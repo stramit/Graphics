@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
-//using UnityEngine.Experimental.Rendering.HDPipeline;
+using UnityEngine.Experimental.Rendering.HDPipeline;
 using UnityEngine.Experimental.Rendering.LightweightPipeline;
+using UnityEngine.Rendering; // Legacy
 
 [ExecuteInEditMode]
 //[HDRPCallback]
@@ -80,10 +81,16 @@ public partial class OcclusionProbes : MonoBehaviour
 	static void OcclusionProbesSetup()
     {
         LightweightPipeline.onPrepareCamera += SetupGPUData;
-		//HDRenderPipeline.OnPrepareCamera += SetupGPUData;
+		HDRenderPipeline.onPrepareCamera += SetupGPUData;
 	}
 
-	static public void SetupGPUData(ScriptableRenderContext renderContext, Camera camera, CommandBuffer cmd)
+    // Legacy
+    private void OnPreRender()
+    {
+        SetupGPUData(Camera.current, null);
+    }
+
+	static public void SetupGPUData(Camera camera, CommandBuffer cmd)
     {
         if(Instance)
         {
@@ -130,10 +137,18 @@ public partial class OcclusionProbes : MonoBehaviour
             return;
         }
 
-        // Sky occlusion
-        cmd.SetGlobalTexture(Uniforms._OcclusionProbes, m_Data.occlusion);
-        // TODO: no full matrix mul needed, just scale and offset the pos (don't really need to support rotation)
-        cmd.SetGlobalMatrix(Uniforms._OcclusionProbesWorldToLocal, m_Data.worldToLocal);
+        if(cmd != null) // Legacy
+        {
+            // Sky occlusion
+            cmd.SetGlobalTexture(Uniforms._OcclusionProbes, m_Data.occlusion);
+            // TODO: no full matrix mul needed, just scale and offset the pos (don't really need to support rotation)
+            cmd.SetGlobalMatrix(Uniforms._OcclusionProbesWorldToLocal, m_Data.worldToLocal);
+        }
+        else
+        {
+            Shader.SetGlobalTexture(Uniforms._OcclusionProbes, m_Data.occlusion);
+            Shader.SetGlobalMatrix(Uniforms._OcclusionProbesWorldToLocal, m_Data.worldToLocal);
+        }
 
         // Detail sky occlusion - for the probe set the camera is in
         InitWhiteTexture();
@@ -157,9 +172,18 @@ public partial class OcclusionProbes : MonoBehaviour
             }
         }
 
-        cmd.SetGlobalTexture(Uniforms._OcclusionProbesDetail, occlusionDetail);
-        cmd.SetGlobalMatrix(Uniforms._OcclusionProbesWorldToLocalDetail, worldToLocalDetail);
-        cmd.SetGlobalFloat(Uniforms._OcclusionProbesReflectionOcclusionAmount, m_Data.reflectionOcclusionAmount);
+        if(cmd != null) // Legacy
+        {
+            cmd.SetGlobalTexture(Uniforms._OcclusionProbesDetail, occlusionDetail);
+            cmd.SetGlobalMatrix(Uniforms._OcclusionProbesWorldToLocalDetail, worldToLocalDetail);
+            cmd.SetGlobalFloat(Uniforms._OcclusionProbesReflectionOcclusionAmount, m_Data.reflectionOcclusionAmount);
+        }
+        else
+        {
+            Shader.SetGlobalTexture(Uniforms._OcclusionProbesDetail, occlusionDetail);
+            Shader.SetGlobalMatrix(Uniforms._OcclusionProbesWorldToLocalDetail, worldToLocalDetail);
+            Shader.SetGlobalFloat(Uniforms._OcclusionProbesReflectionOcclusionAmount, m_Data.reflectionOcclusionAmount);
+        }
     }
 
     static void SetAmbientProbeShaderUniforms(CommandBuffer cmd, AmbientProbeData ambientProbeData)
@@ -170,14 +194,20 @@ public partial class OcclusionProbes : MonoBehaviour
         
         if (ambientProbeData != null)
         {
-            cmd.SetGlobalVectorArray(Uniforms._AmbientProbeSH, ambientProbeData.sh);
+            if(cmd != null) // Legacy
+                cmd.SetGlobalVectorArray(Uniforms._AmbientProbeSH, ambientProbeData.sh);
+            else
+                Shader.SetGlobalVectorArray(Uniforms._AmbientProbeSH, ambientProbeData.sh);
         }
         else
         {
             SphericalHarmonicsL2 ambientProbe =  RenderSettings.ambientProbe;
             // LightProbes.GetShaderConstantsFromNormalizedSH(ref ambientProbe, m_AmbientProbeSC);
             GetShaderConstantsFromNormalizedSH(ref ambientProbe, ms_AmbientProbeSC);
-            cmd.SetGlobalVectorArray(Uniforms._AmbientProbeSH, ms_AmbientProbeSC);
+            if(cmd != null) // Legacy
+                cmd.SetGlobalVectorArray(Uniforms._AmbientProbeSH, ms_AmbientProbeSC);
+            else
+                Shader.SetGlobalVectorArray(Uniforms._AmbientProbeSH, ms_AmbientProbeSC);
         }
     }
 
@@ -202,11 +232,20 @@ public partial class OcclusionProbes : MonoBehaviour
     {
         InitWhiteTexture();
 
-        // To avoid extra variants in the shader, set up a white texture when probes are disabled.
-        cmd.SetGlobalTexture(Uniforms._OcclusionProbes, ms_White);
-        cmd.SetGlobalMatrix(Uniforms._OcclusionProbesWorldToLocal, Matrix4x4.identity);
-        cmd.SetGlobalTexture(Uniforms._OcclusionProbesDetail, ms_White);
-        cmd.SetGlobalMatrix(Uniforms._OcclusionProbesWorldToLocalDetail, Matrix4x4.identity);
+        if(cmd != null) // Legacy
+        {
+            // To avoid extra variants in the shader, set up a white texture when probes are disabled.
+            cmd.SetGlobalTexture(Uniforms._OcclusionProbes, ms_White);
+            cmd.SetGlobalMatrix(Uniforms._OcclusionProbesWorldToLocal, Matrix4x4.identity);
+            cmd.SetGlobalTexture(Uniforms._OcclusionProbesDetail, ms_White);
+            cmd.SetGlobalMatrix(Uniforms._OcclusionProbesWorldToLocalDetail, Matrix4x4.identity);
+        }
+        else
+        {
+            Shader.SetGlobalTexture(Uniforms._OcclusionProbes, ms_White);
+            Shader.SetGlobalMatrix(Uniforms._OcclusionProbesWorldToLocal, Matrix4x4.identity);
+            Shader.SetGlobalTexture(Uniforms._OcclusionProbesDetail, ms_White);
+            Shader.SetGlobalMatrix(Uniforms._OcclusionProbesWorldToLocalDetail, Matrix4x4.identity);
+        }
     }
-
 }

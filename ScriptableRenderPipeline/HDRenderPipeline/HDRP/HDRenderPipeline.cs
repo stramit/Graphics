@@ -266,6 +266,19 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             InitializeRenderStateBlocks();
         }
 
+        public static event Action<Camera, CommandBuffer> onPrepareCamera;
+
+        private void OnPrepareCamera(Camera camera, CommandBuffer cmd)
+        {
+            if(onPrepareCamera != null)
+                onPrepareCamera(camera, cmd);
+        }
+
+        private void DoNothing(Camera camera, CommandBuffer cmd)
+        {
+
+        }
+
         void InitializeRenderTextures()
         {
             // Initial state of the RTHandle system.
@@ -745,6 +758,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
                 // This is the main command buffer used for the frame.
                 var cmd = CommandBufferPool.Get("");
+
+                OnPrepareCamera(camera, cmd);
 
                 // Specific pass to simply display the content of the camera buffer if users have fill it themselves (like video player)
                 if (additionalCameraData && additionalCameraData.renderingPath == HDAdditionalCameraData.RenderingPath.FullscreenPassthrough)

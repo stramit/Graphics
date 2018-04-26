@@ -225,15 +225,15 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
             }
         }
 
-        public static event Action<ScriptableRenderContext, Camera, CommandBuffer> onPrepareCamera;
+        public static event Action<Camera, CommandBuffer> onPrepareCamera;
 
-        private void OnPrepareCamera(ScriptableRenderContext context, Camera camera, CommandBuffer cmd)
+        private void OnPrepareCamera(Camera camera, CommandBuffer cmd)
         {
             if(onPrepareCamera != null)
-                onPrepareCamera(context, camera, cmd);
+                onPrepareCamera(camera, cmd);
         }
 
-        private void DoNothing(ScriptableRenderContext context, Camera camera, CommandBuffer cmd)
+        private void DoNothing(Camera camera, CommandBuffer cmd)
         {
 
         }
@@ -319,7 +319,7 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
                 // Setup global time properties (_Time, _SinTime, _CosTime)
                 context.SetupCameraProperties(m_CurrCamera, stereoEnabled);
 
-                OnPrepareCamera(context, camera, cmd);
+                OnPrepareCamera(camera, cmd);
 
                 if (LightweightUtils.HasFlag(frameRenderingConfiguration, FrameRenderingConfiguration.DepthPrePass))
                     DepthPass(ref context, frameRenderingConfiguration);
