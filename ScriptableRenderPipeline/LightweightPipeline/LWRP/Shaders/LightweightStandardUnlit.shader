@@ -47,8 +47,8 @@ Shader "LightweightPipeline/Standard Unlit"
             #pragma multi_compile_instancing
 
             // Lighting include is needed because of GI
-            #include "LWRP/ShaderLibrary/Lighting.hlsl"
             #include "LWRP/ShaderLibrary/InputSurfaceUnlit.hlsl"
+            #include "LWRP/ShaderLibrary/Lighting.hlsl"
 
             struct VertexInput
             {
@@ -72,6 +72,7 @@ Shader "LightweightPipeline/Standard Unlit"
     #endif
 #endif
                 float4 vertex : SV_POSITION;
+                float3 positionWS               : TEXCOORD5;
 
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
@@ -86,6 +87,7 @@ Shader "LightweightPipeline/Standard Unlit"
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
                 o.vertex = TransformObjectToHClip(v.vertex.xyz);
+                o.positionWS = TransformObjectToWorld(v.vertex.xyz);
                 o.uv0AndFogCoord.xy = TRANSFORM_TEX(v.uv, _MainTex);
                 o.uv0AndFogCoord.z = ComputeFogFactor(o.vertex.z);
 
@@ -118,7 +120,7 @@ Shader "LightweightPipeline/Standard Unlit"
     #else
                 half3 normalWS = normalize(IN.normal);
     #endif
-                color += SAMPLE_GI(IN.lightmapUV, IN.vertexSH, normalWS);
+                color += SAMPLE_GI(IN.lightmapUV, IN.vertexSH, IN.positionWS, normalWS);
 #endif
                 ApplyFog(color, IN.uv0AndFogCoord.z);
 

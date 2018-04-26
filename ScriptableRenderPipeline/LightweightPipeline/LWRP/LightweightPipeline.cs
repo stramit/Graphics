@@ -198,6 +198,8 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
             m_CopyDepthMaterial = CoreUtils.CreateEngineMaterial(m_Asset.CopyDepthShader);
             m_SamplingMaterial = CoreUtils.CreateEngineMaterial(m_Asset.SamplingShader);
             m_ErrorMaterial = CoreUtils.CreateEngineMaterial("Hidden/InternalErrorShader");
+
+            onPrepareCamera += DoNothing;
         }
 
         public override void Dispose()
@@ -221,6 +223,19 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
                 m_LightIndicesBuffer.Release();
                 m_LightIndicesBuffer = null;
             }
+        }
+
+        public static event Action<ScriptableRenderContext, Camera, CommandBuffer> onPrepareCamera;
+
+        private void OnPrepareCamera(ScriptableRenderContext context, Camera camera, CommandBuffer cmd)
+        {
+            if(onPrepareCamera != null)
+                onPrepareCamera(context, camera, cmd);
+        }
+
+        private void DoNothing(ScriptableRenderContext context, Camera camera, CommandBuffer cmd)
+        {
+
         }
 
         private void SetRenderingFeatures()
@@ -303,6 +318,8 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
                 // setup HDR keyword
                 // Setup global time properties (_Time, _SinTime, _CosTime)
                 context.SetupCameraProperties(m_CurrCamera, stereoEnabled);
+
+                OnPrepareCamera(context, camera, cmd);
 
                 if (LightweightUtils.HasFlag(frameRenderingConfiguration, FrameRenderingConfiguration.DepthPrePass))
                     DepthPass(ref context, frameRenderingConfiguration);
@@ -972,6 +989,8 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
             CoreUtils.SetKeyword(cmd, "_MIXED_LIGHTING_SUBTRACTIVE", m_MixedLightingSetup == MixedLightingSetup.Subtractive);
             CoreUtils.SetKeyword(cmd, "_VERTEX_LIGHTS", vertexLightsCount > 0);
             CoreUtils.SetKeyword(cmd, "SOFTPARTICLES_ON", m_RequireDepthTexture && m_Asset.RequireSoftParticles);
+
+            CoreUtils.SetKeyword(cmd, "_OCCLUSION_PROBES", m_Asset.SupportsOcclusionProbes);
         }
 
         private void BeginForwardRendering(ref ScriptableRenderContext context, FrameRenderingConfiguration renderingConfig)

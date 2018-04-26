@@ -18,7 +18,7 @@ struct LightweightVertexOutput
     float2 uv                       : TEXCOORD0;
     DECLARE_LIGHTMAP_OR_SH(lightmapUV, vertexSH, 1);
 
-#ifdef _ADDITIONAL_LIGHTS
+#if defined(_ADDITIONAL_LIGHTS) || defined(_OCCLUSION_PROBES)
     float3 posWS                    : TEXCOORD2;
 #endif
 
@@ -46,7 +46,8 @@ void InitializeInputData(LightweightVertexOutput IN, half3 normalTS, out InputDa
 {
     inputData = (InputData)0;
 
-#ifdef _ADDITIONAL_LIGHTS
+    inputData.positionWS = float3(0, 0, 0);
+#if defined(_ADDITIONAL_LIGHTS) || defined(_OCCLUSION_PROBES)
     inputData.positionWS = IN.posWS;
 #endif
 
@@ -66,7 +67,7 @@ void InitializeInputData(LightweightVertexOutput IN, half3 normalTS, out InputDa
 #endif
     inputData.fogCoord = IN.fogFactorAndVertexLight.x;
     inputData.vertexLighting = IN.fogFactorAndVertexLight.yzw;
-    inputData.bakedGI = SAMPLE_GI(IN.lightmapUV, IN.vertexSH, inputData.normalWS);
+    inputData.bakedGI = SAMPLE_GI(IN.lightmapUV, IN.vertexSH, inputData.positionWS, inputData.normalWS);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -119,7 +120,7 @@ LightweightVertexOutput LitPassVertex(LightweightVertexInput v)
 #endif
 #endif
 
-#ifdef _ADDITIONAL_LIGHTS
+#if defined(_ADDITIONAL_LIGHTS) || defined(_OCCLUSION_PROBES)
     o.posWS = posWS;
 #endif
 

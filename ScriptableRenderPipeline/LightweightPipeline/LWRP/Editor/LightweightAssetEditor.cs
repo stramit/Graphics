@@ -21,6 +21,9 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
             public static GUIContent enableVertexLightLabel = new GUIContent("Vertex Lighting",
                     "If enabled shades additional lights exceeding the maximum number of pixel lights per-vertex up to the maximum of 8 lights.");
 
+            public static GUIContent enableOcclusionProbesLabel = new GUIContent("Occlusion Probes",
+                    "If enabled allows objects to use data from Occlusion Probe volumes to occlude ambient light.");
+
             public static GUIContent requireDepthTexture = new GUIContent("Depth Texture", "If enabled the pipeline will generate camera's depth that can be bound in shaders as _CameraDepthTexture.");
 
             public static GUIContent requireSoftParticles = new GUIContent("Soft Particles", "If enabled the pipeline will enable SOFT_PARTICLES keyword.");
@@ -61,6 +64,7 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
         private SerializedProperty m_RenderScale;
         private SerializedProperty m_MaxPixelLights;
         private SerializedProperty m_SupportsVertexLightProp;
+        private SerializedProperty m_SupportsOcclusionProbesProp;
         private SerializedProperty m_RequireDepthTextureProp;
         private SerializedProperty m_RequireSoftParticlesProp;
         private SerializedProperty m_RequireOpaqueTextureProp;
@@ -79,6 +83,7 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
             m_RenderScale = serializedObject.FindProperty("m_RenderScale");
             m_MaxPixelLights = serializedObject.FindProperty("m_MaxPixelLights");
             m_SupportsVertexLightProp = serializedObject.FindProperty("m_SupportsVertexLight");
+            m_SupportsOcclusionProbesProp = serializedObject.FindProperty("m_SupportsOcclusionProbes");
             m_RequireDepthTextureProp = serializedObject.FindProperty("m_RequireDepthTexture");
             m_RequireSoftParticlesProp = serializedObject.FindProperty("m_RequireSoftParticles");
             m_RequireOpaqueTextureProp = serializedObject.FindProperty("m_RequireOpaqueTexture");
@@ -141,6 +146,7 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
             m_MaxPixelLights.intValue = EditorGUILayout.IntSlider(m_MaxPixelLights.intValue, 0, kMaxSupportedPixelLights);
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.PropertyField(m_SupportsVertexLightProp, Styles.enableVertexLightLabel);
+            EditorGUILayout.PropertyField(m_SupportsOcclusionProbesProp, Styles.enableOcclusionProbesLabel);
             EditorGUILayout.PropertyField(m_RequireDepthTextureProp, Styles.requireDepthTexture);
             DrawAnimatedProperty(m_RequireSoftParticlesProp, Styles.requireSoftParticles, m_ShowSoftParticles);
             EditorGUILayout.PropertyField(m_RequireOpaqueTextureProp, Styles.requireOpaqueTexture);

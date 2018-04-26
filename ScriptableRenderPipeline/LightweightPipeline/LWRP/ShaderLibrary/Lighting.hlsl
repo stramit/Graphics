@@ -355,17 +355,18 @@ half3 SampleSHVertex(half3 normalWS)
 
 // SH Pixel Evaluation. Depending on target SH sampling might be done
 // mixed or fully in pixel. See SampleSHVertex
-half3 SampleSHPixel(half3 L2Term, half3 normalWS)
+half3 SampleSHPixel(half3 L2Term, half3 positionWS, half3 normalWS)
 {
+    half occlusionProbes = SampleOcclusionProbes(positionWS);
 #if defined(EVALUATE_SH_VERTEX)
-    return L2Term;
+    return L2Term * occlusionProbes;
 #elif defined(EVALUATE_SH_MIXED)
     half3 L0L1Term = SHEvalLinearL0L1(normalWS, unity_SHAr, unity_SHAg, unity_SHAb);
-    return max(half3(0, 0, 0), L2Term + L0L1Term);
+    return max(half3(0, 0, 0), L2Term + L0L1Term) * occlusionProbes;
 #endif
 
     // Default: Evaluate SH fully per-pixel
-    return SampleSH(normalWS);
+    return SampleSH(normalWS) * occlusionProbes;
 }
 
 // Sample baked lightmap. Non-Direction and Directional if available.
@@ -396,9 +397,9 @@ half3 SampleLightmap(float2 lightmapUV, half3 normalWS)
 // If lightmap: sampleData.xy = lightmapUV
 // If probe: sampleData.xyz = L2 SH terms
 #ifdef LIGHTMAP_ON
-#define SAMPLE_GI(lmName, shName, normalWSName) SampleLightmap(lmName, normalWSName)
+#define SAMPLE_GI(lmName, shName, positionWSName, normalWSName) SampleLightmap(lmName, normalWSName)
 #else
-#define SAMPLE_GI(lmName, shName, normalWSName) SampleSHPixel(shName, normalWSName)
+#define SAMPLE_GI(lmName, shName, positionWSName, normalWSName) SampleSHPixel(shName, positionWSName, normalWSName)
 #endif
 
 half3 GlossyEnvironmentReflection(half3 reflectVector, half perceptualRoughness, half occlusion)

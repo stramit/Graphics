@@ -94,6 +94,8 @@ Shader "LightweightPipeline/Standard (Physically Based)"
             #pragma shader_feature _GLOSSYREFLECTIONS_OFF
             #pragma shader_feature _SPECULAR_SETUP
 
+            #pragma shader_feature _OCCLUSION_PROBES
+
             // -------------------------------------
             // Lightweight Pipeline keywords
             #pragma multi_compile _ _ADDITIONAL_LIGHTS

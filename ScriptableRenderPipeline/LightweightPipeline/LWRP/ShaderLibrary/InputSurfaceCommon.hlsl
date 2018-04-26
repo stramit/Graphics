@@ -9,6 +9,9 @@ TEXTURE2D(_MainTex);            SAMPLER(sampler_MainTex);
 TEXTURE2D(_BumpMap);            SAMPLER(sampler_BumpMap);
 TEXTURE2D(_EmissionMap);        SAMPLER(sampler_EmissionMap);
 
+TEXTURE3D(_OcclusionProbes);       SAMPLER(sampler_OcclusionProbes);
+float4x4 _OcclusionProbesWorldToLocal;
+
 // Must match Lightweigth ShaderGraph master node
 struct SurfaceData
 {
@@ -65,6 +68,19 @@ half3 SampleEmission(float2 uv, half3 emissionColor, TEXTURE2D_ARGS(emissionMap,
     return 0;
 #else
     return SAMPLE_TEXTURE2D(emissionMap, sampler_emissionMap, uv).rgb * emissionColor;
+#endif
+}
+
+float SampleOcclusionProbes(float3 positionWS)
+{
+#if _OCCLUSION_PROBES
+    // TODO: no full matrix mul needed, just scale and offset the pos (don't really need to support rotation)
+    float occlusionProbes = 1;
+    float3 pos = mul(_OcclusionProbesWorldToLocal, float4(positionWS, 1)).xyz;
+    occlusionProbes = SAMPLE_TEXTURE3D(_OcclusionProbes, sampler_OcclusionProbes, pos).a;
+    return occlusionProbes;
+#else
+    return 1;
 #endif
 }
 

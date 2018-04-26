@@ -63,6 +63,7 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
         [SerializeField] private int kAssetVersion = 2;
         [SerializeField] private int m_MaxPixelLights = 4;
         [SerializeField] private bool m_SupportsVertexLight = false;
+        [SerializeField] private bool m_SupportsOcclusionProbes = false;
         [SerializeField] private bool m_RequireDepthTexture = false;
         [SerializeField] private bool m_RequireSoftParticles = false;
         [SerializeField] private bool m_RequireOpaqueTexture = false;
@@ -210,6 +211,12 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
         public bool SupportsVertexLight
         {
             get { return m_SupportsVertexLight; }
+        }
+
+        public bool SupportsOcclusionProbes
+        {
+            get { return m_SupportsOcclusionProbes; }
+            set { m_SupportsOcclusionProbes = value; }
         }
 
         public bool RequireDepthTexture
