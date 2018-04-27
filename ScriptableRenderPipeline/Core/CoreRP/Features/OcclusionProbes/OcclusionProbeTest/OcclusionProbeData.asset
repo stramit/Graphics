@@ -29,10 +29,10 @@ MonoBehaviour:
     e31: 0
     e32: 0
     e33: 1
-  occlusion: {fileID: 117451980421121110}
+  occlusion: {fileID: 117396606743161006}
   worldToLocalDetail: []
   occlusionDetail: []
---- !u!117 &117451980421121110
+--- !u!117 &117396606743161006
 Texture3D:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}

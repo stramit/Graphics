@@ -29,9 +29,9 @@ struct AttributesMesh
 struct VaryingsMeshToPS
 {
     float4 positionCS;
-#ifdef VARYINGS_NEED_POSITION_WS
+//#ifdef VARYINGS_NEED_POSITION_WS
     float3 positionWS;
-#endif
+//#endif
 #ifdef VARYINGS_NEED_TANGENT_TO_WORLD
     float3 normalWS;
     float4 tangentWS;  // w contain mirror sign
@@ -60,9 +60,9 @@ struct PackedVaryingsMeshToPS
 {
     float4 positionCS : SV_Position;
 
-#ifdef VARYINGS_NEED_POSITION_WS
+//#ifdef VARYINGS_NEED_POSITION_WS
     float3 interpolators0 : TEXCOORD0;
-#endif
+//#endif
 
 #ifdef VARYINGS_NEED_TANGENT_TO_WORLD
     float3 interpolators1 : TEXCOORD1;
@@ -145,9 +145,9 @@ FragInputs UnpackVaryingsMeshToFragInputs(PackedVaryingsMeshToPS input)
 
     output.positionSS = input.positionCS; // input.positionCS is SV_Position
 
-#ifdef VARYINGS_NEED_POSITION_WS
+//#ifdef VARYINGS_NEED_POSITION_WS
     output.positionWS.xyz = input.interpolators0.xyz;
-#endif
+//#endif
 
 #ifdef VARYINGS_NEED_TANGENT_TO_WORLD
     float4 tangentWS = float4(input.interpolators2.xyz, input.interpolators2.w > 0.0 ? 1.0 : -1.0);	// must not be normalized (mikkts requirement)

@@ -264,13 +264,15 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             MousePositionDebug.instance.Build();
 
             InitializeRenderStateBlocks();
+
+            onPrepareCamera += DoNothing;
         }
 
         public static event Action<Camera, CommandBuffer> onPrepareCamera;
 
         private void OnPrepareCamera(Camera camera, CommandBuffer cmd)
         {
-            if(onPrepareCamera != null)
+            //if(onPrepareCamera != null)
                 onPrepareCamera(camera, cmd);
         }
 
@@ -759,8 +761,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 // This is the main command buffer used for the frame.
                 var cmd = CommandBufferPool.Get("");
 
-                OnPrepareCamera(camera, cmd);
-
                 // Specific pass to simply display the content of the camera buffer if users have fill it themselves (like video player)
                 if (additionalCameraData && additionalCameraData.renderingPath == HDAdditionalCameraData.RenderingPath.FullscreenPassthrough)
                 {
@@ -784,6 +784,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
                 using (new ProfilingSample(cmd, "HDRenderPipeline::Render", CustomSamplerId.HDRenderPipelineRender.GetSampler()))
                 {
+                    OnPrepareCamera(camera, cmd);
+
                     // Do anything we need to do upon a new frame.
                     m_LightLoop.NewFrame(m_FrameSettings);
 

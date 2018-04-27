@@ -126,9 +126,9 @@ VaryingsMeshType VertMesh(AttributesMesh input)
     output.tangentWS = tangentWS;
     #endif
 #else
-    #ifdef VARYINGS_NEED_POSITION_WS
+    //#ifdef VARYINGS_NEED_POSITION_WS
     output.positionWS = positionWS;
-    #endif
+    //#endif
     output.positionCS = TransformWorldToHClip(positionWS);
     #ifdef VARYINGS_NEED_TANGENT_TO_WORLD
     output.normalWS = normalWS;

@@ -3,7 +3,6 @@ using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Experimental.Rendering.HDPipeline;
 using UnityEngine.Experimental.Rendering.LightweightPipeline;
-using UnityEngine.Rendering; // Legacy
 
 [ExecuteInEditMode]
 //[HDRPCallback]
@@ -33,6 +32,7 @@ public partial class OcclusionProbes : MonoBehaviour
     void OnEnable()
     {
         LightweightPipeline.onPrepareCamera += SetupGPUData;
+        HDRenderPipeline.onPrepareCamera += SetupGPUData;
 
 #if UNITY_EDITOR
         AddLightmapperCallbacks();
@@ -75,6 +75,7 @@ public partial class OcclusionProbes : MonoBehaviour
     void Cleanup()
     {
         LightweightPipeline.onPrepareCamera -= SetupGPUData;
+        HDRenderPipeline.onPrepareCamera -= SetupGPUData;
     }
 
 	//[HDRPCallbackMethod]

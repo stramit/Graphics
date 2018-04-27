@@ -1,3 +1,19 @@
+TEXTURE3D(_OcclusionProbes);       SAMPLER(sampler_OcclusionProbes);
+float4x4 _OcclusionProbesWorldToLocal;
+
+float SampleOcclusionProbes(float3 positionWS)
+{
+//#if _OCCLUSION_PROBES
+    // TODO: no full matrix mul needed, just scale and offset the pos (don't really need to support rotation)
+    float occlusionProbes = 1;
+    float3 pos = mul(_OcclusionProbesWorldToLocal, float4(positionWS, 1)).xyz;
+    occlusionProbes = SAMPLE_TEXTURE3D(_OcclusionProbes, sampler_OcclusionProbes, pos).a;
+    return occlusionProbes;
+/*#else
+    return 1;
+#endif*/
+}
+
 // In unity we can have a mix of fully baked lightmap (static lightmap) + enlighten realtime lightmap (dynamic lightmap)
 // for each case we can have directional lightmap or not.
 // Else we have lightprobe for dynamic/moving entity. Either SH9 per object lightprobe or SH4 per pixel per object volume probe
@@ -20,13 +36,13 @@ float3 SampleBakedGI(float3 positionWS, float3 normalWS, float2 uvStaticLightmap
         SHCoefficients[5] = unity_SHBb;
         SHCoefficients[6] = unity_SHC;
 
-        return SampleSH9(SHCoefficients, normalWS);
+        return SampleSH9(SHCoefficients, normalWS) * SampleOcclusionProbes(GetAbsolutePositionWS(positionWS));
     }
     else
     {
         // TODO: We use GetAbsolutePositionWS(positionWS) to handle the camera relative case here but this should be part of the unity_ProbeVolumeWorldToObject matrix on C++ side (sadly we can't modify it for HDRenderPipeline...)
         return SampleProbeVolumeSH4(TEXTURE3D_PARAM(unity_ProbeVolumeSH, samplerunity_ProbeVolumeSH), GetAbsolutePositionWS(positionWS), normalWS, unity_ProbeVolumeWorldToObject,
-                                    unity_ProbeVolumeParams.y, unity_ProbeVolumeParams.z, unity_ProbeVolumeMin, unity_ProbeVolumeSizeInv);
+                                    unity_ProbeVolumeParams.y, unity_ProbeVolumeParams.z, unity_ProbeVolumeMin, unity_ProbeVolumeSizeInv) * SampleOcclusionProbes(GetAbsolutePositionWS(positionWS));
     }
 
 #else
