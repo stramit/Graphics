@@ -243,6 +243,9 @@ namespace UnityEngine.Experimental.Rendering
                 if (!volume.enabled || volume.profileRef == null || volume.weight <= 0f)
                     continue;
 
+                foreach (var component in volume.profileRef.components)
+                    component.ProcessVolumeData(volume);
+
                 // Global volumes always have influence
                 if (volume.isGlobal)
                 {

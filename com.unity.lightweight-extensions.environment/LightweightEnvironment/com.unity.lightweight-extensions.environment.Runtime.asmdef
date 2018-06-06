@@ -1,0 +1,12 @@
+{
+    "name": "com.unity.lightweight-extensions.environment.Runtime",
+    "references": [
+    	"com.unity.render-pipelines.core.Runtime",
+    	"com.unity.render-pipelines.lightweight.Runtime",
+        "com.unity.lightweight-extensions.core.Runtime",
+        "com.unity.postprocessing.Runtime"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": []
+}

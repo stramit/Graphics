@@ -114,5 +114,7 @@ namespace UnityEngine.Experimental.Rendering
                 return hash;
             }
         }
+
+        public virtual void ProcessVolumeData(Volume volume) { }
     }
 }

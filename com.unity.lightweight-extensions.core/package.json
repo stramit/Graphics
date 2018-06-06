@@ -1,0 +1,10 @@
+{
+    "name": "com.unity.lightweight-extensions.core",
+    "description": "Core extension tools and assets for lightweight render pipeline.",
+    "version": "0.1.0-preview",
+    "unity": "2018.2",
+    "displayName": "Lightweight Extensions Core Library",
+    "dependencies": {
+        "com.unity.render-pipelines.lightweight": "3.0.0-preview"
+    }
+}
