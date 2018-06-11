@@ -32,9 +32,9 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline.Extensions
       	
 		public string GetKeywordName () { return "WIND"; }
 
-		public EffectData[] GetValue(RendererListener listener)
+		public EffectData[] GetValue(Listener listener)
 		{
-			EffectData directionData = new EffectData("Direction", Vector3.zero, typeof(Vector3));
+			EffectData directionData = new EffectData("WindDirection", Vector3.zero, typeof(Vector3));
 			switch(mode.value)
 			{
 				case WindMode.Directional:
@@ -45,8 +45,8 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline.Extensions
 					break;
 			}
 
-			EffectData strengthData = new EffectData("Strength", enable ? strength.GetValue<float>() : 0, typeof(float));
-			EffectData turbulenceData = new EffectData("Turbulence", turbulence.GetValue<float>(), typeof(float));
+			EffectData strengthData = new EffectData("WindStrength", enable ? strength.GetValue<float>() : 0, typeof(float));
+			EffectData turbulenceData = new EffectData("WindTurbulence", turbulence.GetValue<float>(), typeof(float));
 			return new EffectData[] { directionData, strengthData, turbulenceData };
 		}
 

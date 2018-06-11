@@ -101,6 +101,7 @@
             #pragma shader_feature _SPECULAR_SETUP
 
             #pragma shader_feature _VOLUME_WIND
+            #pragma shader_feature _VOLUME_RAIN
 
             // -------------------------------------
             // Lightweight Pipeline keywords
@@ -196,6 +197,10 @@
                 return o;
             }
 
+            half _VolumeRainStrength;
+            half _VolumeRainAmount;
+            half _VolumeRainSpeed;
+
             half4 VegetationLitPassFragment(LightweightVertexOutput IN, half facing : VFACE) : SV_Target
             {
                 UNITY_SETUP_INSTANCE_ID(IN);
@@ -207,6 +212,8 @@
                 InitializeInputData(IN, surfaceData.normalTS, inputData);
 
                 inputData.normalWS *= facing;
+
+                surfaceData.smoothness = _VolumeRainAmount;
 
                 half4 color = LightweightFragmentPBR(inputData, surfaceData.albedo, surfaceData.metallic, surfaceData.specular, surfaceData.smoothness, surfaceData.occlusion, surfaceData.emission, surfaceData.alpha);
 

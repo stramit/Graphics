@@ -8,6 +8,6 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline.Extensions
 	{
 		string GetKeywordName();
 
-		EffectData[] GetValue(RendererListener listener);
+		EffectData[] GetValue(Listener listener);
 	}
 }

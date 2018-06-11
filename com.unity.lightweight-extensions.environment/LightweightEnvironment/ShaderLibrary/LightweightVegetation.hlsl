@@ -17,9 +17,9 @@ float _LeafStiffness;
 
 UNITY_INSTANCING_BUFFER_START(Props)
 UNITY_DEFINE_INSTANCED_PROP(float3, _Position)
-UNITY_DEFINE_INSTANCED_PROP(half3, _VolumeDirection)
-UNITY_DEFINE_INSTANCED_PROP(half, _VolumeStrength)
-UNITY_DEFINE_INSTANCED_PROP(half, _VolumeTurbulence)
+UNITY_DEFINE_INSTANCED_PROP(half3, _VolumeWindDirection)
+UNITY_DEFINE_INSTANCED_PROP(half, _VolumeWindStrength)
+UNITY_DEFINE_INSTANCED_PROP(half, _VolumeWindTurbulence)
 UNITY_INSTANCING_BUFFER_END(Props)
 
 // ------------------------------
@@ -49,9 +49,9 @@ float3 VegetationDeformation(float3 position, float3 origin, float3 normal, half
     // Main Bending
 
     // Re-range material properties
-    half turbulenceValue = UNITY_ACCESS_INSTANCED_PROP(Props, _VolumeTurbulence) * 10;
-    half strengthValue = UNITY_ACCESS_INSTANCED_PROP(Props, _VolumeStrength) * 5;
-    float2 directionValue = UNITY_ACCESS_INSTANCED_PROP(Props, _VolumeDirection).xz;
+    half turbulenceValue = UNITY_ACCESS_INSTANCED_PROP(Props, _VolumeWindTurbulence) * 10;
+    half strengthValue = UNITY_ACCESS_INSTANCED_PROP(Props, _VolumeWindStrength) * 5;
+    float2 directionValue = UNITY_ACCESS_INSTANCED_PROP(Props, _VolumeWindDirection).xz;
 
     // Calculate main bend
     float fBendScale = (1 - _TrunkStiffness) * 0.1; // main bend opacity
