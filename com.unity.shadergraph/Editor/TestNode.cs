@@ -43,7 +43,7 @@ namespace UnityEditor.ShaderGraph
         InPortDescriptor m_Port23 = new InPortDescriptor(23, "Matrix3x3", SlotValueType.Matrix3);
         InPortDescriptor m_Port24 = new InPortDescriptor(24, "Matrix4x4", SlotValueType.Matrix4);
 
-        InPortDescriptor m_Port25 = new InPortDescriptor(25, "V1PopupD", SlotValueType.Vector1, new PopupControl(new string[] {"Option A", "Option B", "Option C"}, 1));
+        InPortDescriptor m_Port25 = new InPortDescriptor(25, "V1PopupD", SlotValueType.Vector1, new PopupControl(new string[] {"Option A", "Option B", "Option C"}, 0));
         InPortDescriptor m_Port26 = new InPortDescriptor(26, "V1Popup", SlotValueType.Vector1, new PopupControl(new string[] {"Option A", "Option B", "Option C"}));
 
         InPortDescriptor m_Port27 = new InPortDescriptor(27, "V1SliderD", SlotValueType.Vector1, new SliderControl(0.5f, 0.0f, 1.0f));

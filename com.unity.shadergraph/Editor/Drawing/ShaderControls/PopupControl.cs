@@ -19,7 +19,11 @@ namespace UnityEditor.ShaderGraph
 
         ShaderPort m_Port;
         PopupField<string> m_PopupField;
-        List<string> m_Entries;
+        List<string> m_Entries = new List<string>() {""};
+
+        public PopupControl()
+        {
+        }
 
         public PopupControl(string[] entries)
         {

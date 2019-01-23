@@ -15,7 +15,11 @@ namespace UnityEditor.ShaderGraph
             get { return (SlotValueType[])Enum.GetValues(typeof(SlotValueType)); }
         }
 
-        private string m_Label;
+        private string m_Label = "";
+
+        public LabelControl()
+        {
+        }
 
         public LabelControl(string label)
         {

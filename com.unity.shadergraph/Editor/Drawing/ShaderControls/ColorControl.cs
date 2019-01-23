@@ -17,6 +17,10 @@ namespace UnityEditor.ShaderGraph
         private ShaderPort m_Port;
         private bool m_Hdr;
 
+        public ColorControl()
+        {
+        }
+
         public ColorControl(bool hdr = false)
         {
             m_Hdr = hdr;
