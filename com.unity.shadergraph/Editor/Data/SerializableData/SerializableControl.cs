@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using UnityEngine;
 
 namespace UnityEditor.ShaderGraph
@@ -14,13 +15,13 @@ namespace UnityEditor.ShaderGraph
 
         public SerializableControl(IShaderControl control)
         {
-            m_AssemblyName = control.GetType().Assembly.GetName().ToString();
-            m_TypeName = control.GetType().Name;
+            m_AssemblyName = control.GetType().Assembly.FullName;
+            m_TypeName = control.GetType().FullName;
         }
 
         public IShaderControl Deserialize()
         {
-            return (IShaderControl)Activator.CreateInstance(m_AssemblyName, m_TypeName);
+            return (IShaderControl)Activator.CreateInstance(m_AssemblyName, m_TypeName).Unwrap();
         }
     }
 }

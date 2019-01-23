@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.Graphing;
@@ -14,39 +13,18 @@ namespace UnityEditor.ShaderGraph
         {
         }
 
-        public ShaderPort(
-            int slotId,
-            string displayName,
-            SlotType slotType,
-            SlotValueType valueType,
-            ShaderStageCapability stageCapability = ShaderStageCapability.All)
-            : base(slotId, displayName, displayName, slotType, stageCapability, false)
+        public ShaderPort(OutPortDescriptor portDescription)
+            : base(portDescription.id, portDescription.name, portDescription.name, portDescription.portType, ShaderStageCapability.All, false)
         {
             m_ValueType = valueType;
-            m_Control = defaultControl;
-            m_SerializedControl = new SerializableControl(m_Control);
-            m_PortValue = new SerializableValueStore();
         }
 
-        public ShaderPort(
-            int slotId,
-            string displayName,
-            SlotType slotType,
-            SlotValueType valueType,
-            IShaderControl control,
-            ShaderStageCapability stageCapability = ShaderStageCapability.All)
-            : base(slotId, displayName, displayName, slotType, stageCapability, false)
+        public ShaderPort(InPortDescriptor portDescription)
+            : base(portDescription.id, portDescription.name, portDescription.name, portDescription.portType, ShaderStageCapability.All, false)
         {
             m_ValueType = valueType;
-
-            if(!control.validPortTypes.Contains(valueType))
-            {
-                Debug.LogWarning(string.Format("Port {0} tried to create an incompatible Control. Will use default Control instead.", displayName));
-                control = defaultControl;
-            }
-            m_Control = control;
-            m_SerializedControl = new SerializableControl(control);
-            m_PortValue = m_Control.defaultValue != null ? m_Control.defaultValue : new SerializableValueStore();
+            control = portDescription.control;
+            portValue = portDescription.defaultValue;
         }
 
         [SerializeField]
@@ -77,6 +55,11 @@ namespace UnityEditor.ShaderGraph
                 if (m_Control == null)
                     m_Control = m_SerializedControl.Deserialize();
                 return m_Control;
+            }
+            set
+            {
+                m_Control = value;
+                m_SerializedControl = new SerializableControl(value);
             }
         }
 
@@ -123,46 +106,6 @@ namespace UnityEditor.ShaderGraph
         public override VisualElement InstantiateControl()
         {
             return control.GetControl(this);
-        }
-
-        private IShaderControl defaultControl
-        {
-            get
-            {
-                switch (m_ValueType)
-                {
-                    case SlotValueType.Vector4:
-                        return new Vector4Control();
-                    case SlotValueType.Vector3:
-                        return new Vector3Control();
-                    case SlotValueType.Vector2:
-                        return new Vector4Control();
-                    case SlotValueType.Vector1:
-                        return new Vector1Control();
-                    case SlotValueType.Boolean:
-                        return new ToggleControl();
-                    case SlotValueType.Texture2D:
-                        return new TextureControl<Texture>();
-                    case SlotValueType.Texture3D:
-                        return new TextureControl<Texture3D>();
-                    case SlotValueType.Texture2DArray:
-                        return new TextureControl<Texture2DArray>();
-                    case SlotValueType.Cubemap:
-                        return new TextureControl<Cubemap>();
-                    case SlotValueType.SamplerState:
-                        return new LabelControl("Default");
-                    case SlotValueType.Matrix2:
-                        return new LabelControl("Identity");
-                    case SlotValueType.Matrix3:
-                        return new LabelControl("Identity");
-                    case SlotValueType.Matrix4:
-                        return new LabelControl("Identity");
-                    case SlotValueType.Gradient:
-                        return new GradientControl();
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
         }
 
         public override void GetPreviewProperties(List<PreviewProperty> properties, string name)

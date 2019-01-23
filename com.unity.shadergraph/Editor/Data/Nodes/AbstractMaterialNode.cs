@@ -180,6 +180,24 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
+        public void NodeSetup(NodeDescriptor nodeDescriptor)
+        {
+            name = nodeDescriptor.name;
+            List<int> validPorts = new List<int>();
+            
+            for(int i = 0; i < nodeDescriptor.inPorts.Length; i++)
+            {
+                AddSlot(new ShaderPort(nodeDescriptor.inPorts[i]));
+                validPorts.Add(nodeDescriptor.inPorts[i].id);
+            }
+            for(int i = 0; i < nodeDescriptor.outPorts.Length; i++)
+            {
+                AddSlot(new ShaderPort(nodeDescriptor.outPorts[i]));
+                validPorts.Add(nodeDescriptor.outPorts[i].id);
+            }
+            RemoveSlotsNameNotMatching(validPorts);
+        }
+
         protected AbstractMaterialNode()
         {
             m_DrawState.expanded = true;
