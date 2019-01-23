@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.Graphing;
@@ -37,6 +38,12 @@ namespace UnityEditor.ShaderGraph
             : base(slotId, displayName, displayName, slotType, stageCapability, false)
         {
             m_ValueType = valueType;
+
+            if(!control.validPortTypes.Contains(valueType))
+            {
+                Debug.LogWarning(string.Format("Port {0} tried to create an incompatible Control. Will use default Control instead.", displayName));
+                control = defaultControl;
+            }
             m_Control = control;
             m_SerializedControl = new SerializableControl(control);
             m_PortValue = m_Control.defaultValue != null ? m_Control.defaultValue : new SerializableValueStore();

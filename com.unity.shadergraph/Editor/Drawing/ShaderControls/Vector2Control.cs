@@ -13,7 +13,7 @@ namespace UnityEditor.ShaderGraph
 
         public SlotValueType[] validPortTypes
         {
-            get { return new SlotValueType[] { SlotValueType.Vector1 }; }
+            get { return new SlotValueType[] { SlotValueType.Vector2 }; }
         }
 
         public Vector2Control()
