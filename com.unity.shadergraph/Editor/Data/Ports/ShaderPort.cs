@@ -16,6 +16,12 @@ namespace UnityEditor.ShaderGraph
         private Vector4 m_VectorValue = Vector4.zero;
 
         [SerializeField]
+        private bool m_BooleanValue = false;
+
+        [SerializeField]
+        private SerializedGradient m_GradientValue = new SerializedGradient();
+
+        [SerializeField]
         private SerializedControl m_SerializedControl;
 
         private IShaderControl m_Control;
@@ -60,6 +66,23 @@ namespace UnityEditor.ShaderGraph
             set { m_VectorValue = value; }
         }
 
+        public bool booleanValue
+        {
+            get { return m_BooleanValue; }
+            set { m_BooleanValue = value; }
+        }
+
+        public Gradient gradientValue
+        {
+            get { return m_GradientValue.gradient; }
+            set { m_GradientValue.gradient = value; }
+        }
+
+        public void SetGradientValue(Gradient g)
+        {
+            m_GradientValue.Serialize(g);
+        }
+
         public override ConcreteSlotValueType concreteValueType
         {
             get
@@ -74,6 +97,10 @@ namespace UnityEditor.ShaderGraph
                         return ConcreteSlotValueType.Vector2;
                     case SlotValueType.Vector1:
                         return ConcreteSlotValueType.Vector1;
+                    case SlotValueType.Boolean:
+                        return ConcreteSlotValueType.Boolean;
+                    case SlotValueType.Gradient:
+                        return ConcreteSlotValueType.Gradient;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -95,11 +122,19 @@ namespace UnityEditor.ShaderGraph
                 case PropertyType.Vector4:
                 case PropertyType.Vector3:
                 case PropertyType.Vector2:
-                    pp.vector4Value = new Vector4(vectorValue.x, vectorValue.y, vectorValue.z, vectorValue.w);
+                    pp.vector4Value = vectorValue;
                     break;
                 case PropertyType.Vector1:
                     pp.floatValue = vectorValue.x;
                     break;
+                case PropertyType.Boolean:
+                    pp.booleanValue = booleanValue;
+                    break;
+                case PropertyType.Gradient:
+                    pp.gradientValue = gradientValue;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             properties.Add(pp);
@@ -107,6 +142,10 @@ namespace UnityEditor.ShaderGraph
 
         protected override string ConcreteSlotValueAsVariable(AbstractMaterialNode.OutputPrecision precision)
         {
+            var matOwner = owner as AbstractMaterialNode;
+            if (matOwner == null)
+                throw new Exception(string.Format("Slot {0} either has no owner, or the owner is not a {1}", this, typeof(AbstractMaterialNode)));
+
             var channelCount = SlotValueHelper.GetChannelCount(concreteValueType);
             switch (concreteValueType)
             {
@@ -121,6 +160,10 @@ namespace UnityEditor.ShaderGraph
                             values += ", " + NodeUtils.FloatToShaderValue(vectorValue[i]);
                         return string.Format("{0}{1}({2})", precision, channelCount, values);
                     }
+                case ConcreteSlotValueType.Boolean:
+                        return (booleanValue ? 1 : 0).ToString();
+                case ConcreteSlotValueType.Gradient:
+                        return string.Format("Unity{0}()", matOwner.GetVariableNameForSlot(id));
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -150,6 +193,12 @@ namespace UnityEditor.ShaderGraph
                 case ConcreteSlotValueType.Vector1:
                     property = new Vector1ShaderProperty();
                     break;
+                case ConcreteSlotValueType.Boolean:
+                    property = new BooleanShaderProperty();
+                    break;
+                case ConcreteSlotValueType.Gradient:
+                    AddGradientProperties(matOwner, properties, generationMode);
+                    return;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -157,6 +206,63 @@ namespace UnityEditor.ShaderGraph
             property.overrideReferenceName = matOwner.GetVariableNameForSlot(id);
             property.generatePropertyBlock = false;
             properties.AddShaderProperty(property);
+        }
+
+        private void AddGradientProperties(AbstractMaterialNode matOwner, PropertyCollector properties, GenerationMode generationMode)
+        {
+            if (generationMode == GenerationMode.Preview)
+            {
+                properties.AddShaderProperty(new Vector1ShaderProperty()
+                {
+                    overrideReferenceName = string.Format("{0}_Type", matOwner.GetVariableNameForSlot(id)),
+                    value = (int)gradientValue.mode,
+                    generatePropertyBlock = false
+                });
+
+                properties.AddShaderProperty(new Vector1ShaderProperty()
+                {
+                    overrideReferenceName = string.Format("{0}_ColorsLength", matOwner.GetVariableNameForSlot(id)),
+                    value = gradientValue.colorKeys.Length,
+                    generatePropertyBlock = false
+                });
+
+                properties.AddShaderProperty(new Vector1ShaderProperty()
+                {
+                    overrideReferenceName = string.Format("{0}_AlphasLength", matOwner.GetVariableNameForSlot(id)),
+                    value = gradientValue.alphaKeys.Length,
+                    generatePropertyBlock = false
+                });
+
+                for (int i = 0; i < 8; i++)
+                {
+                    properties.AddShaderProperty(new Vector4ShaderProperty()
+                    {
+                        overrideReferenceName = string.Format("{0}_ColorKey{1}", matOwner.GetVariableNameForSlot(id), i),
+                        value = i < gradientValue.colorKeys.Length ? GradientUtils.ColorKeyToVector(gradientValue.colorKeys[i]) : Vector4.zero,
+                        generatePropertyBlock = false
+                    });
+                }
+
+                for (int i = 0; i < 8; i++)
+                {
+                    properties.AddShaderProperty(new Vector4ShaderProperty()
+                    {
+                        overrideReferenceName = string.Format("{0}_AlphaKey{1}", matOwner.GetVariableNameForSlot(id), i),
+                        value = i < gradientValue.alphaKeys.Length ? GradientUtils.AlphaKeyToVector(gradientValue.alphaKeys[i]) : Vector2.zero,
+                        generatePropertyBlock = false
+                    });
+                }
+            }
+
+            var prop = new GradientShaderProperty();
+            prop.overrideReferenceName = matOwner.GetVariableNameForSlot(id);
+            prop.generatePropertyBlock = false;
+            prop.value = gradientValue;
+
+            if (generationMode == GenerationMode.Preview)
+                prop.OverrideMembers(matOwner.GetVariableNameForSlot(id));
+
+            properties.AddShaderProperty(prop);
         }
 
         public override void CopyValuesFrom(MaterialSlot foundSlot)

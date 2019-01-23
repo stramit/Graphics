@@ -14,7 +14,9 @@ namespace UnityEditor.ShaderGraph
 
         public sealed override void UpdateNodeAfterDeserialization()
         {
-            AddSlot(new ShaderPort(0, "1D", SlotType.Input, SlotValueType.Vector1, new Vector1Control(1.0f)));
+            AddSlot(new ShaderPort(0, "Gradient", SlotType.Input, SlotValueType.Gradient, new GradientControl()));
+
+            /*AddSlot(new ShaderPort(0, "1D", SlotType.Input, SlotValueType.Vector1, new Vector1Control(1.0f)));
             AddSlot(new ShaderPort(1, "1ND", SlotType.Input, SlotValueType.Vector1, new Vector1Control()));
 
             AddSlot(new ShaderPort(2, "2D", SlotType.Input, SlotValueType.Vector2, new Vector2Control(Vector2.one)));
@@ -31,6 +33,12 @@ namespace UnityEditor.ShaderGraph
 
             AddSlot(new ShaderPort(10, "4COLD", SlotType.Input, SlotValueType.Vector4, new ColorControl(Color.red, true)));
             AddSlot(new ShaderPort(11, "4COLND", SlotType.Input, SlotValueType.Vector4, new ColorControl()));
+
+            AddSlot(new ShaderPort(12, "GRADD", SlotType.Input, SlotValueType.Gradient, new GradientControl(new Gradient() { colorKeys = new GradientColorKey[] { new GradientColorKey(Color.red, 0), new GradientColorKey(Color.blue, 1) }} )));
+            AddSlot(new ShaderPort(13, "GRADND", SlotType.Input, SlotValueType.Gradient, new GradientControl()));
+
+            AddSlot(new ShaderPort(14, "BD", SlotType.Input, SlotValueType.Boolean, new ToggleControl(true)));
+            AddSlot(new ShaderPort(15, "BND", SlotType.Input, SlotValueType.Boolean, new ToggleControl()));*/
         }
 
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)

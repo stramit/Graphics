@@ -10,7 +10,7 @@ namespace UnityEditor.ShaderGraph
         public Color defaultValue { get; }
         public bool hdr { get; }
 
-        private ShaderPort m_Node;
+        private ShaderPort m_Port;
 
         public ColorControl(bool hdr = false)
         {
@@ -38,7 +38,7 @@ namespace UnityEditor.ShaderGraph
 
         public void UpdateDefaultValue(ShaderPort port)
         {
-            m_Node = port;
+            m_Port = port;
             port.vectorValue = defaultValue;
         }
 
@@ -47,7 +47,7 @@ namespace UnityEditor.ShaderGraph
             VisualElement control = new VisualElement() { name = "ColorControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/ColorRGBASlotControlView"));
 
-            var value = port.valueType == SlotValueType.Vector4 ? m_Node.vectorValue : new Vector4(m_Node.vectorValue.x, m_Node.vectorValue.y, m_Node.vectorValue.z, 0);
+            var value = port.valueType == SlotValueType.Vector4 ? m_Port.vectorValue : new Vector4(m_Port.vectorValue.x, m_Port.vectorValue.y, m_Port.vectorValue.z, 0);
             var alpha = port.valueType == SlotValueType.Vector4;
 
             var colorField = new ColorField { value = value, showAlpha = alpha, hdr = hdr, showEyeDropper = false };
@@ -58,9 +58,12 @@ namespace UnityEditor.ShaderGraph
 
         void OnValueChanged(ChangeEvent<Color> evt)
         {
-            m_Node.owner.owner.owner.RegisterCompleteObjectUndo("Color Change");
-            m_Node.vectorValue = evt.newValue;
-            m_Node.owner.Dirty(ModificationScope.Node);
+            if (!evt.newValue.Equals(m_Port.vectorValue))
+            {
+                m_Port.owner.owner.owner.RegisterCompleteObjectUndo("Color Change");
+                m_Port.vectorValue = evt.newValue;
+                m_Port.owner.Dirty(ModificationScope.Node);
+            }
         }
     }
 }

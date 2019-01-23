@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UnityEditor.ShaderGraph
@@ -14,7 +15,10 @@ namespace UnityEditor.ShaderGraph
     [Serializable]
     internal class SerializedControl
     {
+        [SerializeField]
         private string m_AssemblyName;
+
+        [SerializeField]
         private string m_TypeName;
 
         public SerializedControl(IShaderControl control)
