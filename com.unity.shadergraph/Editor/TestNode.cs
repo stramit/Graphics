@@ -50,6 +50,15 @@ namespace UnityEditor.ShaderGraph
             AddSlot(new ShaderPort(22, "Matrix2x2", SlotType.Input, SlotValueType.Matrix2));
             AddSlot(new ShaderPort(23, "Matrix3x3", SlotType.Input, SlotValueType.Matrix3));
             AddSlot(new ShaderPort(24, "Matrix4x4", SlotType.Input, SlotValueType.Matrix4));
+
+            AddSlot(new ShaderPort(25, "V1PopupD", SlotType.Input, SlotValueType.Vector1, new PopupControl(new string[] {"Option A", "Option B", "Option C"}, 1)));
+            AddSlot(new ShaderPort(26, "V1Popup", SlotType.Input, SlotValueType.Vector1, new PopupControl(new string[] {"Option A", "Option B", "Option C"})));
+
+            AddSlot(new ShaderPort(27, "V1SliderD", SlotType.Input, SlotValueType.Vector1, new SliderControl(0.5f, 0.0f, 1.0f)));
+            AddSlot(new ShaderPort(28, "V1Slider", SlotType.Input, SlotValueType.Vector1, new SliderControl()));
+
+            AddSlot(new ShaderPort(29, "V1IntegerD", SlotType.Input, SlotValueType.Vector1, new IntegerControl(1)));
+            AddSlot(new ShaderPort(30, "V1Integer", SlotType.Input, SlotValueType.Vector1, new IntegerControl()));
         }
 
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
