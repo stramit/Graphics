@@ -13,6 +13,9 @@ namespace UnityEditor.ShaderGraph
         private bool m_BooleanValue = false;
 
         [SerializeField]
+        private Matrix4x4 m_MatrixValue = Matrix4x4.identity;
+
+        [SerializeField]
         private SerializableTexture m_Texture = new SerializableTexture();
 
         [SerializeField]
@@ -28,6 +31,12 @@ namespace UnityEditor.ShaderGraph
         {
             get { return m_BooleanValue; }
             set { m_BooleanValue = value; }
+        }
+
+        public Matrix4x4 matrixValue
+        {
+            get { return m_MatrixValue; }
+            set { m_MatrixValue = value; }
         }
 
         public Texture textureValue

@@ -83,6 +83,14 @@ namespace UnityEditor.ShaderGraph
                         return ConcreteSlotValueType.Texture2DArray;
                     case SlotValueType.Cubemap:
                         return ConcreteSlotValueType.Cubemap;
+                    case SlotValueType.SamplerState:
+                        return ConcreteSlotValueType.SamplerState;
+                    case SlotValueType.Matrix2:
+                        return ConcreteSlotValueType.Matrix2;
+                    case SlotValueType.Matrix3:
+                        return ConcreteSlotValueType.Matrix3;
+                    case SlotValueType.Matrix4:
+                        return ConcreteSlotValueType.Matrix4;
                     case SlotValueType.Gradient:
                         return ConcreteSlotValueType.Gradient;
                     default:
@@ -122,6 +130,12 @@ namespace UnityEditor.ShaderGraph
                 case PropertyType.Cubemap: // TODO - Remove PreviewProperty.cubemapValue
                     pp.cubemapValue = (Cubemap)portValue.textureValue;
                     break;
+                case PropertyType.SamplerState:
+                    return;
+                case PropertyType.Matrix2:
+                case PropertyType.Matrix3:
+                case PropertyType.Matrix4:
+                    return;
                 case PropertyType.Gradient:
                     pp.gradientValue = portValue.gradientValue;
                     break;
@@ -139,6 +153,7 @@ namespace UnityEditor.ShaderGraph
                 throw new Exception(string.Format("Slot {0} either has no owner, or the owner is not a {1}", this, typeof(AbstractMaterialNode)));
 
             var channelCount = SlotValueHelper.GetChannelCount(concreteValueType);
+            Matrix4x4 matrix = m_PortValue.matrixValue;
             switch (concreteValueType)
             {
                 case ConcreteSlotValueType.Vector1:
@@ -158,7 +173,23 @@ namespace UnityEditor.ShaderGraph
                 case ConcreteSlotValueType.Texture3D:
                 case ConcreteSlotValueType.Texture2DArray:
                 case ConcreteSlotValueType.Cubemap:
+                case ConcreteSlotValueType.SamplerState:
                     return matOwner.GetVariableNameForSlot(id);
+                case ConcreteSlotValueType.Matrix2:
+                    return string.Format("{0}2x2 ({1},{2},{3},{4})", precision, 
+                        matrix.m00, matrix.m01, 
+                        matrix.m10, matrix.m11);
+                case ConcreteSlotValueType.Matrix3:
+                    return string.Format("{0}3x3 ({1},{2},{3},{4},{5},{6},{7},{8},{9})", precision, 
+                        matrix.m00, matrix.m01, matrix.m02, 
+                        matrix.m10, matrix.m11, matrix.m12,
+                        matrix.m20, matrix.m21, matrix.m22);
+                case ConcreteSlotValueType.Matrix4:
+                    return string.Format("{0}4x4 ({1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16})", precision, 
+                        matrix.m00, matrix.m01, matrix.m02, matrix.m03, 
+                        matrix.m10, matrix.m11, matrix.m12, matrix.m13,
+                        matrix.m20, matrix.m21, matrix.m22, matrix.m23,
+                        matrix.m30, matrix.m31, matrix.m32, matrix.m33);
                 case ConcreteSlotValueType.Gradient:
                     return string.Format("Unity{0}()", matOwner.GetVariableNameForSlot(id));
                 default:
@@ -204,6 +235,18 @@ namespace UnityEditor.ShaderGraph
                     break;
                 case ConcreteSlotValueType.Cubemap:
                     property = new CubemapShaderProperty();
+                    break;
+                case ConcreteSlotValueType.SamplerState:
+                    property = new SamplerStateShaderProperty();
+                    break;
+                case ConcreteSlotValueType.Matrix2:
+                    property = new Matrix2ShaderProperty();
+                    break;
+                case ConcreteSlotValueType.Matrix3:
+                    property = new Matrix3ShaderProperty();
+                    break;
+                case ConcreteSlotValueType.Matrix4:
+                    property = new Matrix4ShaderProperty();
                     break;
                 case ConcreteSlotValueType.Gradient:
                     AddGradientProperties(matOwner, properties, generationMode);

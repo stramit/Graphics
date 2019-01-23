@@ -44,6 +44,12 @@ namespace UnityEditor.ShaderGraph
             AddSlot(new ShaderPort(18, "Texture3D", SlotType.Input, SlotValueType.Texture3D, new TextureControl<Texture3D>()));
             AddSlot(new ShaderPort(19, "Texture2DArray", SlotType.Input, SlotValueType.Texture2DArray, new TextureControl<Texture2DArray>()));
             AddSlot(new ShaderPort(20, "Cubemap", SlotType.Input, SlotValueType.Cubemap, new TextureControl<Cubemap>()));
+
+            AddSlot(new ShaderPort(21, "Sampler", SlotType.Input, SlotValueType.SamplerState, new LabelControl("Default")));
+
+            AddSlot(new ShaderPort(22, "Matrix2x2", SlotType.Input, SlotValueType.Matrix2, new LabelControl("Identity")));
+            AddSlot(new ShaderPort(23, "Matrix3x3", SlotType.Input, SlotValueType.Matrix3, new LabelControl("Identity")));
+            AddSlot(new ShaderPort(24, "Matrix4x4", SlotType.Input, SlotValueType.Matrix4, new LabelControl("Identity")));
         }
 
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
