@@ -18,6 +18,20 @@ namespace UnityEditor.ShaderGraph
             string displayName,
             SlotType slotType,
             SlotValueType valueType,
+            ShaderStageCapability stageCapability = ShaderStageCapability.All)
+            : base(slotId, displayName, displayName, slotType, stageCapability, false)
+        {
+            m_ValueType = valueType;
+            m_Control = defaultControl;
+            m_SerializedControl = new SerializableControl(m_Control);
+            m_PortValue = new SerializableValueStore();
+        }
+
+        public ShaderPort(
+            int slotId,
+            string displayName,
+            SlotType slotType,
+            SlotValueType valueType,
             IShaderControl control,
             ShaderStageCapability stageCapability = ShaderStageCapability.All)
             : base(slotId, displayName, displayName, slotType, stageCapability, false)
@@ -101,7 +115,47 @@ namespace UnityEditor.ShaderGraph
 
         public override VisualElement InstantiateControl()
         {
-            return m_Control.GetControl(this);
+            return control.GetControl(this);
+        }
+
+        private IShaderControl defaultControl
+        {
+            get
+            {
+                switch (m_ValueType)
+                {
+                    case SlotValueType.Vector4:
+                        return new Vector4Control();
+                    case SlotValueType.Vector3:
+                        return new Vector3Control();
+                    case SlotValueType.Vector2:
+                        return new Vector4Control();
+                    case SlotValueType.Vector1:
+                        return new Vector1Control();
+                    case SlotValueType.Boolean:
+                        return new ToggleControl();
+                    case SlotValueType.Texture2D:
+                        return new TextureControl<Texture>();
+                    case SlotValueType.Texture3D:
+                        return new TextureControl<Texture3D>();
+                    case SlotValueType.Texture2DArray:
+                        return new TextureControl<Texture2DArray>();
+                    case SlotValueType.Cubemap:
+                        return new TextureControl<Cubemap>();
+                    case SlotValueType.SamplerState:
+                        return new LabelControl("Default");
+                    case SlotValueType.Matrix2:
+                        return new LabelControl("Identity");
+                    case SlotValueType.Matrix3:
+                        return new LabelControl("Identity");
+                    case SlotValueType.Matrix4:
+                        return new LabelControl("Identity");
+                    case SlotValueType.Gradient:
+                        return new GradientControl();
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
         }
 
         public override void GetPreviewProperties(List<PreviewProperty> properties, string name)
