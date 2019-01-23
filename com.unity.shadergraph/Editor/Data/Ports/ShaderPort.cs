@@ -13,18 +13,18 @@ namespace UnityEditor.ShaderGraph
         {
         }
 
-        public ShaderPort(OutPortDescriptor portDescription)
-            : base(portDescription.id, portDescription.name, portDescription.name, portDescription.portType, ShaderStageCapability.All, false)
+        public ShaderPort(OutPortDescriptor portDescriptor)
+            : base(portDescriptor.id, portDescriptor.name, portDescriptor.name, portDescriptor.portType, ShaderStageCapability.All, false)
         {
-            m_ValueType = valueType;
+            m_ValueType = portDescriptor.valueType;
         }
 
-        public ShaderPort(InPortDescriptor portDescription)
-            : base(portDescription.id, portDescription.name, portDescription.name, portDescription.portType, ShaderStageCapability.All, false)
+        public ShaderPort(InPortDescriptor portDescriptor)
+            : base(portDescriptor.id, portDescriptor.name, portDescriptor.name, portDescriptor.portType, ShaderStageCapability.All, false)
         {
-            m_ValueType = valueType;
-            control = portDescription.control;
-            portValue = portDescription.defaultValue;
+            m_ValueType = portDescriptor.valueType;
+            control = portDescriptor.control;
+            portValue = portDescriptor.defaultValue;
         }
 
         [SerializeField]
@@ -323,10 +323,12 @@ namespace UnityEditor.ShaderGraph
 
         public override void CopyValuesFrom(MaterialSlot foundSlot)
         {
-            var slot = foundSlot as ShaderPort;
-            if (slot != null)
+            var port = foundSlot as ShaderPort;
+            if (port != null)
             {
-                portValue = slot.portValue;
+                m_ValueType = port.valueType;
+                portValue = port.portValue;
+                control = port.control;
             }
         }
     }
