@@ -220,7 +220,7 @@ namespace UnityEditor.ShaderGraph
                 throw new Exception(string.Format("Slot {0} either has no owner, or the owner is not a {1}", this, typeof(AbstractMaterialNode)));
 
             string overrideReferenceName = matOwner.GetVariableNameForSlot(id);
-            IShaderProperty[] defaultProperties = PortUtil.GetDefaultPropertiesFromShaderValue(this);
+            IShaderProperty[] defaultProperties = PortUtil.GetDefaultPropertiesFromShaderValue(this, overrideReferenceName);
 
             foreach(IShaderProperty property in defaultProperties)
                 properties.AddShaderProperty(property);
