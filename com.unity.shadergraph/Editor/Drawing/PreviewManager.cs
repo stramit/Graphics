@@ -112,7 +112,7 @@ namespace UnityEditor.ShaderGraph.Drawing
         }
 
         Stack<INode> m_NodeWave = new Stack<INode>();
-        List<IEdge> m_Edges = new List<IEdge>();
+        List<ShaderEdge> m_Edges = new List<ShaderEdge>();
         List<MaterialSlot> m_Slots = new List<MaterialSlot>();
 
         void PropagateNodeList(ICollection<INode> nodes, bool forward)

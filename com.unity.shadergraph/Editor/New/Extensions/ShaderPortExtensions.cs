@@ -7,7 +7,7 @@ namespace UnityEditor.ShaderGraph
     {
         internal static string InputValue(this ShaderPort port, IGraph graph, GenerationMode generationMode)
         {
-            IEdge[] edges;
+            ShaderEdge[] edges;
             if (port.HasEdges(out edges))
             {
                 var fromSocketRef = edges[0].outputSlot;
@@ -31,7 +31,7 @@ namespace UnityEditor.ShaderGraph
             return edges.Any();
         }
 
-        internal static bool HasEdges(this ShaderPort port, out IEdge[] edges)
+        internal static bool HasEdges(this ShaderPort port, out ShaderEdge[] edges)
         {
             edges = port.owner.owner.GetEdges(port.slotReference).ToArray();
             return edges.Any();

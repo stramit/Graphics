@@ -10,7 +10,7 @@ namespace UnityEditor.Graphing.Util
     sealed class CopyPasteGraph : ISerializationCallbackReceiver
     {
         [NonSerialized]
-        HashSet<IEdge> m_Edges = new HashSet<IEdge>();
+        HashSet<ShaderEdge> m_Edges = new HashSet<ShaderEdge>();
 
         [NonSerialized]
         HashSet<INode> m_Nodes = new HashSet<INode>();
@@ -47,7 +47,7 @@ namespace UnityEditor.Graphing.Util
 
         public CopyPasteGraph() {}
 
-        public CopyPasteGraph(Guid sourceGraphGuid, IEnumerable<GroupData> groups, IEnumerable<INode> nodes, IEnumerable<IEdge> edges, IEnumerable<IShaderProperty> properties, IEnumerable<IShaderProperty> metaProperties)
+        public CopyPasteGraph(Guid sourceGraphGuid, IEnumerable<GroupData> groups, IEnumerable<INode> nodes, IEnumerable<ShaderEdge> edges, IEnumerable<IShaderProperty> properties, IEnumerable<IShaderProperty> metaProperties)
         {
             m_SourceGraphGuid = new SerializableGuid(sourceGraphGuid);
 
@@ -83,7 +83,7 @@ namespace UnityEditor.Graphing.Util
             m_Nodes.Add(node);
         }
 
-        public void AddEdge(IEdge edge)
+        public void AddEdge(ShaderEdge edge)
         {
             m_Edges.Add(edge);
         }
@@ -108,7 +108,7 @@ namespace UnityEditor.Graphing.Util
             get { return m_Groups; }
         }
 
-        public IEnumerable<IEdge> edges
+        public IEnumerable<ShaderEdge> edges
         {
             get { return m_Edges; }
         }
@@ -132,7 +132,7 @@ namespace UnityEditor.Graphing.Util
         {
             m_SerializeableSourceGraphGuid = SerializationHelper.Serialize(m_SourceGraphGuid);
             m_SerializableNodes = SerializationHelper.Serialize<INode>(m_Nodes);
-            m_SerializableEdges = SerializationHelper.Serialize<IEdge>(m_Edges);
+            m_SerializableEdges = SerializationHelper.Serialize<ShaderEdge>(m_Edges);
             m_SerilaizeableProperties = SerializationHelper.Serialize<IShaderProperty>(m_Properties);
             m_SerializableMetaProperties = SerializationHelper.Serialize<IShaderProperty>(m_MetaProperties);
         }
@@ -147,7 +147,7 @@ namespace UnityEditor.Graphing.Util
                 m_Nodes.Add(node);
             m_SerializableNodes = null;
 
-            var edges = SerializationHelper.Deserialize<IEdge>(m_SerializableEdges, GraphUtil.GetLegacyTypeRemapping());
+            var edges = SerializationHelper.Deserialize<ShaderEdge>(m_SerializableEdges, GraphUtil.GetLegacyTypeRemapping());
             m_Edges.Clear();
             foreach (var edge in edges)
                 m_Edges.Add(edge);

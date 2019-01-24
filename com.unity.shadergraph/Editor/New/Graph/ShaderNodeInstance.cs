@@ -7,69 +7,171 @@ using UnityEditor.Graphing;
 
 namespace UnityEditor.ShaderGraph
 {
-    internal abstract class ShaderNodeInstance : ShaderNode, IGeneratesBodyCode, IGeneratesFunction
-    {      
-        internal ShaderNodeInstance()
+    internal class ShaderNodeInstance : ShaderNode, IGeneratesBodyCode, IGeneratesFunction
+    {   
+        [NonSerialized]
+        object m_Data;
+
+        [SerializeField]
+        SerializationHelper.JSONSerializedElement m_SerializedData;
+
+        [SerializeField]
+        string m_ShaderNodeTypeName;
+
+        NodeTypeState m_TypeState;
+
+        public HlslFunctionDescriptor function { get; set; }
+
+        public NodeTypeState typeState
         {
-            NodeSetupContext context = new NodeSetupContext();
-            Setup(ref context);
-            if(context.descriptor == null)
-                return;
-
-            name = context.descriptor.name;
-            m_Preview = context.descriptor.preview;
-
-            List<int> validPorts = new List<int>();
-            for(int i = 0; i < context.descriptor.inPorts.Length; i++)
+            get => m_TypeState;
+            set
             {
-                AddSlot(new ShaderPort(context.descriptor.inPorts[i]));
-                validPorts.Add(context.descriptor.inPorts[i].id);
+                m_TypeState = value;
+                m_ShaderNodeTypeName = value?.baseNodeType.GetType().FullName;
             }
-            for(int i = 0; i < context.descriptor.outPorts.Length; i++)
-            {
-                AddSlot(new ShaderPort(context.descriptor.outPorts[i]));
-                validPorts.Add(context.descriptor.outPorts[i].id);
-            }
-            RemoveSlotsNameNotMatching(validPorts);
+        }
 
-            List<int> validParameters = new List<int>();
-            for(int i = 0; i <context.descriptor.parameters.Length; i++)
+        public bool isNew { get; set; }
+
+        public object data
+        {
+            get => m_Data;
+            set => m_Data = value;
+        }
+
+        public string shaderNodeTypeName => m_ShaderNodeTypeName;
+
+        public override bool hasPreview => true;
+
+        public ShaderNodeInstance()
+        {
+        }
+
+        // TODO: This one is only really used in SearchWindowProvider, as we need a dummy node with slots for the code there.
+        // Eventually we can make the code in SWP nicer, and remove this constructor.
+        public ShaderNodeInstance(NodeTypeState typeState)
+        {
+            this.typeState = typeState;
+            name = typeState.type.name;
+            isNew = true;
+
+            UpdateSlots();
+        }
+
+        public override void ValidateNode()
+        {
+            base.ValidateNode();
+
+            var errorDetected = true;
+            if (owner == null)
+                Debug.LogError($"{name} ({guid}) has a null owner.");
+            else if (typeState == null)
+                Debug.LogError($"{name} ({guid}) has a null state.");
+            else if (typeState.owner != owner)
+                Debug.LogError($"{name} ({guid}) has an invalid state.");
+            else
+                errorDetected = false;
+
+            hasError |= errorDetected;
+        }
+
+        public override void OnBeforeSerialize()
+        {
+            base.OnBeforeSerialize();
+            if (data != null)
+                m_SerializedData = SerializationHelper.Serialize(data);
+
+            if (typeState != null)
+                m_ShaderNodeTypeName = typeState.baseNodeType.GetType().FullName;
+        }
+
+        public override void UpdateNodeAfterDeserialization()
+        {
+            if (m_SerializedData.typeInfo.IsValid())
             {
-                AddParameter(new ShaderParameter(context.descriptor.parameters[i]));
-                validParameters.Add(context.descriptor.parameters[i].id);
+                m_Data = SerializationHelper.Deserialize<object>(m_SerializedData, GraphUtil.GetLegacyTypeRemapping());
+                m_SerializedData = default;
+            }
+
+            UpdateStateReference();
+        }
+
+        public override void UpdatePortDimension(int portId, int dimension)
+        {
+            // TODO - Revisit dynamics?
+            /*for (int i=0; i< typeState.inputPorts.Count; ++i)
+            {
+                if (typeState.inputPorts[i].id == portId)
+                {
+                    var port = typeState.inputPorts[i];
+                    var portValue = port.value;
+                    // Not sure what to do here. Constructing a new object seems better than adding a function to set the dimension.
+                    if (portValue.type == PortValueType.DynamicVector)
+                    {
+                        port.value = PortValue.DynamicVector(portValue.vector4Value, dimension);
+                        typeState.inputPorts[i] = port;
+                    }
+                    return;
+                }
+            }*/
+        }
+
+        public override void UpdatePortConnection()
+        {
+            typeState.modifiedNodes.Add(tempId.index);
+        }
+
+        public void UpdateStateReference()
+        {
+            var materialOwner = (AbstractMaterialGraph)owner;
+            typeState = materialOwner.nodeTypeStates.FirstOrDefault(x => x.baseNodeType.GetType().FullName == shaderNodeTypeName);
+            if (typeState == null)
+            {
+                throw new InvalidOperationException($"Cannot find an {nameof(ShaderNodeType)} with type name {shaderNodeTypeName}");
+            }
+            UpdateSlots();
+        }
+
+        void UpdateSlots()
+        {
+            var validSlotIds = new List<int>();
+            foreach (InputDescriptor input in typeState.type.inPorts)
+            {
+                AddSlot(new ShaderPort(input));
+                validSlotIds.Add(input.id);
+            }
+            foreach (OutputDescriptor output in typeState.type.outPorts)
+            {
+                AddSlot(new ShaderPort(output));
+                validSlotIds.Add(output.id);
+            }
+            RemoveSlotsNameNotMatching(validSlotIds);
+            
+            var validParameters = new List<int>();
+            foreach (InputDescriptor parameter in typeState.type.parameters)
+            {
+                AddParameter(new ShaderParameter(parameter));
+                validParameters.Add(parameter.id);
             }
             RemoveParametersNameNotMatching(validParameters);
         }
 
-        private bool m_Preview;
-        public override bool hasPreview
-        {
-            get { return m_Preview; }
-        }
-
-        internal abstract void Setup(ref NodeSetupContext context);
-        internal abstract void OnModified(ref NodeChangeContext context);
-
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
         {
-            NodeChangeContext context = new NodeChangeContext();
-            OnModified(ref context);
-            if(context.descriptor == null)
-                return;
-
-            foreach (var argument in context.descriptor.outArguments)
+            foreach (var argument in function.outArguments)
                 visitor.AddShaderChunk(argument.valueType.ToString(precision) + " " + FindShaderValue(argument.id).ToShaderVariableName() + ";", true);
 
-            string call = GetFunctionName(context.descriptor.name) + "(";
+            string call = GetFunctionName(function.name) + "(";
             bool first = true;
-            foreach (var argument in context.descriptor.inArguments)
+            foreach (var argument in function.inArguments)
             {
                 if (!first)
                     call += ", ";
                 first = false;
                 call += GetShaderValueString(argument.id, generationMode);
             }
-            foreach (var argument in context.descriptor.outArguments)
+            foreach (var argument in function.outArguments)
             {
                 if (!first)
                     call += ", ";
@@ -82,19 +184,25 @@ namespace UnityEditor.ShaderGraph
 
         public virtual void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            NodeChangeContext context = new NodeChangeContext();
-            OnModified(ref context);
-            if(context.descriptor == null)
-                return;
-
-            registry.ProvideFunction(GetFunctionName(context.descriptor.name), s =>
+            Debug.Log(function);
+            registry.ProvideFunction(function.name, builder =>
+            {
+                switch (function.source.type)
                 {
-                    s.AppendLine(GetFunctionHeader(context.descriptor));
-                    using(s.BlockScope())
-                    {
-                        s.AppendLines(context.descriptor.body);
-                    }
-                });
+                    case HlslSourceType.File:
+                        builder.AppendLine($"#include \"{function.source.value}\"");
+                        break;
+                    case HlslSourceType.String:
+                        builder.AppendLine(GetFunctionHeader(function));
+                        using(builder.BlockScope())
+                        {
+                            builder.AppendLines(function.source.value);
+                        }
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            });
         }
 
         private string GetFunctionHeader(HlslFunctionDescriptor descriptor)
@@ -122,6 +230,17 @@ namespace UnityEditor.ShaderGraph
         private string GetFunctionName(string name)
         {
             return string.Format("{0}_{1}", name, precision);
+        }
+
+        public override void GetSourceAssetDependencies(List<string> paths)
+        {
+            foreach (var source in typeState.hlslSources)
+            {
+                if (source.type == HlslSourceType.File)
+                {
+                    paths.Add(source.value);
+                }
+            }
         }
     }
 }

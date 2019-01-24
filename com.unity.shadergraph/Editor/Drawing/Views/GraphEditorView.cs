@@ -276,7 +276,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             {
                 m_Graph.owner.RegisterCompleteObjectUndo("Remove Elements");
                 m_Graph.RemoveElements(graphViewChange.elementsToRemove.OfType<MaterialNodeView>().Select(v => (INode)v.node),
-                    graphViewChange.elementsToRemove.OfType<Edge>().Select(e => (IEdge)e.userData),
+                    graphViewChange.elementsToRemove.OfType<Edge>().Select(e => (ShaderEdge)e.userData),
                     graphViewChange.elementsToRemove.OfType<ShaderGroup>().Select(g => (GroupData)g.userData));
                 foreach (var edge in graphViewChange.elementsToRemove.OfType<Edge>())
                 {
@@ -463,7 +463,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             foreach (var edge in m_Graph.removedEdges)
             {
                 var edgeView = m_GraphView.graphElements.ToList().OfType<Edge>()
-                    .FirstOrDefault(p => p.userData is IEdge && Equals((IEdge) p.userData, edge));
+                    .FirstOrDefault(p => p.userData is ShaderEdge && Equals((ShaderEdge) p.userData, edge));
                 if (edgeView != null)
                 {
                     var nodeView = edgeView.input.node as MaterialNodeView;
@@ -596,7 +596,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             port.MarkDirtyRepaint();
         }
 
-        Edge AddEdge(IEdge edge)
+        Edge AddEdge(ShaderEdge edge)
         {
             var sourceNode = m_Graph.GetNodeFromGuid(edge.outputSlot.nodeGuid);
             if (sourceNode == null)

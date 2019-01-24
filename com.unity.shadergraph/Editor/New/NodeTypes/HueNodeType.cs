@@ -1,7 +1,6 @@
 namespace UnityEditor.ShaderGraph
 {
-    [Title("INTERNAL", "Hue")]
-    class HueNodeType : ShaderNodeInstance
+    sealed class HueNodeType : ShaderNodeType
     {
         InputDescriptor m_InPort = new InputDescriptor(0, "In", ConcreteSlotValueType.Vector3, new ColorControl());
         InputDescriptor m_OffsetPort = new InputDescriptor(1, "Offset", ConcreteSlotValueType.Vector1, new Vector1Control());
@@ -11,8 +10,9 @@ namespace UnityEditor.ShaderGraph
 
         internal override void Setup(ref NodeSetupContext context)
         {
-            context.CreateType(new NodeTypeDescriptor
+            context.CreateNodeType(new NodeTypeDescriptor
             {
+                path = "INTERNAL",
                 name = "Hue",
                 inPorts = new InputDescriptor[] { m_InPort, m_OffsetPort },
                 outPorts = new OutputDescriptor[] { m_OutPort },
@@ -21,12 +21,12 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        internal override void OnModified(ref NodeChangeContext context)
+        internal override void OnNodeAdded(NodeChangeContext context, NodeRef node)
         {
-            context.SetHlslFunction(new HlslFunctionDescriptor
+            context.SetHlslFunction(node, new HlslFunctionDescriptor
             {
                 name = "Unity_Hue",
-                body = s_FunctionBody,
+                source = HlslSource.String(s_FunctionBody),
                 inArguments = new InputDescriptor[] { m_InPort, m_OffsetPort, m_ModeParameter },
                 outArguments = new OutputDescriptor[] { m_OutPort }
             });

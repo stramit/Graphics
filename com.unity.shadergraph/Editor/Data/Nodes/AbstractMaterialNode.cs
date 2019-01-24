@@ -11,7 +11,7 @@ namespace UnityEditor.ShaderGraph
     abstract class AbstractMaterialNode : INode, ISerializationCallbackReceiver, IGenerateProperties
     {
         protected static List<MaterialSlot> s_TempSlots = new List<MaterialSlot>();
-        protected static List<IEdge> s_TempEdges = new List<IEdge>();
+        protected static List<ShaderEdge> s_TempEdges = new List<ShaderEdge>();
         protected static List<PreviewProperty> s_TempPreviewProperties = new List<PreviewProperty>();
 
         public enum OutputPrecision
@@ -159,7 +159,7 @@ namespace UnityEditor.ShaderGraph
         public virtual bool hasError
         {
             get { return m_HasError; }
-            protected set { m_HasError = value; }
+            internal set { m_HasError = value; }
         }
         
         string m_DefaultVariableName;
@@ -399,9 +399,17 @@ namespace UnityEditor.ShaderGraph
             // from here set all the
             var dynamicType = ConvertDynamicInputTypeToConcrete(dynamicInputSlotsToCompare.Values);
             foreach (var dynamicKvP in dynamicInputSlotsToCompare)
+            {
                 dynamicKvP.Key.SetConcreteType(dynamicType);
+                UpdatePortDimension(dynamicKvP.Key.id, SlotValueHelper.GetChannelCount(dynamicType));
+                UpdatePortConnection();
+            }
             foreach (var skippedSlot in skippedDynamicSlots)
+            {
                 skippedSlot.SetConcreteType(dynamicType);
+                UpdatePortDimension(skippedSlot.id, SlotValueHelper.GetChannelCount(dynamicType));
+                UpdatePortConnection();
+            }
 
             // and now dynamic matrices
             var dynamicMatrixType = ConvertDynamicMatrixInputTypeToConcrete(dynamicMatrixInputSlotsToCompare.Values);
@@ -628,10 +636,16 @@ namespace UnityEditor.ShaderGraph
             m_SerializableSlots = null;
             foreach (var s in m_Slots)
                 s.owner = this;
-            UpdateNodeAfterDeserialization();
+            //UpdateNodeAfterDeserialization(); // TODO - Really?! Regressions here?
         }
 
         public virtual void UpdateNodeAfterDeserialization()
+        {}
+
+        public virtual void UpdatePortDimension(int portId, int dimension)
+        {}
+
+        public virtual void UpdatePortConnection()
         {}
 
         public bool IsSlotConnected(int slotId)
