@@ -8,6 +8,8 @@ namespace UnityEditor.ShaderGraph
     {
         SerializableValueStore defaultValue { get; }
         ConcreteSlotValueType[] validPortTypes { get; }
+        string[] labels { get; set; }
+        float[] values { get; set; }
         VisualElement GetControl(IShaderValue shaderValue);
     }
 }

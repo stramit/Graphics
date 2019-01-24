@@ -6,6 +6,8 @@ namespace UnityEditor.ShaderGraph
 {
     class ColorControl : IShaderControl
     {
+        public string[] labels { get; set; }
+        public float[] values { get; set; }
         public SerializableValueStore defaultValue { get; }
 
         public ConcreteSlotValueType[] validPortTypes
@@ -13,15 +15,9 @@ namespace UnityEditor.ShaderGraph
             get { return new ConcreteSlotValueType[] { ConcreteSlotValueType.Vector3, ConcreteSlotValueType.Vector4 }; }
         }
 
-        bool m_Hdr;
-
         public ColorControl()
         {
-        }
-
-        public ColorControl(bool hdr = false)
-        {
-            m_Hdr = hdr;
+            values = new float[] { 0 };
         }
 
         public ColorControl(Color defaultValue, bool hdr = false)
@@ -30,7 +26,7 @@ namespace UnityEditor.ShaderGraph
             {
                 vectorValue = defaultValue
             };
-            m_Hdr = hdr;
+            values = new float[] { hdr ? 1 : 0 };
         }
 
         public VisualElement GetControl(IShaderValue shaderValue)
@@ -39,7 +35,7 @@ namespace UnityEditor.ShaderGraph
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/ColorRGBASlotControlView"));
 
             var alpha = shaderValue.concreteValueType == ConcreteSlotValueType.Vector4;
-            var colorField = new ColorField { value = shaderValue.value.vectorValue, showAlpha = alpha, hdr = m_Hdr, showEyeDropper = false };
+            var colorField = new ColorField { value = shaderValue.value.vectorValue, showAlpha = alpha, hdr = values[0] == 1, showEyeDropper = false };
             colorField.RegisterValueChangedCallback(evt =>
             {
                 if (evt.newValue.Equals(shaderValue.value.vectorValue))

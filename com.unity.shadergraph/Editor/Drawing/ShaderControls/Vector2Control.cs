@@ -7,9 +7,9 @@ using UnityEditor.ShaderGraph.Drawing.Slots;
 namespace UnityEditor.ShaderGraph
 {
     class Vector2Control : IShaderControl
-    {
-        static readonly string[] k_SubLabels = { "X", "Y" };
-        
+    {       
+        public string[] labels { get; set; }
+        public float[] values { get; set; }
         public SerializableValueStore defaultValue { get; }
 
         public ConcreteSlotValueType[] validPortTypes
@@ -19,14 +19,16 @@ namespace UnityEditor.ShaderGraph
 
         public Vector2Control()
         {
+            labels = new string[] { "X", "Y" };
         }
 
-        public Vector2Control(Vector2 defaultValue)
+        public Vector2Control(Vector2 defaultValue, string labelX = "X", string labelY = "Y")
         {
             this.defaultValue = new SerializableValueStore()
             {
                 vectorValue = new Vector4(defaultValue.x, defaultValue.y, 0.0f, 0.0f)
             };
+            labels = new string[] { labelX, labelY };
         }
 
         int m_UndoGroup = -1;
@@ -36,8 +38,8 @@ namespace UnityEditor.ShaderGraph
             VisualElement control = new VisualElement() { name = "VectorControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/VectorControl"));
             
-            for (var i = 0; i < k_SubLabels.Length; i++)
-                AddField(control, shaderValue, i, k_SubLabels[i]);
+            for (var i = 0; i < 2; i++)
+                AddField(control, shaderValue, i, labels[i]);
             return control;
         }
 

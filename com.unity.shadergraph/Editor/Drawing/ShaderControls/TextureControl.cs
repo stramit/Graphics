@@ -8,6 +8,8 @@ namespace UnityEditor.ShaderGraph
 {
     class TextureControl<T> : IShaderControl where T : Texture
     {
+        public string[] labels { get; set; }
+        public float[] values { get; set; }
         public SerializableValueStore defaultValue { get; }
 
         public ConcreteSlotValueType[] validPortTypes

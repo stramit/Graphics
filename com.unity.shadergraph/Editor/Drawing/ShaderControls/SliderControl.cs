@@ -10,6 +10,8 @@ namespace UnityEditor.ShaderGraph
 {
     class SliderControl : IShaderControl
     {
+        public string[] labels { get; set; }
+        public float[] values { get; set; }
         public SerializableValueStore defaultValue { get; }
 
         public ConcreteSlotValueType[] validPortTypes
@@ -17,11 +19,9 @@ namespace UnityEditor.ShaderGraph
             get { return new ConcreteSlotValueType[] { ConcreteSlotValueType.Vector1 }; }
         }
 
-        float m_Minimum = 0.0f;
-        float m_Maximum = 1.0f;
-
         public SliderControl()
         {
+            values = new float[] { 0, 1 };
         }
 
         public SliderControl(float defaultValue, float minimum, float maximum)
@@ -30,8 +30,7 @@ namespace UnityEditor.ShaderGraph
             {
                 vectorValue = new Vector4(defaultValue, 0.0f, 0.0f, 0.0f)
             };
-            m_Minimum = minimum;
-            m_Maximum = maximum;
+            values = new float[] { minimum, maximum };
         }
 
         public VisualElement GetControl(IShaderValue shaderValue)
@@ -42,7 +41,7 @@ namespace UnityEditor.ShaderGraph
             Slider slider = null;
             FloatField floatField = null;
 
-            slider = new Slider(m_Minimum, m_Maximum) { value = shaderValue.value.vectorValue.x };
+            slider = new Slider(values[0], values[1]) { value = shaderValue.value.vectorValue.x };
             slider.RegisterValueChangedCallback((evt) =>
             {
                 if (evt.newValue.Equals(shaderValue.value.vectorValue.x))
@@ -66,7 +65,7 @@ namespace UnityEditor.ShaderGraph
             });
             floatField.Q("unity-text-input").RegisterCallback<FocusOutEvent>(evt =>
             {
-                float newValue = Mathf.Max(Mathf.Min(shaderValue.value.vectorValue.x, m_Maximum), m_Minimum);
+                float newValue = Mathf.Max(Mathf.Min(shaderValue.value.vectorValue.x, values[1]), values[0]);
                 if (newValue.Equals(shaderValue.value.vectorValue.x))
                     return;
                 slider.value = newValue;

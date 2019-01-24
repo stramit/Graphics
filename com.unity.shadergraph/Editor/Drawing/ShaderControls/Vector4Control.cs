@@ -8,8 +8,8 @@ namespace UnityEditor.ShaderGraph
 {
     class Vector4Control : IShaderControl
     {
-        static readonly string[] k_SubLabels = { "X", "Y", "Z", "W" };
-
+        public string[] labels { get; set; }
+        public float[] values { get; set; }
         public SerializableValueStore defaultValue { get; }
 
         public ConcreteSlotValueType[] validPortTypes
@@ -19,14 +19,16 @@ namespace UnityEditor.ShaderGraph
 
         public Vector4Control()
         {
+            labels = new string[] { "X", "Y", "Z", "W" };
         }
 
-        public Vector4Control(Vector4 defaultValue)
+        public Vector4Control(Vector4 defaultValue, string labelX = "X", string labelY = "Y", string labelZ = "Z", string labelW = "W")
         {
             this.defaultValue = new SerializableValueStore()
             {
                 vectorValue = defaultValue
             };
+            labels = new string[] { labelX, labelY, labelZ, labelW };
         }
 
         int m_UndoGroup = -1;
@@ -36,8 +38,8 @@ namespace UnityEditor.ShaderGraph
             VisualElement control = new VisualElement() { name = "VectorControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/VectorControl"));
             
-            for (var i = 0; i < k_SubLabels.Length; i++)
-                AddField(control, shaderValue, i, k_SubLabels[i]);
+            for (var i = 0; i < 4; i++)
+                AddField(control, shaderValue, i, labels[i]);
             return control;
         }
 

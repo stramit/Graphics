@@ -6,6 +6,8 @@ namespace UnityEditor.ShaderGraph
 {
     class ToggleControl : IShaderControl
     {
+        public string[] labels { get; set; }
+        public float[] values { get; set; }
         public SerializableValueStore defaultValue { get; }
 
         public ConcreteSlotValueType[] validPortTypes

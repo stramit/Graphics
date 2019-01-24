@@ -8,6 +8,8 @@ namespace UnityEditor.ShaderGraph
 {
     class PopupControl : IShaderControl
     {
+        public string[] labels { get; set; }
+        public float[] values { get; set; }
         public SerializableValueStore defaultValue { get; }
 
         public ConcreteSlotValueType[] validPortTypes
@@ -15,24 +17,29 @@ namespace UnityEditor.ShaderGraph
             get { return new ConcreteSlotValueType[] { ConcreteSlotValueType.Vector1 }; }
         }
 
-        List<string> m_Entries = new List<string>() {""};
+        List<string> m_Entries;
+        List<string> entries
+        {
+            get 
+            {
+                if(m_Entries == null)
+                    m_Entries = labels.ToList();
+                return m_Entries;
+            }
+        }
 
         public PopupControl()
         {
+            labels = new string[] { "A", "B", "C" };
         }
 
-        public PopupControl(string[] entries)
-        {
-            m_Entries = entries.ToList();
-        }
-
-        public PopupControl(string[] entries, float defaultValue)
+        public PopupControl(string[] entries, float defaultValue = 0)
         {
             this.defaultValue = new SerializableValueStore()
             {
                 vectorValue = new Vector4(defaultValue, 0.0f, 0.0f, 0.0f)
             };
-            m_Entries = entries.ToList();
+            labels = entries;
         }
 
         public VisualElement GetControl(IShaderValue shaderValue)
@@ -40,7 +47,7 @@ namespace UnityEditor.ShaderGraph
             VisualElement control = new VisualElement() { name = "PopupControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/ScreenPositionSlotControlView"));
 
-            var popupField = new PopupField<string>(m_Entries, (int)shaderValue.value.vectorValue.x);
+            var popupField = new PopupField<string>(entries, (int)shaderValue.value.vectorValue.x);
             popupField.RegisterValueChangedCallback(evt =>
             {
                 if (popupField.index.Equals(shaderValue.value.vectorValue.x))

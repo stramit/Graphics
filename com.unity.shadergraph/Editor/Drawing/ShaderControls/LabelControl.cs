@@ -8,6 +8,8 @@ namespace UnityEditor.ShaderGraph
 {
     class LabelControl : IShaderControl
     {
+        public string[] labels { get; set; }
+        public float[] values { get; set; }
         public SerializableValueStore defaultValue { get; }
 
         public ConcreteSlotValueType[] validPortTypes
@@ -15,27 +17,23 @@ namespace UnityEditor.ShaderGraph
             get { return (ConcreteSlotValueType[])Enum.GetValues(typeof(ConcreteSlotValueType)); }
         }
 
-        private string m_Label = "";
-
         public LabelControl()
         {
+            labels = new string[] { "Label" };
         }
 
-        public LabelControl(string label)
+        public LabelControl(string label, SerializableValueStore value = null)
         {
-            m_Label = label;
-        }
+            if(value != null)
+                defaultValue = value;
 
-        public LabelControl(string label, SerializableValueStore value)
-        {
-            defaultValue = value;
-            m_Label = label;
+            labels = new string[] { label };
         }
 
         public VisualElement GetControl(IShaderValue shaderValue)
         {
             VisualElement control = new VisualElement() { name = "LabelControl" };
-            Label label = new Label(m_Label);
+            Label label = new Label(labels[0]);
             control.Add(label);
             return control;
         }

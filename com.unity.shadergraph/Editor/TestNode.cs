@@ -6,16 +6,16 @@ namespace UnityEditor.ShaderGraph
     [Title("Test")]
     class TestNode : AbstractMaterialNode
     {
-        InPortDescriptor m_Port0 = new InPortDescriptor(0, "V1D", ConcreteSlotValueType.Vector1, new Vector1Control(1.0f));
+        InPortDescriptor m_Port0 = new InPortDescriptor(0, "V1D", ConcreteSlotValueType.Vector1, new Vector1Control(1.0f, "R"));
         InPortDescriptor m_Port1 = new InPortDescriptor(1, "V1", ConcreteSlotValueType.Vector1);
 
-        InPortDescriptor m_Port2 = new InPortDescriptor(2, "V2D", ConcreteSlotValueType.Vector2, new Vector2Control(Vector2.one));
+        InPortDescriptor m_Port2 = new InPortDescriptor(2, "V2D", ConcreteSlotValueType.Vector2, new Vector2Control(Vector2.one, "R", "G"));
         InPortDescriptor m_Port3 = new InPortDescriptor(3, "V2", ConcreteSlotValueType.Vector2);
 
-        InPortDescriptor m_Port4 = new InPortDescriptor(4, "V3D", ConcreteSlotValueType.Vector3, new Vector3Control(Vector3.one));
+        InPortDescriptor m_Port4 = new InPortDescriptor(4, "V3D", ConcreteSlotValueType.Vector3, new Vector3Control(Vector3.one, "R", "G", "B"));
         InPortDescriptor m_Port5 = new InPortDescriptor(5, "V3", ConcreteSlotValueType.Vector3);
 
-        InPortDescriptor m_Port6 = new InPortDescriptor(6, "V4D", ConcreteSlotValueType.Vector4, new Vector4Control(Vector4.one));
+        InPortDescriptor m_Port6 = new InPortDescriptor(6, "V4D", ConcreteSlotValueType.Vector4, new Vector4Control(Vector4.one, "R", "G", "B", "A"));
         InPortDescriptor m_Port7 = new InPortDescriptor(7, "V4", ConcreteSlotValueType.Vector4);
 
         InPortDescriptor m_Port8 = new InPortDescriptor(8, "3ColorD", ConcreteSlotValueType.Vector3, new ColorControl(Color.red, true));
@@ -43,10 +43,10 @@ namespace UnityEditor.ShaderGraph
         InPortDescriptor m_Port23 = new InPortDescriptor(23, "Matrix3x3", ConcreteSlotValueType.Matrix3);
         InPortDescriptor m_Port24 = new InPortDescriptor(24, "Matrix4x4", ConcreteSlotValueType.Matrix4);
 
-        InPortDescriptor m_Port25 = new InPortDescriptor(25, "V1PopupD", ConcreteSlotValueType.Vector1, new PopupControl(new string[] {"Option A", "Option B", "Option C"}, 0));
+        InPortDescriptor m_Port25 = new InPortDescriptor(25, "V1PopupD", ConcreteSlotValueType.Vector1, new PopupControl(new string[] {"Option A", "Option B", "Option C"}, 1));
         InPortDescriptor m_Port26 = new InPortDescriptor(26, "V1Popup", ConcreteSlotValueType.Vector1, new PopupControl(new string[] {"Option A", "Option B", "Option C"}));
 
-        InPortDescriptor m_Port27 = new InPortDescriptor(27, "V1SliderD", ConcreteSlotValueType.Vector1, new SliderControl(0.5f, 0.0f, 1.0f));
+        InPortDescriptor m_Port27 = new InPortDescriptor(27, "V1SliderD", ConcreteSlotValueType.Vector1, new SliderControl(0.0f, -1.0f, 1.0f));
         InPortDescriptor m_Port28 = new InPortDescriptor(28, "V1Slider", ConcreteSlotValueType.Vector1, new SliderControl());
 
         InPortDescriptor m_Port29 = new InPortDescriptor(29, "V1IntegerD", ConcreteSlotValueType.Vector1, new IntegerControl(1));
