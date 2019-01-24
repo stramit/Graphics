@@ -3,8 +3,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
-using UnityEditor.Graphing;
-using UnityEditor.ShaderGraph.Drawing.Slots;
 
 namespace UnityEditor.ShaderGraph
 {
@@ -17,8 +15,6 @@ namespace UnityEditor.ShaderGraph
             get { return new SlotValueType[] { SlotValueType.Vector1 }; }
         }
 
-        ShaderPort m_Port;
-        PopupField<string> m_PopupField;
         List<string> m_Entries = new List<string>() {""};
 
         public PopupControl()
@@ -39,27 +35,24 @@ namespace UnityEditor.ShaderGraph
             m_Entries = entries.ToList();
         }
 
-        public VisualElement GetControl(ShaderPort port)
+        public VisualElement GetControl(IShaderValue shaderValue)
         {
-            m_Port = port;
-
             VisualElement control = new VisualElement() { name = "PopupControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/ScreenPositionSlotControlView"));
 
-            m_PopupField = new PopupField<string>(m_Entries, (int)m_Port.portValue.vectorValue.x);
-            m_PopupField.RegisterValueChangedCallback(OnValueChanged);
-            control.Add(m_PopupField);
-            return control;
-        }
-
-        void OnValueChanged(ChangeEvent<string> evt)
-        {
-            if (m_PopupField.index != m_Port.portValue.vectorValue.x)
+            var popupField = new PopupField<string>(m_Entries, (int)shaderValue.value.vectorValue.x);
+            popupField.RegisterValueChangedCallback(evt =>
             {
-                m_Port.owner.owner.owner.RegisterCompleteObjectUndo("Change Popup");
-                m_Port.portValue.vectorValue = new Vector4(m_PopupField.index, 0.0f, 0.0f, 0.0f);
-                m_Port.owner.Dirty(ModificationScope.Graph);
-            }
+                if (popupField.index.Equals(shaderValue.value.vectorValue.x))
+                    return;
+                shaderValue.UpdateValue(new SerializableValueStore()
+                {
+                    vectorValue = new Vector4(popupField.index, 0.0f, 0.0f, 0.0f)
+                });
+            });
+
+            control.Add(popupField);
+            return control;
         }
     }
 }

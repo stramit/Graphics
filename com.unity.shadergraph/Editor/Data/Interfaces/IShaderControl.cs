@@ -8,6 +8,6 @@ namespace UnityEditor.ShaderGraph
     {
         SerializableValueStore defaultValue { get; }
         SlotValueType[] validPortTypes { get; }
-        VisualElement GetControl(ShaderPort port);
+        VisualElement GetControl(IShaderValue shaderValue);
     }
 }

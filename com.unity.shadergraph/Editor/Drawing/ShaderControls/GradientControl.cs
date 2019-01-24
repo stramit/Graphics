@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
-using UnityEditor.Graphing;
 
 namespace UnityEditor.ShaderGraph
 {
@@ -13,8 +12,6 @@ namespace UnityEditor.ShaderGraph
         {
             get { return new SlotValueType[] { SlotValueType.Gradient }; }
         }
-
-        private ShaderPort m_Port;
 
         public GradientControl()
         {
@@ -28,27 +25,24 @@ namespace UnityEditor.ShaderGraph
             };
         }
 
-        public VisualElement GetControl(ShaderPort port)
+        public VisualElement GetControl(IShaderValue shaderValue)
         {
-            m_Port = port;
-
             VisualElement control = new VisualElement() { name = "GradientControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/GradientSlotControlView"));
 
-            var gradientField = new GradientField() { value = m_Port.portValue.gradientValue };
-            gradientField.RegisterValueChangedCallback(OnValueChanged);
+            var gradientField = new GradientField() { value = shaderValue.value.gradientValue };
+            gradientField.RegisterValueChangedCallback(evt =>
+            {
+                if (evt.newValue.Equals(shaderValue.value.gradientValue))
+                    return;
+                shaderValue.UpdateValue(new SerializableValueStore()
+                {
+                    gradientValue = evt.newValue
+                });
+            });
+
             control.Add(gradientField);
             return control;
-        }
-
-        void OnValueChanged(ChangeEvent<Gradient> evt)
-        {
-            if (!evt.newValue.Equals(m_Port.portValue.gradientValue))
-            {
-                m_Port.owner.owner.owner.RegisterCompleteObjectUndo("Change Gradient");
-                m_Port.portValue.gradientValue = evt.newValue;
-                m_Port.owner.Dirty(ModificationScope.Node);
-            }
         }
     }
 }

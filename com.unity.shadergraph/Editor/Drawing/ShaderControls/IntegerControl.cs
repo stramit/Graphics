@@ -1,10 +1,6 @@
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
-using UnityEditor.Graphing;
-using UnityEditor.ShaderGraph.Drawing.Slots;
 
 namespace UnityEditor.ShaderGraph
 {
@@ -16,8 +12,6 @@ namespace UnityEditor.ShaderGraph
         {
             get { return new SlotValueType[] { SlotValueType.Vector1 }; }
         }
-
-        ShaderPort m_Port;
 
         public IntegerControl()
         {
@@ -31,23 +25,20 @@ namespace UnityEditor.ShaderGraph
             };
         }
 
-        public VisualElement GetControl(ShaderPort port)
+        public VisualElement GetControl(IShaderValue shaderValue)
         {
-            m_Port = port;
-
             VisualElement control = new VisualElement() { name = "IntegerControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/MultiFloatSlotControlView"));
 
-            var integerField = new IntegerField() { value = (int)m_Port.portValue.vectorValue.x };
+            var integerField = new IntegerField() { value = (int)shaderValue.value.vectorValue.x };
             integerField.RegisterValueChangedCallback((evt) =>
             {
-                if (evt.newValue != m_Port.portValue.vectorValue.x)
+                if (evt.newValue.Equals(shaderValue.value.vectorValue.x))
+                    return;
+                shaderValue.UpdateValue(new SerializableValueStore()
                 {
-                    m_Port.owner.owner.owner.RegisterCompleteObjectUndo("Change Integer");
-                    integerField.value = evt.newValue;
-                    m_Port.portValue.vectorValue = new Vector4(evt.newValue, 0.0f, 0.0f, 0.0f);
-                    m_Port.owner.Dirty(ModificationScope.Node);
-                }
+                    vectorValue = new Vector4(evt.newValue, 0.0f, 0.0f, 0.0f)
+                });
             });
 
             control.Add(integerField);

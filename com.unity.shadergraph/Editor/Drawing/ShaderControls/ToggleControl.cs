@@ -13,8 +13,6 @@ namespace UnityEditor.ShaderGraph
             get { return new SlotValueType[] { SlotValueType.Boolean }; }
         }
 
-        private ShaderPort m_Port;
-
         public ToggleControl()
         {
         }
@@ -27,27 +25,23 @@ namespace UnityEditor.ShaderGraph
             };
         }
 
-        public VisualElement GetControl(ShaderPort port)
+        public VisualElement GetControl(IShaderValue shaderValue)
         {
-            m_Port = port;
-
             VisualElement control = new VisualElement() { name = "ToggleControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/BooleanSlotControlView"));
 
-            var toggleField = new Toggle() { value = m_Port.portValue.booleanValue };
-            toggleField.RegisterValueChangedCallback(OnValueChanged);
+            var toggleField = new Toggle() { value = shaderValue.value.booleanValue };
+            toggleField.RegisterValueChangedCallback(evt =>
+            {
+                if (evt.newValue.Equals(shaderValue.value.booleanValue))
+                    return;
+                shaderValue.UpdateValue(new SerializableValueStore()
+                {
+                    booleanValue = evt.newValue
+                });
+            });
             control.Add(toggleField);
             return control;
-        }
-
-        void OnValueChanged(ChangeEvent<bool> evt)
-        {
-            if (!evt.newValue.Equals(m_Port.portValue.booleanValue))
-            {
-                m_Port.owner.owner.owner.RegisterCompleteObjectUndo("Boolean Change");
-                m_Port.portValue.booleanValue = evt.newValue;
-                m_Port.owner.Dirty(ModificationScope.Node);
-            }
         }
     }
 }

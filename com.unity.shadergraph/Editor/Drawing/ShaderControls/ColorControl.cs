@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
-using UnityEditor.Graphing;
 
 namespace UnityEditor.ShaderGraph
 {
@@ -14,8 +13,7 @@ namespace UnityEditor.ShaderGraph
             get { return new SlotValueType[] { SlotValueType.Vector3, SlotValueType.Vector4 }; }
         }
 
-        private ShaderPort m_Port;
-        private bool m_Hdr;
+        bool m_Hdr;
 
         public ColorControl()
         {
@@ -35,30 +33,25 @@ namespace UnityEditor.ShaderGraph
             m_Hdr = hdr;
         }
 
-        public VisualElement GetControl(ShaderPort port)
+        public VisualElement GetControl(IShaderValue shaderValue)
         {
-            m_Port = port;
-
             VisualElement control = new VisualElement() { name = "ColorControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/ColorRGBASlotControlView"));
 
-            var value = port.valueType == SlotValueType.Vector4 ? m_Port.portValue.vectorValue : new Vector4(m_Port.portValue.vectorValue.x, m_Port.portValue.vectorValue.y, m_Port.portValue.vectorValue.z, 0);
-            var alpha = port.valueType == SlotValueType.Vector4;
+            var alpha = true;//port.valueType == SlotValueType.Vector4; // TODO: Fix
+            var colorField = new ColorField { value = shaderValue.value.vectorValue, showAlpha = alpha, hdr = m_Hdr, showEyeDropper = false };
+            colorField.RegisterValueChangedCallback(evt =>
+            {
+                if (evt.newValue.Equals(shaderValue.value.vectorValue))
+                    return;
+                shaderValue.UpdateValue(new SerializableValueStore()
+                {
+                    vectorValue = evt.newValue
+                });
+            });
 
-            var colorField = new ColorField { value = value, showAlpha = alpha, hdr = m_Hdr, showEyeDropper = false };
-            colorField.RegisterValueChangedCallback(OnValueChanged);
             control.Add(colorField);
             return control;
-        }
-
-        void OnValueChanged(ChangeEvent<Color> evt)
-        {
-            if (!evt.newValue.Equals(m_Port.portValue.vectorValue))
-            {
-                m_Port.owner.owner.owner.RegisterCompleteObjectUndo("Color Change");
-                m_Port.portValue.vectorValue = evt.newValue;
-                m_Port.owner.Dirty(ModificationScope.Node);
-            }
         }
     }
 }

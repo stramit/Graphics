@@ -15,34 +15,28 @@ namespace UnityEditor.ShaderGraph
             get { return new SlotValueType[] { SlotValueType.Texture2D, SlotValueType.Texture3D, SlotValueType.Texture2DArray, SlotValueType.Cubemap }; }
         }
 
-        ShaderPort m_Port;
-
         public TextureControl()
         {
         }
 
-        public VisualElement GetControl(ShaderPort port)
+        public VisualElement GetControl(IShaderValue shaderValue)
         {
-            m_Port = port;
-
             VisualElement control = new VisualElement() { name = "TextureControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/TextureSlotControlView"));
 
-            var objectField = new ObjectField { objectType = typeof(T), value = m_Port.portValue.textureValue };
-            objectField.RegisterValueChangedCallback(OnValueChanged);
+            var objectField = new ObjectField { objectType = typeof(T), value = shaderValue.value.textureValue };
+            objectField.RegisterValueChangedCallback(evt =>
+            {
+                var texture = evt.newValue as T;
+                if (texture.Equals(shaderValue.value.textureValue))
+                    return;
+                shaderValue.UpdateValue(new SerializableValueStore()
+                {
+                    textureValue = texture
+                });
+            });
             control.Add(objectField);
             return control;
-        }
-
-        void OnValueChanged(ChangeEvent<Object> evt)
-        {
-            var texture = evt.newValue as T;
-            if (texture != m_Port.portValue.textureValue)
-            {
-                m_Port.owner.owner.owner.RegisterCompleteObjectUndo("Change Texture");
-                m_Port.portValue.textureValue = texture;
-                m_Port.owner.Dirty(ModificationScope.Node);
-            }
         }
     }
 }

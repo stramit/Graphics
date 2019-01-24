@@ -17,9 +17,6 @@ namespace UnityEditor.ShaderGraph
             get { return new SlotValueType[] { SlotValueType.Vector1 }; }
         }
 
-        ShaderPort m_Port;
-        Slider m_Slider;
-        FloatField m_SliderInput;
         float m_Minimum = 0.0f;
         float m_Maximum = 1.0f;
 
@@ -37,45 +34,50 @@ namespace UnityEditor.ShaderGraph
             m_Maximum = maximum;
         }
 
-        public VisualElement GetControl(ShaderPort port)
+        public VisualElement GetControl(IShaderValue shaderValue)
         {
-            m_Port = port;
-
             VisualElement control = new VisualElement() { name = "SliderControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/SliderControl"));
 
-            m_Slider = new Slider(m_Minimum, m_Maximum) { value = m_Port.portValue.vectorValue.x };
-            m_Slider.RegisterValueChangedCallback((evt) =>
+            Slider slider = null;
+            FloatField floatField = null;
+
+            slider = new Slider(m_Minimum, m_Maximum) { value = shaderValue.value.vectorValue.x };
+            slider.RegisterValueChangedCallback((evt) =>
             {
-                var newValue = evt.newValue;
-                if (newValue != m_Port.portValue.vectorValue.x)
+                if (evt.newValue.Equals(shaderValue.value.vectorValue.x))
+                    return;
+                floatField.value = evt.newValue;
+                shaderValue.UpdateValue(new SerializableValueStore()
                 {
-                    m_Port.owner.owner.owner.RegisterCompleteObjectUndo("Change Slider");
-                    m_SliderInput.value = newValue;
-                    m_Port.portValue.vectorValue = new Vector4(newValue, 0.0f, 0.0f, 0.0f);
-                    m_Port.owner.Dirty(ModificationScope.Node);
-                    //this.MarkDirtyRepaint();
-                }
+                    vectorValue = new Vector4((float)evt.newValue, 0.0f, 0.0f, 0.0f)
+                });
             });
 
-            m_SliderInput = new FloatField { value = m_Port.portValue.vectorValue.x };
-            m_SliderInput.RegisterValueChangedCallback(evt =>
+            floatField = new FloatField { value = shaderValue.value.vectorValue.x };
+            floatField.RegisterValueChangedCallback(evt =>
             {
-                m_Port.portValue.vectorValue = new Vector4((float)evt.newValue, 0.0f, 0.0f, 0.0f);
-                m_Port.owner.Dirty(ModificationScope.Node);
-                //this.MarkDirtyRepaint();
+                if (evt.newValue.Equals(shaderValue.value.vectorValue.x))
+                    return;
+                shaderValue.UpdateValue(new SerializableValueStore()
+                {
+                    vectorValue = new Vector4((float)evt.newValue, 0.0f, 0.0f, 0.0f)
+                });
             });
-            m_SliderInput.Q("unity-text-input").RegisterCallback<FocusOutEvent>(evt =>
+            floatField.Q("unity-text-input").RegisterCallback<FocusOutEvent>(evt =>
             {
-                float newValue = Mathf.Max(Mathf.Min(m_Port.portValue.vectorValue.x, m_Maximum), m_Minimum);
-                m_Port.owner.Dirty(ModificationScope.Node);
-                m_Slider.value = m_Port.portValue.vectorValue.x;
-                //UpdateSlider();
-                //this.MarkDirtyRepaint();
+                float newValue = Mathf.Max(Mathf.Min(shaderValue.value.vectorValue.x, m_Maximum), m_Minimum);
+                if (newValue.Equals(shaderValue.value.vectorValue.x))
+                    return;
+                slider.value = newValue;
+                shaderValue.UpdateValue(new SerializableValueStore()
+                {
+                    vectorValue = new Vector4(newValue, 0.0f, 0.0f, 0.0f)
+                });
             });
 
-            control.Add(m_Slider);
-            control.Add(m_SliderInput);
+            control.Add(slider);
+            control.Add(floatField);
             return control;
         }
     }

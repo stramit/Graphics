@@ -32,7 +32,7 @@ namespace UnityEditor.ShaderGraph
             m_Label = label;
         }
 
-        public VisualElement GetControl(ShaderPort port)
+        public VisualElement GetControl(IShaderValue shaderValue)
         {
             VisualElement control = new VisualElement() { name = "LabelControl" };
             Label label = new Label(m_Label);
