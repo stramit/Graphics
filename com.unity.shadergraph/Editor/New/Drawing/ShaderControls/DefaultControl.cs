@@ -16,6 +16,11 @@ namespace UnityEditor.ShaderGraph
             get { return (ConcreteSlotValueType[])Enum.GetValues(typeof(ConcreteSlotValueType)); }
         }
 
+        public int portControlWidth
+        {
+            get { return 0; }
+        }
+
         public DefaultControl()
         {
         }
