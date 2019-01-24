@@ -7,6 +7,8 @@ namespace UnityEditor.ShaderGraph
         InPortDescriptor m_OffsetPort = new InPortDescriptor(1, "Offset", ConcreteSlotValueType.Vector1, new Vector1Control());
         OutPortDescriptor m_OutPort = new OutPortDescriptor(2, "Out", ConcreteSlotValueType.Vector3);
 
+        InPortDescriptor m_ModeParameter = new InPortDescriptor(3, "Mode", ConcreteSlotValueType.Vector1, new PopupControl(new string[] { "Degrees", "Normalized" }, 0));
+
         public override void Setup(ref NodeSetupContext context)
         {
             context.CreateType(new NodeTypeDescriptor
@@ -14,6 +16,7 @@ namespace UnityEditor.ShaderGraph
                 name = "Hue",
                 inPorts = new InPortDescriptor[] { m_InPort, m_OffsetPort },
                 outPorts = new OutPortDescriptor[] { m_OutPort },
+                parameters = new InPortDescriptor[] { m_ModeParameter },
                 preview = true
             });
         }
@@ -24,7 +27,7 @@ namespace UnityEditor.ShaderGraph
             {
                 name = "Unity_Hue",
                 body = s_FunctionBody,
-                inArguments = new InPortDescriptor[] { m_InPort, m_OffsetPort },
+                inArguments = new InPortDescriptor[] { m_InPort, m_OffsetPort, m_ModeParameter },
                 outArguments = new OutPortDescriptor[] { m_OutPort }
             });
         }
@@ -38,7 +41,8 @@ real D = Q.x - min(Q.w, Q.y);
 real E = 1e-10;
 real3 hsv = real3(abs(Q.z + (Q.w - Q.y)/(6.0 * D + E)), D / (Q.x + E), Q.x);
 
-real hue = hsv.x + Offset / 360;
+real divisor = lerp(360, 1, Mode);
+real hue = hsv.x + Offset / divisor;
 hsv.x = (hue < 0)
         ? hue + 1
         : (hue > 1)

@@ -30,6 +30,7 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         private ConcreteSlotValueType m_ConcreteValueType = ConcreteSlotValueType.Vector1;
 
+        // TODO: Defined by both MaterialSlot and IShaderValue
         public override ConcreteSlotValueType concreteValueType
         {
             get { return m_ConcreteValueType; }

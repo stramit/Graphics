@@ -8,6 +8,7 @@ namespace UnityEditor.ShaderGraph
     {
         ConcreteSlotValueType concreteValueType { get; }
         SerializableValueStore value { get; }
+        string shaderOutputName { get; }
         void UpdateValue(SerializableValueStore value);
     }
 }

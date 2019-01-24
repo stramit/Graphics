@@ -58,6 +58,16 @@ namespace UnityEditor.ShaderGraph.Drawing
                 foreach (var propertyInfo in node.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                     foreach (IControlAttribute attribute in propertyInfo.GetCustomAttributes(typeof(IControlAttribute), false))
                         m_ControlItems.Add(attribute.InstantiateControl(node, propertyInfo));
+
+                ShaderNode shaderNode = inNode as ShaderNode;
+                if(shaderNode != null)
+                {
+                    if(shaderNode.parameters != null)
+                    {
+                        foreach(ShaderParameter parameter in shaderNode.parameters)
+                            m_ControlItems.Add(parameter.control.GetControl(parameter));
+                    }
+                }
             }
             if (m_ControlItems.childCount > 0)
                 contents.Add(controlsContainer);
