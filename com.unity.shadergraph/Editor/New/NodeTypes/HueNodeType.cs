@@ -1,27 +1,30 @@
 namespace UnityEditor.ShaderGraph
 {
     [Title("INTERNAL", "Hue")]
-    class HueNodeType : ShaderNode
+    class HueNodeType : ShaderNodeInstance
     {
         InputDescriptor m_InPort = new InputDescriptor(0, "In", ConcreteSlotValueType.Vector3, new ColorControl());
         InputDescriptor m_OffsetPort = new InputDescriptor(1, "Offset", ConcreteSlotValueType.Vector1, new Vector1Control());
         OutputDescriptor m_OutPort = new OutputDescriptor(2, "Out", ConcreteSlotValueType.Vector3);
 
         InputDescriptor m_ModeParameter = new InputDescriptor(3, "Mode", ConcreteSlotValueType.Vector1, new PopupControl(new string[] { "Degrees", "Normalized" }, 0));
+        InputDescriptor X = new InputDescriptor(4, "Mode", ConcreteSlotValueType.Vector1, new SliderControl());
+        InputDescriptor Y = new InputDescriptor(5, "Mode", ConcreteSlotValueType.Vector3, new ColorControl());
+        InputDescriptor Z = new InputDescriptor(6, "Mode", ConcreteSlotValueType.Vector1, new ToggleControl());
 
-        public override void Setup(ref NodeSetupContext context)
+        internal override void Setup(ref NodeSetupContext context)
         {
             context.CreateType(new NodeTypeDescriptor
             {
                 name = "Hue",
                 inPorts = new InputDescriptor[] { m_InPort, m_OffsetPort },
                 outPorts = new OutputDescriptor[] { m_OutPort },
-                parameters = new InputDescriptor[] { m_ModeParameter },
+                parameters = new InputDescriptor[] { m_ModeParameter, X, Y, Z },
                 preview = true
             });
         }
 
-        public override void OnModified(ref NodeChangeContext context)
+        internal override void OnModified(ref NodeChangeContext context)
         {
             context.SetHlslFunction(new HlslFunctionDescriptor
             {
