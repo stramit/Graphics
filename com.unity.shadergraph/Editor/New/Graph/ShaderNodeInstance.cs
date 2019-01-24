@@ -184,7 +184,6 @@ namespace UnityEditor.ShaderGraph
 
         public virtual void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            Debug.Log(function);
             registry.ProvideFunction(function.name, builder =>
             {
                 switch (function.source.type)
