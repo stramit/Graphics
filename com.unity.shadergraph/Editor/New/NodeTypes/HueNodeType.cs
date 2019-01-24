@@ -1,22 +1,22 @@
 namespace UnityEditor.ShaderGraph
 {
-    [Title("Test Nodes", "Hue")]
-    class NewHueNode : ShaderNode
+    [Title("INTERNAL", "Hue")]
+    class HueNodeType : ShaderNode
     {
-        InPortDescriptor m_InPort = new InPortDescriptor(0, "In", ConcreteSlotValueType.Vector3, new ColorControl());
-        InPortDescriptor m_OffsetPort = new InPortDescriptor(1, "Offset", ConcreteSlotValueType.Vector1, new Vector1Control());
-        OutPortDescriptor m_OutPort = new OutPortDescriptor(2, "Out", ConcreteSlotValueType.Vector3);
+        InputDescriptor m_InPort = new InputDescriptor(0, "In", ConcreteSlotValueType.Vector3, new ColorControl());
+        InputDescriptor m_OffsetPort = new InputDescriptor(1, "Offset", ConcreteSlotValueType.Vector1, new Vector1Control());
+        OutputDescriptor m_OutPort = new OutputDescriptor(2, "Out", ConcreteSlotValueType.Vector3);
 
-        InPortDescriptor m_ModeParameter = new InPortDescriptor(3, "Mode", ConcreteSlotValueType.Vector1, new PopupControl(new string[] { "Degrees", "Normalized" }, 0));
+        InputDescriptor m_ModeParameter = new InputDescriptor(3, "Mode", ConcreteSlotValueType.Vector1, new PopupControl(new string[] { "Degrees", "Normalized" }, 0));
 
         public override void Setup(ref NodeSetupContext context)
         {
             context.CreateType(new NodeTypeDescriptor
             {
                 name = "Hue",
-                inPorts = new InPortDescriptor[] { m_InPort, m_OffsetPort },
-                outPorts = new OutPortDescriptor[] { m_OutPort },
-                parameters = new InPortDescriptor[] { m_ModeParameter },
+                inPorts = new InputDescriptor[] { m_InPort, m_OffsetPort },
+                outPorts = new OutputDescriptor[] { m_OutPort },
+                parameters = new InputDescriptor[] { m_ModeParameter },
                 preview = true
             });
         }
@@ -27,8 +27,8 @@ namespace UnityEditor.ShaderGraph
             {
                 name = "Unity_Hue",
                 body = s_FunctionBody,
-                inArguments = new InPortDescriptor[] { m_InPort, m_OffsetPort, m_ModeParameter },
-                outArguments = new OutPortDescriptor[] { m_OutPort }
+                inArguments = new InputDescriptor[] { m_InPort, m_OffsetPort, m_ModeParameter },
+                outArguments = new OutputDescriptor[] { m_OutPort }
             });
         }
 

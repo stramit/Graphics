@@ -6,10 +6,10 @@ namespace UnityEditor.ShaderGraph
 {
     internal interface IShaderControl
     {
-        SerializableValueStore defaultValue { get; }
+        ShaderValueData defaultValueData { get; }
+        ShaderControlData controlData { get; set; }
         ConcreteSlotValueType[] validPortTypes { get; }
-        string[] labels { get; set; }
-        float[] values { get; set; }
+
         VisualElement GetControl(IShaderValue shaderValue);
     }
 }

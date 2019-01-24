@@ -13,7 +13,6 @@ namespace UnityEditor.ShaderGraph
         {
             NodeSetupContext context = new NodeSetupContext();
             Setup(ref context);
-
             if(context.descriptor == null)
                 return;
 
@@ -33,41 +32,42 @@ namespace UnityEditor.ShaderGraph
             }
             RemoveSlotsNameNotMatching(validPorts);
 
-            m_Parameters = new ShaderParameter[context.descriptor.parameters.Length];
-            for(int i = 0; i < m_Parameters.Length; i++)
+            List<int> validParameters = new List<int>();
+            for(int i = 0; i <context.descriptor.parameters.Length; i++)
             {
-                m_Parameters[i] = new ShaderParameter(context.descriptor.parameters[i]);
-                m_Parameters[i].owner = this;
+                AddParameter(new ShaderParameter(context.descriptor.parameters[i]));
+                validParameters.Add(context.descriptor.parameters[i].id);
             }
+            RemoveParametersNameNotMatching(validParameters);
         }
 
+        [SerializeField]
+        private List<ShaderParameter> m_Parameters = new List<ShaderParameter>();
+
         private bool m_Preview;
+
+        public List<ShaderParameter> parameters
+        {
+            get { return m_Parameters; }
+        }
 
         public override bool hasPreview
         {
             get { return m_Preview; }
         }
 
-        [SerializeField]
-        private ShaderParameter[] m_Parameters = new ShaderParameter[0];
-
-        public ShaderParameter[] parameters
-        {
-            get { return m_Parameters; }
-        }
-
-        private string GetFunctionName(string name)
-        {
-            return string.Format("{0}_{1}", name, precision);
-        }
+        public abstract void Setup(ref NodeSetupContext context);
+        public abstract void OnModified(ref NodeChangeContext context);
 
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
         {
             NodeChangeContext context = new NodeChangeContext();
             OnModified(ref context);
+            if(context.descriptor == null)
+                return;
 
-            foreach (var outArgument in context.descriptor.outArguments)
-                visitor.AddShaderChunk(NodeUtils.ConvertConcreteSlotValueTypeToString(precision, outArgument.valueType) + " " + GetVariableNameForSlot(outArgument.id) + ";", true);
+            foreach (var argument in context.descriptor.outArguments)
+                visitor.AddShaderChunk(argument.valueType.ToString(precision) + " " + FindShaderValue(argument.id).ToShaderVariableName() + ";", true);
 
             string call = GetFunctionName(context.descriptor.name) + "(";
             bool first = true;
@@ -76,14 +76,14 @@ namespace UnityEditor.ShaderGraph
                 if (!first)
                     call += ", ";
                 first = false;
-                call += GetShaderValue(argument.id, generationMode);
+                call += GetShaderValueString(argument.id, generationMode);
             }
             foreach (var argument in context.descriptor.outArguments)
             {
                 if (!first)
                     call += ", ";
                 first = false;
-                call += GetVariableNameForSlot(argument.id);
+                call += FindShaderValue(argument.id).ToShaderVariableName();
             }
             call += ");";
             visitor.AddShaderChunk(call, true);
@@ -93,6 +93,8 @@ namespace UnityEditor.ShaderGraph
         {
             NodeChangeContext context = new NodeChangeContext();
             OnModified(ref context);
+            if(context.descriptor == null)
+                return;
 
             registry.ProvideFunction(GetFunctionName(context.descriptor.name), s =>
                 {
@@ -102,6 +104,56 @@ namespace UnityEditor.ShaderGraph
                         s.AppendLines(context.descriptor.body);
                     }
                 });
+        }
+
+        private string GetFunctionHeader(HlslFunctionDescriptor descriptor)
+        {
+            string header = string.Format("void {0}_{1}(", descriptor.name, precision);
+            var first = true;
+            foreach (var argument in descriptor.inArguments)
+            {
+                if (!first)
+                    header += ", ";
+                first = false;
+                header += string.Format("{0} {1}", argument.valueType.ToString(precision), argument.name);
+            }
+            foreach (var argument in descriptor.outArguments)
+            {
+                if (!first)
+                    header += ", ";
+                first = false;
+                header += string.Format("out {0} {1}", argument.valueType.ToString(precision), argument.name);
+            }
+            header += ")";
+            return header;
+        }
+
+        private string GetFunctionName(string name)
+        {
+            return string.Format("{0}_{1}", name, precision);
+        }
+
+        public void AddParameter(ShaderParameter parameter)
+        {
+            var addingParameter = parameter;
+            var foundParameter = FindParameter(parameter.id);
+
+            m_Parameters.RemoveAll(x => x.id == parameter.id);
+            m_Parameters.Add(parameter);
+            parameter.owner = this;
+
+            Dirty(ModificationScope.Topological);
+
+            if (foundParameter == null)
+                return;
+
+            addingParameter.CopyValuesFrom(foundParameter);
+        }
+
+        public void RemoveParameter(int parameterId)
+        {
+            m_Parameters.RemoveAll(x => x.id == parameterId);
+            Dirty(ModificationScope.Topological);
         }
 
         public ShaderParameter FindParameter(int id)
@@ -114,151 +166,89 @@ namespace UnityEditor.ShaderGraph
             return null;
         }
 
-        public string GetShaderValue(int id, GenerationMode generationMode)
+        public void RemoveParametersNameNotMatching(IEnumerable<int> parameterIds, bool supressWarnings = false)
+        {
+            var invalidParameters = m_Parameters.Select(x => x.id).Except(parameterIds);
+
+            foreach (var invalidParameter in invalidParameters.ToArray())
+            {
+                if (!supressWarnings)
+                    Debug.LogWarningFormat("Removing Invalid Parameter: {0}", invalidParameter);
+                RemoveSlot(invalidParameter);
+            }
+        }
+
+        public IShaderValue FindShaderValue(int id)
+        {
+            var parameter = FindParameter(id);
+            if(parameter != null)
+                return parameter;
+
+            var port = FindSlot<ShaderPort>(id);
+            if(port != null)
+                return port;
+
+            return null;
+        }
+
+        public string GetShaderValueString(int id, GenerationMode generationMode)
         {
             var parameter = FindParameter(id);
             if (parameter != null)
             {
                 if (generationMode.IsPreview())
-                    return string.Format("_{0}_{1}", GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(parameter.shaderOutputName));
+                    return parameter.ToShaderVariableName();
 
-                return ShaderValueAsVariable(parameter, precision);
+                return parameter.ToShaderVariableValue(precision);
             }
 
-            var inputPort = FindSlot<ShaderPort>(id);
-            if (inputPort == null)
-                return string.Empty;
+            var port = FindSlot<ShaderPort>(id) as ShaderPort;
+            if (port != null)
+                return port.InputValue(owner, generationMode);
 
-            var edges = owner.GetEdges(inputPort.slotReference).ToArray();
-
-            if (edges.Any())
-            {
-                var fromSocketRef = edges[0].outputSlot;
-                var fromNode = owner.GetNodeFromGuid<AbstractMaterialNode>(fromSocketRef.nodeGuid);
-                if (fromNode == null)
-                    return string.Empty;
-
-                var slot = fromNode.FindOutputSlot<MaterialSlot>(fromSocketRef.slotId);
-                if (slot == null)
-                    return string.Empty;
-
-                return ShaderGenerator.AdaptNodeOutput(fromNode, slot.id, inputPort.concreteValueType);
-            }
-
-            return inputPort.GetDefaultValue(generationMode);
+            return string.Empty;
         }
 
-        // TODO: IShaderValue version of AbstractMaterialSlot.ConcreteSlotValueAsVariable
-        protected string ShaderValueAsVariable(IShaderValue shaderValue, AbstractMaterialNode.OutputPrecision precision)
-        {
-            var matOwner = owner as AbstractMaterialNode;
-            if (matOwner == null)
-                throw new Exception(string.Format("Slot {0} either has no owner, or the owner is not a {1}", this, typeof(AbstractMaterialNode)));
-
-            var channelCount = SlotValueHelper.GetChannelCount(shaderValue.concreteValueType);
-            Matrix4x4 matrix = shaderValue.value.matrixValue;
-            switch (shaderValue.concreteValueType)
-            {
-                case ConcreteSlotValueType.Vector1:
-                    return NodeUtils.FloatToShaderValue(shaderValue.value.vectorValue.x);
-                case ConcreteSlotValueType.Vector4:
-                case ConcreteSlotValueType.Vector3:
-                case ConcreteSlotValueType.Vector2:
-                    {
-                        string values = NodeUtils.FloatToShaderValue(shaderValue.value.vectorValue.x);
-                        for (var i = 1; i < channelCount; i++)
-                            values += ", " + NodeUtils.FloatToShaderValue(shaderValue.value.vectorValue[i]);
-                        return string.Format("{0}{1}({2})", precision, channelCount, values);
-                    }
-                case ConcreteSlotValueType.Boolean:
-                    return (shaderValue.value.booleanValue ? 1 : 0).ToString();
-                case ConcreteSlotValueType.Texture2D:
-                case ConcreteSlotValueType.Texture3D:
-                case ConcreteSlotValueType.Texture2DArray:
-                case ConcreteSlotValueType.Cubemap:
-                case ConcreteSlotValueType.SamplerState:
-                    return ShaderValueToVariableName(shaderValue);
-                case ConcreteSlotValueType.Matrix2:
-                    return string.Format("{0}2x2 ({1},{2},{3},{4})", precision, 
-                        matrix.m00, matrix.m01, 
-                        matrix.m10, matrix.m11);
-                case ConcreteSlotValueType.Matrix3:
-                    return string.Format("{0}3x3 ({1},{2},{3},{4},{5},{6},{7},{8},{9})", precision, 
-                        matrix.m00, matrix.m01, matrix.m02, 
-                        matrix.m10, matrix.m11, matrix.m12,
-                        matrix.m20, matrix.m21, matrix.m22);
-                case ConcreteSlotValueType.Matrix4:
-                    return string.Format("{0}4x4 ({1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16})", precision, 
-                        matrix.m00, matrix.m01, matrix.m02, matrix.m03, 
-                        matrix.m10, matrix.m11, matrix.m12, matrix.m13,
-                        matrix.m20, matrix.m21, matrix.m22, matrix.m23,
-                        matrix.m30, matrix.m31, matrix.m32, matrix.m33);
-                case ConcreteSlotValueType.Gradient:
-                    return string.Format("Unity{0}()", ShaderValueToVariableName(shaderValue));
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        // TODO: Override for collecting parameters
         public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)
         {
-            base.CollectPreviewMaterialProperties(properties);
+            s_TempSlots.Clear();
+            GetInputSlots(s_TempSlots);
+            foreach (var slot in s_TempSlots)
+            {
+                ShaderPort port = slot as ShaderPort;
+                if(port.HasEdges())
+                    return;
+                
+                properties.Add(port.ToPreviewProperty(port.ToShaderVariableName()));
+            }
 
             foreach(ShaderParameter parameter in m_Parameters)
-            {
-                s_TempPreviewProperties.Clear();
-                parameter.GetPreviewProperties(s_TempPreviewProperties, ShaderValueToVariableName(parameter));
-                for (int i = 0; i < s_TempPreviewProperties.Count; i++)
-                {
-                    if (s_TempPreviewProperties[i].name == null)
-                        continue;
-
-                    properties.Add(s_TempPreviewProperties[i]);
-                }
-            }
+                properties.Add(parameter.ToPreviewProperty(parameter.ToShaderVariableName()));
         }
 
-        // TODO: Override for collecting parameters
         public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
         {
-            base.CollectShaderProperties(properties, generationMode);
+            if (!generationMode.IsPreview())
+                return;
+
+            foreach (var port in this.GetInputSlots<ShaderPort>())
+            {
+                if(!port.HasEdges())
+                {
+                    string overrideReferenceName = port.ToShaderVariableName();
+                    IShaderProperty[] defaultProperties = port.ToDefaultPropertyArray(overrideReferenceName);
+                    foreach(IShaderProperty property in defaultProperties)
+                        properties.AddShaderProperty(property);
+                }
+            }
 
             foreach (var parameter in m_Parameters)
-                parameter.AddDefaultProperty(properties, generationMode);
-        }
-
-        // TODO: Replaces AbstractMaterialNode.GetVariableNameForSlot
-        private string ShaderValueToVariableName(IShaderValue shaderValue)
-        {
-            return string.Format("_{0}_{1}", GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(shaderValue.shaderOutputName));
-        }
-
-        private string GetFunctionHeader(HlslFunctionDescriptor descriptor)
-        {
-            string header = "void " + GetFunctionName(descriptor.name) + "(";
-
-            var first = true;
-            foreach (var argument in descriptor.inArguments)
             {
-                if (!first)
-                    header += ", ";
-                first = false;
-                header += string.Format("{0} {1}", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, argument.valueType), argument.name);
+                string overrideReferenceName = parameter.ToShaderVariableName();
+                IShaderProperty[] defaultProperties = parameter.ToDefaultPropertyArray(overrideReferenceName);
+                foreach(IShaderProperty property in defaultProperties)
+                        properties.AddShaderProperty(property);
             }
-            foreach (var argument in descriptor.outArguments)
-            {
-                if (!first)
-                    header += ", ";
-                first = false;
-                header += string.Format("out {0} {1}", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, argument.valueType), argument.name);
-            }
-
-            header += ")";
-            return header;
         }
-
-        public abstract void Setup(ref NodeSetupContext context);
-        public abstract void OnModified(ref NodeChangeContext context);
     }
 }

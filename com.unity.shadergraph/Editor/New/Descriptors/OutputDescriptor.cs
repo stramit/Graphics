@@ -3,8 +3,15 @@ using UnityEditor.Graphing;
 
 namespace UnityEditor.ShaderGraph
 {
-    class OutPortDescriptor : IPortDescriptor
+    class OutputDescriptor
     {
+        public OutputDescriptor(int id, string name, ConcreteSlotValueType valueType)
+        {
+            m_Id = id;
+            m_Name = name;
+            m_ValueType = valueType;
+        }
+        
         [SerializeField]
         private int m_Id;
 
@@ -32,13 +39,6 @@ namespace UnityEditor.ShaderGraph
         public SlotType portType
         {
             get { return SlotType.Output; }
-        }
-
-        public OutPortDescriptor(int id, string name, ConcreteSlotValueType valueType)
-        {
-            m_Id = id;
-            m_Name = name;
-            m_ValueType = valueType;
         }
     }
 }

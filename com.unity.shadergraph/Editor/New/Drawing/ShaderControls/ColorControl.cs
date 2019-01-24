@@ -6,9 +6,8 @@ namespace UnityEditor.ShaderGraph
 {
     class ColorControl : IShaderControl
     {
-        public string[] labels { get; set; }
-        public float[] values { get; set; }
-        public SerializableValueStore defaultValue { get; }
+        public ShaderControlData controlData { get; set; }
+        public ShaderValueData defaultValueData { get; }
 
         public ConcreteSlotValueType[] validPortTypes
         {
@@ -17,16 +16,22 @@ namespace UnityEditor.ShaderGraph
 
         public ColorControl()
         {
-            values = new float[] { 0 };
+            this.controlData = new ShaderControlData()
+            {
+                values = new float[] { 0 }
+            };
         }
 
         public ColorControl(Color defaultValue, bool hdr = false)
         {
-            this.defaultValue = new SerializableValueStore()
+            this.defaultValueData = new ShaderValueData()
             {
                 vectorValue = defaultValue
             };
-            values = new float[] { hdr ? 1 : 0 };
+            this.controlData = new ShaderControlData()
+            {
+                values = new float[] { hdr ? 1 : 0 }
+            };
         }
 
         public VisualElement GetControl(IShaderValue shaderValue)
@@ -35,12 +40,12 @@ namespace UnityEditor.ShaderGraph
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/ColorRGBASlotControlView"));
 
             var alpha = shaderValue.concreteValueType == ConcreteSlotValueType.Vector4;
-            var colorField = new ColorField { value = shaderValue.value.vectorValue, showAlpha = alpha, hdr = values[0] == 1, showEyeDropper = false };
+            var colorField = new ColorField { value = shaderValue.value.vectorValue, showAlpha = alpha, hdr = controlData.values[0] == 1, showEyeDropper = false };
             colorField.RegisterValueChangedCallback(evt =>
             {
                 if (evt.newValue.Equals(shaderValue.value.vectorValue))
                     return;
-                shaderValue.UpdateValue(new SerializableValueStore()
+                shaderValue.UpdateValue(new ShaderValueData()
                 {
                     vectorValue = evt.newValue
                 });

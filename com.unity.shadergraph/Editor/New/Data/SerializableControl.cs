@@ -14,25 +14,22 @@ namespace UnityEditor.ShaderGraph
         private string m_TypeName;
 
         [SerializeField]
-        private string[] m_Labels;
+        private ShaderControlData m_ControlData;
 
-        [SerializeField]
-        private float[] m_Values;
-
-        public SerializableControl(IShaderControl control)
+        public IShaderControl control
         {
-            m_AssemblyName = control.GetType().Assembly.FullName;
-            m_TypeName = control.GetType().FullName;
-            m_Labels = control.labels;
-            m_Values = control.values;
-        }
-
-        public IShaderControl Deserialize()
-        {
-            var control = (IShaderControl)Activator.CreateInstance(m_AssemblyName, m_TypeName).Unwrap();
-            control.labels = m_Labels;
-            control.values = m_Values;
-            return control;
+            get
+            {
+                var control = (IShaderControl)Activator.CreateInstance(m_AssemblyName, m_TypeName).Unwrap();
+                control.controlData = m_ControlData;
+                return control;
+            }
+            set
+            {
+                m_AssemblyName = value.GetType().Assembly.FullName;
+                m_TypeName = value.GetType().FullName;
+                m_ControlData = value.controlData;
+            }
         }
     }
 }

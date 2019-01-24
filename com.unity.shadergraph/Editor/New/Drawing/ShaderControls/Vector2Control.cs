@@ -8,9 +8,8 @@ namespace UnityEditor.ShaderGraph
 {
     class Vector2Control : IShaderControl
     {       
-        public string[] labels { get; set; }
-        public float[] values { get; set; }
-        public SerializableValueStore defaultValue { get; }
+        public ShaderControlData controlData { get; set; }
+        public ShaderValueData defaultValueData { get; }
 
         public ConcreteSlotValueType[] validPortTypes
         {
@@ -19,16 +18,22 @@ namespace UnityEditor.ShaderGraph
 
         public Vector2Control()
         {
-            labels = new string[] { "X", "Y" };
+            this.controlData = new ShaderControlData()
+            {
+                labels = new string[] { "X", "Y" }
+            };
         }
 
         public Vector2Control(Vector2 defaultValue, string labelX = "X", string labelY = "Y")
         {
-            this.defaultValue = new SerializableValueStore()
+            this.defaultValueData = new ShaderValueData()
             {
                 vectorValue = new Vector4(defaultValue.x, defaultValue.y, 0.0f, 0.0f)
             };
-            labels = new string[] { labelX, labelY };
+            this.controlData = new ShaderControlData()
+            {
+                labels = new string[] { labelX, labelY }
+            };
         }
 
         int m_UndoGroup = -1;
@@ -39,7 +44,7 @@ namespace UnityEditor.ShaderGraph
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/VectorControl"));
             
             for (var i = 0; i < 2; i++)
-                AddField(control, shaderValue, i, labels[i]);
+                AddField(control, shaderValue, i, controlData.labels[i]);
             return control;
         }
 
@@ -58,7 +63,7 @@ namespace UnityEditor.ShaderGraph
                         return;
                     var value = shaderValue.value.vectorValue;
                     value[index] = (float)evt.newValue;
-                    shaderValue.UpdateValue(new SerializableValueStore()
+                    shaderValue.UpdateValue(new ShaderValueData()
                     {
                         vectorValue = value
                     });
@@ -77,7 +82,7 @@ namespace UnityEditor.ShaderGraph
                     if (Mathf.Abs(value[index] - newValue) > 1e-9)
                     {
                         value[index] = newValue;
-                        shaderValue.UpdateValue(new SerializableValueStore()
+                        shaderValue.UpdateValue(new ShaderValueData()
                         {
                             vectorValue = value
                         });

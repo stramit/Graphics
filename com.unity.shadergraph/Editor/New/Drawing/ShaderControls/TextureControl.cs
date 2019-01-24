@@ -8,9 +8,8 @@ namespace UnityEditor.ShaderGraph
 {
     class TextureControl<T> : IShaderControl where T : Texture
     {
-        public string[] labels { get; set; }
-        public float[] values { get; set; }
-        public SerializableValueStore defaultValue { get; }
+        public ShaderControlData controlData { get; set; }
+        public ShaderValueData defaultValueData { get; }
 
         public ConcreteSlotValueType[] validPortTypes
         {
@@ -39,7 +38,7 @@ namespace UnityEditor.ShaderGraph
                 var texture = evt.newValue as T;
                 if (texture.Equals(shaderValue.value.textureValue))
                     return;
-                shaderValue.UpdateValue(new SerializableValueStore()
+                shaderValue.UpdateValue(new ShaderValueData()
                 {
                     textureValue = texture
                 });

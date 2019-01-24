@@ -4,7 +4,7 @@ using UnityEngine;
 namespace UnityEditor.ShaderGraph
 {   
     [Serializable]
-    public class SerializableValueStore
+    public class ShaderValueData
     {
         [SerializeField]
         private Vector4 m_VectorValue = Vector4.zero;

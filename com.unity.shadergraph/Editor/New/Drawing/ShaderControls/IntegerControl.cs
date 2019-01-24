@@ -6,9 +6,8 @@ namespace UnityEditor.ShaderGraph
 {
     class IntegerControl : IShaderControl
     {
-        public string[] labels { get; set; }
-        public float[] values { get; set; }
-        public SerializableValueStore defaultValue { get; }
+        public ShaderControlData controlData { get; set; }
+        public ShaderValueData defaultValueData { get; }
 
         public ConcreteSlotValueType[] validPortTypes
         {
@@ -21,7 +20,7 @@ namespace UnityEditor.ShaderGraph
 
         public IntegerControl(int defaultValue)
         {
-            this.defaultValue = new SerializableValueStore()
+            this.defaultValueData = new ShaderValueData()
             {
                 vectorValue = new Vector4(defaultValue, 0.0f, 0.0f, 0.0f)
             };
@@ -37,7 +36,7 @@ namespace UnityEditor.ShaderGraph
             {
                 if (evt.newValue.Equals(shaderValue.value.vectorValue.x))
                     return;
-                shaderValue.UpdateValue(new SerializableValueStore()
+                shaderValue.UpdateValue(new ShaderValueData()
                 {
                     vectorValue = new Vector4(evt.newValue, 0.0f, 0.0f, 0.0f)
                 });

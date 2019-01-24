@@ -4,8 +4,8 @@
     {
         private string m_Name = "Node";
         private string m_Body = "";
-        private InPortDescriptor[] m_InArguments = new InPortDescriptor[0];
-        private OutPortDescriptor[] m_OutArguments = new OutPortDescriptor[0];
+        private InputDescriptor[] m_InArguments = new InputDescriptor[0];
+        private OutputDescriptor[] m_OutArguments = new OutputDescriptor[0];
 
         public string name
         {
@@ -19,13 +19,13 @@
             set { m_Body = value; }
         }
 
-        public InPortDescriptor[] inArguments
+        public InputDescriptor[] inArguments
         {
             get { return m_InArguments; }
             set { m_InArguments = value; }
         }
 
-        public OutPortDescriptor[] outArguments
+        public OutputDescriptor[] outArguments
         {
             get { return m_OutArguments; }
             set { m_OutArguments = value; }

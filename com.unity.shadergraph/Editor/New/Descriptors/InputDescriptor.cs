@@ -5,8 +5,33 @@ using UnityEditor.Graphing;
 
 namespace UnityEditor.ShaderGraph
 {
-    class InPortDescriptor : IPortDescriptor
+    class InputDescriptor
     {
+        public InputDescriptor(int id, string name, ConcreteSlotValueType valueType)
+        {
+            m_Id = id;
+            m_Name = name;
+            m_ValueType = valueType;
+            
+            this.control = valueType.ToDefaultControl();
+            m_DefaultValue = new ShaderValueData();
+        }
+
+        public InputDescriptor(int id, string name, ConcreteSlotValueType valueType, IShaderControl control)
+        {
+            m_Id = id;
+            m_Name = name;
+            m_ValueType = valueType;
+
+            if(!control.validPortTypes.Contains(valueType))
+            {
+                Debug.LogWarning(string.Format("InputDescriptor {0} tried to define an incompatible Control. Will use default Control instead.", name));
+                control = valueType.ToDefaultControl();
+            }
+            this.control = control;
+            m_DefaultValue = control.defaultValueData != null ? control.defaultValueData : new ShaderValueData();
+        }
+        
         [SerializeField]
         private int m_Id;
 
@@ -17,10 +42,10 @@ namespace UnityEditor.ShaderGraph
         private ConcreteSlotValueType m_ValueType;
         
         [SerializeField]
-        private SerializableValueStore m_DefaultValue;
+        private ShaderValueData m_DefaultValue;
 
         [SerializeField]
-        private SerializableControl m_SerializedControl;
+        private SerializableControl m_SerializableControl = new SerializableControl();
 
         public int id
         {
@@ -37,12 +62,7 @@ namespace UnityEditor.ShaderGraph
             get { return m_ValueType; }
         }
 
-        public SlotType portType
-        {
-            get { return SlotType.Input; }
-        }
-
-        public SerializableValueStore defaultValue
+        public ShaderValueData defaultValue
         {
             get { return m_DefaultValue; }
         }
@@ -53,79 +73,19 @@ namespace UnityEditor.ShaderGraph
             get
             {
                 if (m_Control == null)
-                    m_Control = m_SerializedControl.Deserialize();
+                    m_Control = m_SerializableControl.control;
                 return m_Control;
             }
             set
             {
                 m_Control = value;
-                m_SerializedControl = new SerializableControl(value);
+                m_SerializableControl.control = value;
             }
         }
 
-        public InPortDescriptor(int id, string name, ConcreteSlotValueType valueType)
+        public SlotType portType
         {
-            m_Id = id;
-            m_Name = name;
-            m_ValueType = valueType;
-            
-            this.control = defaultControl;
-            m_DefaultValue = new SerializableValueStore();
-        }
-
-        public InPortDescriptor(int id, string name, ConcreteSlotValueType valueType, IShaderControl control)
-        {
-            m_Id = id;
-            m_Name = name;
-            m_ValueType = valueType;
-
-            if(!control.validPortTypes.Contains(valueType))
-            {
-                Debug.LogWarning(string.Format("InPortDescrption {0} tried to define an incompatible Control. Will use default Control instead.", name));
-                control = defaultControl;
-            }
-            this.control = control;
-            m_DefaultValue = control.defaultValue != null ? control.defaultValue : new SerializableValueStore();
-        }
-
-        private IShaderControl defaultControl
-        {
-            get
-            {
-                switch (m_ValueType)
-                {
-                    case ConcreteSlotValueType.Vector4:
-                        return new Vector4Control();
-                    case ConcreteSlotValueType.Vector3:
-                        return new Vector3Control();
-                    case ConcreteSlotValueType.Vector2:
-                        return new Vector4Control();
-                    case ConcreteSlotValueType.Vector1:
-                        return new Vector1Control();
-                    case ConcreteSlotValueType.Boolean:
-                        return new ToggleControl();
-                    case ConcreteSlotValueType.Texture2D:
-                        return new TextureControl<Texture>();
-                    case ConcreteSlotValueType.Texture3D:
-                        return new TextureControl<Texture3D>();
-                    case ConcreteSlotValueType.Texture2DArray:
-                        return new TextureControl<Texture2DArray>();
-                    case ConcreteSlotValueType.Cubemap:
-                        return new TextureControl<Cubemap>();
-                    case ConcreteSlotValueType.SamplerState:
-                        return new LabelControl("Default");
-                    case ConcreteSlotValueType.Matrix2:
-                        return new LabelControl("Identity");
-                    case ConcreteSlotValueType.Matrix3:
-                        return new LabelControl("Identity");
-                    case ConcreteSlotValueType.Matrix4:
-                        return new LabelControl("Identity");
-                    case ConcreteSlotValueType.Gradient:
-                        return new GradientControl();
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
+            get { return SlotType.Input; }
         }
     }
 }

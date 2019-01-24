@@ -8,9 +8,8 @@ namespace UnityEditor.ShaderGraph
 {
     class PopupControl : IShaderControl
     {
-        public string[] labels { get; set; }
-        public float[] values { get; set; }
-        public SerializableValueStore defaultValue { get; }
+        public ShaderControlData controlData { get; set; }
+        public ShaderValueData defaultValueData { get; }
 
         public ConcreteSlotValueType[] validPortTypes
         {
@@ -23,23 +22,29 @@ namespace UnityEditor.ShaderGraph
             get 
             {
                 if(m_Entries == null)
-                    m_Entries = labels.ToList();
+                    m_Entries = controlData.labels.ToList();
                 return m_Entries;
             }
         }
 
         public PopupControl()
         {
-            labels = new string[] { "A", "B", "C" };
+            this.controlData = new ShaderControlData()
+            {
+                labels = new string[] { "A", "B", "C" }
+            };
         }
 
         public PopupControl(string[] entries, float defaultValue = 0)
         {
-            this.defaultValue = new SerializableValueStore()
+            this.defaultValueData = new ShaderValueData()
             {
                 vectorValue = new Vector4(defaultValue, 0.0f, 0.0f, 0.0f)
             };
-            labels = entries;
+            this.controlData = new ShaderControlData()
+            {
+                labels = entries
+            };
         }
 
         public VisualElement GetControl(IShaderValue shaderValue)
@@ -52,7 +57,7 @@ namespace UnityEditor.ShaderGraph
             {
                 if (popupField.index.Equals(shaderValue.value.vectorValue.x))
                     return;
-                shaderValue.UpdateValue(new SerializableValueStore()
+                shaderValue.UpdateValue(new ShaderValueData()
                 {
                     vectorValue = new Vector4(popupField.index, 0.0f, 0.0f, 0.0f)
                 });

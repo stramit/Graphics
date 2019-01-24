@@ -6,9 +6,13 @@ namespace UnityEditor.ShaderGraph
 {
     internal interface IShaderValue
     {
+        INode owner { get; set; }
+        int id { get; }
+
         ConcreteSlotValueType concreteValueType { get; }
-        SerializableValueStore value { get; }
+        ShaderValueData value { get; }
         string shaderOutputName { get; }
-        void UpdateValue(SerializableValueStore value);
+
+        void UpdateValue(ShaderValueData value);
     }
 }

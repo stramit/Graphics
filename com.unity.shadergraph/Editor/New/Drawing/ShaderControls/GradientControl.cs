@@ -6,9 +6,8 @@ namespace UnityEditor.ShaderGraph
 {
     class GradientControl : IShaderControl
     {
-        public string[] labels { get; set; }
-        public float[] values { get; set; }
-        public SerializableValueStore defaultValue { get; }
+        public ShaderControlData controlData { get; set; }
+        public ShaderValueData defaultValueData { get; }
 
         public ConcreteSlotValueType[] validPortTypes
         {
@@ -21,7 +20,7 @@ namespace UnityEditor.ShaderGraph
 
         public GradientControl(Gradient defaultValue)
         {
-            this.defaultValue = new SerializableValueStore()
+            this.defaultValueData = new ShaderValueData()
             {
                 gradientValue = defaultValue
             };
@@ -37,7 +36,7 @@ namespace UnityEditor.ShaderGraph
             {
                 if (evt.newValue.Equals(shaderValue.value.gradientValue))
                     return;
-                shaderValue.UpdateValue(new SerializableValueStore()
+                shaderValue.UpdateValue(new ShaderValueData()
                 {
                     gradientValue = evt.newValue
                 });
