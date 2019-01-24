@@ -67,7 +67,11 @@ namespace UnityEditor.ShaderGraph
 
         public override VisualElement InstantiateControl()
         {
-            return control.GetControl(this);
+            var container = new VisualElement { name = "Container" };
+            container.Add(control.GetControl(this));
+            if(control.portControlWidth != -1)
+                container.style.width = control.portControlWidth;
+            return container;
         }
 
         public void UpdateValue(ShaderValueData value)

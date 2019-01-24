@@ -59,14 +59,12 @@ namespace UnityEditor.ShaderGraph.Drawing
                     foreach (IControlAttribute attribute in propertyInfo.GetCustomAttributes(typeof(IControlAttribute), false))
                         m_ControlItems.Add(attribute.InstantiateControl(node, propertyInfo));
 
+                // Instantiate controls for ShaderParameters
                 ShaderNode shaderNode = inNode as ShaderNode;
-                if(shaderNode != null)
+                if(shaderNode != null && shaderNode.parameters != null)
                 {
-                    if(shaderNode.parameters != null)
-                    {
-                        foreach(ShaderParameter parameter in shaderNode.parameters)
-                            m_ControlItems.Add(parameter.control.GetControl(parameter));
-                    }
+                    foreach(ShaderParameter parameter in shaderNode.parameters)
+                        m_ControlItems.Add(GetControlForShaderParameter(parameter));
                 }
             }
             if (m_ControlItems.childCount > 0)
@@ -207,6 +205,29 @@ namespace UnityEditor.ShaderGraph.Drawing
                 RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
             }
         }
+
+        private VisualElement GetControlForShaderParameter(ShaderParameter parameter)
+        {
+            var container = new VisualElement { name = "Container" };
+            container.style.maxWidth = 200;
+            container.style.marginLeft = 6;
+            container.style.marginRight = 6;
+            container.style.flexDirection = FlexDirection.Row;
+
+            var labelContainer = new VisualElement { name = "LabelContainer" };
+            labelContainer.style.width = 60;
+            var label = new Label(parameter.displayName);
+            label.style.paddingTop = 4;
+            labelContainer.Add(label);
+            container.Add(labelContainer);
+
+            var valueContainer = new VisualElement { name = "ValueContainer" };
+            valueContainer.Add(parameter.control.GetControl(parameter));
+            valueContainer.style.flexGrow = 1;
+            container.Add(valueContainer);
+            m_ControlItems.Add(container);
+            return container;
+        } 
 
         public void AttachError(string errString)
         {

@@ -125,7 +125,7 @@ namespace UnityEditor.ShaderGraph
                 case ConcreteSlotValueType.Vector3:
                     return new Vector3Control();
                 case ConcreteSlotValueType.Vector2:
-                    return new Vector4Control();
+                    return new Vector2Control();
                 case ConcreteSlotValueType.Vector1:
                     return new Vector1Control();
                 case ConcreteSlotValueType.Boolean:

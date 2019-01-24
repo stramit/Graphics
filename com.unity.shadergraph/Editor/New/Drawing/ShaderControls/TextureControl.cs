@@ -23,6 +23,11 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
+        public int portControlWidth
+        {
+            get { return 84; }
+        }
+
         public TextureControl()
         {
         }
@@ -30,7 +35,7 @@ namespace UnityEditor.ShaderGraph
         public VisualElement GetControl(IShaderValue shaderValue)
         {
             VisualElement control = new VisualElement() { name = "TextureControl" };
-            control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/TextureSlotControlView"));
+            control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/TextureControl"));
 
             var objectField = new ObjectField { objectType = typeof(T), value = shaderValue.value.textureValue };
             objectField.RegisterValueChangedCallback(evt =>

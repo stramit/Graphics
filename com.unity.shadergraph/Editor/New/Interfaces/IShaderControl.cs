@@ -9,6 +9,7 @@ namespace UnityEditor.ShaderGraph
         ShaderValueData defaultValueData { get; }
         ShaderControlData controlData { get; set; }
         ConcreteSlotValueType[] validPortTypes { get; }
+        int portControlWidth { get; }
 
         VisualElement GetControl(IShaderValue shaderValue);
     }

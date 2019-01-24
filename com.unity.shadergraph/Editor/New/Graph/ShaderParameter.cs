@@ -43,6 +43,11 @@ namespace UnityEditor.ShaderGraph
             get { return m_Id; }
         }
 
+        public string displayName
+        {
+            get { return m_DisplayName; }
+        }
+
         public string shaderOutputName
         {
             get { return m_ShaderOutputName; }

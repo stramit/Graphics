@@ -14,6 +14,11 @@ namespace UnityEditor.ShaderGraph
             get { return new ConcreteSlotValueType[] { ConcreteSlotValueType.Vector1 }; }
         }
 
+        public int portControlWidth
+        {
+            get { return 32; }
+        }
+
         public IntegerControl()
         {
         }
@@ -29,7 +34,7 @@ namespace UnityEditor.ShaderGraph
         public VisualElement GetControl(IShaderValue shaderValue)
         {
             VisualElement control = new VisualElement() { name = "IntegerControl" };
-            control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/MultiFloatSlotControlView"));
+            control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/IntegerControl"));
 
             var integerField = new IntegerField() { value = (int)shaderValue.value.vectorValue.x };
             integerField.RegisterValueChangedCallback((evt) =>

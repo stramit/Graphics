@@ -16,6 +16,11 @@ namespace UnityEditor.ShaderGraph
             get { return (ConcreteSlotValueType[])Enum.GetValues(typeof(ConcreteSlotValueType)); }
         }
 
+        public int portControlWidth
+        {
+            get { return 42; }
+        }
+
         public LabelControl()
         {
             this.controlData = new ShaderControlData()
@@ -31,13 +36,15 @@ namespace UnityEditor.ShaderGraph
 
             this.controlData = new ShaderControlData()
             {
-                labels = new string[] { "Label" }
+                labels = new string[] { label }
             };
         }
 
         public VisualElement GetControl(IShaderValue shaderValue)
         {
             VisualElement control = new VisualElement() { name = "LabelControl" };
+            control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/LabelControl"));
+
             Label label = new Label(controlData.labels[0]);
             control.Add(label);
             return control;

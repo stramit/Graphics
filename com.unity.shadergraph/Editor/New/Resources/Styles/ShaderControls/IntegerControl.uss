@@ -1,28 +1,15 @@
-VisualElement > #VectorControl {
+VisualElement > #IntegerControl {
     flex-direction: row;
     align-items: center;
     margin-top: 2;
     margin-bottom: 2;
 }
 
-#dummy > Label {
-    margin-left: 0;
-    margin-right: 0;
-    margin-bottom: 0;
-    cursor: slide-arrow;
-    text-alignment: middle-left;
-}
-
 .unity-base-field {
-    flex: 1;
+    flex-grow: 1;
     margin-top: 0;
     margin-bottom: 0;
     text-alignment: middle-left;
-}
-
-unity-base-field__input{
-    margin-left: 0;
-    margin-right: 0;
 }
 
 FloatField.unity-double-field {
