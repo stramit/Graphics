@@ -38,7 +38,7 @@ namespace UnityEditor.ShaderGraph
             VisualElement control = new VisualElement() { name = "ColorControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/ColorRGBASlotControlView"));
 
-            var alpha = true;//port.valueType == SlotValueType.Vector4; // TODO: Fix
+            var alpha = shaderValue.valueType == SlotValueType.Vector4;
             var colorField = new ColorField { value = shaderValue.value.vectorValue, showAlpha = alpha, hdr = m_Hdr, showEyeDropper = false };
             colorField.RegisterValueChangedCallback(evt =>
             {
