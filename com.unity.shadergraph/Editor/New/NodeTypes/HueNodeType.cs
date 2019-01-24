@@ -8,9 +8,6 @@ namespace UnityEditor.ShaderGraph
         OutputDescriptor m_OutPort = new OutputDescriptor(2, "Out", ConcreteSlotValueType.Vector3);
 
         InputDescriptor m_ModeParameter = new InputDescriptor(3, "Mode", ConcreteSlotValueType.Vector1, new PopupControl(new string[] { "Degrees", "Normalized" }, 0));
-        InputDescriptor X = new InputDescriptor(4, "Mode", ConcreteSlotValueType.Vector1, new SliderControl());
-        InputDescriptor Y = new InputDescriptor(5, "Mode", ConcreteSlotValueType.Vector3, new ColorControl());
-        InputDescriptor Z = new InputDescriptor(6, "Mode", ConcreteSlotValueType.Vector1, new ToggleControl());
 
         internal override void Setup(ref NodeSetupContext context)
         {
@@ -19,7 +16,7 @@ namespace UnityEditor.ShaderGraph
                 name = "Hue",
                 inPorts = new InputDescriptor[] { m_InPort, m_OffsetPort },
                 outPorts = new OutputDescriptor[] { m_OutPort },
-                parameters = new InputDescriptor[] { m_ModeParameter, X, Y, Z },
+                parameters = new InputDescriptor[] { m_ModeParameter },
                 preview = true
             });
         }
