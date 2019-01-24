@@ -275,57 +275,52 @@ namespace UnityEditor.ShaderGraph
 
         private void AddGradientProperties(AbstractMaterialNode matOwner, PropertyCollector properties, GenerationMode generationMode)
         {
-            if (generationMode == GenerationMode.Preview)
+            properties.AddShaderProperty(new Vector1ShaderProperty()
             {
-                properties.AddShaderProperty(new Vector1ShaderProperty()
+                overrideReferenceName = string.Format("{0}_Type", matOwner.GetVariableNameForSlot(id)),
+                value = (int)value.gradientValue.mode,
+                generatePropertyBlock = false
+            });
+
+            properties.AddShaderProperty(new Vector1ShaderProperty()
+            {
+                overrideReferenceName = string.Format("{0}_ColorsLength", matOwner.GetVariableNameForSlot(id)),
+                value = value.gradientValue.colorKeys.Length,
+                generatePropertyBlock = false
+            });
+
+            properties.AddShaderProperty(new Vector1ShaderProperty()
+            {
+                overrideReferenceName = string.Format("{0}_AlphasLength", matOwner.GetVariableNameForSlot(id)),
+                value = value.gradientValue.alphaKeys.Length,
+                generatePropertyBlock = false
+            });
+
+            for (int i = 0; i < 8; i++)
+            {
+                properties.AddShaderProperty(new Vector4ShaderProperty()
                 {
-                    overrideReferenceName = string.Format("{0}_Type", matOwner.GetVariableNameForSlot(id)),
-                    value = (int)value.gradientValue.mode,
+                    overrideReferenceName = string.Format("{0}_ColorKey{1}", matOwner.GetVariableNameForSlot(id), i),
+                    value = i < value.gradientValue.colorKeys.Length ? GradientUtils.ColorKeyToVector(value.gradientValue.colorKeys[i]) : Vector4.zero,
                     generatePropertyBlock = false
                 });
+            }
 
-                properties.AddShaderProperty(new Vector1ShaderProperty()
+            for (int i = 0; i < 8; i++)
+            {
+                properties.AddShaderProperty(new Vector4ShaderProperty()
                 {
-                    overrideReferenceName = string.Format("{0}_ColorsLength", matOwner.GetVariableNameForSlot(id)),
-                    value = value.gradientValue.colorKeys.Length,
+                    overrideReferenceName = string.Format("{0}_AlphaKey{1}", matOwner.GetVariableNameForSlot(id), i),
+                    value = i < value.gradientValue.alphaKeys.Length ? GradientUtils.AlphaKeyToVector(value.gradientValue.alphaKeys[i]) : Vector2.zero,
                     generatePropertyBlock = false
                 });
-
-                properties.AddShaderProperty(new Vector1ShaderProperty()
-                {
-                    overrideReferenceName = string.Format("{0}_AlphasLength", matOwner.GetVariableNameForSlot(id)),
-                    value = value.gradientValue.alphaKeys.Length,
-                    generatePropertyBlock = false
-                });
-
-                for (int i = 0; i < 8; i++)
-                {
-                    properties.AddShaderProperty(new Vector4ShaderProperty()
-                    {
-                        overrideReferenceName = string.Format("{0}_ColorKey{1}", matOwner.GetVariableNameForSlot(id), i),
-                        value = i < value.gradientValue.colorKeys.Length ? GradientUtils.ColorKeyToVector(value.gradientValue.colorKeys[i]) : Vector4.zero,
-                        generatePropertyBlock = false
-                    });
-                }
-
-                for (int i = 0; i < 8; i++)
-                {
-                    properties.AddShaderProperty(new Vector4ShaderProperty()
-                    {
-                        overrideReferenceName = string.Format("{0}_AlphaKey{1}", matOwner.GetVariableNameForSlot(id), i),
-                        value = i < value.gradientValue.alphaKeys.Length ? GradientUtils.AlphaKeyToVector(value.gradientValue.alphaKeys[i]) : Vector2.zero,
-                        generatePropertyBlock = false
-                    });
-                }
             }
 
             var prop = new GradientShaderProperty();
             prop.overrideReferenceName = matOwner.GetVariableNameForSlot(id);
             prop.generatePropertyBlock = false;
             prop.value = value.gradientValue;
-
-            if (generationMode == GenerationMode.Preview)
-                prop.OverrideMembers(matOwner.GetVariableNameForSlot(id));
+            prop.OverrideMembers(matOwner.GetVariableNameForSlot(id));
 
             properties.AddShaderProperty(prop);
         }
