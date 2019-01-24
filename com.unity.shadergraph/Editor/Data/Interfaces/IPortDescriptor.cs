@@ -7,6 +7,6 @@ namespace UnityEditor.ShaderGraph
         int id { get; }
         string name { get; }
         SlotType portType { get; }
-        SlotValueType valueType { get; }
+        ConcreteSlotValueType valueType { get; }
     }
 }

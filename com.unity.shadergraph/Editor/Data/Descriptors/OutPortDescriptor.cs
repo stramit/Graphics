@@ -12,7 +12,7 @@ namespace UnityEditor.ShaderGraph
         private string m_Name;
 
         [SerializeField]
-        private SlotValueType m_ValueType;
+        private ConcreteSlotValueType m_ValueType;
 
         public int id
         {
@@ -24,7 +24,7 @@ namespace UnityEditor.ShaderGraph
             get { return m_Name; }
         }
 
-        public SlotValueType valueType
+        public ConcreteSlotValueType valueType
         {
             get { return m_ValueType; }
         }
@@ -34,7 +34,7 @@ namespace UnityEditor.ShaderGraph
             get { return SlotType.Output; }
         }
 
-        public OutPortDescriptor(int id, string name, SlotValueType valueType)
+        public OutPortDescriptor(int id, string name, ConcreteSlotValueType valueType)
         {
             m_Id = id;
             m_Name = name;

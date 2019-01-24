@@ -8,9 +8,9 @@ namespace UnityEditor.ShaderGraph
     {
         public SerializableValueStore defaultValue { get; }
 
-        public SlotValueType[] validPortTypes
+        public ConcreteSlotValueType[] validPortTypes
         {
-            get { return new SlotValueType[] { SlotValueType.Gradient }; }
+            get { return new ConcreteSlotValueType[] { ConcreteSlotValueType.Gradient }; }
         }
 
         public GradientControl()

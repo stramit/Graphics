@@ -14,7 +14,7 @@ namespace UnityEditor.ShaderGraph
         private string m_Name;
 
         [SerializeField]
-        private SlotValueType m_ValueType;
+        private ConcreteSlotValueType m_ValueType;
         
         [SerializeField]
         private SerializableValueStore m_DefaultValue;
@@ -32,7 +32,7 @@ namespace UnityEditor.ShaderGraph
             get { return m_Name; }
         }
 
-        public SlotValueType valueType
+        public ConcreteSlotValueType valueType
         {
             get { return m_ValueType; }
         }
@@ -63,7 +63,7 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public InPortDescriptor(int id, string name, SlotValueType valueType)
+        public InPortDescriptor(int id, string name, ConcreteSlotValueType valueType)
         {
             m_Id = id;
             m_Name = name;
@@ -73,7 +73,7 @@ namespace UnityEditor.ShaderGraph
             m_DefaultValue = new SerializableValueStore();
         }
 
-        public InPortDescriptor(int id, string name, SlotValueType valueType, IShaderControl control)
+        public InPortDescriptor(int id, string name, ConcreteSlotValueType valueType, IShaderControl control)
         {
             m_Id = id;
             m_Name = name;
@@ -94,33 +94,33 @@ namespace UnityEditor.ShaderGraph
             {
                 switch (m_ValueType)
                 {
-                    case SlotValueType.Vector4:
+                    case ConcreteSlotValueType.Vector4:
                         return new Vector4Control();
-                    case SlotValueType.Vector3:
+                    case ConcreteSlotValueType.Vector3:
                         return new Vector3Control();
-                    case SlotValueType.Vector2:
+                    case ConcreteSlotValueType.Vector2:
                         return new Vector4Control();
-                    case SlotValueType.Vector1:
+                    case ConcreteSlotValueType.Vector1:
                         return new Vector1Control();
-                    case SlotValueType.Boolean:
+                    case ConcreteSlotValueType.Boolean:
                         return new ToggleControl();
-                    case SlotValueType.Texture2D:
+                    case ConcreteSlotValueType.Texture2D:
                         return new TextureControl<Texture>();
-                    case SlotValueType.Texture3D:
+                    case ConcreteSlotValueType.Texture3D:
                         return new TextureControl<Texture3D>();
-                    case SlotValueType.Texture2DArray:
+                    case ConcreteSlotValueType.Texture2DArray:
                         return new TextureControl<Texture2DArray>();
-                    case SlotValueType.Cubemap:
+                    case ConcreteSlotValueType.Cubemap:
                         return new TextureControl<Cubemap>();
-                    case SlotValueType.SamplerState:
+                    case ConcreteSlotValueType.SamplerState:
                         return new LabelControl("Default");
-                    case SlotValueType.Matrix2:
+                    case ConcreteSlotValueType.Matrix2:
                         return new LabelControl("Identity");
-                    case SlotValueType.Matrix3:
+                    case ConcreteSlotValueType.Matrix3:
                         return new LabelControl("Identity");
-                    case SlotValueType.Matrix4:
+                    case ConcreteSlotValueType.Matrix4:
                         return new LabelControl("Identity");
-                    case SlotValueType.Gradient:
+                    case ConcreteSlotValueType.Gradient:
                         return new GradientControl();
                     default:
                         throw new ArgumentOutOfRangeException();

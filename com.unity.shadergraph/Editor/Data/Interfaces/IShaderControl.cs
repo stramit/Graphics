@@ -7,7 +7,7 @@ namespace UnityEditor.ShaderGraph
     internal interface IShaderControl
     {
         SerializableValueStore defaultValue { get; }
-        SlotValueType[] validPortTypes { get; }
+        ConcreteSlotValueType[] validPortTypes { get; }
         VisualElement GetControl(IShaderValue shaderValue);
     }
 }

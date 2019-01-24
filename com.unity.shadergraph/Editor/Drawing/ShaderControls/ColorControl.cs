@@ -8,9 +8,9 @@ namespace UnityEditor.ShaderGraph
     {
         public SerializableValueStore defaultValue { get; }
 
-        public SlotValueType[] validPortTypes
+        public ConcreteSlotValueType[] validPortTypes
         {
-            get { return new SlotValueType[] { SlotValueType.Vector3, SlotValueType.Vector4 }; }
+            get { return new ConcreteSlotValueType[] { ConcreteSlotValueType.Vector3, ConcreteSlotValueType.Vector4 }; }
         }
 
         bool m_Hdr;
@@ -38,7 +38,7 @@ namespace UnityEditor.ShaderGraph
             VisualElement control = new VisualElement() { name = "ColorControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/ColorRGBASlotControlView"));
 
-            var alpha = shaderValue.valueType == SlotValueType.Vector4;
+            var alpha = shaderValue.concreteValueType == ConcreteSlotValueType.Vector4;
             var colorField = new ColorField { value = shaderValue.value.vectorValue, showAlpha = alpha, hdr = m_Hdr, showEyeDropper = false };
             colorField.RegisterValueChangedCallback(evt =>
             {

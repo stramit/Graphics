@@ -16,23 +16,23 @@ namespace UnityEditor.ShaderGraph
         public ShaderPort(OutPortDescriptor portDescriptor)
             : base(portDescriptor.id, portDescriptor.name, portDescriptor.name, portDescriptor.portType, ShaderStageCapability.All, false)
         {
-            m_ValueType = portDescriptor.valueType;
+            m_ConcreteValueType = portDescriptor.valueType;
         }
 
         public ShaderPort(InPortDescriptor portDescriptor)
             : base(portDescriptor.id, portDescriptor.name, portDescriptor.name, portDescriptor.portType, ShaderStageCapability.All, false)
         {
-            m_ValueType = portDescriptor.valueType;
+            m_ConcreteValueType = portDescriptor.valueType;
             m_ShaderValue = portDescriptor.defaultValue;
             control = portDescriptor.control;
         }
 
         [SerializeField]
-        private SlotValueType m_ValueType = SlotValueType.Vector1;
+        private ConcreteSlotValueType m_ConcreteValueType = ConcreteSlotValueType.Vector1;
 
-        public override SlotValueType valueType
+        public override ConcreteSlotValueType concreteValueType
         {
-            get { return m_ValueType; }
+            get { return m_ConcreteValueType; }
         }
 
         [SerializeField]
@@ -72,40 +72,40 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public override ConcreteSlotValueType concreteValueType
+        public override SlotValueType valueType
         {
             get
             {
-                switch (m_ValueType)
+                switch (m_ConcreteValueType)
                 {
-                    case SlotValueType.Vector4:
-                        return ConcreteSlotValueType.Vector4;
-                    case SlotValueType.Vector3:
-                        return ConcreteSlotValueType.Vector3;
-                    case SlotValueType.Vector2:
-                        return ConcreteSlotValueType.Vector2;
-                    case SlotValueType.Vector1:
-                        return ConcreteSlotValueType.Vector1;
-                    case SlotValueType.Boolean:
-                        return ConcreteSlotValueType.Boolean;
-                    case SlotValueType.Texture2D:
-                        return ConcreteSlotValueType.Texture2D;
-                    case SlotValueType.Texture3D:
-                        return ConcreteSlotValueType.Texture3D;
-                    case SlotValueType.Texture2DArray:
-                        return ConcreteSlotValueType.Texture2DArray;
-                    case SlotValueType.Cubemap:
-                        return ConcreteSlotValueType.Cubemap;
-                    case SlotValueType.SamplerState:
-                        return ConcreteSlotValueType.SamplerState;
-                    case SlotValueType.Matrix2:
-                        return ConcreteSlotValueType.Matrix2;
-                    case SlotValueType.Matrix3:
-                        return ConcreteSlotValueType.Matrix3;
-                    case SlotValueType.Matrix4:
-                        return ConcreteSlotValueType.Matrix4;
-                    case SlotValueType.Gradient:
-                        return ConcreteSlotValueType.Gradient;
+                    case ConcreteSlotValueType.Vector4:
+                        return SlotValueType.Vector4;
+                    case ConcreteSlotValueType.Vector3:
+                        return SlotValueType.Vector3;
+                    case ConcreteSlotValueType.Vector2:
+                        return SlotValueType.Vector2;
+                    case ConcreteSlotValueType.Vector1:
+                        return SlotValueType.Vector1;
+                    case ConcreteSlotValueType.Boolean:
+                        return SlotValueType.Boolean;
+                    case ConcreteSlotValueType.Texture2D:
+                        return SlotValueType.Texture2D;
+                    case ConcreteSlotValueType.Texture3D:
+                        return SlotValueType.Texture3D;
+                    case ConcreteSlotValueType.Texture2DArray:
+                        return SlotValueType.Texture2DArray;
+                    case ConcreteSlotValueType.Cubemap:
+                        return SlotValueType.Cubemap;
+                    case ConcreteSlotValueType.SamplerState:
+                        return SlotValueType.SamplerState;
+                    case ConcreteSlotValueType.Matrix2:
+                        return SlotValueType.Matrix2;
+                    case ConcreteSlotValueType.Matrix3:
+                        return SlotValueType.Matrix3;
+                    case ConcreteSlotValueType.Matrix4:
+                        return SlotValueType.Matrix4;
+                    case ConcreteSlotValueType.Gradient:
+                        return SlotValueType.Gradient;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -219,110 +219,11 @@ namespace UnityEditor.ShaderGraph
             if (matOwner == null)
                 throw new Exception(string.Format("Slot {0} either has no owner, or the owner is not a {1}", this, typeof(AbstractMaterialNode)));
 
-            IShaderProperty property;
-            switch (concreteValueType)
-            {
-                case ConcreteSlotValueType.Vector4:
-                    property = new Vector4ShaderProperty();
-                    break;
-                case ConcreteSlotValueType.Vector3:
-                    property = new Vector3ShaderProperty();
-                    break;
-                case ConcreteSlotValueType.Vector2:
-                    property = new Vector2ShaderProperty();
-                    break;
-                case ConcreteSlotValueType.Vector1:
-                    property = new Vector1ShaderProperty();
-                    break;
-                case ConcreteSlotValueType.Boolean:
-                    property = new BooleanShaderProperty();
-                    break;
-                case ConcreteSlotValueType.Texture2D:
-                    property = new TextureShaderProperty();
-                    break;
-                case ConcreteSlotValueType.Texture3D:
-                    property = new Texture3DShaderProperty();
-                    break;
-                case ConcreteSlotValueType.Texture2DArray:
-                    property = new Texture2DArrayShaderProperty();
-                    break;
-                case ConcreteSlotValueType.Cubemap:
-                    property = new CubemapShaderProperty();
-                    break;
-                case ConcreteSlotValueType.SamplerState:
-                    property = new SamplerStateShaderProperty();
-                    break;
-                case ConcreteSlotValueType.Matrix2:
-                    property = new Matrix2ShaderProperty();
-                    break;
-                case ConcreteSlotValueType.Matrix3:
-                    property = new Matrix3ShaderProperty();
-                    break;
-                case ConcreteSlotValueType.Matrix4:
-                    property = new Matrix4ShaderProperty();
-                    break;
-                case ConcreteSlotValueType.Gradient:
-                    AddGradientProperties(matOwner, properties, generationMode);
-                    return;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            string overrideReferenceName = matOwner.GetVariableNameForSlot(id);
+            IShaderProperty[] defaultProperties = PortUtil.GetDefaultPropertiesFromShaderValue(this);
 
-            property.overrideReferenceName = matOwner.GetVariableNameForSlot(id);
-            property.generatePropertyBlock = false;
-            properties.AddShaderProperty(property);
-        }
-
-        private void AddGradientProperties(AbstractMaterialNode matOwner, PropertyCollector properties, GenerationMode generationMode)
-        {
-            properties.AddShaderProperty(new Vector1ShaderProperty()
-            {
-                overrideReferenceName = string.Format("{0}_Type", matOwner.GetVariableNameForSlot(id)),
-                value = (int)value.gradientValue.mode,
-                generatePropertyBlock = false
-            });
-
-            properties.AddShaderProperty(new Vector1ShaderProperty()
-            {
-                overrideReferenceName = string.Format("{0}_ColorsLength", matOwner.GetVariableNameForSlot(id)),
-                value = value.gradientValue.colorKeys.Length,
-                generatePropertyBlock = false
-            });
-
-            properties.AddShaderProperty(new Vector1ShaderProperty()
-            {
-                overrideReferenceName = string.Format("{0}_AlphasLength", matOwner.GetVariableNameForSlot(id)),
-                value = value.gradientValue.alphaKeys.Length,
-                generatePropertyBlock = false
-            });
-
-            for (int i = 0; i < 8; i++)
-            {
-                properties.AddShaderProperty(new Vector4ShaderProperty()
-                {
-                    overrideReferenceName = string.Format("{0}_ColorKey{1}", matOwner.GetVariableNameForSlot(id), i),
-                    value = i < value.gradientValue.colorKeys.Length ? GradientUtils.ColorKeyToVector(value.gradientValue.colorKeys[i]) : Vector4.zero,
-                    generatePropertyBlock = false
-                });
-            }
-
-            for (int i = 0; i < 8; i++)
-            {
-                properties.AddShaderProperty(new Vector4ShaderProperty()
-                {
-                    overrideReferenceName = string.Format("{0}_AlphaKey{1}", matOwner.GetVariableNameForSlot(id), i),
-                    value = i < value.gradientValue.alphaKeys.Length ? GradientUtils.AlphaKeyToVector(value.gradientValue.alphaKeys[i]) : Vector2.zero,
-                    generatePropertyBlock = false
-                });
-            }
-
-            var prop = new GradientShaderProperty();
-            prop.overrideReferenceName = matOwner.GetVariableNameForSlot(id);
-            prop.generatePropertyBlock = false;
-            prop.value = value.gradientValue;
-            prop.OverrideMembers(matOwner.GetVariableNameForSlot(id));
-
-            properties.AddShaderProperty(prop);
+            foreach(IShaderProperty property in defaultProperties)
+                properties.AddShaderProperty(property);
         }
 
         public override void CopyValuesFrom(MaterialSlot foundSlot)
@@ -330,7 +231,7 @@ namespace UnityEditor.ShaderGraph
             var port = foundSlot as ShaderPort;
             if (port != null)
             {
-                m_ValueType = port.valueType;
+                m_ConcreteValueType = port.concreteValueType;
                 m_ShaderValue = port.value;
                 control = port.control;
             }

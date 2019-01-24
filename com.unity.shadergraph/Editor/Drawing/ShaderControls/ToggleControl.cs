@@ -8,9 +8,9 @@ namespace UnityEditor.ShaderGraph
     {
         public SerializableValueStore defaultValue { get; }
 
-        public SlotValueType[] validPortTypes
+        public ConcreteSlotValueType[] validPortTypes
         {
-            get { return new SlotValueType[] { SlotValueType.Boolean }; }
+            get { return new ConcreteSlotValueType[] { ConcreteSlotValueType.Boolean }; }
         }
 
         public ToggleControl()

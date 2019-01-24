@@ -10,9 +10,9 @@ namespace UnityEditor.ShaderGraph
     {
         public SerializableValueStore defaultValue { get; }
 
-        public SlotValueType[] validPortTypes
+        public ConcreteSlotValueType[] validPortTypes
         {
-            get { return (SlotValueType[])Enum.GetValues(typeof(SlotValueType)); }
+            get { return (ConcreteSlotValueType[])Enum.GetValues(typeof(ConcreteSlotValueType)); }
         }
 
         private string m_Label = "";

@@ -10,9 +10,9 @@ namespace UnityEditor.ShaderGraph
     {
         public SerializableValueStore defaultValue { get; }
 
-        public SlotValueType[] validPortTypes
+        public ConcreteSlotValueType[] validPortTypes
         {
-            get { return new SlotValueType[] { SlotValueType.Vector1 }; }
+            get { return new ConcreteSlotValueType[] { ConcreteSlotValueType.Vector1 }; }
         }
 
         List<string> m_Entries = new List<string>() {""};

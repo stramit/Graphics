@@ -10,9 +10,16 @@ namespace UnityEditor.ShaderGraph
     {
         public SerializableValueStore defaultValue { get; }
 
-        public SlotValueType[] validPortTypes
+        public ConcreteSlotValueType[] validPortTypes
         {
-            get { return new SlotValueType[] { SlotValueType.Texture2D, SlotValueType.Texture3D, SlotValueType.Texture2DArray, SlotValueType.Cubemap }; }
+            get { return new ConcreteSlotValueType[] 
+                { 
+                    ConcreteSlotValueType.Texture2D,
+                    ConcreteSlotValueType.Texture3D,
+                    ConcreteSlotValueType.Texture2DArray,
+                    ConcreteSlotValueType.Cubemap 
+                }; 
+            }
         }
 
         public TextureControl()
