@@ -14,6 +14,11 @@ namespace UnityEditor.ShaderGraph
             get { return new ConcreteSlotValueType[] { ConcreteSlotValueType.Boolean }; }
         }
 
+        public int portControlWidth
+        {
+            get { return 14; }
+        }
+
         public ToggleControl()
         {
         }
@@ -29,7 +34,7 @@ namespace UnityEditor.ShaderGraph
         public VisualElement GetControl(IShaderValue shaderValue)
         {
             VisualElement control = new VisualElement() { name = "ToggleControl" };
-            control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/BooleanSlotControlView"));
+            control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/ToggleControl"));
 
             var toggleField = new Toggle() { value = shaderValue.value.booleanValue };
             toggleField.RegisterValueChangedCallback(evt =>

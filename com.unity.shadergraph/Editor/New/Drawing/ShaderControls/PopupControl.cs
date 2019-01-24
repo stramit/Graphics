@@ -16,6 +16,11 @@ namespace UnityEditor.ShaderGraph
             get { return new ConcreteSlotValueType[] { ConcreteSlotValueType.Vector1 }; }
         }
 
+        public int portControlWidth
+        {
+            get { return 84; }
+        }
+
         List<string> m_Entries;
         List<string> entries
         {
@@ -50,7 +55,7 @@ namespace UnityEditor.ShaderGraph
         public VisualElement GetControl(IShaderValue shaderValue)
         {
             VisualElement control = new VisualElement() { name = "PopupControl" };
-            control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/ScreenPositionSlotControlView"));
+            control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/PopupControl"));
 
             var popupField = new PopupField<string>(entries, (int)shaderValue.value.vectorValue.x);
             popupField.RegisterValueChangedCallback(evt =>

@@ -59,13 +59,21 @@ namespace UnityEditor.ShaderGraph.Drawing
                     foreach (IControlAttribute attribute in propertyInfo.GetCustomAttributes(typeof(IControlAttribute), false))
                         m_ControlItems.Add(attribute.InstantiateControl(node, propertyInfo));
 
+                // Instantiate controls for ShaderParameters
                 ShaderNode shaderNode = inNode as ShaderNode;
                 if(shaderNode != null)
                 {
                     if(shaderNode.parameters != null)
                     {
                         foreach(ShaderParameter parameter in shaderNode.parameters)
-                            m_ControlItems.Add(parameter.control.GetControl(parameter));
+                        {
+                            var container = new VisualElement { name = "Container" };
+                            container.style.maxWidth = 200;
+                            container.style.marginLeft = 6;
+                            container.style.marginRight = 6;
+                            container.Add(parameter.control.GetControl(parameter));
+                            m_ControlItems.Add(container);
+                        }  
                     }
                 }
             }

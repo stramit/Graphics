@@ -14,6 +14,11 @@ namespace UnityEditor.ShaderGraph
             get { return new ConcreteSlotValueType[] { ConcreteSlotValueType.Vector3, ConcreteSlotValueType.Vector4 }; }
         }
 
+        public int portControlWidth
+        {
+            get { return 32; }
+        }
+
         public ColorControl()
         {
             this.controlData = new ShaderControlData()
@@ -37,7 +42,7 @@ namespace UnityEditor.ShaderGraph
         public VisualElement GetControl(IShaderValue shaderValue)
         {
             VisualElement control = new VisualElement() { name = "ColorControl" };
-            control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/ColorRGBASlotControlView"));
+            control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/ColorControl"));
 
             var alpha = shaderValue.concreteValueType == ConcreteSlotValueType.Vector4;
             var colorField = new ColorField { value = shaderValue.value.vectorValue, showAlpha = alpha, hdr = controlData.values[0] == 1, showEyeDropper = false };

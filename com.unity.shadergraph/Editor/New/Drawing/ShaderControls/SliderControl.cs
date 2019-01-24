@@ -18,6 +18,11 @@ namespace UnityEditor.ShaderGraph
             get { return new ConcreteSlotValueType[] { ConcreteSlotValueType.Vector1 }; }
         }
 
+        public int portControlWidth
+        {
+            get { return 84; }
+        }
+
         public SliderControl()
         {
             this.controlData = new ShaderControlData()

@@ -14,6 +14,11 @@ namespace UnityEditor.ShaderGraph
             get { return new ConcreteSlotValueType[] { ConcreteSlotValueType.Gradient }; }
         }
 
+        public int portControlWidth
+        {
+            get { return 32; }
+        }
+
         public GradientControl()
         {
         }
@@ -29,7 +34,7 @@ namespace UnityEditor.ShaderGraph
         public VisualElement GetControl(IShaderValue shaderValue)
         {
             VisualElement control = new VisualElement() { name = "GradientControl" };
-            control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/Controls/GradientSlotControlView"));
+            control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/GradientControl"));
 
             var gradientField = new GradientField() { value = shaderValue.value.gradientValue };
             gradientField.RegisterValueChangedCallback(evt =>
