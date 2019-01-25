@@ -47,25 +47,11 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         private SerializableControl m_SerializableControl = new SerializableControl();
 
-        public int id
-        {
-            get { return m_Id; }
-        }
-
-        public string name
-        {
-            get { return m_Name; }
-        }
-
-        public ConcreteSlotValueType valueType
-        {
-            get { return m_ValueType; }
-        }
-
-        public ShaderValueData defaultValue
-        {
-            get { return m_DefaultValue; }
-        }
+        public int id  => m_Id;
+        public string name => m_Name;
+        public ConcreteSlotValueType valueType => m_ValueType;
+        public SlotType portType => SlotType.Input;
+        public ShaderValueData defaultValue => m_DefaultValue;
 
         private IShaderControl m_Control;
         public IShaderControl control
@@ -81,11 +67,6 @@ namespace UnityEditor.ShaderGraph
                 m_Control = value;
                 m_SerializableControl.control = value;
             }
-        }
-
-        public SlotType portType
-        {
-            get { return SlotType.Input; }
         }
     }
 }

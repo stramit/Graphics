@@ -23,32 +23,32 @@ namespace UnityEditor.ShaderGraph
 
         public Vector4 vectorValue
         {
-            get { return m_VectorValue; }
-            set { m_VectorValue = value; }
+            get => m_VectorValue;
+            set => m_VectorValue = value;
         }
 
         public bool booleanValue
         {
-            get { return m_BooleanValue; }
-            set { m_BooleanValue = value; }
+            get => m_BooleanValue;
+            set => m_BooleanValue = value;
         }
 
         public Matrix4x4 matrixValue
         {
-            get { return m_MatrixValue; }
-            set { m_MatrixValue = value; }
+            get => m_MatrixValue;
+            set => m_MatrixValue = value;
         }
 
         public Texture textureValue
         {
-            get { return m_Texture.texture; }
-            set { m_Texture.texture = value; }
+            get => m_Texture.texture;
+            set => m_Texture.texture = value;
         }
 
         public Gradient gradientValue
         {
-            get { return m_GradientValue.gradient; }
-            set { m_GradientValue.gradient = value; }
+            get => m_GradientValue.gradient;
+            set => m_GradientValue.gradient = value;
         }
     }
 }

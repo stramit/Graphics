@@ -25,10 +25,7 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         private List<ShaderParameter> m_Parameters = new List<ShaderParameter>();
 
-        internal List<ShaderParameter> parameters
-        {
-            get { return m_Parameters; }
-        }
+        internal List<ShaderParameter> parameters => m_Parameters;
 
         internal void AddShaderValuesFromTypeDescriptor(NodeTypeDescriptor descriptor)
         {
@@ -50,7 +47,7 @@ namespace UnityEditor.ShaderGraph
                 }
             }
             RemoveSlotsNameNotMatching(validSlotIds);
-            
+
             var validParameters = new List<int>();
             if(descriptor.parameters != null)
             {
@@ -62,7 +59,7 @@ namespace UnityEditor.ShaderGraph
             }
             RemoveParametersNameNotMatching(validParameters);
         }
-
+        
         private void AddParameter(ShaderParameter parameter)
         {
             var addingParameter = parameter;
@@ -131,11 +128,11 @@ namespace UnityEditor.ShaderGraph
                 if(port.HasEdges())
                     continue;
                 
-                properties.Add(port.ToPreviewProperty(port.ToShaderVariableName()));
+                properties.Add(port.ToPreviewProperty(port.ToVariableName()));
             }
 
             foreach(ShaderParameter parameter in m_Parameters)
-                properties.Add(parameter.ToPreviewProperty(parameter.ToShaderVariableName()));
+                properties.Add(parameter.ToPreviewProperty(parameter.ToVariableName()));
         }
 
         public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
@@ -147,7 +144,7 @@ namespace UnityEditor.ShaderGraph
             {
                 if(!port.HasEdges())
                 {
-                    string overrideReferenceName = port.ToShaderVariableName();
+                    string overrideReferenceName = port.ToVariableName();
                     IShaderProperty[] defaultProperties = port.ToDefaultPropertyArray(overrideReferenceName);
                     foreach(IShaderProperty property in defaultProperties)
                         properties.AddShaderProperty(property);
@@ -156,7 +153,7 @@ namespace UnityEditor.ShaderGraph
 
             foreach (var parameter in m_Parameters)
             {
-                string overrideReferenceName = parameter.ToShaderVariableName();
+                string overrideReferenceName = parameter.ToVariableName();
                 IShaderProperty[] defaultProperties = parameter.ToDefaultPropertyArray(overrideReferenceName);
                 foreach(IShaderProperty property in defaultProperties)
                         properties.AddShaderProperty(property);
