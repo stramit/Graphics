@@ -56,7 +56,7 @@ namespace UnityEditor.ShaderGraph
             name = typeState.type.name;
             isNew = true;
 
-            UpdateSlots();
+            AddShaderValuesFromTypeDescriptor(typeState.type);
         }
 
         public override void ValidateNode()
@@ -130,31 +130,7 @@ namespace UnityEditor.ShaderGraph
             {
                 throw new InvalidOperationException($"Cannot find an {nameof(ShaderNodeType)} with type name {shaderNodeTypeName}");
             }
-            UpdateSlots();
-        }
-
-        void UpdateSlots()
-        {
-            var validSlotIds = new List<int>();
-            foreach (InputDescriptor input in typeState.type.inPorts)
-            {
-                AddSlot(new ShaderPort(input));
-                validSlotIds.Add(input.id);
-            }
-            foreach (OutputDescriptor output in typeState.type.outPorts)
-            {
-                AddSlot(new ShaderPort(output));
-                validSlotIds.Add(output.id);
-            }
-            RemoveSlotsNameNotMatching(validSlotIds);
-            
-            var validParameters = new List<int>();
-            foreach (InputDescriptor parameter in typeState.type.parameters)
-            {
-                AddParameter(new ShaderParameter(parameter));
-                validParameters.Add(parameter.id);
-            }
-            RemoveParametersNameNotMatching(validParameters);
+            AddShaderValuesFromTypeDescriptor(typeState.type);
         }
 
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)

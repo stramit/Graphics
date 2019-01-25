@@ -21,6 +21,45 @@ namespace UnityEditor.ShaderGraph
             get { return m_Parameters; }
         }
 
+        internal void DefineNode(NodeTypeDescriptor descriptor)
+        {
+            name = descriptor.name;
+            AddShaderValuesFromTypeDescriptor(descriptor);
+        }
+
+        internal void AddShaderValuesFromTypeDescriptor(NodeTypeDescriptor descriptor)
+        {
+            var validSlotIds = new List<int>();
+            if(descriptor.inPorts != null)
+            {
+                foreach (InputDescriptor input in descriptor.inPorts)
+                {
+                    AddSlot(new ShaderPort(input));
+                    validSlotIds.Add(input.id);
+                }
+            }
+            if(descriptor.outPorts != null)
+            {
+                foreach (OutputDescriptor output in descriptor.outPorts)
+                {
+                    AddSlot(new ShaderPort(output));
+                    validSlotIds.Add(output.id);
+                }
+            }
+            RemoveSlotsNameNotMatching(validSlotIds);
+            
+            var validParameters = new List<int>();
+            if(descriptor.parameters != null)
+            {
+                foreach (InputDescriptor parameter in descriptor.parameters)
+                {
+                    AddParameter(new ShaderParameter(parameter));
+                    validParameters.Add(parameter.id);
+                }
+            }
+            RemoveParametersNameNotMatching(validParameters);
+        }
+
         internal void AddParameter(ShaderParameter parameter)
         {
             var addingParameter = parameter;
@@ -105,7 +144,7 @@ namespace UnityEditor.ShaderGraph
             {
                 ShaderPort port = slot as ShaderPort;
                 if(port.HasEdges())
-                    return;
+                    continue;
                 
                 properties.Add(port.ToPreviewProperty(port.ToShaderVariableName()));
             }
