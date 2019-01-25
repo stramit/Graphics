@@ -1,6 +1,5 @@
 ﻿namespace UnityEditor.ShaderGraph.NodeLibrary
 {
-    [Title("INTERNAL", "Scalar")]
     sealed class ScalarNode : ShaderNode, IGeneratesBodyCode, IPropertyFromNode
     {
         InputDescriptor m_X = new InputDescriptor(0, "X", ConcreteSlotValueType.Vector1);

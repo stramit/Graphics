@@ -2,7 +2,6 @@
 
 namespace UnityEditor.ShaderGraph.NodeLibrary
 {
-    [Title("INTERNAL", "Color")]
     internal class ColorNode : ShaderNode, IGeneratesBodyCode, IPropertyFromNode
     {
         InputDescriptor m_Color = new InputDescriptor(0, "Color", ConcreteSlotValueType.Vector4, new ColorControl());

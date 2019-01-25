@@ -61,10 +61,11 @@ namespace UnityEditor.ShaderGraph.Drawing
             {
                 foreach (var type in assembly.GetTypesOrNothing())
                 {
+                    // AbstractMaterialNode
                     if (type.IsClass && !type.IsAbstract && (type.IsSubclassOf(typeof(AbstractMaterialNode)))
                         && type != typeof(PropertyNode)
                         && type != typeof(SubGraphNode)
-                        && type != typeof(ShaderNodeInstance))
+                        && (!type.IsSubclassOf(typeof(ShaderNode))))
                     {
                         var attrs = type.GetCustomAttributes(typeof(TitleAttribute), false) as TitleAttribute[];
                         if (attrs != null && attrs.Length > 0)
@@ -73,9 +74,20 @@ namespace UnityEditor.ShaderGraph.Drawing
                             AddEntries(node, attrs[0].title, nodeEntries);
                         }
                     }
+
+                    // ShaderNode
+                    if (type.IsClass && !type.IsAbstract && (type.IsSubclassOf(typeof(ShaderNode)))
+                        && type != typeof(ShaderNodeInstance))
+                    {
+                        var node = (ShaderNode)Activator.CreateInstance(type);
+                        NodeDefinitionContext nodeContext = new NodeDefinitionContext();
+                        node.Setup(ref nodeContext);
+                        AddEntries(node, nodeContext.type.path.Split('/').Append(nodeContext.type.name).ToArray(), nodeEntries);
+                    }
                 }
             }
 
+            // Subgraph
             if (!(m_Graph is SubGraph))
             {
                 foreach (var guid in AssetDatabase.FindAssets(string.Format("t:{0}", typeof(MaterialSubGraphAsset))))
@@ -96,6 +108,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 }
             }
 
+            // Property
             foreach (var property in m_Graph.properties)
             {
                 var node = new PropertyNode();
@@ -106,6 +119,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 AddEntries(node, new[] { "Properties", "Property: " + property.displayName }, nodeEntries);
             }
 
+            // ShaderNodeType
             foreach (var state in m_Graph.nodeTypeStates)
             {
                 var node = new ShaderNodeInstance(state);
