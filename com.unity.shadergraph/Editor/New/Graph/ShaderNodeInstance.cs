@@ -140,7 +140,7 @@ namespace UnityEditor.ShaderGraph
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
         {
             foreach (var argument in function.outArguments)
-                visitor.AddShaderChunk(argument.valueType.ToString(precision) + " " + GetShaderValue(argument).ToShaderVariableName() + ";", true);
+                visitor.AddShaderChunk(argument.valueType.ToString(precision) + " " + GetShaderValue(argument).ToVariableName() + ";", true);
 
             string call = GetFunctionName(function.name) + "(";
             bool first = true;
@@ -157,7 +157,7 @@ namespace UnityEditor.ShaderGraph
                 if (!first)
                     call += ", ";
                 first = false;
-                call += GetShaderValue(argument).ToShaderVariableName();
+                call += GetShaderValue(argument).ToVariableName();
             }
             call += ");";
             visitor.AddShaderChunk(call, true);
