@@ -63,7 +63,7 @@ namespace UnityEditor.ShaderGraph
             RemoveParametersNameNotMatching(validParameters);
         }
 
-        internal void AddParameter(ShaderParameter parameter)
+        private void AddParameter(ShaderParameter parameter)
         {
             var addingParameter = parameter;
             var foundParameter = FindParameter(parameter.id);
@@ -80,13 +80,13 @@ namespace UnityEditor.ShaderGraph
             addingParameter.CopyValuesFrom(foundParameter);
         }
 
-        internal void RemoveParameter(int parameterId)
+        private void RemoveParameter(int parameterId)
         {
             m_Parameters.RemoveAll(x => x.id == parameterId);
             Dirty(ModificationScope.Topological);
         }
 
-        internal ShaderParameter FindParameter(int id)
+        private ShaderParameter FindParameter(int id)
         {
             foreach (var parameter in m_Parameters)
             {
@@ -96,7 +96,7 @@ namespace UnityEditor.ShaderGraph
             return null;
         }
 
-        internal void RemoveParametersNameNotMatching(IEnumerable<int> parameterIds, bool supressWarnings = false)
+        private void RemoveParametersNameNotMatching(IEnumerable<int> parameterIds, bool supressWarnings = false)
         {
             var invalidParameters = m_Parameters.Select(x => x.id).Except(parameterIds);
 
@@ -104,7 +104,7 @@ namespace UnityEditor.ShaderGraph
             {
                 if (!supressWarnings)
                     Debug.LogWarningFormat("Removing Invalid Parameter: {0}", invalidParameter);
-                RemoveSlot(invalidParameter);
+                RemoveParameter(invalidParameter);
             }
         }
 
