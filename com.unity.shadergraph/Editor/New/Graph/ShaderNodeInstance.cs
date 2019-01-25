@@ -48,6 +48,10 @@ namespace UnityEditor.ShaderGraph
         {
         }
 
+        internal override void Setup(ref NodeDefinitionContext context)
+        {
+        }
+
         // TODO: This one is only really used in SearchWindowProvider, as we need a dummy node with slots for the code there.
         // Eventually we can make the code in SWP nicer, and remove this constructor.
         public ShaderNodeInstance(NodeTypeState typeState)

@@ -11,7 +11,16 @@ namespace UnityEditor.ShaderGraph
     {      
         internal ShaderNode()
         {
+            NodeDefinitionContext context = new NodeDefinitionContext();
+            Setup(ref context);
+            if(string.IsNullOrEmpty(context.type.name))
+                return;
+
+            name = context.type.name;
+            AddShaderValuesFromTypeDescriptor(context.type);
         }
+
+        internal abstract void Setup(ref NodeDefinitionContext context);
 
         [SerializeField]
         private List<ShaderParameter> m_Parameters = new List<ShaderParameter>();
@@ -19,12 +28,6 @@ namespace UnityEditor.ShaderGraph
         internal List<ShaderParameter> parameters
         {
             get { return m_Parameters; }
-        }
-
-        internal void DefineNode(NodeTypeDescriptor descriptor)
-        {
-            name = descriptor.name;
-            AddShaderValuesFromTypeDescriptor(descriptor);
         }
 
         internal void AddShaderValuesFromTypeDescriptor(NodeTypeDescriptor descriptor)

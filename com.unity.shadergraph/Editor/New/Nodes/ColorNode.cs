@@ -9,13 +9,15 @@ namespace UnityEditor.ShaderGraph.NodeLibrary
         InputDescriptor m_Mode = new InputDescriptor(1, "Mode", ConcreteSlotValueType.Vector1, new PopupControl(Enum.GetNames(typeof(ColorMode))));
         OutputDescriptor m_Out = new OutputDescriptor(2, "Out", ConcreteSlotValueType.Vector4);
 
-        public ColorNode()
+        internal override void Setup(ref NodeDefinitionContext context)
         {
-            DefineNode(new NodeTypeDescriptor()
+            context.CreateNodeType(new NodeTypeDescriptor
             {
+                path = "INTERNAL",
                 name = "Color",
                 outPorts = new OutputDescriptor[] { m_Out },
-                parameters = new InputDescriptor[] { m_Color, m_Mode }
+                parameters = new InputDescriptor[] { m_Color, m_Mode },
+                preview = false
             });
         }
 

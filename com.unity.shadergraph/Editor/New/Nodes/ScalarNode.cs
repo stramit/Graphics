@@ -6,15 +6,15 @@
         InputDescriptor m_X = new InputDescriptor(0, "X", ConcreteSlotValueType.Vector1);
         OutputDescriptor m_Out = new OutputDescriptor(1, "Out", ConcreteSlotValueType.Vector1);
 
-        public ScalarNode()
+        internal override void Setup(ref NodeDefinitionContext context)
         {
-            DefineNode(new NodeTypeDescriptor()
+            context.CreateNodeType(new NodeTypeDescriptor
             {
                 path = "INTERNAL",
                 name = "Scalar",
                 inPorts = new InputDescriptor[] { m_X },
                 outPorts = new OutputDescriptor[] { m_Out },
-                preview = true
+                preview = false
             });
         }
 
