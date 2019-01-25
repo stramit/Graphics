@@ -3,7 +3,7 @@ using UnityEditor.Graphing;
 
 namespace UnityEditor.ShaderGraph
 {
-    class OutputDescriptor
+    class OutputDescriptor : IShaderValueDescriptor
     {
         public OutputDescriptor(int id, string name, ConcreteSlotValueType valueType)
         {

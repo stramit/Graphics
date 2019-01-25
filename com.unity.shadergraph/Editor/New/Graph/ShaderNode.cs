@@ -105,35 +105,17 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        internal IShaderValue FindShaderValue(int id)
+        internal IShaderValue GetShaderValue(IShaderValueDescriptor descriptor)
         {
-            var parameter = FindParameter(id);
+            var parameter = FindParameter(descriptor.id);
             if(parameter != null)
                 return parameter;
 
-            var port = FindSlot<ShaderPort>(id);
+            var port = FindSlot<ShaderPort>(descriptor.id);
             if(port != null)
                 return port;
 
             return null;
-        }
-
-        internal string GetShaderValueString(int id, GenerationMode generationMode)
-        {
-            var parameter = FindParameter(id);
-            if (parameter != null)
-            {
-                if (generationMode.IsPreview())
-                    return parameter.ToShaderVariableName();
-
-                return parameter.ToShaderVariableValue(precision);
-            }
-
-            var port = FindSlot<ShaderPort>(id) as ShaderPort;
-            if (port != null)
-                return port.InputValue(owner, generationMode);
-
-            return string.Empty;
         }
 
         public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)

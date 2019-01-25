@@ -5,7 +5,7 @@ using UnityEditor.Graphing;
 
 namespace UnityEditor.ShaderGraph
 {
-    class InputDescriptor
+    class InputDescriptor : IShaderValueDescriptor
     {
         public InputDescriptor(int id, string name, ConcreteSlotValueType valueType)
         {

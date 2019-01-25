@@ -61,6 +61,29 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
+        internal static string ToVariableDefinition(this IShaderValue shaderValue, AbstractMaterialNode.OutputPrecision precision)
+        {
+            return string.Format("{0} {1}",
+                NodeUtils.ConvertConcreteSlotValueTypeToString(precision, shaderValue.concreteValueType),
+                shaderValue.ToShaderVariableName());
+        }
+
+        internal static string ToVariableReference(this IShaderValue shaderValue, AbstractMaterialNode.OutputPrecision precision, GenerationMode generationMode)
+        {
+            if (shaderValue is ShaderParameter parameter)
+            {
+                if (generationMode.IsPreview())
+                    return parameter.ToShaderVariableName();
+
+                return parameter.ToShaderVariableValue(precision);
+            }
+
+            if (shaderValue is ShaderPort port)
+                return port.InputValue(shaderValue.owner.owner, generationMode);
+
+            return string.Empty;
+        }
+
         internal static IShaderProperty[] ToDefaultPropertyArray(this IShaderValue shaderValue, string overrideReferenceName = null)
         {
             if(shaderValue.concreteValueType == ConcreteSlotValueType.Gradient)
