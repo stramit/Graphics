@@ -11,17 +11,56 @@ namespace UnityEditor.ShaderGraph
     {      
         internal ShaderNode()
         {
+            NodeDefinitionContext context = new NodeDefinitionContext();
+            Setup(ref context);
+            if(string.IsNullOrEmpty(context.type.name))
+                return;
+
+            name = context.type.name;
+            AddShaderValuesFromTypeDescriptor(context.type);
         }
+
+        internal abstract void Setup(ref NodeDefinitionContext context);
 
         [SerializeField]
         private List<ShaderParameter> m_Parameters = new List<ShaderParameter>();
 
-        internal List<ShaderParameter> parameters
+        internal List<ShaderParameter> parameters => m_Parameters;
+
+        internal void AddShaderValuesFromTypeDescriptor(NodeTypeDescriptor descriptor)
         {
-            get { return m_Parameters; }
+            var validSlotIds = new List<int>();
+            if(descriptor.inPorts != null)
+            {
+                foreach (InputDescriptor input in descriptor.inPorts)
+                {
+                    AddSlot(new ShaderPort(input));
+                    validSlotIds.Add(input.id);
+                }
+            }
+            if(descriptor.outPorts != null)
+            {
+                foreach (OutputDescriptor output in descriptor.outPorts)
+                {
+                    AddSlot(new ShaderPort(output));
+                    validSlotIds.Add(output.id);
+                }
+            }
+            RemoveSlotsNameNotMatching(validSlotIds);
+
+            var validParameters = new List<int>();
+            if(descriptor.parameters != null)
+            {
+                foreach (InputDescriptor parameter in descriptor.parameters)
+                {
+                    AddParameter(new ShaderParameter(parameter));
+                    validParameters.Add(parameter.id);
+                }
+            }
+            RemoveParametersNameNotMatching(validParameters);
         }
 
-        internal void AddParameter(ShaderParameter parameter)
+        private void AddParameter(ShaderParameter parameter)
         {
             var addingParameter = parameter;
             var foundParameter = FindParameter(parameter.id);
@@ -38,13 +77,13 @@ namespace UnityEditor.ShaderGraph
             addingParameter.CopyValuesFrom(foundParameter);
         }
 
-        internal void RemoveParameter(int parameterId)
+        private void RemoveParameter(int parameterId)
         {
             m_Parameters.RemoveAll(x => x.id == parameterId);
             Dirty(ModificationScope.Topological);
         }
 
-        internal ShaderParameter FindParameter(int id)
+        private ShaderParameter FindParameter(int id)
         {
             foreach (var parameter in m_Parameters)
             {
@@ -54,7 +93,7 @@ namespace UnityEditor.ShaderGraph
             return null;
         }
 
-        internal void RemoveParametersNameNotMatching(IEnumerable<int> parameterIds, bool supressWarnings = false)
+        private void RemoveParametersNameNotMatching(IEnumerable<int> parameterIds, bool supressWarnings = false)
         {
             var invalidParameters = m_Parameters.Select(x => x.id).Except(parameterIds);
 
@@ -62,39 +101,21 @@ namespace UnityEditor.ShaderGraph
             {
                 if (!supressWarnings)
                     Debug.LogWarningFormat("Removing Invalid Parameter: {0}", invalidParameter);
-                RemoveSlot(invalidParameter);
+                RemoveParameter(invalidParameter);
             }
         }
 
-        internal IShaderValue FindShaderValue(int id)
+        internal IShaderValue GetShaderValue(IShaderValueDescriptor descriptor)
         {
-            var parameter = FindParameter(id);
+            var parameter = FindParameter(descriptor.id);
             if(parameter != null)
                 return parameter;
 
-            var port = FindSlot<ShaderPort>(id);
+            var port = FindSlot<ShaderPort>(descriptor.id);
             if(port != null)
                 return port;
 
             return null;
-        }
-
-        internal string GetShaderValueString(int id, GenerationMode generationMode)
-        {
-            var parameter = FindParameter(id);
-            if (parameter != null)
-            {
-                if (generationMode.IsPreview())
-                    return parameter.ToShaderVariableName();
-
-                return parameter.ToShaderVariableValue(precision);
-            }
-
-            var port = FindSlot<ShaderPort>(id) as ShaderPort;
-            if (port != null)
-                return port.InputValue(owner, generationMode);
-
-            return string.Empty;
         }
 
         public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)
@@ -105,13 +126,13 @@ namespace UnityEditor.ShaderGraph
             {
                 ShaderPort port = slot as ShaderPort;
                 if(port.HasEdges())
-                    return;
+                    continue;
                 
-                properties.Add(port.ToPreviewProperty(port.ToShaderVariableName()));
+                properties.Add(port.ToPreviewProperty(port.ToVariableName()));
             }
 
             foreach(ShaderParameter parameter in m_Parameters)
-                properties.Add(parameter.ToPreviewProperty(parameter.ToShaderVariableName()));
+                properties.Add(parameter.ToPreviewProperty(parameter.ToVariableName()));
         }
 
         public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
@@ -123,7 +144,7 @@ namespace UnityEditor.ShaderGraph
             {
                 if(!port.HasEdges())
                 {
-                    string overrideReferenceName = port.ToShaderVariableName();
+                    string overrideReferenceName = port.ToVariableName();
                     IShaderProperty[] defaultProperties = port.ToDefaultPropertyArray(overrideReferenceName);
                     foreach(IShaderProperty property in defaultProperties)
                         properties.AddShaderProperty(property);
@@ -132,7 +153,7 @@ namespace UnityEditor.ShaderGraph
 
             foreach (var parameter in m_Parameters)
             {
-                string overrideReferenceName = parameter.ToShaderVariableName();
+                string overrideReferenceName = parameter.ToVariableName();
                 IShaderProperty[] defaultProperties = parameter.ToDefaultPropertyArray(overrideReferenceName);
                 foreach(IShaderProperty property in defaultProperties)
                         properties.AddShaderProperty(property);

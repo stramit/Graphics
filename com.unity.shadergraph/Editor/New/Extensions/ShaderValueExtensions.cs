@@ -7,13 +7,13 @@ namespace UnityEditor.ShaderGraph
 {
     internal static class ShaderValueExtensions
     {
-        internal static string ToShaderVariableName(this IShaderValue shaderValue)
+        internal static string ToVariableName(this IShaderValue shaderValue)
         {
             var matOwner = shaderValue.owner as AbstractMaterialNode;
             return string.Format("_{0}_{1}", matOwner.GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(shaderValue.shaderOutputName));
         }
 
-        internal static string ToShaderVariableValue(this IShaderValue shaderValue, AbstractMaterialNode.OutputPrecision precision)
+        internal static string ToVariableValue(this IShaderValue shaderValue, AbstractMaterialNode.OutputPrecision precision)
         {
             var matOwner = shaderValue.owner as AbstractMaterialNode;
             var channelCount = SlotValueHelper.GetChannelCount(shaderValue.concreteValueType);
@@ -59,6 +59,29 @@ namespace UnityEditor.ShaderGraph
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        internal static string ToVariableDefinition(this IShaderValue shaderValue, AbstractMaterialNode.OutputPrecision precision)
+        {
+            return string.Format("{0} {1}",
+                NodeUtils.ConvertConcreteSlotValueTypeToString(precision, shaderValue.concreteValueType),
+                shaderValue.ToVariableName());
+        }
+
+        internal static string ToVariableReference(this IShaderValue shaderValue, AbstractMaterialNode.OutputPrecision precision, GenerationMode generationMode)
+        {
+            if (shaderValue is ShaderParameter parameter)
+            {
+                if (generationMode.IsPreview())
+                    return parameter.ToVariableName();
+
+                return parameter.ToVariableValue(precision);
+            }
+
+            if (shaderValue is ShaderPort port)
+                return port.InputValue(shaderValue.owner.owner, generationMode);
+
+            return string.Empty;
         }
 
         internal static IShaderProperty[] ToDefaultPropertyArray(this IShaderValue shaderValue, string overrideReferenceName = null)

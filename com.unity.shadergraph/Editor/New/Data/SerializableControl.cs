@@ -20,7 +20,11 @@ namespace UnityEditor.ShaderGraph
         {
             get
             {
-                var control = (IShaderControl)Activator.CreateInstance(m_AssemblyName, m_TypeName).Unwrap();
+                IShaderControl control;
+                if(!string.IsNullOrEmpty(m_AssemblyName) && !string.IsNullOrEmpty(m_TypeName))
+                    control = (IShaderControl)Activator.CreateInstance(m_AssemblyName, m_TypeName).Unwrap();
+                else
+                    control = new DefaultControl();
                 control.controlData = m_ControlData;
                 return control;
             }

@@ -38,30 +38,11 @@ namespace UnityEditor.ShaderGraph
 
         public INode owner { get; set; }
 
-        public int id
-        {
-            get { return m_Id; }
-        }
-
-        public string displayName
-        {
-            get { return m_DisplayName; }
-        }
-
-        public string shaderOutputName
-        {
-            get { return m_ShaderOutputName; }
-        }
-
-        public ConcreteSlotValueType concreteValueType
-        {
-            get { return m_ConcreteSlotValueType; }
-        }
-
-        public ShaderValueData value
-        {
-            get { return m_ShaderValueData; }
-        }
+        public int id => m_Id;
+        public string displayName => m_DisplayName;
+        public string shaderOutputName => m_ShaderOutputName;
+        public ConcreteSlotValueType concreteValueType => m_ConcreteSlotValueType;
+        public ShaderValueData value => m_ShaderValueData;
 
         private IShaderControl m_Control;
         public IShaderControl control

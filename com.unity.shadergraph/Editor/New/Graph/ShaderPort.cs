@@ -37,17 +37,8 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         private SerializableControl m_SerializableControl = new SerializableControl();
 
-        // TODO: Defined by both MaterialSlot and IShaderValue
-        public override ConcreteSlotValueType concreteValueType
-        {
-            get { return m_ConcreteSlotValueType; }
-        }
-
-        // TODO: Cascading rename
-        public ShaderValueData value
-        {
-            get { return m_ShaderValueData; }
-        }
+        public override ConcreteSlotValueType concreteValueType => m_ConcreteSlotValueType;
+        public ShaderValueData value => m_ShaderValueData;
 
         private IShaderControl m_Control;
         public IShaderControl control
@@ -120,7 +111,7 @@ namespace UnityEditor.ShaderGraph
             if (matOwner == null)
                 throw new Exception(string.Format("Slot {0} either has no owner, or the owner is not a {1}", this, typeof(AbstractMaterialNode)));
 
-            string overrideReferenceName = this.ToShaderVariableName();
+            string overrideReferenceName = this.ToVariableName();
             IShaderProperty[] defaultProperties = this.ToDefaultPropertyArray(overrideReferenceName);
 
             foreach(IShaderProperty property in defaultProperties)
@@ -134,14 +125,14 @@ namespace UnityEditor.ShaderGraph
                 throw new Exception(string.Format("Slot {0} either has no owner, or the owner is not a {1}", this, typeof(AbstractMaterialNode)));
 
             if (generationMode.IsPreview())
-                return this.ToShaderVariableName();
+                return this.ToVariableName();
 
-            return this.ToShaderVariableValue(matOwner.precision);
+            return this.ToVariableValue(matOwner.precision);
         }
 
         protected override string ConcreteSlotValueAsVariable(AbstractMaterialNode.OutputPrecision precision)
         {
-            return this.ToShaderVariableValue(precision);
+            return this.ToVariableValue(precision);
         }
     }
 }

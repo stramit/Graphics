@@ -12,16 +12,16 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         private float[] m_Values = new float[0];
 
-        public string[] labels 
+        public string[] labels
         { 
-            get { return m_Labels; } 
-            set { m_Labels = value; }
+            get => m_Labels; 
+            set => m_Labels = value;
         }
 
         public float[] values 
         { 
-            get { return m_Values; } 
-            set { m_Values = value; }
+            get => m_Values;
+            set => m_Values = value;
         }
     }
 }
