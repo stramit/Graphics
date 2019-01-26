@@ -8,6 +8,7 @@ namespace UnityEditor.ShaderGraph
     {
         INode owner { get; set; }
         int id { get; }
+        string displayName { get; set; }
 
         ConcreteSlotValueType concreteValueType { get; }
         ShaderValueData value { get; }

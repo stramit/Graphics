@@ -1,10 +1,16 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEditor.Graphing;
 
 namespace UnityEditor.ShaderGraph
 {
+    [Serializable]
     class OutputDescriptor : IShaderValueDescriptor
     {
+        public OutputDescriptor()
+        {
+        }
+
         public OutputDescriptor(int id, string name, ConcreteSlotValueType valueType)
         {
             m_Id = id;
@@ -21,8 +27,18 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         private ConcreteSlotValueType m_ValueType;
 
-        public int id  => m_Id;
-        public string name => m_Name;
+        public int id
+        {  
+            get => m_Id;
+            set => m_Id = value;
+        }
+        
+        public string name 
+        {
+            get => m_Name;
+            set => m_Name = value;
+        }
+        
         public ConcreteSlotValueType valueType => m_ValueType;
         public SlotType portType => SlotType.Output;
     }

@@ -6,8 +6,8 @@ namespace UnityEditor.ShaderGraph
 {
     internal interface IShaderValueDescriptor
     {
-        int id { get; }
-        string name { get; }
+        int id { get; set; }
+        string name { get; set; }
         ConcreteSlotValueType valueType { get; }
         SlotType portType { get; }
     }

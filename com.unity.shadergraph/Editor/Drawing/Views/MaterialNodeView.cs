@@ -20,6 +20,8 @@ namespace UnityEditor.ShaderGraph.Drawing
         VisualElement m_PreviewContainer;
         VisualElement m_ControlItems;
         VisualElement m_PreviewFiller;
+        VisualElement m_ControlsArea;
+        VisualElement m_ControlsContainer;
         VisualElement m_ControlsDivider;
         IEdgeConnectorListener m_ConnectorListener;
         VisualElement m_PortInputContainer;
@@ -46,29 +48,35 @@ namespace UnityEditor.ShaderGraph.Drawing
             UpdateTitle();
 
             // Add controls container
-            var controlsContainer = new VisualElement { name = "controls" };
+            m_ControlsArea = new VisualElement { name = "ControlsContainer" };
             {
-                m_ControlsDivider = new VisualElement { name = "divider" };
-                m_ControlsDivider.AddToClassList("horizontal");
-                controlsContainer.Add(m_ControlsDivider);
-                m_ControlItems = new VisualElement { name = "items" };
-                controlsContainer.Add(m_ControlItems);
-
-                // Instantiate control views from node
-                foreach (var propertyInfo in node.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
-                    foreach (IControlAttribute attribute in propertyInfo.GetCustomAttributes(typeof(IControlAttribute), false))
-                        m_ControlItems.Add(attribute.InstantiateControl(node, propertyInfo));
-
-                // Instantiate controls for ShaderParameters
-                ShaderNode shaderNode = inNode as ShaderNode;
-                if(shaderNode != null && shaderNode.parameters != null)
+                m_ControlsContainer = new VisualElement { name = "controls" };
                 {
-                    foreach(ShaderParameter parameter in shaderNode.parameters)
-                        m_ControlItems.Add(GetControlForShaderParameter(parameter));
+                    m_ControlsDivider = new VisualElement { name = "divider" };
+                    m_ControlsDivider.AddToClassList("horizontal");
+                    m_ControlsContainer.Add(m_ControlsDivider);
+                    m_ControlItems = new VisualElement { name = "items" };
+                    m_ControlsContainer.Add(m_ControlItems);
+
+                    // Instantiate controls for ShaderParameters
+                    ShaderNode shaderNode = inNode as ShaderNode;
+                    if(shaderNode != null && shaderNode.parameters != null)
+                    {
+                        foreach(ShaderParameter parameter in shaderNode.parameters)
+                            m_ControlItems.Add(GetControlForShaderParameter(parameter));
+                    }
+                    else
+                    {
+                        // Instantiate control views from node
+                        foreach (var propertyInfo in node.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+                            foreach (IControlAttribute attribute in propertyInfo.GetCustomAttributes(typeof(IControlAttribute), false))
+                                m_ControlItems.Add(attribute.InstantiateControl(node, propertyInfo));
+                    }
                 }
+                if(m_ControlItems.childCount > 0)
+                    m_ControlsArea.Add(m_ControlsContainer);
             }
-            if (m_ControlItems.childCount > 0)
-                contents.Add(controlsContainer);
+            contents.Add(m_ControlsArea);
 
             if (node.hasPreview)
             {
@@ -217,7 +225,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             var labelContainer = new VisualElement { name = "LabelContainer" };
             labelContainer.style.width = 60;
             var label = new Label(parameter.displayName);
-            label.style.paddingTop = 4;
+            label.style.paddingTop = 3;
             labelContainer.Add(label);
             container.Add(labelContainer);
 
@@ -225,7 +233,6 @@ namespace UnityEditor.ShaderGraph.Drawing
             valueContainer.Add(parameter.control.GetControl(parameter));
             valueContainer.style.flexGrow = 1;
             container.Add(valueContainer);
-            m_ControlItems.Add(container);
             return container;
         } 
 
@@ -438,6 +445,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             if (scope == ModificationScope.Topological)
             {
                 RecreateSettings();
+                RecreateParameterControls();
 
                 var slots = node.GetSlots<MaterialSlot>().ToList();
 
@@ -501,6 +509,33 @@ namespace UnityEditor.ShaderGraph.Drawing
             {
                 if (listener != null)
                     listener.OnNodeModified(scope);
+            }
+        }
+
+        void RecreateParameterControls()
+        {
+            ShaderNode shaderNode = node as ShaderNode;
+            if(shaderNode == null)
+                return;
+            
+            var currentControls = m_ControlItems.Children().ToArray();
+            for(int i = 0; i < currentControls.Length; i++)
+                currentControls[i].RemoveFromHierarchy();
+
+            if(shaderNode.parameters != null)
+            {
+                foreach(ShaderParameter parameter in shaderNode.parameters)
+                    m_ControlItems.Add(GetControlForShaderParameter(parameter));
+            }
+            if(m_ControlsArea.Contains(m_ControlsContainer))
+            {
+                if(m_ControlItems.childCount == 0)
+                    m_ControlsArea.Remove(m_ControlsContainer);
+            }
+            else
+            {
+                if(m_ControlItems.childCount > 0)
+                    m_ControlsArea.Add(m_ControlsContainer);
             }
         }
 

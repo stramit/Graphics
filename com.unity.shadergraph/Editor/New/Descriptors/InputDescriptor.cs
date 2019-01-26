@@ -5,8 +5,13 @@ using UnityEditor.Graphing;
 
 namespace UnityEditor.ShaderGraph
 {
+    [Serializable]
     class InputDescriptor : IShaderValueDescriptor
     {
+        public InputDescriptor()
+        {
+        }
+
         public InputDescriptor(int id, string name, ConcreteSlotValueType valueType)
         {
             m_Id = id;
@@ -47,8 +52,18 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         private SerializableControl m_SerializableControl = new SerializableControl();
 
-        public int id  => m_Id;
-        public string name => m_Name;
+        public int id
+        {  
+            get => m_Id;
+            set => m_Id = value;
+        }
+        
+        public string name 
+        {
+            get => m_Name;
+            set => m_Name = value;
+        }
+
         public ConcreteSlotValueType valueType => m_ValueType;
         public SlotType portType => SlotType.Input;
         public ShaderValueData defaultValue => m_DefaultValue;

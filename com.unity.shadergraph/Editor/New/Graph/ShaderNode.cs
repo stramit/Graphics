@@ -17,6 +17,7 @@ namespace UnityEditor.ShaderGraph
                 return;
 
             name = context.type.name;
+            m_Preview = context.type.preview;
             AddShaderValuesFromTypeDescriptor(context.type);
         }
 
@@ -26,6 +27,9 @@ namespace UnityEditor.ShaderGraph
         private List<ShaderParameter> m_Parameters = new List<ShaderParameter>();
 
         internal List<ShaderParameter> parameters => m_Parameters;
+
+        private bool m_Preview;
+        public override bool hasPreview => m_Preview;
 
         internal void AddShaderValuesFromTypeDescriptor(NodeTypeDescriptor descriptor)
         {
@@ -60,7 +64,7 @@ namespace UnityEditor.ShaderGraph
             RemoveParametersNameNotMatching(validParameters);
         }
 
-        private void AddParameter(ShaderParameter parameter)
+        public void AddParameter(ShaderParameter parameter)
         {
             var addingParameter = parameter;
             var foundParameter = FindParameter(parameter.id);
@@ -93,7 +97,21 @@ namespace UnityEditor.ShaderGraph
             return null;
         }
 
-        private void RemoveParametersNameNotMatching(IEnumerable<int> parameterIds, bool supressWarnings = false)
+        internal void GetParameters(List<ShaderParameter> foundSlots)
+        {
+            foreach (var slot in m_Parameters)
+            {
+                foundSlots.Add(slot);
+            }
+        }
+
+        public void RemoveShaderValuesNotMatching(IEnumerable<int> shaderValueIds, bool supressWarnings = false)
+        {
+            RemoveParametersNameNotMatching(shaderValueIds, supressWarnings);
+            RemoveSlotsNameNotMatching(shaderValueIds, supressWarnings);
+        }
+
+        public void RemoveParametersNameNotMatching(IEnumerable<int> parameterIds, bool supressWarnings = false)
         {
             var invalidParameters = m_Parameters.Select(x => x.id).Except(parameterIds);
 
@@ -116,6 +134,15 @@ namespace UnityEditor.ShaderGraph
                 return port;
 
             return null;
+        }
+
+        internal List<IShaderValue> GetShaderValues()
+        {
+            List<ShaderPort> ports = new List<ShaderPort>();
+            GetSlots(ports);
+            List<ShaderParameter> parameters = new List<ShaderParameter>();
+            GetParameters(parameters);
+            return ports.ToList<IShaderValue>().Union(parameters.ToList<IShaderValue>()).ToList();
         }
 
         public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)

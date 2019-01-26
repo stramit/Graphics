@@ -17,7 +17,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             m_Node = node;
 
             PropertySheet ps = new PropertySheet();
-
+            ps.style.width = 362;
             ps.Add(new PropertyRow(new Label("Workflow")), (row) =>
                 {
                     row.Add(new EnumField(PBRMasterNode.Model.Metallic), (field) =>

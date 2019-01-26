@@ -152,5 +152,42 @@ namespace UnityEditor.ShaderGraph
                     throw new ArgumentOutOfRangeException();
             }
         }
+
+        internal static Type ToDefaultControlType(this ConcreteSlotValueType concreteSlotValueType)
+        {
+            switch (concreteSlotValueType)
+            {
+                case ConcreteSlotValueType.Vector4:
+                    return typeof(Vector4Control);
+                case ConcreteSlotValueType.Vector3:
+                    return typeof(Vector3Control);
+                case ConcreteSlotValueType.Vector2:
+                    return typeof(Vector2Control);
+                case ConcreteSlotValueType.Vector1:
+                    return typeof(Vector1Control);
+                case ConcreteSlotValueType.Boolean:
+                    return typeof(ToggleControl);
+                case ConcreteSlotValueType.Texture2D:
+                    return typeof(TextureControl<Texture>);
+                case ConcreteSlotValueType.Texture3D:
+                    return typeof(TextureControl<Texture3D>);
+                case ConcreteSlotValueType.Texture2DArray:
+                    return typeof(TextureControl<Texture2DArray>);
+                case ConcreteSlotValueType.Cubemap:
+                    return typeof(TextureControl<Cubemap>);
+                case ConcreteSlotValueType.SamplerState:
+                    return typeof(LabelControl);
+                case ConcreteSlotValueType.Matrix2:
+                    return typeof(LabelControl);
+                case ConcreteSlotValueType.Matrix3:
+                    return typeof(LabelControl);
+                case ConcreteSlotValueType.Matrix4:
+                    return typeof(LabelControl);
+                case ConcreteSlotValueType.Gradient:
+                    return typeof(GradientControl);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
     }
 }
