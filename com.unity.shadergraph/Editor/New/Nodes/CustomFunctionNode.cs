@@ -9,7 +9,7 @@ using UnityEditor.ShaderGraph.Drawing.Controls;
 
 namespace UnityEditor.ShaderGraph.NodeLibrary
 {
-    sealed class ListNode : ShaderNode, IHasSettings, IGeneratesBodyCode, IGeneratesFunction
+    sealed class CustomFunctionNode : ShaderNode, IHasSettings, IGeneratesBodyCode, IGeneratesFunction
     {
         [SerializeField]
         private List<InputDescriptor> m_InDescriptors = new List<InputDescriptor>();
@@ -50,7 +50,7 @@ namespace UnityEditor.ShaderGraph.NodeLibrary
             context.CreateNodeType(new NodeTypeDescriptor
             {
                 path = "INTERNAL",
-                name = "List",
+                name = "Custom Function",
                 preview = true
             });
         }

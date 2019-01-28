@@ -33,13 +33,13 @@ namespace UnityEditor.ShaderGraph.Drawing
         private TextField m_FunctionSource;
         private TextField m_FunctionBody;
 
-        internal HlslSourceView(ListNode node, HlslFunctionDescriptor function)
+        internal HlslSourceView(CustomFunctionNode node, HlslFunctionDescriptor function)
         {
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/SettingsViews/HlslSourceView"));
             Draw(node, function);            
         }
 
-        private void Draw(ListNode node, HlslFunctionDescriptor function)
+        private void Draw(CustomFunctionNode node, HlslFunctionDescriptor function)
         {
             var currentControls = this.Children().ToArray();
             for(int i = 0; i < currentControls.Length; i++)
