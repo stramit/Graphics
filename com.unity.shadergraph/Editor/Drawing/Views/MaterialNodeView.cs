@@ -441,7 +441,7 @@ namespace UnityEditor.ShaderGraph.Drawing
 
                 var slots = node.GetSlots<MaterialSlot>().ToList();
 
-                var inputPorts = inputContainer.Children().OfType<ShaderPort>().ToList();
+                var inputPorts = inputContainer.Children().OfType<ShaderPortView>().ToList();
                 foreach (var port in inputPorts)
                 {
                     var currentSlot = port.slot;
@@ -466,7 +466,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                     }
                 }
 
-                var outputPorts = outputContainer.Children().OfType<ShaderPort>().ToList();
+                var outputPorts = outputContainer.Children().OfType<ShaderPortView>().ToList();
                 foreach (var port in outputPorts)
                 {
                     var currentSlot = port.slot;
@@ -488,9 +488,9 @@ namespace UnityEditor.ShaderGraph.Drawing
                 slots.AddRange(node.GetSlots<MaterialSlot>());
 
                 if (inputContainer.childCount > 0)
-                    inputContainer.Sort((x, y) => slots.IndexOf(((ShaderPort)x).slot) - slots.IndexOf(((ShaderPort)y).slot));
+                    inputContainer.Sort((x, y) => slots.IndexOf(((ShaderPortView)x).slot) - slots.IndexOf(((ShaderPortView)y).slot));
                 if (outputContainer.childCount > 0)
-                    outputContainer.Sort((x, y) => slots.IndexOf(((ShaderPort)x).slot) - slots.IndexOf(((ShaderPort)y).slot));
+                    outputContainer.Sort((x, y) => slots.IndexOf(((ShaderPortView)x).slot) - slots.IndexOf(((ShaderPortView)y).slot));
             }
 
             RefreshExpandedState(); //This should not be needed. GraphView needs to improve the extension api here
@@ -511,7 +511,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 if (slot.hidden)
                     continue;
 
-                var port = ShaderPort.Create(slot, m_ConnectorListener);
+                var port = ShaderPortView.Create(slot, m_ConnectorListener);
                 if (slot.isOutputSlot)
                     outputContainer.Add(port);
                 else
@@ -521,18 +521,18 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         void UpdatePortInputs()
         {
-            foreach (var port in inputContainer.Children().OfType<ShaderPort>())
+            foreach (var port in inputContainer.Children().OfType<ShaderPortView>())
             {
                 if (!m_PortInputContainer.Children().OfType<PortInputView>().Any(a => Equals(a.slot, port.slot)))
                 {
                     var portInputView = new PortInputView(port.slot) { style = { position = Position.Absolute } };
                     m_PortInputContainer.Add(portInputView);
-                    port.RegisterCallback<GeometryChangedEvent>(evt => UpdatePortInput((ShaderPort)evt.target));
+                    port.RegisterCallback<GeometryChangedEvent>(evt => UpdatePortInput((ShaderPortView)evt.target));
                 }
             }
         }
 
-        void UpdatePortInput(ShaderPort port)
+        void UpdatePortInput(ShaderPortView port)
         {
             var inputView = m_PortInputContainer.Children().OfType<PortInputView>().First(x => Equals(x.slot, port.slot));
 
@@ -565,7 +565,7 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         public void UpdatePortInputTypes()
         {
-            foreach (var anchor in inputContainer.Children().Concat(outputContainer.Children()).OfType<ShaderPort>())
+            foreach (var anchor in inputContainer.Children().Concat(outputContainer.Children()).OfType<ShaderPortView>())
             {
                 var slot = anchor.slot;
                 anchor.portName = slot.displayName;

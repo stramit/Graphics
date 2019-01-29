@@ -17,7 +17,7 @@ namespace UnityEditor.ShaderGraph.Drawing
         AbstractMaterialGraph m_Graph;
         GraphView m_GraphView;
         Texture2D m_Icon;
-        public ShaderPort connectedPort { get; set; }
+        public ShaderPortView connectedPort { get; set; }
         public bool nodeNeedsRepositioning { get; set; }
         public SlotReference targetSlotReference { get; private set; }
         public Vector2 targetPosition { get; private set; }

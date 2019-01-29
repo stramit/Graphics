@@ -5,9 +5,9 @@ using UnityEngine.UIElements;
 
 namespace UnityEditor.ShaderGraph.Drawing
 {
-    sealed class ShaderPort : Port
+    sealed class ShaderPortView : Port
     {
-        ShaderPort(Orientation portOrientation, Direction portDirection, Capacity portCapacity, Type type)
+        ShaderPortView(Orientation portOrientation, Direction portDirection, Capacity portCapacity, Type type)
             : base(portOrientation, portDirection, portCapacity, type)
         {
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderPort"));
@@ -17,7 +17,7 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         public static Port Create(MaterialSlot slot, IEdgeConnectorListener connectorListener)
         {
-            var port = new ShaderPort(Orientation.Horizontal, slot.isInputSlot ? Direction.Input : Direction.Output,
+            var port = new ShaderPortView(Orientation.Horizontal, slot.isInputSlot ? Direction.Input : Direction.Output,
                     slot.isInputSlot ? Capacity.Single : Capacity.Multi, null)
             {
                 m_EdgeConnector = new EdgeConnector<Edge>(connectorListener),
@@ -51,7 +51,7 @@ namespace UnityEditor.ShaderGraph.Drawing
     {
         public static MaterialSlot GetSlot(this Port port)
         {
-            var shaderPort = port as ShaderPort;
+            var shaderPort = port as ShaderPortView;
             return shaderPort != null ? shaderPort.slot : null;
         }
     }

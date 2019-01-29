@@ -540,7 +540,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 m_SearchWindowProvider.nodeNeedsRepositioning = false;
                 foreach (var element in nodeView.inputContainer.Children().Union(nodeView.outputContainer.Children()))
                 {
-                    var port = element as ShaderPort;
+                    var port = element as ShaderPortView;
                     if (port == null)
                         continue;
                     if (port.slot.slotReference.Equals(m_SearchWindowProvider.targetSlotReference))
@@ -578,7 +578,7 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         static void RepositionNode(GeometryChangedEvent evt)
         {
-            var port = evt.target as ShaderPort;
+            var port = evt.target as ShaderPortView;
             if (port == null)
                 return;
             port.UnregisterCallback<GeometryChangedEvent>(RepositionNode);
@@ -617,10 +617,10 @@ namespace UnityEditor.ShaderGraph.Drawing
             var sourceNodeView = m_GraphView.nodes.ToList().OfType<MaterialNodeView>().FirstOrDefault(x => x.node == sourceNode);
             if (sourceNodeView != null)
             {
-                var sourceAnchor = sourceNodeView.outputContainer.Children().OfType<ShaderPort>().FirstOrDefault(x => x.slot.Equals(sourceSlot));
+                var sourceAnchor = sourceNodeView.outputContainer.Children().OfType<ShaderPortView>().FirstOrDefault(x => x.slot.Equals(sourceSlot));
 
                 var targetNodeView = m_GraphView.nodes.ToList().OfType<MaterialNodeView>().FirstOrDefault(x => x.node == targetNode);
-                var targetAnchor = targetNodeView.inputContainer.Children().OfType<ShaderPort>().FirstOrDefault(x => x.slot.Equals(targetSlot));
+                var targetAnchor = targetNodeView.inputContainer.Children().OfType<ShaderPortView>().FirstOrDefault(x => x.slot.Equals(targetSlot));
 
                 var edgeView = new Edge
                 {
