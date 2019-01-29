@@ -30,15 +30,15 @@ namespace UnityEditor.ShaderGraph.NodeLibrary
                 colorShaderValue.ToVariableReference(precision, generationMode)));
         }
 
-        public IShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
             var colorParameter = GetShaderValue(m_Color);
             var modeParameter = GetShaderValue(m_Mode);
-            return new ColorShaderProperty 
-            { 
-                value = colorParameter.value.vectorValue, 
-                colorMode = (ColorMode)modeParameter.value.vectorValue.x 
-            };
+            return new ShaderProperty(PropertyType.Color); 
+            // { 
+            //     value = colorParameter.value.vectorValue, 
+            //     colorMode = (ColorMode)modeParameter.value.vectorValue.x 
+            // };
         }
 
         public int outputSlotId { get { return m_Out.id; } }

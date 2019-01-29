@@ -220,23 +220,23 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             return validSlots.OfType<IMayRequirePosition>().Aggregate(NeededCoordinateSpace.None, (mask, node) => mask | node.RequiresPosition(stageCapability));
         }
 
-        public override void CollectShaderProperties(PropertyCollector collector, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector collector, GenerationMode generationMode)
         {
-            Vector1ShaderProperty drawOrder = new Vector1ShaderProperty();
+            ShaderProperty drawOrder = new ShaderProperty(PropertyType.Vector1);
             drawOrder.overrideReferenceName = "_DrawOrder";
             drawOrder.displayName = "Draw Order";
-            drawOrder.floatType = FloatType.Integer;
-            drawOrder.value = 0;
-            collector.AddShaderProperty(drawOrder);
+            // drawOrder.floatType = FloatType.Integer;
+            // drawOrder.value = 0;
+            collector.AddGraphInput(drawOrder);
 
-            Vector1ShaderProperty decalMeshDepthBias = new Vector1ShaderProperty();
+            ShaderProperty decalMeshDepthBias = new ShaderProperty(PropertyType.Vector1);
             decalMeshDepthBias.overrideReferenceName = "_DecalMeshDepthBias";
             decalMeshDepthBias.displayName = "DecalMesh DepthBias";
-            decalMeshDepthBias.floatType = FloatType.Default;
-            decalMeshDepthBias.value = 0;
-            collector.AddShaderProperty(decalMeshDepthBias);
+            // decalMeshDepthBias.floatType = FloatType.Default;
+            // decalMeshDepthBias.value = 0;
+            collector.AddGraphInput(decalMeshDepthBias);
 
-            base.CollectShaderProperties(collector, generationMode);
+            base.CollectGraphInputs(collector, generationMode);
         }
 
         [SerializeField]

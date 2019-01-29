@@ -113,14 +113,14 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector properties, GenerationMode generationMode)
         {
             if (!generationMode.IsPreview())
                 return;
 
-            base.CollectShaderProperties(properties, generationMode);
+            base.CollectGraphInputs(properties, generationMode);
 
-            properties.AddShaderProperty(new Vector2ShaderProperty()
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Vector2)
             {
                 overrideReferenceName = string.Format("_{0}_Invert", GetVariableNameForNode()),
                 generatePropertyBlock = false

@@ -146,17 +146,17 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector properties, GenerationMode generationMode)
         {
             if (!generationMode.IsPreview())
                 return;
 
-            base.CollectShaderProperties(properties, generationMode);
+            base.CollectGraphInputs(properties, generationMode);
 
-            properties.AddShaderProperty(new Vector4ShaderProperty
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Vector4)
             {
                 overrideReferenceName = string.Format("_{0}_InvertColors", GetVariableNameForNode()),
-                generatePropertyBlock = false
+                //generatePropertyBlock = false
             });
         }
 

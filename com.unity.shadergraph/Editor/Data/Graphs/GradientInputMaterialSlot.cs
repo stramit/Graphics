@@ -60,57 +60,57 @@ namespace UnityEditor.ShaderGraph
 
             if (generationMode == GenerationMode.Preview)
             {
-                properties.AddShaderProperty(new Vector1ShaderProperty()
-                {
-                    overrideReferenceName = string.Format("{0}_Type", matOwner.GetVariableNameForSlot(id)),
-                    value = (int)value.mode,
-                    generatePropertyBlock = false
-                });
+                properties.AddGraphInput(new ShaderProperty(PropertyType.Vector1));
+                // {
+                //     overrideReferenceName = string.Format("{0}_Type", matOwner.GetVariableNameForSlot(id)),
+                //     value = (int)value.mode,
+                //     generatePropertyBlock = false
+                // });
 
-                properties.AddShaderProperty(new Vector1ShaderProperty()
-                {
-                    overrideReferenceName = string.Format("{0}_ColorsLength", matOwner.GetVariableNameForSlot(id)),
-                    value = value.colorKeys.Length,
-                    generatePropertyBlock = false
-                });
+                properties.AddGraphInput(new ShaderProperty(PropertyType.Vector1));
+                // {
+                //     overrideReferenceName = string.Format("{0}_ColorsLength", matOwner.GetVariableNameForSlot(id)),
+                //     value = value.colorKeys.Length,
+                //     generatePropertyBlock = false
+                // });
 
-                properties.AddShaderProperty(new Vector1ShaderProperty()
-                {
-                    overrideReferenceName = string.Format("{0}_AlphasLength", matOwner.GetVariableNameForSlot(id)),
-                    value = value.alphaKeys.Length,
-                    generatePropertyBlock = false
-                });
+                properties.AddGraphInput(new ShaderProperty(PropertyType.Vector1));
+                // {
+                //     overrideReferenceName = string.Format("{0}_AlphasLength", matOwner.GetVariableNameForSlot(id)),
+                //     value = value.alphaKeys.Length,
+                //     generatePropertyBlock = false
+                // });
 
                 for (int i = 0; i < 8; i++)
                 {
-                    properties.AddShaderProperty(new Vector4ShaderProperty()
-                    {
-                        overrideReferenceName = string.Format("{0}_ColorKey{1}", matOwner.GetVariableNameForSlot(id), i),
-                        value = i < value.colorKeys.Length ? GradientUtils.ColorKeyToVector(value.colorKeys[i]) : Vector4.zero,
-                        generatePropertyBlock = false
-                    });
+                    properties.AddGraphInput(new ShaderProperty(PropertyType.Vector4));
+                    // {
+                    //     overrideReferenceName = string.Format("{0}_ColorKey{1}", matOwner.GetVariableNameForSlot(id), i),
+                    //     value = i < value.colorKeys.Length ? GradientUtils.ColorKeyToVector(value.colorKeys[i]) : Vector4.zero,
+                    //     generatePropertyBlock = false
+                    // });
                 }
 
                 for (int i = 0; i < 8; i++)
                 {
-                    properties.AddShaderProperty(new Vector4ShaderProperty()
-                    {
-                        overrideReferenceName = string.Format("{0}_AlphaKey{1}", matOwner.GetVariableNameForSlot(id), i),
-                        value = i < value.alphaKeys.Length ? GradientUtils.AlphaKeyToVector(value.alphaKeys[i]) : Vector2.zero,
-                        generatePropertyBlock = false
-                    });
+                    properties.AddGraphInput(new ShaderProperty(PropertyType.Vector4));
+                    // {
+                    //     overrideReferenceName = string.Format("{0}_AlphaKey{1}", matOwner.GetVariableNameForSlot(id), i),
+                    //     value = i < value.alphaKeys.Length ? GradientUtils.AlphaKeyToVector(value.alphaKeys[i]) : Vector2.zero,
+                    //     generatePropertyBlock = false
+                    // });
                 }
             }
 
-            var prop = new GradientShaderProperty();
-            prop.overrideReferenceName = matOwner.GetVariableNameForSlot(id);
-            prop.generatePropertyBlock = false;
-            prop.value = value;
+            var prop = new ShaderProperty(PropertyType.Vector1);
+            // prop.overrideReferenceName = matOwner.GetVariableNameForSlot(id);
+            // prop.generatePropertyBlock = false;
+            // prop.value = value;
 
             if (generationMode == GenerationMode.Preview)
                 prop.OverrideMembers(matOwner.GetVariableNameForSlot(id));
 
-            properties.AddShaderProperty(prop);
+            properties.AddGraphInput(prop);
         }
 
         public override void GetPreviewProperties(List<PreviewProperty> properties, string name)

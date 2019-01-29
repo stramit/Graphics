@@ -91,103 +91,103 @@ namespace UnityEditor.ShaderGraph
         }
     }
 
-    [Serializable]
-    class GradientShaderProperty : AbstractShaderProperty<Gradient>
-    {
-        public GradientShaderProperty()
-        {
-            displayName = "Gradient";
-            value = new Gradient();
-        }
+//     [Serializable]
+//     class GradientShaderProperty : AbstractShaderProperty<Gradient>
+//     {
+//         public GradientShaderProperty()
+//         {
+//             displayName = "Gradient";
+//             value = new Gradient();
+//         }
 
-        private bool m_OverrideMembers = false;
+//         private bool m_OverrideMembers = false;
 
-        private string m_OverrideSlotName;
+//         private string m_OverrideSlotName;
 
-        public override PropertyType propertyType
-        {
-            get { return PropertyType.Gradient; }
-        }
+//         public override PropertyType propertyType
+//         {
+//             get { return PropertyType.Gradient; }
+//         }
 
-        public override Vector4 defaultValue
-        {
-            get { return new Vector4(); }
-        }
+//         public override Vector4 defaultValue
+//         {
+//             get { return new Vector4(); }
+//         }
 
-        public override bool isBatchable
-        {
-            get { return false; }
-        }
+//         public override bool isBatchable
+//         {
+//             get { return false; }
+//         }
 
-        public override string GetPropertyBlockString()
-        {
-            return string.Empty;
-        }
+//         public override string GetPropertyBlockString()
+//         {
+//             return string.Empty;
+//         }
 
-        public void OverrideMembers(string slotName)
-        {
-            m_OverrideMembers = true;
-            m_OverrideSlotName = slotName;
-        }
+//         public void OverrideMembers(string slotName)
+//         {
+//             m_OverrideMembers = true;
+//             m_OverrideSlotName = slotName;
+//         }
 
-        public override string GetPropertyDeclarationString(string delimiter = ";")
-        {
-            if (m_OverrideMembers)
-            {
-                ShaderStringBuilder s = new ShaderStringBuilder();
-                s.AppendLine("Gradient Unity{0} ()",
-                    referenceName);
-                using (s.BlockScope())
-                {
-                    s.AppendLine("Gradient g;");
-                    s.AppendLine("g.type = {0}_Type;", m_OverrideSlotName);
-                    s.AppendLine("g.colorsLength = {0}_ColorsLength;", m_OverrideSlotName);
-                    s.AppendLine("g.alphasLength = {0}_AlphasLength;", m_OverrideSlotName);
-                    for (int i = 0; i < 8; i++)
-                    {
-                        s.AppendLine("g.colors[{0}] = {1}_ColorKey{0};", i, m_OverrideSlotName);
-                    }
-                    for (int i = 0; i < 8; i++)
-                    {
-                        s.AppendLine("g.alphas[{0}] = {1}_AlphaKey{0};", i, m_OverrideSlotName);
-                    }
-                    s.AppendLine("return g;", true);
-                }
-                return s.ToString();
-            }
-            else
-            {
-                ShaderStringBuilder s = new ShaderStringBuilder();
-                s.AppendLine("Gradient Unity{0} ()", referenceName);
-                using (s.BlockScope())
-                {
-                    GradientUtils.GetGradientDeclaration(value, ref s);
-                    s.AppendLine("return g;", true);
-                }
-                return s.ToString();
-            }
-        }
+//         public override string GetPropertyDeclarationString(string delimiter = ";")
+//         {
+//             if (m_OverrideMembers)
+//             {
+//                 ShaderStringBuilder s = new ShaderStringBuilder();
+//                 s.AppendLine("Gradient Unity{0} ()",
+//                     referenceName);
+//                 using (s.BlockScope())
+//                 {
+//                     s.AppendLine("Gradient g;");
+//                     s.AppendLine("g.type = {0}_Type;", m_OverrideSlotName);
+//                     s.AppendLine("g.colorsLength = {0}_ColorsLength;", m_OverrideSlotName);
+//                     s.AppendLine("g.alphasLength = {0}_AlphasLength;", m_OverrideSlotName);
+//                     for (int i = 0; i < 8; i++)
+//                     {
+//                         s.AppendLine("g.colors[{0}] = {1}_ColorKey{0};", i, m_OverrideSlotName);
+//                     }
+//                     for (int i = 0; i < 8; i++)
+//                     {
+//                         s.AppendLine("g.alphas[{0}] = {1}_AlphaKey{0};", i, m_OverrideSlotName);
+//                     }
+//                     s.AppendLine("return g;", true);
+//                 }
+//                 return s.ToString();
+//             }
+//             else
+//             {
+//                 ShaderStringBuilder s = new ShaderStringBuilder();
+//                 s.AppendLine("Gradient Unity{0} ()", referenceName);
+//                 using (s.BlockScope())
+//                 {
+//                     GradientUtils.GetGradientDeclaration(value, ref s);
+//                     s.AppendLine("return g;", true);
+//                 }
+//                 return s.ToString();
+//             }
+//         }
 
-        public override PreviewProperty GetPreviewMaterialProperty()
-        {
-            return new PreviewProperty(PropertyType.Gradient)
-            {
-                name = referenceName,
-                gradientValue = value
-            };
-        }
+//         public override PreviewProperty GetPreviewMaterialProperty()
+//         {
+//             return new PreviewProperty(PropertyType.Gradient)
+//             {
+//                 name = referenceName,
+//                 gradientValue = value
+//             };
+//         }
 
-        public override INode ToConcreteNode()
-        {
-            return new GradientNode { gradient = value };
-        }
+//         public override INode ToConcreteNode()
+//         {
+//             return new GradientNode { gradient = value };
+//         }
 
-        public override IShaderProperty Copy()
-        {
-            return new GradientShaderProperty
-            {
-                value = value
-            };
-        }
-    }
+//         public override IShaderProperty Copy()
+//         {
+//             return new GradientShaderProperty
+//             {
+//                 value = value
+//             };
+//         }
+//     }
 }

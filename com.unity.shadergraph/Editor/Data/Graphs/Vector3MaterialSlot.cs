@@ -67,13 +67,13 @@ namespace UnityEditor.ShaderGraph
             if (matOwner == null)
                 throw new Exception(string.Format("Slot {0} either has no owner, or the owner is not a {1}", this, typeof(AbstractMaterialNode)));
 
-            var property = new Vector3ShaderProperty()
-            {
-                overrideReferenceName = matOwner.GetVariableNameForSlot(id),
-                generatePropertyBlock = false,
-                value = value
-            };
-            properties.AddShaderProperty(property);
+            var property = new ShaderProperty(PropertyType.Vector3);
+            // {
+            //     overrideReferenceName = matOwner.GetVariableNameForSlot(id),
+            //     generatePropertyBlock = false,
+            //     value = value
+            // };
+            properties.AddGraphInput(property);
         }
 
         public override void GetPreviewProperties(List<PreviewProperty> properties, string name)

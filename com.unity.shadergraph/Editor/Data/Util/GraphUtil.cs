@@ -978,14 +978,14 @@ namespace UnityEditor.ShaderGraph
             // -------------------------------------
             // Add preview shader output property
 
-            results.outputIdProperty = new Vector1ShaderProperty
-            {
-                displayName = "OutputId",
-                generatePropertyBlock = false,
-                value = -1
-            };
+            results.outputIdProperty = new ShaderProperty(PropertyType.Vector1);
+            // {
+            //     displayName = "OutputId",
+            //     generatePropertyBlock = false,
+            //     value = -1
+            // };
             if (isUber)
-                shaderProperties.AddShaderProperty(results.outputIdProperty);
+                shaderProperties.AddGraphInput(results.outputIdProperty);
 
             // ----------------------------------------------------- //
             //                START VERTEX DESCRIPTION               //
@@ -1177,7 +1177,7 @@ namespace UnityEditor.ShaderGraph
             GenerationMode mode,
             string functionName = "PopulateSurfaceData",
             string surfaceDescriptionName = "SurfaceDescription",
-            Vector1ShaderProperty outputIdProperty = null,
+            ShaderProperty outputIdProperty = null,
             IEnumerable<MaterialSlot> slots = null,
             string graphInputStructName = "SurfaceDescriptionInputs")
         {
@@ -1186,7 +1186,7 @@ namespace UnityEditor.ShaderGraph
 
             GraphContext graphContext = new GraphContext(graphInputStructName);
 
-            graph.CollectShaderProperties(shaderProperties, mode);
+            graph.CollectGraphInputs(shaderProperties, mode);
 
             surfaceDescriptionFunction.AppendLine(String.Format("{0} {1}(SurfaceDescriptionInputs IN)", surfaceDescriptionName, functionName), false);
             using (surfaceDescriptionFunction.BlockScope())
@@ -1222,7 +1222,7 @@ namespace UnityEditor.ShaderGraph
                         }
                     }
 
-                    activeNode.CollectShaderProperties(shaderProperties, mode);
+                    activeNode.CollectGraphInputs(shaderProperties, mode);
                 }
                 surfaceDescriptionFunction.AppendLines(sg.GetShaderString(0));
                 functionRegistry.builder.currentNode = null;
@@ -1297,7 +1297,7 @@ namespace UnityEditor.ShaderGraph
 
             GraphContext graphContext = new GraphContext(graphInputStructName);
 
-            graph.CollectShaderProperties(shaderProperties, mode);
+            graph.CollectGraphInputs(shaderProperties, mode);
 
             builder.AppendLine("{0} {1}({2} IN)", graphOutputStructName, functionName, graphInputStructName);
             using (builder.BlockScope())
@@ -1317,7 +1317,7 @@ namespace UnityEditor.ShaderGraph
                     {
                         generatesBodyCode.GenerateNodeCode(sg, graphContext, mode);
                     }
-                    node.CollectShaderProperties(shaderProperties, mode);
+                    node.CollectGraphInputs(shaderProperties, mode);
                 }
                 builder.AppendLines(sg.GetShaderString(0));
                 foreach (var slot in slots)

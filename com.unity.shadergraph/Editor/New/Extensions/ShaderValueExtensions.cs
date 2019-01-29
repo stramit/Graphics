@@ -84,70 +84,76 @@ namespace UnityEditor.ShaderGraph
             return string.Empty;
         }
 
-        internal static IShaderProperty[] ToDefaultPropertyArray(this IShaderValue shaderValue, string overrideReferenceName = null)
+        internal static AbstractMaterialNode ToProperty(this IShaderValue shaderValue)
+        {
+            Debug.LogError("TODO: HANDLE CONVERISON TO CONCRETE NODE!");
+            return null;
+        }
+
+        internal static ShaderProperty[] ToDefaultPropertyArray(this IShaderValue shaderValue, string overrideReferenceName = null)
         {
             if(shaderValue.concreteValueType == ConcreteSlotValueType.Gradient)
                 return GradientShaderValueToDefaultPropertyArray(shaderValue, overrideReferenceName);
 
-            IShaderProperty property = shaderValue.concreteValueType.ToShaderProperty();
+            ShaderProperty property = shaderValue.concreteValueType.ToShaderProperty();
 
-            property.generatePropertyBlock = false;
+            //property.generatePropertyBlock = false;
 
             if(overrideReferenceName != null)
                 property.overrideReferenceName = overrideReferenceName;
             
-            return new IShaderProperty[] { property };
+            return new ShaderProperty[] { property };
         }
 
-        private static IShaderProperty[] GradientShaderValueToDefaultPropertyArray(IShaderValue shaderValue, string overrideReferenceName)
+        private static ShaderProperty[] GradientShaderValueToDefaultPropertyArray(IShaderValue shaderValue, string overrideReferenceName)
         {
-            List<IShaderProperty> properties = new List<IShaderProperty>();
-            properties.Add(new Vector1ShaderProperty()
-            {
-                overrideReferenceName = string.Format("{0}_Type", overrideReferenceName),
-                value = (int)shaderValue.value.gradientValue.mode,
-                generatePropertyBlock = false
-            });
+            List<ShaderProperty> properties = new List<ShaderProperty>();
+            // properties.Add(new Vector1ShaderProperty()
+            // {
+            //     overrideReferenceName = string.Format("{0}_Type", overrideReferenceName),
+            //     value = (int)shaderValue.value.gradientValue.mode,
+            //     generatePropertyBlock = false
+            // });
 
-            properties.Add(new Vector1ShaderProperty()
-            {
-                overrideReferenceName = string.Format("{0}_ColorsLength", overrideReferenceName),
-                value = shaderValue.value.gradientValue.colorKeys.Length,
-                generatePropertyBlock = false
-            });
+            // properties.Add(new Vector1ShaderProperty()
+            // {
+            //     overrideReferenceName = string.Format("{0}_ColorsLength", overrideReferenceName),
+            //     value = shaderValue.value.gradientValue.colorKeys.Length,
+            //     generatePropertyBlock = false
+            // });
 
-            properties.Add(new Vector1ShaderProperty()
-            {
-                overrideReferenceName = string.Format("{0}_AlphasLength", overrideReferenceName),
-                value = shaderValue.value.gradientValue.alphaKeys.Length,
-                generatePropertyBlock = false
-            });
+            // properties.Add(new Vector1ShaderProperty()
+            // {
+            //     overrideReferenceName = string.Format("{0}_AlphasLength", overrideReferenceName),
+            //     value = shaderValue.value.gradientValue.alphaKeys.Length,
+            //     generatePropertyBlock = false
+            // });
 
-            for (int i = 0; i < 8; i++)
-            {
-                properties.Add(new Vector4ShaderProperty()
-                {
-                    overrideReferenceName = string.Format("{0}_ColorKey{1}", overrideReferenceName, i),
-                    value = i < shaderValue.value.gradientValue.colorKeys.Length ? GradientUtils.ColorKeyToVector(shaderValue.value.gradientValue.colorKeys[i]) : Vector4.zero,
-                    generatePropertyBlock = false
-                });
-            }
+            // for (int i = 0; i < 8; i++)
+            // {
+            //     properties.Add(new Vector4ShaderProperty()
+            //     {
+            //         overrideReferenceName = string.Format("{0}_ColorKey{1}", overrideReferenceName, i),
+            //         value = i < shaderValue.value.gradientValue.colorKeys.Length ? GradientUtils.ColorKeyToVector(shaderValue.value.gradientValue.colorKeys[i]) : Vector4.zero,
+            //         generatePropertyBlock = false
+            //     });
+            // }
 
-            for (int i = 0; i < 8; i++)
-            {
-                properties.Add(new Vector4ShaderProperty()
-                {
-                    overrideReferenceName = string.Format("{0}_AlphaKey{1}", overrideReferenceName, i),
-                    value = i < shaderValue.value.gradientValue.alphaKeys.Length ? GradientUtils.AlphaKeyToVector(shaderValue.value.gradientValue.alphaKeys[i]) : Vector2.zero,
-                    generatePropertyBlock = false
-                });
-            }
+            // for (int i = 0; i < 8; i++)
+            // {
+            //     properties.Add(new Vector4ShaderProperty()
+            //     {
+            //         overrideReferenceName = string.Format("{0}_AlphaKey{1}", overrideReferenceName, i),
+            //         value = i < shaderValue.value.gradientValue.alphaKeys.Length ? GradientUtils.AlphaKeyToVector(shaderValue.value.gradientValue.alphaKeys[i]) : Vector2.zero,
+            //         generatePropertyBlock = false
+            //     });
+            // }
 
-            var prop = new GradientShaderProperty();
+            var prop = new ShaderProperty(PropertyType.Gradient);
             if(overrideReferenceName != null)
                 prop.overrideReferenceName = overrideReferenceName;
-            prop.generatePropertyBlock = false;
-            prop.value = shaderValue.value.gradientValue;
+            // prop.generatePropertyBlock = false;
+            // prop.value = shaderValue.value.gradientValue;
             prop.OverrideMembers(overrideReferenceName);
             properties.Add(prop);
 

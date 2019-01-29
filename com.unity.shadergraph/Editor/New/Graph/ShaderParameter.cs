@@ -22,6 +22,9 @@ namespace UnityEditor.ShaderGraph
         int m_Id;
 
         [SerializeField]
+        private SerializableGuid m_Guid = new SerializableGuid();
+
+        [SerializeField]
         string m_DisplayName = "Not Initilaized";
 
         [SerializeField]
@@ -39,10 +42,16 @@ namespace UnityEditor.ShaderGraph
         public INode owner { get; set; }
 
         public int id => m_Id;
-        public string displayName => m_DisplayName;
+        public Guid guid => m_Guid.guid;
         public string shaderOutputName => m_ShaderOutputName;
         public ConcreteSlotValueType concreteValueType => m_ConcreteSlotValueType;
         public ShaderValueData value => m_ShaderValueData;
+
+        public string displayName
+        {
+            get => m_DisplayName;
+            set => m_DisplayName = value;
+        }
 
         private IShaderControl m_Control;
         public IShaderControl control
@@ -78,6 +87,11 @@ namespace UnityEditor.ShaderGraph
                 m_ShaderValueData = parameter.value;
                 control = parameter.control;
             }
+        }
+
+        public INode ToConcreteNode()
+        {
+            return null; // TODO - Fill this out
         }
     }
 }

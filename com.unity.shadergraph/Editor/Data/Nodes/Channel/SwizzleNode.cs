@@ -153,15 +153,15 @@ namespace UnityEditor.ShaderGraph
                         inputValue), false);
         }
 
-        public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector properties, GenerationMode generationMode)
         {
-            base.CollectShaderProperties(properties, generationMode);
+            base.CollectGraphInputs(properties, generationMode);
             if (generationMode != GenerationMode.Preview)
                 return;
-            properties.AddShaderProperty(new Vector1ShaderProperty
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Vector1)
             {
                 overrideReferenceName = GetVariableNameForNode(),
-                generatePropertyBlock = false
+                //generatePropertyBlock = false
             });
         }
 

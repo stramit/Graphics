@@ -13,8 +13,8 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         private SerializableTexture m_Texture = new SerializableTexture();
 
-        [SerializeField]
-        private TextureShaderProperty.DefaultType m_DefaultType = TextureShaderProperty.DefaultType.White;
+        //[SerializeField]
+        //private TextureShaderProperty.DefaultType m_DefaultType = TextureShaderProperty.DefaultType.White;
 
         public Texture texture
         {
@@ -22,11 +22,11 @@ namespace UnityEditor.ShaderGraph
             set { m_Texture.texture = value; }
         }
 
-        public TextureShaderProperty.DefaultType defaultType
-        {
-            get { return m_DefaultType; }
-            set { m_DefaultType = value; }
-        }
+        // public TextureShaderProperty.DefaultType defaultType
+        // {
+        //     get { return m_DefaultType; }
+        //     set { m_DefaultType = value; }
+        // }
 
         public Texture2DInputMaterialSlot()
         {}
@@ -60,13 +60,13 @@ namespace UnityEditor.ShaderGraph
             if (matOwner == null)
                 throw new Exception(string.Format("Slot {0} either has no owner, or the owner is not a {1}", this, typeof(AbstractMaterialNode)));
 
-            var prop = new TextureShaderProperty();
+            var prop = new ShaderProperty(PropertyType.Texture2D);
             prop.overrideReferenceName = matOwner.GetVariableNameForSlot(id);
-            prop.modifiable = false;
-            prop.generatePropertyBlock = true;
-            prop.value.texture = texture;
-            prop.defaultType = defaultType;
-            properties.AddShaderProperty(prop);
+            // prop.modifiable = false;
+            // prop.generatePropertyBlock = true;
+            prop.value.textureValue = texture;
+            // prop.defaultType = defaultType;
+            properties.AddGraphInput(prop);
         }
 
         public override void GetPreviewProperties(List<PreviewProperty> properties, string name)

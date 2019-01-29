@@ -5,38 +5,38 @@ namespace UnityEditor.ShaderGraph
 {
     internal static class ShaderValueTypeExtensions
     {
-        internal static IShaderProperty ToShaderProperty(this ConcreteSlotValueType concreteSlotValueType)
+        internal static ShaderProperty ToShaderProperty(this ConcreteSlotValueType concreteSlotValueType)
         {
             switch (concreteSlotValueType)
             {
                 case ConcreteSlotValueType.Vector4:
-                    return new Vector4ShaderProperty();
+                    return new ShaderProperty(PropertyType.Vector4);// Vector4ShaderProperty();
                 case ConcreteSlotValueType.Vector3:
-                    return new Vector3ShaderProperty();
+                    return new ShaderProperty(PropertyType.Vector3);//return new Vector3ShaderProperty();
                 case ConcreteSlotValueType.Vector2:
-                    return new Vector2ShaderProperty();
+                    return new ShaderProperty(PropertyType.Vector2);//return new Vector2ShaderProperty();
                 case ConcreteSlotValueType.Vector1:
-                    return new Vector1ShaderProperty();
+                    return new ShaderProperty(PropertyType.Vector1);//return new Vector1ShaderProperty();
                 case ConcreteSlotValueType.Boolean:
-                    return new BooleanShaderProperty();
+                    return new ShaderProperty(PropertyType.Boolean);//return new BooleanShaderProperty();
                 case ConcreteSlotValueType.Texture2D:
-                    return new TextureShaderProperty();
+                    return new ShaderProperty(PropertyType.Texture2D);//return new TextureShaderProperty();
                 case ConcreteSlotValueType.Texture3D:
-                    return new Texture3DShaderProperty();
+                    return new ShaderProperty(PropertyType.Texture3D);//return new Texture3DShaderProperty();
                 case ConcreteSlotValueType.Texture2DArray:
-                    return new Texture2DArrayShaderProperty();
+                    return new ShaderProperty(PropertyType.Texture2DArray);//return new Texture2DArrayShaderProperty();
                 case ConcreteSlotValueType.Cubemap:
-                    return new CubemapShaderProperty();
+                    return new ShaderProperty(PropertyType.Cubemap);//return new CubemapShaderProperty();
                 case ConcreteSlotValueType.SamplerState:
-                    return new SamplerStateShaderProperty();
+                    return new ShaderProperty(PropertyType.SamplerState);//return new SamplerStateShaderProperty();
                 case ConcreteSlotValueType.Matrix2:
-                    return new Matrix2ShaderProperty();
+                    return new ShaderProperty(PropertyType.Matrix2);//return new Matrix2ShaderProperty();
                 case ConcreteSlotValueType.Matrix3:
-                    return new Matrix3ShaderProperty();
+                    return new ShaderProperty(PropertyType.Matrix3);//return new Matrix3ShaderProperty();
                 case ConcreteSlotValueType.Matrix4:
-                    return new Matrix4ShaderProperty();
+                    return new ShaderProperty(PropertyType.Matrix4);//return new Matrix4ShaderProperty();
                 case ConcreteSlotValueType.Gradient:
-                    return null;
+                    return new ShaderProperty(PropertyType.Gradient);//return null;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

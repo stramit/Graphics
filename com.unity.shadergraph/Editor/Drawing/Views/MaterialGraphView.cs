@@ -311,11 +311,11 @@ namespace UnityEditor.ShaderGraph.Drawing
             var groups = elements.OfType<ShaderGroup>().Select(x => x.userData);
             var nodes = elements.OfType<MaterialNodeView>().Select(x => (INode)x.node);
             var edges = elements.OfType<Edge>().Select(x => x.userData).OfType<IEdge>();
-            var properties = selection.OfType<BlackboardField>().Select(x => x.userData as IShaderProperty);
+            var properties = selection.OfType<BlackboardField>().Select(x => x.userData as ShaderProperty);
 
             // Collect the property nodes and get the corresponding properties
             var propertyNodeGuids = nodes.OfType<PropertyNode>().Select(x => x.propertyGuid);
-            var metaProperties = this.graph.properties.Where(x => propertyNodeGuids.Contains(x.guid));
+            var metaProperties = this.graph.graphInputs.Where(x => propertyNodeGuids.Contains(x.guid));
 
             var graph = new CopyPasteGraph(this.graph.guid, groups, nodes, edges, properties, metaProperties);
             return JsonUtility.ToJson(graph, true);
@@ -359,7 +359,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 var field = selectable as BlackboardField;
                 if (field != null && field.userData != null)
                 {
-                    var property = (IShaderProperty)field.userData;
+                    var property = (ShaderProperty)field.userData;
                     graph.RemoveShaderProperty(property.guid);
                 }
             }
@@ -468,7 +468,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             if (textureArray != null)
             {
                 graph.owner.RegisterCompleteObjectUndo("Drag Texture Array");
-                var property = new Texture2DArrayShaderProperty { displayName = textureArray.name, value = { textureArray = textureArray } };
+                var property = new ShaderProperty(PropertyType.Texture2DArray);// { displayName = textureArray.name, value = { textureArray = textureArray } };
                 graph.AddShaderProperty(property);
                 var node = new SampleTexture2DArrayNode();
                 var drawState = node.drawState;
@@ -484,7 +484,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             if (texture3D != null)
             {
                 graph.owner.RegisterCompleteObjectUndo("Drag Texture 3D");
-                var property = new Texture3DShaderProperty { displayName = texture3D.name, value = { texture = texture3D } };
+                var property = new ShaderProperty(PropertyType.Texture3D);// { displayName = texture3D.name, value = { texture = texture3D } };
                 graph.AddShaderProperty(property);
                 var node = new SampleTexture3DNode();
                 var drawState = node.drawState;
@@ -500,7 +500,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             if (cubemap != null)
             {
                 graph.owner.RegisterCompleteObjectUndo("Drag Cubemap");
-                var property = new CubemapShaderProperty { displayName = cubemap.name, value = { cubemap = cubemap } };
+                var property = new ShaderProperty(PropertyType.Cubemap);// { displayName = cubemap.name, value = { cubemap = cubemap } };
                 graph.AddShaderProperty(property);
                 var node = new SampleCubemapNode();
 
@@ -530,7 +530,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             var blackboardField = obj as BlackboardField;
             if (blackboardField != null)
             {
-                IShaderProperty property = blackboardField.userData as IShaderProperty;
+                ShaderProperty property = blackboardField.userData as ShaderProperty;
                 if (property != null)
                 {
                     graph.owner.RegisterCompleteObjectUndo("Drag Property");
@@ -558,10 +558,10 @@ namespace UnityEditor.ShaderGraph.Drawing
                 return;
 
             // Make new properties from the copied graph
-            foreach (IShaderProperty property in copyGraph.properties)
+            foreach (ShaderProperty property in copyGraph.graphInputs)
             {
                 string propertyName = graphView.graph.SanitizePropertyName(property.displayName);
-                IShaderProperty copiedProperty = property.Copy();
+                ShaderProperty copiedProperty = property.Copy();
                 copiedProperty.displayName = propertyName;
                 graphView.graph.AddShaderProperty(copiedProperty);
 

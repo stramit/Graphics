@@ -181,26 +181,26 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector properties, GenerationMode generationMode)
         {
             if (!generationMode.IsPreview())
                 return;
 
-            base.CollectShaderProperties(properties, generationMode);
+            base.CollectGraphInputs(properties, generationMode);
 
-            properties.AddShaderProperty(new Vector1ShaderProperty()
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Vector1)
             {
                 overrideReferenceName = string.Format("_{0}_Type", GetVariableNameForNode()),
                 generatePropertyBlock = false
             });
 
-            properties.AddShaderProperty(new Vector1ShaderProperty()
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Vector1)
             {
                 overrideReferenceName = string.Format("_{0}_ColorsLength", GetVariableNameForNode()),
                 generatePropertyBlock = false
             });
 
-            properties.AddShaderProperty(new Vector1ShaderProperty()
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Vector1)
             {
                 overrideReferenceName = string.Format("_{0}_AlphasLength", GetVariableNameForNode()),
                 generatePropertyBlock = false
@@ -208,7 +208,7 @@ namespace UnityEditor.ShaderGraph
 
             for (int i = 0; i < 8; i++)
             {
-                properties.AddShaderProperty(new Vector4ShaderProperty()
+                properties.AddGraphInput(new ShaderProperty(PropertyType.Vector4)
                 {
                     overrideReferenceName = string.Format("_{0}_ColorKey{1}", GetVariableNameForNode(), i),
                     generatePropertyBlock = false
@@ -217,7 +217,7 @@ namespace UnityEditor.ShaderGraph
 
             for (int i = 0; i < 8; i++)
             {
-                properties.AddShaderProperty(new Vector4ShaderProperty()
+                properties.AddGraphInput(new ShaderProperty(PropertyType.Vector4)
                 {
                     overrideReferenceName = string.Format("_{0}_AlphaKey{1}", GetVariableNameForNode(), i),
                     generatePropertyBlock = false

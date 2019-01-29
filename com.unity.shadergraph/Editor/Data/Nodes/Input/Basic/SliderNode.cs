@@ -46,19 +46,19 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector properties, GenerationMode generationMode)
         {
             if (!generationMode.IsPreview())
                 return;
 
-            properties.AddShaderProperty(new Vector1ShaderProperty()
-            {
-                overrideReferenceName = GetVariableNameForNode(),
-                generatePropertyBlock = false,
-                value = value.x,
-                rangeValues = new Vector2(value.y, value.z),
-                floatType = FloatType.Slider
-            });
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Vector1));//()
+            // {
+            //     overrideReferenceName = GetVariableNameForNode(),
+            //     generatePropertyBlock = false,
+            //     value = value.x,
+            //     rangeValues = new Vector2(value.y, value.z),
+            //     floatType = FloatType.Slider
+            // });
         }
 
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
@@ -83,14 +83,14 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        public IShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
-            return new Vector1ShaderProperty
-            {
-                value = value.x,
-                rangeValues = new Vector2(value.y, value.z),
-                floatType = FloatType.Slider
-            };
+            return new ShaderProperty(PropertyType.Vector1);
+            // {
+            //     value = value.x,
+            //     rangeValues = new Vector2(value.y, value.z),
+            //     floatType = FloatType.Slider
+            // };
         }
 
         public int outputSlotId { get { return OutputSlotId; } }

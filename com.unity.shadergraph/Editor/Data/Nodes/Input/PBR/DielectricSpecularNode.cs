@@ -144,16 +144,16 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector properties, GenerationMode generationMode)
         {
             if (!generationMode.IsPreview())
                 return;
 
-            base.CollectShaderProperties(properties, generationMode);
+            base.CollectGraphInputs(properties, generationMode);
 
             if (material.type == DielectricMaterialType.Common)
             {
-                properties.AddShaderProperty(new Vector1ShaderProperty()
+                properties.AddGraphInput(new ShaderProperty(PropertyType.Vector1)
                 {
                     overrideReferenceName = string.Format("_{0}_Range", GetVariableNameForNode()),
                     generatePropertyBlock = false
@@ -161,7 +161,7 @@ namespace UnityEditor.ShaderGraph
             }
             else if (material.type == DielectricMaterialType.Custom)
             {
-                properties.AddShaderProperty(new Vector1ShaderProperty()
+                properties.AddGraphInput(new ShaderProperty(PropertyType.Vector1)
                 {
                     overrideReferenceName = string.Format("_{0}_IOR", GetVariableNameForNode()),
                     generatePropertyBlock = false

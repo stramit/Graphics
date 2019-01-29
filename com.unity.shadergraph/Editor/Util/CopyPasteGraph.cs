@@ -19,13 +19,13 @@ namespace UnityEditor.Graphing.Util
         List<GroupData> m_Groups = new List<GroupData>();
 
         [NonSerialized]
-        HashSet<IShaderProperty> m_Properties = new HashSet<IShaderProperty>();
+        HashSet<IShaderValue> m_GraphInputs = new HashSet<IShaderValue>();
 
         // The meta properties are properties that are not copied into the tatget graph
         // but sent along to allow property nodes to still hvae the data from the original
         // property present.
         [NonSerialized]
-        HashSet<IShaderProperty> m_MetaProperties = new HashSet<IShaderProperty>();
+        HashSet<IShaderValue> m_MetaGraphInputs = new HashSet<IShaderValue>();
 
         [NonSerialized]
         SerializableGuid m_SourceGraphGuid;
@@ -37,17 +37,17 @@ namespace UnityEditor.Graphing.Util
         List<SerializationHelper.JSONSerializedElement> m_SerializableEdges = new List<SerializationHelper.JSONSerializedElement>();
 
         [SerializeField]
-        List<SerializationHelper.JSONSerializedElement> m_SerilaizeableProperties = new List<SerializationHelper.JSONSerializedElement>();
+        List<SerializationHelper.JSONSerializedElement> m_SerilaizeableGraphInputs = new List<SerializationHelper.JSONSerializedElement>();
 
         [SerializeField]
-        List<SerializationHelper.JSONSerializedElement> m_SerializableMetaProperties = new List<SerializationHelper.JSONSerializedElement>();
+        List<SerializationHelper.JSONSerializedElement> m_SerializableMetaGraphInputs = new List<SerializationHelper.JSONSerializedElement>();
 
         [SerializeField]
         SerializationHelper.JSONSerializedElement m_SerializeableSourceGraphGuid = new SerializationHelper.JSONSerializedElement();
 
         public CopyPasteGraph() {}
 
-        public CopyPasteGraph(Guid sourceGraphGuid, IEnumerable<GroupData> groups, IEnumerable<INode> nodes, IEnumerable<IEdge> edges, IEnumerable<IShaderProperty> properties, IEnumerable<IShaderProperty> metaProperties)
+        public CopyPasteGraph(Guid sourceGraphGuid, IEnumerable<GroupData> groups, IEnumerable<INode> nodes, IEnumerable<IEdge> edges, IEnumerable<IShaderValue> graphInputs, IEnumerable<IShaderValue> metaGraphInputs)
         {
             m_SourceGraphGuid = new SerializableGuid(sourceGraphGuid);
 
@@ -66,11 +66,11 @@ namespace UnityEditor.Graphing.Util
             foreach (var edge in edges)
                 AddEdge(edge);
 
-            foreach (var property in properties)
-                AddProperty(property);
+            foreach (var property in graphInputs)
+                AddGraphInput(property);
 
-            foreach (var metaProperty in metaProperties)
-                AddMetaProperty(metaProperty);
+            foreach (var metaProperty in metaGraphInputs)
+                AddMetaGraphInput(metaProperty);
         }
 
         public void AddGroup(GroupData group)
@@ -88,14 +88,14 @@ namespace UnityEditor.Graphing.Util
             m_Edges.Add(edge);
         }
 
-        public void AddProperty(IShaderProperty property)
+        public void AddGraphInput(IShaderValue property)
         {
-            m_Properties.Add(property);
+            m_GraphInputs.Add(property);
         }
 
-        public void AddMetaProperty(IShaderProperty metaProperty)
+        public void AddMetaGraphInput(IShaderValue metaProperty)
         {
-            m_MetaProperties.Add(metaProperty);
+            m_MetaGraphInputs.Add(metaProperty);
         }
 
         public IEnumerable<T> GetNodes<T>() where T : INode
@@ -113,14 +113,14 @@ namespace UnityEditor.Graphing.Util
             get { return m_Edges; }
         }
 
-        public IEnumerable<IShaderProperty> properties
+        public IEnumerable<IShaderValue> graphInputs
         {
-            get { return m_Properties; }
+            get { return m_GraphInputs; }
         }
 
-        public IEnumerable<IShaderProperty> metaProperties
+        public IEnumerable<IShaderValue> metaGraphInputs
         {
-            get { return m_MetaProperties; }
+            get { return m_MetaGraphInputs; }
         }
 
         public Guid sourceGraphGuid
@@ -133,8 +133,8 @@ namespace UnityEditor.Graphing.Util
             m_SerializeableSourceGraphGuid = SerializationHelper.Serialize(m_SourceGraphGuid);
             m_SerializableNodes = SerializationHelper.Serialize<INode>(m_Nodes);
             m_SerializableEdges = SerializationHelper.Serialize<IEdge>(m_Edges);
-            m_SerilaizeableProperties = SerializationHelper.Serialize<IShaderProperty>(m_Properties);
-            m_SerializableMetaProperties = SerializationHelper.Serialize<IShaderProperty>(m_MetaProperties);
+            m_SerilaizeableGraphInputs = SerializationHelper.Serialize<IShaderValue>(m_GraphInputs);
+            m_SerializableMetaGraphInputs = SerializationHelper.Serialize<IShaderValue>(m_MetaGraphInputs);
         }
 
         public void OnAfterDeserialize()
@@ -153,19 +153,19 @@ namespace UnityEditor.Graphing.Util
                 m_Edges.Add(edge);
             m_SerializableEdges = null;
 
-            var properties = SerializationHelper.Deserialize<IShaderProperty>(m_SerilaizeableProperties, GraphUtil.GetLegacyTypeRemapping());
-            m_Properties.Clear();
-            foreach (var property in properties)
-                m_Properties.Add(property);
-            m_SerilaizeableProperties = null;
+            var graphInputs = SerializationHelper.Deserialize<IShaderValue>(m_SerilaizeableGraphInputs, GraphUtil.GetLegacyTypeRemapping());
+            m_GraphInputs.Clear();
+            foreach (var property in graphInputs)
+                m_GraphInputs.Add(property);
+            m_SerilaizeableGraphInputs = null;
 
-            var metaProperties = SerializationHelper.Deserialize<IShaderProperty>(m_SerializableMetaProperties, GraphUtil.GetLegacyTypeRemapping());
-            m_MetaProperties.Clear();
-            foreach (var metaProperty in metaProperties)
+            var metaGraphInputs = SerializationHelper.Deserialize<IShaderValue>(m_SerializableMetaGraphInputs, GraphUtil.GetLegacyTypeRemapping());
+            m_MetaGraphInputs.Clear();
+            foreach (var metaProperty in metaGraphInputs)
             {
-                m_MetaProperties.Add(metaProperty);
+                m_MetaGraphInputs.Add(metaProperty);
             }
-            m_SerializableMetaProperties = null;
+            m_SerializableMetaGraphInputs = null;
         }
 
         internal static CopyPasteGraph FromJson(string copyBuffer)

@@ -46,17 +46,17 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector properties, GenerationMode generationMode)
         {
             if (!generationMode.IsPreview())
                 return;
 
-            properties.AddShaderProperty(new Vector1ShaderProperty()
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Vector1)
             {
                 overrideReferenceName = GetVariableNameForNode(),
-                generatePropertyBlock = false,
-                value = value,
-                floatType = FloatType.Integer
+                //generatePropertyBlock = false,
+                //value = value,
+                //floatType = FloatType.Integer
             });
         }
 
@@ -82,9 +82,9 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        public IShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
-            return new Vector1ShaderProperty { value = value, floatType = FloatType.Integer };
+            return new ShaderProperty(PropertyType.Vector1) { /*value = value, floatType = FloatType.Integer*/ };
         }
 
         public int outputSlotId { get { return OutputSlotId; } }

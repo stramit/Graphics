@@ -42,10 +42,10 @@ namespace UnityEditor.ShaderGraph
             visitor.AddShaderChunk(precision + " " + GetVariableNameForSlot(OutputSlotId) + " = " + inputValue + ";", false);
         }
 
-        public IShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
             var slot = FindInputSlot<Vector1MaterialSlot>(InputSlotXId);
-            return new Vector1ShaderProperty { value = slot.value };
+            return new ShaderProperty(PropertyType.Vector1);// { value = slot.value };
         }
 
         int IPropertyFromNode.outputSlotId { get { return OutputSlotId; } }

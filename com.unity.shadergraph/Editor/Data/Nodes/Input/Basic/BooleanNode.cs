@@ -44,17 +44,17 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector properties, GenerationMode generationMode)
         {
             if (!generationMode.IsPreview())
                 return;
 
-            properties.AddShaderProperty(new BooleanShaderProperty()
-            {
-                overrideReferenceName = GetVariableNameForNode(),
-                generatePropertyBlock = false,
-                value = m_Value
-            });
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Boolean));
+            // {
+            //     overrideReferenceName = GetVariableNameForNode(),
+            //     generatePropertyBlock = false,
+            //     value = m_Value
+            // });
         }
 
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
@@ -79,9 +79,9 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        public IShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
-            return new BooleanShaderProperty { value = m_Value };
+            return new ShaderProperty(PropertyType.Boolean);// { value = m_Value };
         }
 
         public int outputSlotId { get { return OutputSlotId; } }

@@ -66,9 +66,9 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public IEnumerable<IShaderProperty> graphInputs
+        public IEnumerable<ShaderProperty> graphInputs
         {
-            get { return properties.OrderBy(x => x.guid); }
+            get { return base.graphInputs.OfType<ShaderProperty>().OrderBy(x => x.guid); }
         }
 
         public IEnumerable<MaterialSlot> graphOutputs
@@ -117,7 +117,7 @@ namespace UnityEditor.ShaderGraph
                 });
         }
 
-        public override void CollectShaderProperties(PropertyCollector collector, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector collector, GenerationMode generationMode)
         {
             // if we are previewing the graph we need to
             // export 'exposed props' if we are 'for real'
@@ -126,14 +126,14 @@ namespace UnityEditor.ShaderGraph
             // be copied into scope.
             if (generationMode == GenerationMode.Preview)
             {
-                foreach (var prop in properties)
-                    collector.AddShaderProperty(prop);
+                foreach (var prop in base.graphInputs)
+                    collector.AddGraphInput(prop);
             }
 
             foreach (var node in activeNodes)
             {
                 if (node is IGenerateProperties)
-                    (node as IGenerateProperties).CollectShaderProperties(collector, generationMode);
+                    (node as IGenerateProperties).CollectGraphInputs(collector, generationMode);
             }
         }
 

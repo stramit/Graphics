@@ -27,13 +27,13 @@
                 xShaderValue.ToVariableReference(precision, generationMode)));
         }
 
-        public IShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
             var xShaderValue = GetShaderValue(m_X);
-            return new Vector1ShaderProperty 
-            { 
-                value = xShaderValue.value.vectorValue.x
-            };
+            return new ShaderProperty(PropertyType.Vector1); 
+            // { 
+            //     value = xShaderValue.value.vectorValue.x
+            // };
         }
 
         public int outputSlotId { get { return m_Out.id; } }

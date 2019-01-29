@@ -855,29 +855,29 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             return subsurfaceScattering.isOn;
         }
 
-        public override void CollectShaderProperties(PropertyCollector collector, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector collector, GenerationMode generationMode)
         {
             if (debug.isOn)
             {
                 // We have useful debug options in StackLit, so add them always, and let the UI editor (non shadergraph) handle displaying them
                 // since this is also the editor that controls the keyword switching for the debug mode.
-                collector.AddShaderProperty(new Vector4ShaderProperty()
+                collector.AddGraphInput(new ShaderProperty(PropertyType.Vector4)
                 {
                     overrideReferenceName = "_DebugEnvLobeMask", // xyz is environments lights lobe 0 1 2 Enable, w is Enable VLayering
                     displayName = "_DebugEnvLobeMask",
-                    value = new Vector4(1.0f, 1.0f, 1.0f, 1.0f)
+                    //value = new Vector4(1.0f, 1.0f, 1.0f, 1.0f)
                 });
-                collector.AddShaderProperty(new Vector4ShaderProperty()
+                collector.AddGraphInput(new ShaderProperty(PropertyType.Vector4)
                 {
                     overrideReferenceName = "_DebugLobeMask", // xyz is analytical dirac lights lobe 0 1 2 Enable", false),
                     displayName = "_DebugLobeMask",
-                    value = new Vector4(1.0f, 1.0f, 1.0f, 1.0f)
+                    //value = new Vector4(1.0f, 1.0f, 1.0f, 1.0f)
                 });
-                collector.AddShaderProperty(new Vector4ShaderProperty()
+                collector.AddGraphInput(new ShaderProperty(PropertyType.Vector4)
                 {
                     overrideReferenceName = "_DebugAniso", // x is Hack Enable, w is factor
                     displayName = "_DebugAniso",
-                    value = new Vector4(1.0f, 0.0f, 0.0f, 1000.0f)
+                    //value = new Vector4(1.0f, 0.0f, 0.0f, 1000.0f)
                 });
                 // _DebugSpecularOcclusion:
                 //
@@ -891,11 +891,11 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 //      Since there's not one value in our case,
                 //      0 will show the object all red to indicate to choose one, 1-4 corresponds to showing
                 //      1 = coat SO, 2 = base lobe A SO, 3 = base lobe B SO, 4 = shows the result of sampling the SSAO texture (screenSpaceAmbientOcclusion).
-                collector.AddShaderProperty(new Vector4ShaderProperty()
+                collector.AddGraphInput(new ShaderProperty(PropertyType.Vector4)
                 {
                     overrideReferenceName = "_DebugSpecularOcclusion",
                     displayName = "_DebugSpecularOcclusion",
-                    value = new Vector4(2.0f, 2.0f, 1.0f, 2.0f)
+                    //value = new Vector4(2.0f, 2.0f, 1.0f, 2.0f)
                 });
             }
 
@@ -904,14 +904,14 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             // The user will then need to explicitly disable emissive GI if it is not needed.
             // To be able to automatically disable emission based on the ShaderGraph config when emission is black,
             // we will need a more general way to communicate this to the engine (not directly tied to a material property).
-            collector.AddShaderProperty(new ColorShaderProperty()
+            collector.AddGraphInput(new ShaderProperty(PropertyType.Color)
             {
                 overrideReferenceName = "_EmissionColor",
-                hidden = true,
-                value = new Color(1.0f, 1.0f, 1.0f, 1.0f)
+                // hidden = true,
+                // value = new Color(1.0f, 1.0f, 1.0f, 1.0f)
             });
 
-            base.CollectShaderProperties(collector, generationMode);
+            base.CollectGraphInputs(collector, generationMode);
         }
     }
 }

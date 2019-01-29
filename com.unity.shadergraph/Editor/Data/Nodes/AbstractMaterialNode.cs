@@ -220,7 +220,7 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public virtual void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        public virtual void CollectGraphInputs(PropertyCollector properties, GenerationMode generationMode)
         {
             foreach (var inputSlot in this.GetInputSlots<MaterialSlot>())
             {

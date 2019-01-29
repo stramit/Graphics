@@ -125,17 +125,17 @@ namespace UnityEditor.ShaderGraph
                 visitor.AddShaderChunk(string.Format("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, outSlot.concreteValueType), GetVariableNameForSlot(outSlot.id)), true);
 
             var arguments = new List<string>();
-            foreach (var prop in referencedGraph.graphInputs)
+            foreach (var prop in referencedGraph.graphInputs.OfType<ShaderProperty>())
             {
                 var inSlotId = prop.guid.GetHashCode();
 
-                if (prop is TextureShaderProperty)
+                if (prop.propertyType == PropertyType.Texture2D)
                     arguments.Add(string.Format("TEXTURE2D_PARAM({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
-                else if (prop is Texture2DArrayShaderProperty)
+                if (prop.propertyType == PropertyType.Texture2DArray)
                     arguments.Add(string.Format("TEXTURE2D_ARRAY_PARAM({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
-                else if (prop is Texture3DShaderProperty)
+                if (prop.propertyType == PropertyType.Texture3D)
                     arguments.Add(string.Format("TEXTURE3D_PARAM({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
-                else if (prop is CubemapShaderProperty)
+                if (prop.propertyType == PropertyType.Cubemap)
                     arguments.Add(string.Format("TEXTURECUBE_PARAM({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
                 else
                     arguments.Add(GetSlotValue(inSlotId, generationMode));
@@ -168,7 +168,7 @@ namespace UnityEditor.ShaderGraph
                 return;
             }
 
-            var props = referencedGraph.properties;
+            var props = referencedGraph.graphInputs;
             foreach (var prop in props)
             {
                 var propType = prop.propertyType;
@@ -223,38 +223,34 @@ namespace UnityEditor.ShaderGraph
                 }
 
                 var id = prop.guid.GetHashCode();
-                MaterialSlot slot = MaterialSlot.CreateMaterialSlot(slotType, id, prop.displayName, prop.referenceName, SlotType.Input, prop.defaultValue, ShaderStageCapability.All);
+                MaterialSlot slot = MaterialSlot.CreateMaterialSlot(slotType, id, prop.displayName, prop.referenceName, SlotType.Input, prop.value.vectorValue, ShaderStageCapability.All);
                 // copy default for texture for niceness
                 if (slotType == SlotValueType.Texture2D && propType == PropertyType.Texture2D)
                 {
                     var tSlot = slot as Texture2DInputMaterialSlot;
-                    var tProp = prop as TextureShaderProperty;
-                    if (tSlot != null && tProp != null)
-                        tSlot.texture = tProp.value.texture;
+                    if (tSlot != null && prop != null)
+                        tSlot.texture = (Texture2D)prop.value.textureValue;
                 }
                 // copy default for texture array for niceness
                 else if (slotType == SlotValueType.Texture2DArray && propType == PropertyType.Texture2DArray)
                 {
                     var tSlot = slot as Texture2DArrayInputMaterialSlot;
-                    var tProp = prop as Texture2DArrayShaderProperty;
-                    if (tSlot != null && tProp != null)
-                        tSlot.textureArray = tProp.value.textureArray;
+                    if (tSlot != null && prop != null)
+                        tSlot.textureArray = (Texture2DArray)prop.value.textureValue;
                 }
                 // copy default for texture 3d for niceness
                 else if (slotType == SlotValueType.Texture3D && propType == PropertyType.Texture3D)
                 {
                     var tSlot = slot as Texture3DInputMaterialSlot;
-                    var tProp = prop as Texture3DShaderProperty;
-                    if (tSlot != null && tProp != null)
-                        tSlot.texture = tProp.value.texture;
+                    if (tSlot != null && prop != null)
+                        tSlot.texture = (Texture3D)prop.value.textureValue;
                 }
                 // copy default for cubemap for niceness
                 else if (slotType == SlotValueType.Cubemap && propType == PropertyType.Cubemap)
                 {
                     var tSlot = slot as CubemapInputMaterialSlot;
-                    var tProp = prop as CubemapShaderProperty;
-                    if (tSlot != null && tProp != null)
-                        tSlot.cubemap = tProp.value.cubemap;
+                    if (tSlot != null && prop != null)
+                        tSlot.cubemap = (Cubemap)prop.value.textureValue;
                 }
                 AddSlot(slot);
                 validNames.Add(id);
@@ -330,14 +326,14 @@ namespace UnityEditor.ShaderGraph
             base.ValidateNode();
         }
 
-        public override void CollectShaderProperties(PropertyCollector visitor, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector visitor, GenerationMode generationMode)
         {
-            base.CollectShaderProperties(visitor, generationMode);
+            base.CollectGraphInputs(visitor, generationMode);
 
             if (referencedGraph == null)
                 return;
 
-            referencedGraph.CollectShaderProperties(visitor, generationMode);
+            referencedGraph.CollectGraphInputs(visitor, generationMode);
         }
 
         public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)

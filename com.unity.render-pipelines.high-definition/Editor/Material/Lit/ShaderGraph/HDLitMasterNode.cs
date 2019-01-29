@@ -808,21 +808,21 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             return materialType == HDLitMasterNode.MaterialType.SubsurfaceScattering;
         }
 
-        public override void CollectShaderProperties(PropertyCollector collector, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector collector, GenerationMode generationMode)
         {
             // Trunk currently relies on checking material property "_EmissionColor" to allow emissive GI. If it doesn't find that property, or it is black, GI is forced off.
             // ShaderGraph doesn't use this property, so currently it inserts a dummy color (white). This dummy color may be removed entirely once the following PR has been merged in trunk: Pull request #74105
             // The user will then need to explicitly disable emissive GI if it is not needed.
             // To be able to automatically disable emission based on the ShaderGraph config when emission is black,
             // we will need a more general way to communicate this to the engine (not directly tied to a material property).
-            collector.AddShaderProperty(new ColorShaderProperty()
+            collector.AddGraphInput(new ShaderProperty(PropertyType.Color)
             {
                 overrideReferenceName = "_EmissionColor",
-                hidden = true,
-                value = new Color(1.0f, 1.0f, 1.0f, 1.0f)
+                // hidden = true,
+                // value = new Color(1.0f, 1.0f, 1.0f, 1.0f)
             });
 
-            base.CollectShaderProperties(collector, generationMode);
+            base.CollectGraphInputs(collector, generationMode);
         }
     }
 }

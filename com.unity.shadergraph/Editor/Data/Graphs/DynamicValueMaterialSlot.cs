@@ -96,37 +96,37 @@ namespace UnityEditor.ShaderGraph
             if (matOwner == null)
                 throw new Exception(string.Format("Slot {0} either has no owner, or the owner is not a {1}", this, typeof(AbstractMaterialNode)));
 
-            IShaderProperty property;
+            ShaderProperty property;
             switch (concreteValueType)
             {
                 case ConcreteSlotValueType.Vector4:
-                    property = new Vector4ShaderProperty();
+                    property = new ShaderProperty(PropertyType.Vector4);
                     break;
                 case ConcreteSlotValueType.Vector3:
-                    property = new Vector3ShaderProperty();
+                    property = new ShaderProperty(PropertyType.Vector3);
                     break;
                 case ConcreteSlotValueType.Vector2:
-                    property = new Vector2ShaderProperty();
+                    property = new ShaderProperty(PropertyType.Vector2);
                     break;
                 case ConcreteSlotValueType.Vector1:
-                    property = new Vector1ShaderProperty();
+                    property = new ShaderProperty(PropertyType.Vector1);
                     break;
                 case ConcreteSlotValueType.Matrix4:
-                    property = new Matrix4ShaderProperty();
+                    property = new ShaderProperty(PropertyType.Matrix4);
                     break;
                 case ConcreteSlotValueType.Matrix3:
-                    property = new Matrix3ShaderProperty();
+                    property = new ShaderProperty(PropertyType.Matrix3);
                     break;
                 case ConcreteSlotValueType.Matrix2:
-                    property = new Matrix2ShaderProperty();
+                    property = new ShaderProperty(PropertyType.Matrix2);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
-            property.overrideReferenceName = matOwner.GetVariableNameForSlot(id);
-            property.generatePropertyBlock = false;
-            properties.AddShaderProperty(property);
+            // property.overrideReferenceName = matOwner.GetVariableNameForSlot(id);
+            // property.generatePropertyBlock = false;
+            properties.AddGraphInput(property);
         }
 
         public override void CopyValuesFrom(MaterialSlot foundSlot)

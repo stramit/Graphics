@@ -29,6 +29,9 @@ namespace UnityEditor.ShaderGraph
         }
 
         [SerializeField]
+        private SerializableGuid m_Guid = new SerializableGuid();
+
+        [SerializeField]
         private ConcreteSlotValueType m_ConcreteSlotValueType = ConcreteSlotValueType.Vector1;
 
         [SerializeField]
@@ -37,6 +40,7 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         private SerializableControl m_SerializableControl = new SerializableControl();
 
+        public Guid guid => m_Guid.guid;
         public override ConcreteSlotValueType concreteValueType => m_ConcreteSlotValueType;
         public ShaderValueData value => m_ShaderValueData;
 
@@ -86,6 +90,11 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
+        public INode ToConcreteNode()
+        {
+            return null; // TODO - Fill this out
+        }
+
         // ----------------------------------------------------------------------------------------------------
         // LEGACY CODE
         // - Inherited from MaterialSlot
@@ -112,10 +121,10 @@ namespace UnityEditor.ShaderGraph
                 throw new Exception(string.Format("Slot {0} either has no owner, or the owner is not a {1}", this, typeof(AbstractMaterialNode)));
 
             string overrideReferenceName = this.ToVariableName();
-            IShaderProperty[] defaultProperties = this.ToDefaultPropertyArray(overrideReferenceName);
+            ShaderProperty[] defaultProperties = this.ToDefaultPropertyArray(overrideReferenceName);
 
-            foreach(IShaderProperty property in defaultProperties)
-                properties.AddShaderProperty(property);
+            foreach(ShaderProperty property in defaultProperties)
+                properties.AddGraphInput(property);
         }
 
         public override string GetDefaultValue(GenerationMode generationMode)

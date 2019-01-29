@@ -16,7 +16,7 @@ namespace UnityEditor.ShaderGraph.Drawing
         readonly BlackboardField m_BlackboardField;
         readonly AbstractMaterialGraph m_Graph;
 
-        IShaderProperty m_Property;
+        ShaderProperty m_Property;
         Toggle m_ExposedToogle;
         TextField m_ReferenceNameField;
 
@@ -27,7 +27,7 @@ namespace UnityEditor.ShaderGraph.Drawing
         public delegate void OnExposedToggle();
         private OnExposedToggle m_OnExposedToggle;
         
-        public BlackboardFieldPropertyView(BlackboardField blackboardField, AbstractMaterialGraph graph, IShaderProperty property)
+        public BlackboardFieldPropertyView(BlackboardField blackboardField, AbstractMaterialGraph graph, ShaderProperty property)
         {
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderGraphBlackboard"));
             m_BlackboardField = blackboardField;
@@ -40,7 +40,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 m_Graph.owner.RegisterCompleteObjectUndo("Change Exposed Toggle");
                 if(m_OnExposedToggle != null)
                     m_OnExposedToggle();
-                property.generatePropertyBlock = evt.newValue;
+                //property.generatePropertyBlock = evt.newValue;
                 if (property.generatePropertyBlock)
                 {
                     m_BlackboardField.icon = BlackboardProvider.exposedIcon;
@@ -81,146 +81,136 @@ namespace UnityEditor.ShaderGraph.Drawing
             if (!string.IsNullOrEmpty(property.overrideReferenceName))
                 m_ReferenceNameField.AddToClassList("modified");
 
-            if (property is Vector1ShaderProperty)
+            if (property.propertyType == PropertyType.Vector1)
             {
-                var floatProperty = (Vector1ShaderProperty)property;
-                BuildVector1PropertyView(floatProperty);
+                BuildVector1PropertyView(property);
             }
-            else if (property is Vector2ShaderProperty)
+            else if (property.propertyType == PropertyType.Vector2)
             {
-                var vectorProperty = (Vector2ShaderProperty)property;
-                var field = new Vector2Field { value = vectorProperty.value };
+                var field = new Vector2Field { value = property.value.vectorValue };
                 field.RegisterValueChangedCallback(evt =>
                     {
                         m_Graph.owner.RegisterCompleteObjectUndo("Change property value");
-                        vectorProperty.value = evt.newValue;
+                        property.value.vectorValue = evt.newValue;
                         DirtyNodes();
                     });
                 AddRow("Default", field);
             }
-            else if (property is Vector3ShaderProperty)
+            else if (property.propertyType == PropertyType.Vector3)
             {
-                var vectorProperty = (Vector3ShaderProperty)property;
-                var field = new Vector3Field { value = vectorProperty.value };
+                var field = new Vector3Field { value = property.value.vectorValue };
                 field.RegisterValueChangedCallback(evt =>
                     {
                         m_Graph.owner.RegisterCompleteObjectUndo("Change property value");
-                        vectorProperty.value = evt.newValue;
+                        property.value.vectorValue = evt.newValue;
                         DirtyNodes();
                     });
                 AddRow("Default", field);
             }
-            else if (property is Vector4ShaderProperty)
+            else if (property.propertyType == PropertyType.Vector4)
             {
-                var vectorProperty = (Vector4ShaderProperty)property;
-                var field = new Vector4Field { value = vectorProperty.value };
+                var field = new Vector4Field { value = property.value.vectorValue };
                 field.RegisterValueChangedCallback(evt =>
                     {
                         m_Graph.owner.RegisterCompleteObjectUndo("Change property value");
-                        vectorProperty.value = evt.newValue;
+                        property.value.vectorValue = evt.newValue;
                         DirtyNodes();
                     });
                 AddRow("Default", field);
             }
-            else if (property is ColorShaderProperty)
+            else if (property.propertyType == PropertyType.Color)
             {
-                var colorProperty = (ColorShaderProperty)property;
-                var colorField = new ColorField { value = property.defaultValue, showEyeDropper = false, hdr = colorProperty.colorMode == ColorMode.HDR };
+                var colorField = new ColorField { value = property.value.vectorValue };//, showEyeDropper = false, hdr = colorProperty.colorMode == ColorMode.HDR };
                 colorField.RegisterValueChangedCallback(evt =>
                     {
                         m_Graph.owner.RegisterCompleteObjectUndo("Change property value");
-                        colorProperty.value = evt.newValue;
+                        property.value.vectorValue = evt.newValue;
                         DirtyNodes();
                     });
                 AddRow("Default", colorField);
-                var colorModeField = new EnumField((Enum)colorProperty.colorMode);
-                colorModeField.RegisterValueChangedCallback(evt =>
-                    {
-                        m_Graph.owner.RegisterCompleteObjectUndo("Change Color Mode");
-                        if (colorProperty.colorMode == (ColorMode)evt.newValue)
-                            return;
-                        colorProperty.colorMode = (ColorMode)evt.newValue;
-                        colorField.hdr = colorProperty.colorMode == ColorMode.HDR;
-                        colorField.MarkDirtyRepaint();
-                        DirtyNodes();
-                    });
-                AddRow("Mode", colorModeField);
+                // var colorModeField = new EnumField((Enum)colorProperty.colorMode);
+                // colorModeField.RegisterValueChangedCallback(evt =>
+                //     {
+                //         m_Graph.owner.RegisterCompleteObjectUndo("Change Color Mode");
+                //         if (colorProperty.colorMode == (ColorMode)evt.newValue)
+                //             return;
+                //         colorProperty.colorMode = (ColorMode)evt.newValue;
+                //         colorField.hdr = colorProperty.colorMode == ColorMode.HDR;
+                //         colorField.MarkDirtyRepaint();
+                //         DirtyNodes();
+                //     });
+                // AddRow("Mode", colorModeField);
             }
-            else if (property is TextureShaderProperty)
+            else if (property.propertyType == PropertyType.Texture2D)
             {
-                var textureProperty = (TextureShaderProperty)property;
-                var field = new ObjectField { value = textureProperty.value.texture, objectType = typeof(Texture) };
+                var field = new ObjectField { value = property.value.textureValue, objectType = typeof(Texture) };
                 field.RegisterValueChangedCallback(evt =>
                     {
                         m_Graph.owner.RegisterCompleteObjectUndo("Change property value");
-                        textureProperty.value.texture = (Texture)evt.newValue;
+                        property.value.textureValue = (Texture)evt.newValue;
                         DirtyNodes();
                     });
                 AddRow("Default", field);
-                var defaultModeField = new EnumField((Enum)textureProperty.defaultType);
-                defaultModeField.RegisterValueChangedCallback(evt =>
-                    {
-                        m_Graph.owner.RegisterCompleteObjectUndo("Change Texture Mode");
-                        if (textureProperty.defaultType == (TextureShaderProperty.DefaultType)evt.newValue)
-                            return;
-                        textureProperty.defaultType = (TextureShaderProperty.DefaultType)evt.newValue;
-                        DirtyNodes(ModificationScope.Graph);
-                    });
-                void ToggleDefaultModeFieldEnabled()
-                {
-                    defaultModeField.SetEnabled(!defaultModeField.enabledSelf);
-                }
-                m_OnExposedToggle += ToggleDefaultModeFieldEnabled;
-                AddRow("Mode", defaultModeField);
+                // var defaultModeField = new EnumField((Enum)property.defaultType);
+                // defaultModeField.RegisterValueChangedCallback(evt =>
+                //     {
+                //         m_Graph.owner.RegisterCompleteObjectUndo("Change Texture Mode");
+                //         if (textureProperty.defaultType == (TextureShaderProperty.DefaultType)evt.newValue)
+                //             return;
+                //         textureProperty.defaultType = (TextureShaderProperty.DefaultType)evt.newValue;
+                //         DirtyNodes(ModificationScope.Graph);
+                //     });
+                // void ToggleDefaultModeFieldEnabled()
+                // {
+                //     defaultModeField.SetEnabled(!defaultModeField.enabledSelf);
+                // }
+                // m_OnExposedToggle += ToggleDefaultModeFieldEnabled;
+                // AddRow("Mode", defaultModeField);
             }
-            else if (property is Texture2DArrayShaderProperty)
+            else if (property.propertyType == PropertyType.Texture2DArray)
             {
-                var textureProperty = (Texture2DArrayShaderProperty)property;
-                var field = new ObjectField { value = textureProperty.value.textureArray, objectType = typeof(Texture2DArray) };
+                var field = new ObjectField { value = property.value.textureValue, objectType = typeof(Texture2DArray) };
                 field.RegisterValueChangedCallback(evt =>
                     {
                         m_Graph.owner.RegisterCompleteObjectUndo("Change property value");
-                        textureProperty.value.textureArray = (Texture2DArray)evt.newValue;
+                        property.value.textureValue = (Texture2DArray)evt.newValue;
                         DirtyNodes();
                     });
                 AddRow("Default", field);
             }
-            else if (property is Texture3DShaderProperty)
+            else if (property.propertyType == PropertyType.Texture3D)
             {
-                var textureProperty = (Texture3DShaderProperty)property;
-                var field = new ObjectField { value = textureProperty.value.texture, objectType = typeof(Texture3D) };
+                var field = new ObjectField { value = property.value.textureValue, objectType = typeof(Texture3D) };
                 field.RegisterValueChangedCallback(evt =>
                     {
                         m_Graph.owner.RegisterCompleteObjectUndo("Change property value");
-                        textureProperty.value.texture = (Texture3D)evt.newValue;
+                        property.value.textureValue = (Texture3D)evt.newValue;
                         DirtyNodes();
                     });
                 AddRow("Default", field);
             }
-            else if (property is CubemapShaderProperty)
+            else if (property.propertyType == PropertyType.Cubemap)
             {
-                var cubemapProperty = (CubemapShaderProperty)property;
-                var field = new ObjectField { value = cubemapProperty.value.cubemap, objectType = typeof(Cubemap) };
+                var field = new ObjectField { value = property.value.textureValue, objectType = typeof(Cubemap) };
                 field.RegisterValueChangedCallback(evt =>
                     {
                         m_Graph.owner.RegisterCompleteObjectUndo("Change property value");
-                        cubemapProperty.value.cubemap = (Cubemap)evt.newValue;
+                        property.value.textureValue = (Cubemap)evt.newValue;
                         DirtyNodes();
                     });
                 AddRow("Default", field);
             }
-            else if (property is BooleanShaderProperty)
+            else if (property.propertyType == PropertyType.Boolean)
             {
-                var booleanProperty = (BooleanShaderProperty)property;
                 EventCallback<ChangeEvent<bool>> onBooleanChanged = evt =>
                     {
                         m_Graph.owner.RegisterCompleteObjectUndo("Change property value");
-                        booleanProperty.value = evt.newValue;
+                        property.value.booleanValue = evt.newValue;
                         DirtyNodes();
                     };
                 var field = new Toggle();
                 field.OnToggleChanged(onBooleanChanged);
-                field.value = booleanProperty.value;
+                field.value = property.value.booleanValue;
                 AddRow("Default", field);
             }
 //            AddRow("Type", new TextField());
@@ -235,113 +225,113 @@ namespace UnityEditor.ShaderGraph.Drawing
             UpdateReferenceNameResetMenu();
         }
 
-        void BuildVector1PropertyView(Vector1ShaderProperty floatProperty)
+        void BuildVector1PropertyView(ShaderProperty floatProperty)
         {
             VisualElement[] rows = null;
 
-            switch (floatProperty.floatType)
-            {
-                case FloatType.Slider:
-                    {
-                        float min = Mathf.Min(floatProperty.value, floatProperty.rangeValues.x);
-                        float max = Mathf.Max(floatProperty.value, floatProperty.rangeValues.y);
-                        floatProperty.rangeValues = new Vector2(min, max);
+            // switch (floatProperty.floatType)
+            // {
+            //     case FloatType.Slider:
+            //         {
+            //             float min = Mathf.Min(floatProperty.value, floatProperty.rangeValues.x);
+            //             float max = Mathf.Max(floatProperty.value, floatProperty.rangeValues.y);
+            //             floatProperty.rangeValues = new Vector2(min, max);
 
-                        var defaultField = new FloatField { value = floatProperty.value };
-                        var minField = new FloatField { value = floatProperty.rangeValues.x };
-                        var maxField = new FloatField { value = floatProperty.rangeValues.y };
+            //             var defaultField = new FloatField { value = floatProperty.value };
+            //             var minField = new FloatField { value = floatProperty.rangeValues.x };
+            //             var maxField = new FloatField { value = floatProperty.rangeValues.y };
 
+            //             defaultField.RegisterValueChangedCallback(evt =>
+            //             {
+            //                 var value = (float)evt.newValue;
+            //                 floatProperty.value = value;
+            //                 this.MarkDirtyRepaint();
+            //             });
+            //             defaultField.Q("unity-text-input").RegisterCallback<FocusOutEvent>(evt =>
+            //             {
+            //                 m_Graph.owner.RegisterCompleteObjectUndo("Change property value");
+            //                 float minValue = Mathf.Min(floatProperty.value, floatProperty.rangeValues.x);
+            //                 float maxValue = Mathf.Max(floatProperty.value, floatProperty.rangeValues.y);
+            //                 floatProperty.rangeValues = new Vector2(minValue, maxValue);
+            //                 minField.value = minValue;
+            //                 maxField.value = maxValue;
+            //                 DirtyNodes();
+            //             });
+            //             minField.RegisterValueChangedCallback(evt =>
+            //             {
+            //                 m_Graph.owner.RegisterCompleteObjectUndo("Change Range property minimum");
+            //                 float newValue = (float)evt.newValue;
+            //                 floatProperty.rangeValues = new Vector2(newValue, floatProperty.rangeValues.y);
+            //                 DirtyNodes();
+            //             });
+            //             minField.Q("unity-text-input").RegisterCallback<FocusOutEvent>(evt =>
+            //             {
+            //                 floatProperty.value = Mathf.Max(Mathf.Min(floatProperty.value, floatProperty.rangeValues.y), floatProperty.rangeValues.x);
+            //                 defaultField.value = floatProperty.value;
+            //                 DirtyNodes();
+            //             });
+            //             maxField.RegisterValueChangedCallback(evt =>
+            //             {
+            //                 m_Graph.owner.RegisterCompleteObjectUndo("Change Range property maximum");
+            //                 float newValue = (float)evt.newValue;
+            //                 floatProperty.rangeValues = new Vector2(floatProperty.rangeValues.x, newValue);
+            //                 DirtyNodes();
+            //             });
+            //             maxField.Q("unity-text-input").RegisterCallback<FocusOutEvent>(evt =>
+            //             {
+            //                 floatProperty.value = Mathf.Max(Mathf.Min(floatProperty.value, floatProperty.rangeValues.y), floatProperty.rangeValues.x);
+            //                 defaultField.value = floatProperty.value;
+            //                 DirtyNodes();
+            //             });
+            //             rows = new VisualElement[4];
+            //             rows[0] = CreateRow("Default", defaultField);
+            //             rows[2] = CreateRow("Min", minField);
+            //             rows[3] = CreateRow("Max", maxField);
+            //         }
+            //         break;
+            //     case FloatType.Integer:
+            //         {
+            //             floatProperty.value = (int)floatProperty.value;
+            //             var defaultField = new IntegerField { value = (int)floatProperty.value };
+            //             defaultField.RegisterValueChangedCallback(evt =>
+            //             {
+            //                 m_Graph.owner.RegisterCompleteObjectUndo("Change property value");
+            //                 var value = (int)evt.newValue;
+            //                 floatProperty.value = value;
+            //                 this.MarkDirtyRepaint();
+            //             });
+            //             rows = new VisualElement[2];
+            //             rows[0] = CreateRow("Default", defaultField);
+            //         }
+            //         break;
+            //     default:
+            //         {
+                        var defaultField = new FloatField { value = floatProperty.value.vectorValue.x };
                         defaultField.RegisterValueChangedCallback(evt =>
                         {
+                            m_Graph.owner.RegisterCompleteObjectUndo("Change property value");
                             var value = (float)evt.newValue;
-                            floatProperty.value = value;
-                            this.MarkDirtyRepaint();
-                        });
-                        defaultField.Q("unity-text-input").RegisterCallback<FocusOutEvent>(evt =>
-                        {
-                            m_Graph.owner.RegisterCompleteObjectUndo("Change property value");
-                            float minValue = Mathf.Min(floatProperty.value, floatProperty.rangeValues.x);
-                            float maxValue = Mathf.Max(floatProperty.value, floatProperty.rangeValues.y);
-                            floatProperty.rangeValues = new Vector2(minValue, maxValue);
-                            minField.value = minValue;
-                            maxField.value = maxValue;
-                            DirtyNodes();
-                        });
-                        minField.RegisterValueChangedCallback(evt =>
-                        {
-                            m_Graph.owner.RegisterCompleteObjectUndo("Change Range property minimum");
-                            float newValue = (float)evt.newValue;
-                            floatProperty.rangeValues = new Vector2(newValue, floatProperty.rangeValues.y);
-                            DirtyNodes();
-                        });
-                        minField.Q("unity-text-input").RegisterCallback<FocusOutEvent>(evt =>
-                        {
-                            floatProperty.value = Mathf.Max(Mathf.Min(floatProperty.value, floatProperty.rangeValues.y), floatProperty.rangeValues.x);
-                            defaultField.value = floatProperty.value;
-                            DirtyNodes();
-                        });
-                        maxField.RegisterValueChangedCallback(evt =>
-                        {
-                            m_Graph.owner.RegisterCompleteObjectUndo("Change Range property maximum");
-                            float newValue = (float)evt.newValue;
-                            floatProperty.rangeValues = new Vector2(floatProperty.rangeValues.x, newValue);
-                            DirtyNodes();
-                        });
-                        maxField.Q("unity-text-input").RegisterCallback<FocusOutEvent>(evt =>
-                        {
-                            floatProperty.value = Mathf.Max(Mathf.Min(floatProperty.value, floatProperty.rangeValues.y), floatProperty.rangeValues.x);
-                            defaultField.value = floatProperty.value;
-                            DirtyNodes();
-                        });
-                        rows = new VisualElement[4];
-                        rows[0] = CreateRow("Default", defaultField);
-                        rows[2] = CreateRow("Min", minField);
-                        rows[3] = CreateRow("Max", maxField);
-                    }
-                    break;
-                case FloatType.Integer:
-                    {
-                        floatProperty.value = (int)floatProperty.value;
-                        var defaultField = new IntegerField { value = (int)floatProperty.value };
-                        defaultField.RegisterValueChangedCallback(evt =>
-                        {
-                            m_Graph.owner.RegisterCompleteObjectUndo("Change property value");
-                            var value = (int)evt.newValue;
-                            floatProperty.value = value;
+                            floatProperty.value.vectorValue = new Vector4(value, 0, 0, 0);
                             this.MarkDirtyRepaint();
                         });
                         rows = new VisualElement[2];
                         rows[0] = CreateRow("Default", defaultField);
-                    }
-                    break;
-                default:
-                    {
-                        var defaultField = new FloatField { value = floatProperty.value };
-                        defaultField.RegisterValueChangedCallback(evt =>
-                        {
-                            m_Graph.owner.RegisterCompleteObjectUndo("Change property value");
-                            var value = (float)evt.newValue;
-                            floatProperty.value = value;
-                            this.MarkDirtyRepaint();
-                        });
-                        rows = new VisualElement[2];
-                        rows[0] = CreateRow("Default", defaultField);
-                    }
-                    break;
-            }
+            //         }
+            //         break;
+            // }
 
-            var modeField = new EnumField(floatProperty.floatType);
-            modeField.RegisterValueChangedCallback(evt =>
-            {
-                m_Graph.owner.RegisterCompleteObjectUndo("Change Vector1 mode");
-                var value = (FloatType)evt.newValue;
-                floatProperty.floatType = value;
-                if (rows != null)
-                    RemoveElements(rows);
-                BuildVector1PropertyView(floatProperty);
-                this.MarkDirtyRepaint();
-            });
-            rows[1] = CreateRow("Mode", modeField);
+            // var modeField = new EnumField(floatProperty.floatType);
+            // modeField.RegisterValueChangedCallback(evt =>
+            // {
+            //     m_Graph.owner.RegisterCompleteObjectUndo("Change Vector1 mode");
+            //     var value = (FloatType)evt.newValue;
+            //     floatProperty.floatType = value;
+            //     if (rows != null)
+            //         RemoveElements(rows);
+            //     BuildVector1PropertyView(floatProperty);
+            //     this.MarkDirtyRepaint();
+            // });
+            // rows[1] = CreateRow("Mode", modeField);
 
             if (rows == null)
                 return;

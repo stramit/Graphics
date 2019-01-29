@@ -69,10 +69,10 @@ namespace UnityEditor.ShaderGraph
 
             var abstractMaterialGraph = owner as AbstractMaterialGraph;
             if (abstractMaterialGraph != null)
-                abstractMaterialGraph.CollectShaderProperties(shaderProperties, mode);
+                abstractMaterialGraph.CollectGraphInputs(shaderProperties, mode);
 
             foreach (var activeNode in activeNodeList.OfType<AbstractMaterialNode>())
-                activeNode.CollectShaderProperties(shaderProperties, mode);
+                activeNode.CollectGraphInputs(shaderProperties, mode);
 
             var finalShader = new ShaderStringBuilder();
             finalShader.AppendLine(@"Shader ""{0}""", outputName);

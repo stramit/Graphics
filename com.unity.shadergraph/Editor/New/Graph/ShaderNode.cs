@@ -135,7 +135,7 @@ namespace UnityEditor.ShaderGraph
                 properties.Add(parameter.ToPreviewProperty(parameter.ToVariableName()));
         }
 
-        public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector properties, GenerationMode generationMode)
         {
             if (!generationMode.IsPreview())
                 return;
@@ -145,18 +145,18 @@ namespace UnityEditor.ShaderGraph
                 if(!port.HasEdges())
                 {
                     string overrideReferenceName = port.ToVariableName();
-                    IShaderProperty[] defaultProperties = port.ToDefaultPropertyArray(overrideReferenceName);
-                    foreach(IShaderProperty property in defaultProperties)
-                        properties.AddShaderProperty(property);
+                    ShaderProperty[] defaultProperties = port.ToDefaultPropertyArray(overrideReferenceName);
+                    foreach(ShaderProperty property in defaultProperties)
+                        properties.AddGraphInput(property);
                 }
             }
 
             foreach (var parameter in m_Parameters)
             {
                 string overrideReferenceName = parameter.ToVariableName();
-                IShaderProperty[] defaultProperties = parameter.ToDefaultPropertyArray(overrideReferenceName);
-                foreach(IShaderProperty property in defaultProperties)
-                        properties.AddShaderProperty(property);
+                ShaderProperty[] defaultProperties = parameter.ToDefaultPropertyArray(overrideReferenceName);
+                foreach(ShaderProperty property in defaultProperties)
+                        properties.AddGraphInput(property);
             }
         }
     }

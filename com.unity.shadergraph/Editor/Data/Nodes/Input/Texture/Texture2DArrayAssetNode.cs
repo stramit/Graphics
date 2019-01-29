@@ -45,15 +45,15 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector properties, GenerationMode generationMode)
         {
-            properties.AddShaderProperty(new Texture2DArrayShaderProperty()
-            {
-                overrideReferenceName = GetVariableNameForSlot(OutputSlotId),
-                generatePropertyBlock = true,
-                value = m_Texture,
-                modifiable = false
-            });
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Texture2DArray));//()
+            // {
+            //     overrideReferenceName = GetVariableNameForSlot(OutputSlotId),
+            //     generatePropertyBlock = true,
+            //     value = m_Texture,
+            //     modifiable = false
+            // });
         }
 
         public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)
@@ -65,9 +65,9 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        public IShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
-            var prop = new Texture2DArrayShaderProperty { value = m_Texture };
+            var prop = new ShaderProperty(PropertyType.Texture2DArray);// { value = m_Texture };
             if (texture != null)
                 prop.displayName = texture.name;
             return prop;

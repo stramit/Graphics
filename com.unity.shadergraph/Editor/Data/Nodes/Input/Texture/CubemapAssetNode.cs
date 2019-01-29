@@ -45,15 +45,15 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector properties, GenerationMode generationMode)
         {
-            properties.AddShaderProperty(new CubemapShaderProperty()
-            {
-                overrideReferenceName = GetVariableNameForSlot(OutputSlotId),
-                generatePropertyBlock = true,
-                value = m_Cubemap,
-                modifiable = false
-            });
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Cubemap));
+            // {
+            //     overrideReferenceName = GetVariableNameForSlot(OutputSlotId),
+            //     generatePropertyBlock = true,
+            //     value = m_Cubemap,
+            //     modifiable = false
+            // });
         }
 
         public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)
@@ -65,9 +65,9 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        public IShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
-            var prop = new CubemapShaderProperty { value = m_Cubemap };
+            var prop = new ShaderProperty(PropertyType.Cubemap);// { value = m_Cubemap };
             if (cubemap != null)
                 prop.displayName = cubemap.name;
             return prop;

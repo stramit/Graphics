@@ -63,13 +63,13 @@ namespace UnityEditor.ShaderGraph
             visitor.AddShaderChunk(s, true);
         }
 
-        public IShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
             var slotX = FindInputSlot<Vector1MaterialSlot>(InputSlotXId);
             var slotY = FindInputSlot<Vector1MaterialSlot>(InputSlotYId);
             var slotZ = FindInputSlot<Vector1MaterialSlot>(InputSlotZId);
             var slotW = FindInputSlot<Vector1MaterialSlot>(InputSlotWId);
-            return new Vector4ShaderProperty { value = new Vector4(slotX.value, slotY.value, slotZ.value, slotW.value) };
+            return new ShaderProperty(PropertyType.Vector4);// { value = new Vector4(slotX.value, slotY.value, slotZ.value, slotW.value) };
         }
 
         public int outputSlotId { get { return OutputSlotId; } }

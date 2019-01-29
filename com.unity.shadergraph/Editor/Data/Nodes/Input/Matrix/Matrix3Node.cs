@@ -66,30 +66,30 @@ namespace UnityEditor.ShaderGraph
             RemoveSlotsNameNotMatching(new[] { OutputSlotId });
         }
 
-        public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector properties, GenerationMode generationMode)
         {
             if (!generationMode.IsPreview())
                 return;
 
-            properties.AddShaderProperty(new Vector3ShaderProperty()
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Vector3)
             {
                 overrideReferenceName = string.Format("_{0}_m0", GetVariableNameForNode()),
-                generatePropertyBlock = false,
-                value = m_Row0
+                // generatePropertyBlock = false,
+                // value = m_Row0
             });
 
-            properties.AddShaderProperty(new Vector3ShaderProperty()
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Vector3)
             {
                 overrideReferenceName = string.Format("_{0}_m1", GetVariableNameForNode()),
-                generatePropertyBlock = false,
-                value = m_Row1
+                // generatePropertyBlock = false,
+                // value = m_Row1
             });
 
-            properties.AddShaderProperty(new Vector3ShaderProperty()
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Vector3)
             {
                 overrideReferenceName = string.Format("_{0}_m2", GetVariableNameForNode()),
-                generatePropertyBlock = false,
-                value = m_Row2
+                // generatePropertyBlock = false,
+                // value = m_Row2
             });
         }
 

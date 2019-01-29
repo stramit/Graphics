@@ -64,18 +64,18 @@ namespace UnityEditor.ShaderGraph
             RemoveSlotsNameNotMatching(new[] { OutputSlotId });
         }
 
-        public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector properties, GenerationMode generationMode)
         {
             if (!generationMode.IsPreview())
                 return;
 
-            properties.AddShaderProperty(new ColorShaderProperty()
-            {
-                overrideReferenceName = GetVariableNameForNode(),
-                generatePropertyBlock = false,
-                value = color.color,
-                colorMode = color.mode
-            });
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Color));
+            // {
+            //     overrideReferenceName = GetVariableNameForNode(),
+            //     generatePropertyBlock = false,
+            //     value = color.color,
+            //     colorMode = color.mode
+            // });
         }
 
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
@@ -107,9 +107,9 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        public IShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
-            return new ColorShaderProperty { value = color.color, colorMode = color.mode };
+            return new ShaderProperty(PropertyType.Color);// { value = color.color, colorMode = color.mode };
         }
 
         public int outputSlotId { get { return OutputSlotId; } }

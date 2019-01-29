@@ -56,23 +56,23 @@ namespace UnityEditor.ShaderGraph
             RemoveSlotsNameNotMatching(new[] { OutputSlotId });
         }
 
-        public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector properties, GenerationMode generationMode)
         {
             if (!generationMode.IsPreview())
                 return;
 
-            properties.AddShaderProperty(new Vector2ShaderProperty()
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Matrix2)
             {
                 overrideReferenceName = string.Format("_{0}_m0", GetVariableNameForNode()),
-                generatePropertyBlock = false,
-                value = m_Row0
+                // generatePropertyBlock = false,
+                // value = m_Row0
             });
 
-            properties.AddShaderProperty(new Vector2ShaderProperty()
+            properties.AddGraphInput(new ShaderProperty(PropertyType.Matrix2)
             {
                 overrideReferenceName = string.Format("_{0}_m1", GetVariableNameForNode()),
-                generatePropertyBlock = false,
-                value = m_Row1
+                // generatePropertyBlock = false,
+                // value = m_Row1
             });
         }
 

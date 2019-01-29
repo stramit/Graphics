@@ -69,18 +69,18 @@ namespace UnityEditor.ShaderGraph
             return GetVariableNameForNode();
         }
 
-        public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        public override void CollectGraphInputs(PropertyCollector properties, GenerationMode generationMode)
         {
-            properties.AddShaderProperty(new SamplerStateShaderProperty()
+            properties.AddGraphInput(new ShaderProperty(PropertyType.SamplerState)
             {
                 overrideReferenceName = GetVariableNameForNode(),
                 generatePropertyBlock = false,
 
-                value = new TextureSamplerState()
-                {
-                    filter = m_filter,
-                    wrap =  m_wrap
-                }
+                // value = new TextureSamplerState()
+                // {
+                //     filter = m_filter,
+                //     wrap =  m_wrap
+                // }
             });
         }
 

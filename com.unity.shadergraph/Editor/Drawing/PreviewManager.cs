@@ -194,7 +194,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 }
 
                 node.CollectPreviewMaterialProperties(m_PreviewProperties);
-                foreach (var prop in m_Graph.properties)
+                foreach (var prop in m_Graph.graphInputs.OfType<ShaderProperty>())
                     m_PreviewProperties.Add(prop.GetPreviewMaterialProperty());
 
                 foreach (var previewProperty in m_PreviewProperties)

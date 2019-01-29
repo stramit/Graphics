@@ -246,14 +246,14 @@ namespace UnityEditor.ShaderGraph.Drawing
 
             // Collect the property nodes and get the corresponding properties
             var propertyNodeGuids = graphView.selection.OfType<MaterialNodeView>().Where(x => (x.node is PropertyNode)).Select(x => ((PropertyNode)x.node).propertyGuid);
-            var metaProperties = graphView.graph.properties.Where(x => propertyNodeGuids.Contains(x.guid));
+            var metaProperties = graphView.graph.graphInputs.Where(x => propertyNodeGuids.Contains(x.guid));
 
             var copyPasteGraph = new CopyPasteGraph(
                     graphView.graph.guid,
                     graphView.selection.OfType<ShaderGroup>().Select(x => x.userData),
                     graphView.selection.OfType<MaterialNodeView>().Where(x => !(x.node is PropertyNode)).Select(x => x.node as INode),
                     graphView.selection.OfType<Edge>().Select(x => x.userData as IEdge),
-                    graphView.selection.OfType<BlackboardField>().Select(x => x.userData as IShaderProperty),
+                    graphView.selection.OfType<BlackboardField>().Select(x => x.userData as ShaderProperty),
                     metaProperties);
 
             var deserialized = CopyPasteGraph.FromJson(JsonUtility.ToJson(copyPasteGraph, false));
@@ -319,42 +319,42 @@ namespace UnityEditor.ShaderGraph.Drawing
                     edge => edge,
                     (key, edges) => new { slotRef = key, edges = edges.ToList() });
 
-            var externalInputNeedingConnection = new List<KeyValuePair<IEdge, IShaderProperty>>();
+            var externalInputNeedingConnection = new List<KeyValuePair<IEdge, ShaderProperty>>();
             foreach (var group in uniqueIncomingEdges)
             {
                 var sr = group.slotRef;
                 var fromNode = graphObject.graph.GetNodeFromGuid(sr.nodeGuid);
                 var fromSlot = fromNode.FindOutputSlot<MaterialSlot>(sr.slotId);
 
-                IShaderProperty prop;
+                ShaderProperty prop;
                 switch (fromSlot.concreteValueType)
                 {
                     case ConcreteSlotValueType.Texture2D:
-                        prop = new TextureShaderProperty();
+                        prop = new ShaderProperty(PropertyType.Texture2D);
                         break;
                     case ConcreteSlotValueType.Texture2DArray:
-                        prop = new Texture2DArrayShaderProperty();
+                        prop = new ShaderProperty(PropertyType.Texture2DArray);
                         break;
                     case ConcreteSlotValueType.Texture3D:
-                        prop = new Texture3DShaderProperty();
+                        prop = new ShaderProperty(PropertyType.Texture3D);
                         break;
                     case ConcreteSlotValueType.Cubemap:
-                        prop = new CubemapShaderProperty();
+                        prop = new ShaderProperty(PropertyType.Cubemap);
                         break;
                     case ConcreteSlotValueType.Vector4:
-                        prop = new Vector4ShaderProperty();
+                        prop = new ShaderProperty(PropertyType.Vector4);
                         break;
                     case ConcreteSlotValueType.Vector3:
-                        prop = new Vector3ShaderProperty();
+                        prop = new ShaderProperty(PropertyType.Vector3);
                         break;
                     case ConcreteSlotValueType.Vector2:
-                        prop = new Vector2ShaderProperty();
+                        prop = new ShaderProperty(PropertyType.Vector2);
                         break;
                     case ConcreteSlotValueType.Vector1:
-                        prop = new Vector1ShaderProperty();
+                        prop = new ShaderProperty(PropertyType.Vector1);
                         break;
                     case ConcreteSlotValueType.Boolean:
-                        prop = new BooleanShaderProperty();
+                        prop = new ShaderProperty(PropertyType.Boolean);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -364,7 +364,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 {
                     var materialGraph = (AbstractMaterialGraph)graphObject.graph;
                     var fromPropertyNode = fromNode as PropertyNode;
-                    var fromProperty = fromPropertyNode != null ? materialGraph.properties.FirstOrDefault(p => p.guid == fromPropertyNode.propertyGuid) : null;
+                    var fromProperty = fromPropertyNode != null ? materialGraph.graphInputs.FirstOrDefault(p => p.guid == fromPropertyNode.propertyGuid) : null;
                     prop.displayName = fromProperty != null ? fromProperty.displayName : fromNode.name;
                     subGraph.AddShaderProperty(prop);
                     var propNode = new PropertyNode();
@@ -381,7 +381,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                         subGraph.Connect(
                             new SlotReference(propNode.guid, PropertyNode.OutputSlotId),
                             new SlotReference(nodeGuidMap[edge.inputSlot.nodeGuid], edge.inputSlot.slotId));
-                        externalInputNeedingConnection.Add(new KeyValuePair<IEdge, IShaderProperty>(edge, prop));
+                        externalInputNeedingConnection.Add(new KeyValuePair<IEdge, ShaderProperty>(edge, prop));
                     }
                 }
             }

@@ -29,56 +29,56 @@ namespace UnityEditor.ShaderGraph
         private void UpdateNode()
         {
             var graph = owner as AbstractMaterialGraph;
-            var property = graph.properties.FirstOrDefault(x => x.guid == propertyGuid);
+            var property = graph.graphInputs.OfType<ShaderProperty>().FirstOrDefault(x => x.guid == propertyGuid);
             if (property == null)
                 return;
 
-            if (property is Vector1ShaderProperty)
+            if (property.propertyType == PropertyType.Vector1)
             {
                 AddSlot(new Vector1MaterialSlot(OutputSlotId, property.displayName, "Out", SlotType.Output, 0));
                 RemoveSlotsNameNotMatching(new[] {OutputSlotId});
             }
-            else if (property is Vector2ShaderProperty)
+            if (property.propertyType == PropertyType.Vector2)
             {
                 AddSlot(new Vector2MaterialSlot(OutputSlotId, property.displayName, "Out", SlotType.Output, Vector4.zero));
                 RemoveSlotsNameNotMatching(new[] {OutputSlotId});
             }
-            else if (property is Vector3ShaderProperty)
+            if (property.propertyType == PropertyType.Vector3)
             {
                 AddSlot(new Vector3MaterialSlot(OutputSlotId, property.displayName, "Out", SlotType.Output, Vector4.zero));
                 RemoveSlotsNameNotMatching(new[] {OutputSlotId});
             }
-            else if (property is Vector4ShaderProperty)
+            if (property.propertyType == PropertyType.Vector4)
             {
                 AddSlot(new Vector4MaterialSlot(OutputSlotId, property.displayName, "Out", SlotType.Output, Vector4.zero));
                 RemoveSlotsNameNotMatching(new[] {OutputSlotId});
             }
-            else if (property is ColorShaderProperty)
+            if (property.propertyType == PropertyType.Color)
             {
                 AddSlot(new Vector4MaterialSlot(OutputSlotId, property.displayName, "Out", SlotType.Output, Vector4.zero));
                 RemoveSlotsNameNotMatching(new[] {OutputSlotId});
             }
-            else if (property is TextureShaderProperty)
+            if (property.propertyType == PropertyType.Texture2D)
             {
                 AddSlot(new Texture2DMaterialSlot(OutputSlotId, property.displayName, "Out", SlotType.Output));
                 RemoveSlotsNameNotMatching(new[] {OutputSlotId});
             }
-            else if (property is Texture2DArrayShaderProperty)
+            if (property.propertyType == PropertyType.Texture2DArray)
             {
                 AddSlot(new Texture2DArrayMaterialSlot(OutputSlotId, property.displayName, "Out", SlotType.Output));
                 RemoveSlotsNameNotMatching(new[] {OutputSlotId});
             }
-            else if (property is Texture3DShaderProperty)
+            if (property.propertyType == PropertyType.Texture3D)
             {
                 AddSlot(new Texture3DMaterialSlot(OutputSlotId, property.displayName, "Out", SlotType.Output));
                 RemoveSlotsNameNotMatching(new[] {OutputSlotId});
             }
-            else if (property is CubemapShaderProperty)
+            if (property.propertyType == PropertyType.Cubemap)
             {
                 AddSlot(new CubemapMaterialSlot(OutputSlotId, property.displayName, "Out", SlotType.Output));
                 RemoveSlotsNameNotMatching(new[] { OutputSlotId });
             }
-            else if (property is BooleanShaderProperty)
+            if (property.propertyType == PropertyType.Boolean)
             {
                 AddSlot(new BooleanMaterialSlot(OutputSlotId, property.displayName, "Out", SlotType.Output, false));
                 RemoveSlotsNameNotMatching(new[] { OutputSlotId });
@@ -88,11 +88,11 @@ namespace UnityEditor.ShaderGraph
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
         {
             var graph = owner as AbstractMaterialGraph;
-            var property = graph.properties.FirstOrDefault(x => x.guid == propertyGuid);
+            var property = graph.graphInputs.OfType<ShaderProperty>().FirstOrDefault(x => x.guid == propertyGuid);
             if (property == null)
                 return;
 
-            if (property is Vector1ShaderProperty)
+            if (property.propertyType == PropertyType.Vector1)
             {
                 var result = string.Format("{0} {1} = {2};"
                         , precision
@@ -100,7 +100,7 @@ namespace UnityEditor.ShaderGraph
                         , property.referenceName);
                 visitor.AddShaderChunk(result, true);
             }
-            else if (property is Vector2ShaderProperty)
+            if (property.propertyType == PropertyType.Vector2)
             {
                 var result = string.Format("{0}2 {1} = {2};"
                         , precision
@@ -108,7 +108,7 @@ namespace UnityEditor.ShaderGraph
                         , property.referenceName);
                 visitor.AddShaderChunk(result, true);
             }
-            else if (property is Vector3ShaderProperty)
+            if (property.propertyType == PropertyType.Vector3)
             {
                 var result = string.Format("{0}3 {1} = {2};"
                         , precision
@@ -116,7 +116,7 @@ namespace UnityEditor.ShaderGraph
                         , property.referenceName);
                 visitor.AddShaderChunk(result, true);
             }
-            else if (property is Vector4ShaderProperty)
+            if (property.propertyType == PropertyType.Vector4)
             {
                 var result = string.Format("{0}4 {1} = {2};"
                         , precision
@@ -124,7 +124,7 @@ namespace UnityEditor.ShaderGraph
                         , property.referenceName);
                 visitor.AddShaderChunk(result, true);
             }
-            else if (property is ColorShaderProperty)
+            if (property.propertyType == PropertyType.Color)
             {
                 var result = string.Format("{0}4 {1} = {2};"
                         , precision
@@ -132,7 +132,7 @@ namespace UnityEditor.ShaderGraph
                         , property.referenceName);
                 visitor.AddShaderChunk(result, true);
             }
-            else if (property is BooleanShaderProperty)
+            if (property.propertyType == PropertyType.Boolean)
             {
                 var result = string.Format("{0} {1} = {2};"
                         , precision
@@ -151,7 +151,7 @@ namespace UnityEditor.ShaderGraph
                     return;
 
                 var graph = owner as AbstractMaterialGraph;
-                var property = graph.properties.FirstOrDefault(x => x.guid == value);
+                var property = graph.graphInputs.FirstOrDefault(x => x.guid == value);
                 if (property == null)
                     return;
                 m_PropertyGuid = value;
@@ -165,12 +165,12 @@ namespace UnityEditor.ShaderGraph
         public override string GetVariableNameForSlot(int slotId)
         {
             var graph = owner as AbstractMaterialGraph;
-            var property = graph.properties.FirstOrDefault(x => x.guid == propertyGuid);
+            var property = graph.graphInputs.OfType<ShaderProperty>().FirstOrDefault(x => x.guid == propertyGuid);
 
-            if (!(property is TextureShaderProperty) &&
-                !(property is Texture2DArrayShaderProperty) &&
-                !(property is Texture3DShaderProperty) &&
-                !(property is CubemapShaderProperty))
+            if (!(property.propertyType == PropertyType.Texture2D) &&
+                !(property.propertyType == PropertyType.Texture2DArray) &&
+                !(property.propertyType == PropertyType.Texture3D) &&
+                !(property.propertyType == PropertyType.Cubemap))
                 return base.GetVariableNameForSlot(slotId);
 
             return property.referenceName;
@@ -180,7 +180,7 @@ namespace UnityEditor.ShaderGraph
         {
             var graph = owner as AbstractMaterialGraph;
 
-            if (!propertyGuid.Equals(Guid.Empty) && !graph.properties.Any(x => x.guid == propertyGuid))
+            if (!propertyGuid.Equals(Guid.Empty) && !graph.graphInputs.Any(x => x.guid == propertyGuid))
                 return true;
 
             return false;
