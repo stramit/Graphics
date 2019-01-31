@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.Graphing;
@@ -13,10 +13,11 @@ namespace UnityEditor.ShaderGraph
         {
         }
 
-        public ShaderProperty(PropertyType type)
+        public ShaderProperty(PropertyType type, string name)
         {
             m_PropertyType = type;
             m_DisplayName = type.ToString();
+            m_ShaderOutputName = string.IsNullOrEmpty(name) ? string.Format("{0}_{1}", type.ToString(), GuidEncoder.Encode(guid)) : name;
             m_ShaderValueData = new ShaderValueData();
         }
 

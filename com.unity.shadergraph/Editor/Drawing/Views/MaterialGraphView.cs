@@ -359,8 +359,8 @@ namespace UnityEditor.ShaderGraph.Drawing
                 var field = selectable as BlackboardField;
                 if (field != null && field.userData != null)
                 {
-                    var property = (ShaderProperty)field.userData;
-                    graph.RemoveShaderProperty(property.guid);
+                    var shaderValue = (IShaderValue)field.userData;
+                    graph.RemoveShaderProperty(shaderValue.guid);
                 }
             }
 
@@ -530,10 +530,10 @@ namespace UnityEditor.ShaderGraph.Drawing
             var blackboardField = obj as BlackboardField;
             if (blackboardField != null)
             {
-                ShaderProperty property = blackboardField.userData as ShaderProperty;
-                if (property != null)
+                IShaderValue shaderValue = blackboardField.userData as IShaderValue;
+                if (shaderValue != null)
                 {
-                    graph.owner.RegisterCompleteObjectUndo("Drag Property");
+                    graph.owner.RegisterCompleteObjectUndo("Drag Input");
                     var node = new PropertyNode();
 
                     var drawState = node.drawState;
@@ -542,7 +542,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                     graph.AddNode(node);
 
                     // Setting the guid requires the graph to be set first.
-                    node.propertyGuid = property.guid;
+                    node.propertyGuid = shaderValue.guid;
                 }
             }
         }

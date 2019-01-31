@@ -25,15 +25,15 @@ namespace UnityEditor.ShaderGraph
         public string GetPropertiesBlock(int baseIndentLevel)
         {
             var sb = new StringBuilder();
-            foreach (var prop in m_GraphInputs.OfType<ShaderProperty>().Where(x => x.generatePropertyBlock))
-            {
-                for (var i = 0; i < baseIndentLevel; i++)
-                {
-                    //sb.Append("\t");
-                    sb.Append("    "); // unity convention use space instead of tab...
-                }
-                sb.AppendLine(prop.GetPropertyBlockString());
-            }
+            //foreach (var prop in m_GraphInputs) //.Where(x => x.generatePropertyBlock))
+            //{
+            //    for (var i = 0; i < baseIndentLevel; i++)
+            //    {
+            //        //sb.Append("\t");
+            //        sb.Append("    "); // unity convention use space instead of tab...
+            //    }
+            //    sb.AppendLine(prop.GetPropertyBlockString());
+            //}
             return sb.ToString();
         }
 
@@ -46,17 +46,17 @@ namespace UnityEditor.ShaderGraph
 
         public void GetPropertiesDeclaration(ShaderStringBuilder builder)
         {
-            builder.AppendLine("CBUFFER_START(UnityPerMaterial)");
-            foreach (var prop in m_GraphInputs.OfType<ShaderProperty>().Where(n => n.isBatchable && n.generatePropertyBlock))
-            {
-                builder.AppendLine(prop.GetPropertyDeclarationString());
-            }
-            builder.AppendLine("CBUFFER_END");
-            builder.AppendNewLine();
+            //builder.AppendLine("CBUFFER_START(UnityPerMaterial)");
+            //foreach (var prop in m_GraphInputs.Where(n => n.isBatchable && n.generatePropertyBlock))
+            //{
+            //    builder.AppendLine(prop.GetPropertyDeclarationString());
+            //}
+            //builder.AppendLine("CBUFFER_END");
+            //builder.AppendNewLine();
 
-            foreach (var prop in m_GraphInputs.OfType<ShaderProperty>().Where(n => !n.isBatchable || !n.generatePropertyBlock))
+            foreach (var prop in m_GraphInputs)//.Where(n => !n.isBatchable || !n.generatePropertyBlock))
             {
-                builder.AppendLine(prop.GetPropertyDeclarationString());
+                builder.AppendLine(prop.ToPropertyDefinition(AbstractMaterialNode.OutputPrecision.@float));
             }
         }
 
@@ -64,13 +64,13 @@ namespace UnityEditor.ShaderGraph
         {
             var result = new List<TextureInfo>();
 
-            foreach (var prop in m_GraphInputs.OfType<ShaderProperty>().Where(p => p.propertyType == PropertyType.Texture2D))
+            foreach (var prop in m_GraphInputs.Where(p => p.concreteValueType == ConcreteSlotValueType.Texture2D))
             {
-                if (prop.referenceName != null)
+                if (prop.shaderOutputName != null)
                 {
                     var textureInfo = new TextureInfo
                     {
-                        name = prop.referenceName,
+                        name = prop.shaderOutputName,
                         textureId = prop.value.textureValue != null ? prop.value.textureValue.GetInstanceID() : 0,
                         //modifiable = prop.modifiable
                     };
@@ -78,13 +78,13 @@ namespace UnityEditor.ShaderGraph
                 }
             }
 
-            foreach (var prop in m_GraphInputs.OfType<ShaderProperty>().Where(p => p.propertyType == PropertyType.Texture2DArray))
+            foreach (var prop in m_GraphInputs.Where(p => p.concreteValueType == ConcreteSlotValueType.Texture2DArray))
             {
-                if (prop.referenceName != null)
+                if (prop.shaderOutputName != null)
                 {
                     var textureInfo = new TextureInfo
                     {
-                        name = prop.referenceName,
+                        name = prop.shaderOutputName,
                         textureId = prop.value.textureValue != null ? prop.value.textureValue.GetInstanceID() : 0,
                         //modifiable = prop.modifiable
                     };
@@ -92,13 +92,13 @@ namespace UnityEditor.ShaderGraph
                 }
             }
 
-            foreach (var prop in m_GraphInputs.OfType<ShaderProperty>().Where(p => p.propertyType == PropertyType.Texture3D))
+            foreach (var prop in m_GraphInputs.Where(p => p.concreteValueType == ConcreteSlotValueType.Texture3D))
             {
-                if (prop.referenceName != null)
+                if (prop.shaderOutputName != null)
                 {
                     var textureInfo = new TextureInfo
                     {
-                        name = prop.referenceName,
+                        name = prop.shaderOutputName,
                         textureId = prop.value.textureValue != null ? prop.value.textureValue.GetInstanceID() : 0,
                         //modifiable = prop.modifiable
                     };
@@ -106,13 +106,13 @@ namespace UnityEditor.ShaderGraph
                 }
             }
 
-            foreach (var prop in m_GraphInputs.OfType<ShaderProperty>().Where(p => p.propertyType == PropertyType.Cubemap))
+            foreach (var prop in m_GraphInputs.Where(p => p.concreteValueType == ConcreteSlotValueType.Cubemap))
             {
-                if (prop.referenceName != null)
+                if (prop.shaderOutputName != null)
                 {
                     var textureInfo = new TextureInfo
                     {
-                        name = prop.referenceName,
+                        name = prop.shaderOutputName,
                         textureId = prop.value.textureValue != null ? prop.value.textureValue.GetInstanceID() : 0,
                         //modifiable = prop.modifiable
                     };

@@ -66,9 +66,9 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public IEnumerable<ShaderProperty> graphInputs
+        public IEnumerable<IShaderValue> graphInputs
         {
-            get { return base.graphInputs.OfType<ShaderProperty>().OrderBy(x => x.guid); }
+            get { return base.graphInputs.OrderBy(x => x.guid); }
         }
 
         public IEnumerable<MaterialSlot> graphOutputs
@@ -88,7 +88,7 @@ namespace UnityEditor.ShaderGraph
                     // Generate arguments... first INPUTS
                     var arguments = new List<string>();
                     foreach (var prop in graphInputs)
-                        arguments.Add(string.Format("{0}", prop.GetPropertyAsArgumentString()));
+                        arguments.Add(string.Format("{0}", prop.ToPropertyArgument(outputNode.precision)));
 
                     // now pass surface inputs
                     arguments.Add(string.Format("{0} IN", graphContext.graphInputStructName));
