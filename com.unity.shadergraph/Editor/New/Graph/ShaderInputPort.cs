@@ -113,7 +113,7 @@ namespace UnityEditor.ShaderGraph
             if (matOwner == null)
                 throw new Exception(string.Format("Slot {0} either has no owner, or the owner is not a {1}", this, typeof(AbstractMaterialNode)));
 
-            string overrideReferenceName = this.ToVariableSnippet();
+            string overrideReferenceName = this.ToVariableNameSnippet();
             IShaderProperty[] defaultProperties = this.ToDefaultPropertyArray(overrideReferenceName);
 
             foreach(IShaderProperty property in defaultProperties)
@@ -127,7 +127,7 @@ namespace UnityEditor.ShaderGraph
                 throw new Exception(string.Format("Slot {0} either has no owner, or the owner is not a {1}", this, typeof(AbstractMaterialNode)));
 
             if (generationMode.IsPreview())
-                return this.ToVariableSnippet();
+                return this.ToVariableNameSnippet();
 
             return this.ToValueSnippet(matOwner.precision);
         }

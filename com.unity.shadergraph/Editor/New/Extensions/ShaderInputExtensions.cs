@@ -33,7 +33,7 @@ namespace UnityEditor.ShaderGraph
                 case ConcreteSlotValueType.Texture2DArray:
                 case ConcreteSlotValueType.Cubemap:
                 case ConcreteSlotValueType.SamplerState:
-                    return shaderInput.ToVariableSnippet();
+                    return shaderInput.ToVariableNameSnippet();
                 case ConcreteSlotValueType.Matrix2:
                     return string.Format("{0}2x2 ({1},{2},{3},{4})", precision, 
                         matrix.m00, matrix.m01, 
@@ -50,7 +50,7 @@ namespace UnityEditor.ShaderGraph
                         matrix.m20, matrix.m21, matrix.m22, matrix.m23,
                         matrix.m30, matrix.m31, matrix.m32, matrix.m33);
                 case ConcreteSlotValueType.Gradient:
-                    return string.Format("Unity{0}()", shaderInput.ToVariableSnippet());
+                    return string.Format("Unity{0}()", shaderInput.ToVariableNameSnippet());
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -61,7 +61,7 @@ namespace UnityEditor.ShaderGraph
             if (shaderValue is ShaderParameter parameter)
             {
                 if (generationMode.IsPreview())
-                    return parameter.ToVariableSnippet();
+                    return parameter.ToVariableNameSnippet();
 
                 return parameter.ToValueSnippet(precision);
             }

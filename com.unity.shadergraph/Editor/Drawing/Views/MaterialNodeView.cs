@@ -18,6 +18,7 @@ namespace UnityEditor.ShaderGraph.Drawing
         PreviewRenderData m_PreviewRenderData;
         Image m_PreviewImage;
         VisualElement m_PreviewContainer;
+        VisualElement m_ControlsContainer;
         VisualElement m_ControlItems;
         VisualElement m_PreviewFiller;
         VisualElement m_ControlsDivider;
@@ -28,7 +29,6 @@ namespace UnityEditor.ShaderGraph.Drawing
         VisualElement m_SettingsButton;
         VisualElement m_Settings;
         VisualElement m_NodeSettingsView;
-
 
         public void Initialize(AbstractMaterialNode inNode, PreviewManager previewManager, IEdgeConnectorListener connectorListener)
         {
@@ -46,29 +46,9 @@ namespace UnityEditor.ShaderGraph.Drawing
             UpdateTitle();
 
             // Add controls container
-            var controlsContainer = new VisualElement { name = "controls" };
-            {
-                m_ControlsDivider = new VisualElement { name = "divider" };
-                m_ControlsDivider.AddToClassList("horizontal");
-                controlsContainer.Add(m_ControlsDivider);
-                m_ControlItems = new VisualElement { name = "items" };
-                controlsContainer.Add(m_ControlItems);
-
-                // Instantiate control views from node
-                foreach (var propertyInfo in node.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
-                    foreach (IControlAttribute attribute in propertyInfo.GetCustomAttributes(typeof(IControlAttribute), false))
-                        m_ControlItems.Add(attribute.InstantiateControl(node, propertyInfo));
-
-                // Instantiate controls for ShaderParameters
-                ShaderNode shaderNode = inNode as ShaderNode;
-                if(shaderNode != null && shaderNode.parameters != null)
-                {
-                    foreach(ShaderParameter parameter in shaderNode.parameters)
-                        m_ControlItems.Add(DrawingUtil.GetInspectorRowForInput(parameter));
-                }
-            }
-            if (m_ControlItems.childCount > 0)
-                contents.Add(controlsContainer);
+            m_ControlsContainer = new VisualElement { name = "controls" };
+                RecreateParameters();
+            contents.Add(m_ControlsContainer);
 
             if (node.hasPreview)
             {
@@ -403,6 +383,38 @@ namespace UnityEditor.ShaderGraph.Drawing
                 title = node.name;
         }
 
+        private void RecreateParameters()
+        {
+            var currentControls = m_ControlsContainer.Children().ToArray();
+            for(int i = 0; i < currentControls.Length; i++)
+                currentControls[i].RemoveFromHierarchy();
+
+            m_ControlsDivider = new VisualElement { name = "divider" };
+            m_ControlsDivider.AddToClassList("horizontal");
+            m_ControlsContainer.Add(m_ControlsDivider);
+            m_ControlItems = new VisualElement { name = "items" };
+            m_ControlsContainer.Add(m_ControlItems);
+
+            // Instantiate control views from node
+            foreach (var propertyInfo in node.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+                foreach (IControlAttribute attribute in propertyInfo.GetCustomAttributes(typeof(IControlAttribute), false))
+                    m_ControlItems.Add(attribute.InstantiateControl(node, propertyInfo));
+
+            // Instantiate controls for ShaderParameters
+            ShaderNode shaderNode = node as ShaderNode;
+            if(shaderNode != null && shaderNode.parameters != null)
+            {
+                foreach(ShaderParameter parameter in shaderNode.parameters)
+                    m_ControlItems.Add(DrawingUtil.GetInspectorRowForInput(parameter));
+            }
+
+            if(!m_ControlItems.Children().Any())
+            {
+                m_ControlsContainer.Remove(m_ControlsDivider);
+                m_ControlsContainer.Remove(m_ControlItems);
+            }
+        }
+
         public void OnModified(ModificationScope scope)
         {
             UpdateTitle();
@@ -415,6 +427,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             if (scope == ModificationScope.Topological)
             {
                 RecreateSettings();
+                RecreateParameters();
 
                 var slots = node.GetSlots<MaterialSlot>().ToList();
 

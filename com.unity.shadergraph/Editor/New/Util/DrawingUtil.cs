@@ -17,7 +17,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             var labelContainer = new VisualElement { name = "Label" };
             labelContainer.style.width = 60;
             var label = new Label(input.displayName);
-            label.style.paddingTop = 4;
+            label.style.paddingTop = 3;
             labelContainer.Add(label);
             container.Add(labelContainer);
 

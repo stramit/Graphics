@@ -1,18 +1,20 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using UnityEngine;
 using UnityEditor.Graphing;
 
 namespace UnityEditor.ShaderGraph
 {
-    struct InputDescriptor : IShaderValueDescriptor
+    [Serializable]
+    class InputDescriptor : IShaderValueDescriptor
     {
         public SerializableGuid guid => new SerializableGuid();
-        public int id { get; }
+        public int id { get; set; }
 
         public SlotType portType => SlotType.Input;
         public SlotValueType valueType { get; }
 
-        public string name { get; }
+        public string name { get; set; }
 
         public IShaderControl control;
         public ShaderValueData valueData;

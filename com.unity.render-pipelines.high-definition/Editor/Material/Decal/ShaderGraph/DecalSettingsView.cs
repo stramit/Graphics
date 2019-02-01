@@ -28,7 +28,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline.Drawing
         {
             m_Node = node;
             PropertySheet ps = new PropertySheet();
-            
+            ps.style.width = 362;
             int indentLevel = 0;
 
             ps.Add(new PropertyRow(CreateLabel("Affects Albedo", indentLevel)), (row) =>

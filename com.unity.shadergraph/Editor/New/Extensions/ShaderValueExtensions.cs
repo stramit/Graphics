@@ -8,7 +8,7 @@ namespace UnityEditor.ShaderGraph
     {
 
 #region Snippets
-        internal static string ToVariableSnippet(this IShaderValue shaderValue)
+        internal static string ToVariableNameSnippet(this IShaderValue shaderValue)
         {
             if(shaderValue is ShaderPort port)
             {
@@ -27,7 +27,7 @@ namespace UnityEditor.ShaderGraph
         {
             return string.Format("{0} {1}",
                 NodeUtils.ConvertConcreteSlotValueTypeToString(precision, shaderValue.concreteValueType),
-                shaderValue.ToVariableSnippet());
+                shaderValue.ToVariableNameSnippet());
         }
 #endregion
 

@@ -17,7 +17,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             m_Node = node;
 
             PropertySheet ps = new PropertySheet();
-
+            ps.style.width = 362;
             ps.Add(new PropertyRow(new Label("Surface")), (row) =>
                 {
                     row.Add(new EnumField(SurfaceType.Opaque), (field) =>
