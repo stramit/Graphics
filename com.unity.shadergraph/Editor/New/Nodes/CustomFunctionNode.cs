@@ -81,25 +81,62 @@ namespace UnityEditor.ShaderGraph.NodeLibrary
         }
 
         [SerializeField]
+        private HlslSourceType m_SourceType;
+
+        [SerializeField]
+        private string m_FunctionName;
+
+        [SerializeField]
+        private string m_FunctionSource;
+
         private HlslFunctionDescriptor m_FunctionDescriptor;
 
         public HlslFunctionDescriptor functionDescriptor
         {
             get
             {
-                if(m_FunctionDescriptor == null)
+                if(string.IsNullOrEmpty(m_FunctionDescriptor.name))
                 {
-                    m_FunctionDescriptor = new HlslFunctionDescriptor()
+                    if(string.IsNullOrEmpty(m_FunctionName) && string.IsNullOrEmpty(m_FunctionSource))
                     {
-                        name = s_FunctionName,
-                        source = HlslSource.File(s_FunctionSource, true)
-                    };
+                        m_FunctionDescriptor = new HlslFunctionDescriptor()
+                        {
+                            name = s_FunctionName,
+                            source = HlslSource.File(s_FunctionSource, true)
+                        };
+                    }
+                    else
+                    {
+                        switch(m_SourceType)
+                        {
+                            case HlslSourceType.File:
+                                m_FunctionDescriptor = new HlslFunctionDescriptor()
+                                {
+                                    name = m_FunctionName,
+                                    source = HlslSource.File(m_FunctionSource, true)
+                                };
+                                break;
+                            case HlslSourceType.String:
+                                m_FunctionDescriptor = new HlslFunctionDescriptor()
+                                {
+                                    name = m_FunctionName,
+                                    source = HlslSource.String(m_FunctionSource, true)
+                                };
+                                break;
+                        }
+                    }
                 }
                 m_FunctionDescriptor.inArguments = inDescriptors.Union(parameterDescriptors).ToArray();
                 m_FunctionDescriptor.outArguments = outDescriptors.ToArray();
                 return m_FunctionDescriptor;
             }
-            set => m_FunctionDescriptor = value;
+            set
+            {
+                m_FunctionDescriptor = value;
+                m_FunctionName = value.name;
+                m_SourceType = value.source.type;
+                m_FunctionSource = value.source.value;
+            }
         }
 
         private static string s_FunctionName =>  "Function name here...";
@@ -194,7 +231,9 @@ namespace UnityEditor.ShaderGraph.NodeLibrary
             ps.Add(new InputDescriptorListView(this, inDescriptors, ShaderValueDescriptorType.Input));
             ps.Add(new OutputDescriptorListView(this, outDescriptors));
             ps.Add(new InputDescriptorListView(this, parameterDescriptors, ShaderValueDescriptorType.Parameter));
-            ps.Add(new HlslSourceView(this, functionDescriptor));
+            HlslFunctionDescriptor descriptor = functionDescriptor;
+            ps.Add(new HlslSourceView(this, ref descriptor));
+            functionDescriptor = descriptor;
             return ps;
         }
 #endregion

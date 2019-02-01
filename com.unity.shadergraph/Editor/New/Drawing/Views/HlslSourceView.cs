@@ -33,13 +33,13 @@ namespace UnityEditor.ShaderGraph.Drawing
         private TextField m_FunctionSource;
         private TextField m_FunctionBody;
 
-        internal HlslSourceView(CustomFunctionNode node, HlslFunctionDescriptor function)
+        internal HlslSourceView(CustomFunctionNode node, ref HlslFunctionDescriptor function)
         {
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/Views/HlslSourceView"));
-            Draw(node, function);            
+            Draw(node, ref function);            
         }
 
-        private void Draw(CustomFunctionNode node, HlslFunctionDescriptor function)
+        private void Draw(CustomFunctionNode node, ref HlslFunctionDescriptor function)
         {
             var currentControls = this.Children().ToArray();
             for(int i = 0; i < currentControls.Length; i++)
@@ -51,7 +51,9 @@ namespace UnityEditor.ShaderGraph.Drawing
                 node.owner.owner.RegisterCompleteObjectUndo("Function Change");
                 string value = (HlslSourceType)s.newValue == HlslSourceType.File ? m_FunctionSource.value : m_FunctionBody.value;
                 node.functionDescriptor = GetNewDescriptor(m_FunctionName.value, value, (HlslSourceType)s.newValue);
-                Draw(node, node.functionDescriptor);
+                HlslFunctionDescriptor descriptor = node.functionDescriptor;
+                Draw(node, ref descriptor);
+                node.functionDescriptor = descriptor;
                 node.Dirty(ModificationScope.Graph);
             });
 

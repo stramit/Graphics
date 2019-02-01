@@ -75,8 +75,7 @@ namespace UnityEditor.ShaderGraph
 #region Validation
         internal virtual bool IsValidFunctionDescriptor(HlslFunctionDescriptor descriptor)
         {
-            return (descriptor != null &&
-                !string.IsNullOrEmpty(descriptor.name) &&
+            return (!string.IsNullOrEmpty(descriptor.name) &&
                 !string.IsNullOrEmpty(descriptor.source.value));
         }
 #endregion
