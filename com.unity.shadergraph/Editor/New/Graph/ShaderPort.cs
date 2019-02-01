@@ -48,7 +48,6 @@ namespace UnityEditor.ShaderGraph
             if (port != null)
             {
                 m_Guid = port.guid;
-                m_ValueType = port.valueType;
             }
         }
 #endregion

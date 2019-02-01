@@ -108,11 +108,7 @@ namespace UnityEditor.ShaderGraph
             {
                 m_Guid = parameter.guid;
                 m_Id = parameter.id;
-                m_ValueType = parameter.valueType;
-                m_DisplayName = parameter.displayName;
-                m_ShaderOutputName = parameter.outputName;
                 m_ValueData = parameter.valueData;
-                control = parameter.control;
             }
         }
 #endregion

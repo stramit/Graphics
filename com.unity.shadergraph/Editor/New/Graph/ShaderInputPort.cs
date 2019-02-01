@@ -85,7 +85,6 @@ namespace UnityEditor.ShaderGraph
             if (port != null)
             {
                 base.CopyValuesFrom(foundSlot);
-                this.control = port.control;
                 this.valueData = port.valueData;
             }
         }

@@ -8,31 +8,76 @@ namespace UnityEditor.ShaderGraph
     [Serializable]
     class InputDescriptor : IShaderValueDescriptor
     {
-        public SerializableGuid guid => new SerializableGuid();
-        public int id { get; set; }
+        [SerializeField]
+        SerializableGuid m_Guid;
 
+        [SerializeField]
+        int m_Id;
+
+        [SerializeField]
+        SlotValueType m_ValueType;       
+
+        [SerializeField]
+        string m_Name = "Not Initilaized";
+
+        [SerializeField]
+        private ShaderValueData m_ValueData;
+
+        [SerializeField]
+        private SerializableControl m_SerializableControl = new SerializableControl();
+
+        public SerializableGuid guid => m_Guid;
         public SlotType portType => SlotType.Input;
-        public SlotValueType valueType { get; }
+        public SlotValueType valueType => m_ValueType;
 
-        public string name { get; set; }
+        public int id
+        {
+            get => m_Id;
+            set => m_Id = value;
+        }
 
-        public IShaderControl control;
-        public ShaderValueData valueData;
+        public string name
+        {
+            get => m_Name;
+            set => m_Name = value;
+        }
+
+        public ShaderValueData valueData
+        {
+            get => m_ValueData;
+            set => m_ValueData = value;
+        }
+
+        private IShaderControl m_Control;
+        public IShaderControl control
+        {
+            get
+            {
+                if (m_Control == null)
+                    m_Control = m_SerializableControl.control;
+                return m_Control;
+            }
+            set
+            {
+                m_Control = value;
+                m_SerializableControl.control = value;
+            }
+        }
 
         public InputDescriptor(int id, string name, SlotValueType valueType)
         {
-            this.id = id;
-            this.name = name;
-            this.valueType = valueType;
+            m_Id = id;
+            m_Name = name;
+            m_ValueType = valueType;
             this.control = valueType.ToDefaultControl();
             this.valueData = new ShaderValueData();
         }
 
         public InputDescriptor(int id, string name, SlotValueType valueType, IShaderControl control)
         {
-            this.id = id;
-            this.name = name;
-            this.valueType = valueType;
+            m_Id = id;
+            m_Name = name;
+            m_ValueType = valueType;
             
             if(!control.validPortTypes.Contains(valueType))
             {
