@@ -6,65 +6,14 @@ using UnityEditor.ShaderGraph.Drawing.Controls;
 using UnityEngine;
 using UnityEditor.Graphing;
 using UnityEngine.UIElements;
+using UnityEditor.ShaderGraph.Drawing;
 
 namespace UnityEditor.ShaderGraph
 {
-    class SubGraphOutputControlAttribute : Attribute, IControlAttribute
+    class SubGraphOutputNode : ShaderNode, IHasSettings
     {
-        public VisualElement InstantiateControl(AbstractMaterialNode node, PropertyInfo propertyInfo)
-        {
-            if (!(node is SubGraphOutputNode))
-                throw new ArgumentException("Node must inherit from AbstractSubGraphIONode.", "node");
-            return new SubGraphOutputControlView((SubGraphOutputNode)node);
-        }
-    }
-
-    class SubGraphOutputControlView : VisualElement
-    {
-        SubGraphOutputNode m_Node;
-
-        public SubGraphOutputControlView(SubGraphOutputNode node)
-        {
-            m_Node = node;
-            Add(new Button(OnAdd) { text = "Add Slot" });
-            Add(new Button(OnRemove) { text = "Remove Slot" });
-        }
-
-        void OnAdd()
-        {
-            m_Node.AddSlot();
-        }
-
-        void OnRemove()
-        {
-            // tell the user that they might cchange things up.
-            if (EditorUtility.DisplayDialog("Sub Graph Will Change", "If you remove a slot and save the sub graph, you might change other graphs that are using this sub graph.\n\nDo you want to continue?", "Yes", "No"))
-            {
-                m_Node.owner.owner.RegisterCompleteObjectUndo("Removing Slot");
-                m_Node.RemoveSlot();
-            }
-        }
-    }
-
-    class SubGraphOutputNode : AbstractMaterialNode
-    {
-        [SubGraphOutputControl]
-        int controlDummy { get; set; }
-
-        public SubGraphOutputNode()
-        {
-            name = "SubGraphOutputs";
-        }
-
-        public override bool hasPreview
-        {
-            get { return true; }
-        }
-
-        public override PreviewMode previewMode
-        {
-            get { return PreviewMode.Preview3D; }
-        }
+        [SerializeField]
+        private List<InputDescriptor> m_InDescriptors = new List<InputDescriptor>();
 
         public ShaderStageCapability effectiveShaderStage
         {
@@ -85,6 +34,24 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
+        public SubGraphOutputNode()
+        {
+            name = "Output";
+        }
+
+#region Initialization
+        internal override void Setup(ref NodeDefinitionContext context)
+        {
+            context.CreateNodeType(new NodeTypeDescriptor
+            {
+                path = "HIDDEN",
+                name = "Subgraph Output",
+                preview = false
+            });
+        }
+#endregion
+
+#region Validation
         private void ValidateShaderStage()
         {
             List<MaterialSlot> slots = new List<MaterialSlot>();
@@ -101,27 +68,50 @@ namespace UnityEditor.ShaderGraph
 
         public override void ValidateNode()
         {
-            ValidateShaderStage();
+            List<int> validShaderValues = new List<int>();
+            foreach(InputDescriptor descriptor in m_InDescriptors)
+            {
+                ValidateDescriptor(descriptor);
+                AddShaderValue(descriptor, ShaderValueDescriptorType.Input);
+                validShaderValues.Add(descriptor.id);
+            }
+            RemoveShaderValuesNotMatching(validShaderValues);
 
+            ValidateShaderStage();
             base.ValidateNode();
         }
 
+        private void ValidateDescriptor(IShaderValueDescriptor descriptor)
+        {
+            if(descriptor.id != -1)
+                return;
+
+            int idCeiling = -1;
+            int duplicateNameCeiling = 0;
+            var shaderValues = GetShaderValues();
+            foreach(IShaderValue value in shaderValues)
+            {
+                idCeiling = value.id > idCeiling ? value.id : idCeiling;
+                if(value.displayName.StartsWith("New"))
+                    duplicateNameCeiling++;
+            }
+            descriptor.id = idCeiling + 1;
+            descriptor.name = "New";
+            if(duplicateNameCeiling > 0)
+                descriptor.name += string.Format(" ({0})", duplicateNameCeiling);
+        }
+#endregion
+
+#region Slots
         public virtual int AddSlot()
         {
             var index = this.GetInputSlots<ISlot>().Count() + 1;
             AddSlot(new Vector4MaterialSlot(index, "Output " + index, "Output" + index, SlotType.Input, Vector4.zero));
             return index;
         }
+#endregion
 
-        public virtual void RemoveSlot()
-        {
-            var index = this.GetInputSlots<ISlot>().Count();
-            if (index == 0)
-                return;
-
-            RemoveSlot(index);
-        }
-
+#region Outputs
         public void RemapOutputs(ShaderGenerator visitor, GenerationMode generationMode)
         {
             foreach (var slot in graphOutputs)
@@ -135,5 +125,17 @@ namespace UnityEditor.ShaderGraph
                 return NodeExtensions.GetInputSlots<MaterialSlot>(this).OrderBy(x => x.id);
             }
         }
+#endregion
+
+#region Views
+        public VisualElement CreateSettingsElement()
+        {
+            PropertySheet ps = new PropertySheet();
+            ps.style.width = 400;
+            ps.Add(new InputDescriptorListView(this, m_InDescriptors, ShaderValueDescriptorType.Input));
+            return ps;
+        }
+#endregion
+
     }
 }

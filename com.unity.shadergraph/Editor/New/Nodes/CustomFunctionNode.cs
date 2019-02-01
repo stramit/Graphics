@@ -45,6 +45,7 @@ namespace UnityEditor.ShaderGraph.NodeLibrary
         private static string s_FunctionName =>  "Function name here...";
         private static string s_FunctionSource => "Hlsl include file path here...";
 
+#region Initialization
         internal override void Setup(ref NodeDefinitionContext context)
         {
             context.CreateNodeType(new NodeTypeDescriptor
@@ -54,6 +55,7 @@ namespace UnityEditor.ShaderGraph.NodeLibrary
                 preview = true
             });
         }
+#endregion
 
 #region Validation
         public override void ValidateNode()
