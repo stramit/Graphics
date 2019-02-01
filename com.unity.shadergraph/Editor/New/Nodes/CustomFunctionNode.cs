@@ -11,14 +11,74 @@ namespace UnityEditor.ShaderGraph.NodeLibrary
 {
     sealed class CustomFunctionNode : ShaderNode, IHasSettings
     {
-        [SerializeField]
-        private List<InputDescriptor> m_InDescriptors = new List<InputDescriptor>();
+        private List<MaterialSlot> m_TempSlots = new List<MaterialSlot>();
+        private List<ShaderParameter> m_TempParameters = new List<ShaderParameter>();
 
-        [SerializeField]
-        private List<InputDescriptor> m_ParameterDescriptors = new List<InputDescriptor>();
+        private List<InputDescriptor> m_InDescriptors;
 
-        [SerializeField]
-        private List<OutputDescriptor> m_OutDescriptors = new List<OutputDescriptor>();
+        public List<InputDescriptor> inDescriptors
+        {
+            get
+            {
+                if(m_InDescriptors == null)
+                {
+                    m_InDescriptors = new List<InputDescriptor>();
+                    m_TempSlots.Clear();
+                    GetInputSlots(m_TempSlots);
+                    for(int i = 0; i < m_TempSlots.Count; i++)
+                    {
+                        if(m_TempSlots[i] is ShaderInputPort port)
+                            m_InDescriptors.Add(new InputDescriptor(port.id, port.RawDisplayName(), port.valueType, port.control));
+                    }
+                }
+                return m_InDescriptors;
+            }
+            set => m_InDescriptors = value;
+        }
+
+        private List<OutputDescriptor> m_OutDescriptors;
+
+        public List<OutputDescriptor> outDescriptors
+        {
+            get
+            {
+                if(m_OutDescriptors == null)
+                {
+                    m_OutDescriptors = new List<OutputDescriptor>();
+                    m_TempSlots.Clear();
+                    GetOutputSlots(m_TempSlots);
+                    for(int i = 0; i < m_TempSlots.Count; i++)
+                    {
+                        if(m_TempSlots[i] is ShaderPort port)
+                            m_OutDescriptors.Add(new OutputDescriptor(port.id, port.RawDisplayName(), port.valueType));
+                    }
+                }
+                return m_OutDescriptors;
+            }
+            set => m_OutDescriptors = value;
+        }
+
+        private List<InputDescriptor> m_ParameterDescriptors;
+
+        public List<InputDescriptor> parameterDescriptors
+        {
+            get
+            {
+                if(m_ParameterDescriptors == null)
+                {
+                    m_ParameterDescriptors = new List<InputDescriptor>();
+                    m_TempParameters.Clear();
+                    GetParameters(m_TempParameters);
+                    for(int i = 0; i < m_TempParameters.Count; i++)
+                    {
+                        if(m_TempParameters[i] is ShaderParameter parameter)
+                            m_ParameterDescriptors.Add(new InputDescriptor(parameter.id, parameter.displayName, parameter.valueType, parameter.control));
+                    }
+                }
+                return m_ParameterDescriptors;
+            }
+            set => m_ParameterDescriptors = value;
+        }
 
         [SerializeField]
         private HlslFunctionDescriptor m_FunctionDescriptor;
@@ -35,8 +95,8 @@ namespace UnityEditor.ShaderGraph.NodeLibrary
                         source = HlslSource.File(s_FunctionSource, true)
                     };
                 }
-                m_FunctionDescriptor.inArguments = m_InDescriptors.Union(m_ParameterDescriptors).ToArray();
-                m_FunctionDescriptor.outArguments = m_OutDescriptors.ToArray();
+                m_FunctionDescriptor.inArguments = inDescriptors.Union(parameterDescriptors).ToArray();
+                m_FunctionDescriptor.outArguments = outDescriptors.ToArray();
                 return m_FunctionDescriptor;
             }
             set => m_FunctionDescriptor = value;
@@ -61,29 +121,29 @@ namespace UnityEditor.ShaderGraph.NodeLibrary
         public override void ValidateNode()
         {
             List<int> validShaderValues = new List<int>();
-            for(int i = 0; i < m_InDescriptors.Count; i++)
+            for(int i = 0; i < inDescriptors.Count; i++)
             {
-                IShaderValueDescriptor descriptor = m_InDescriptors[i];
+                IShaderValueDescriptor descriptor = inDescriptors[i];
                 ValidateDescriptor(ref descriptor);
                 AddShaderValue(descriptor, ShaderValueDescriptorType.Input);
                 validShaderValues.Add(descriptor.id);
-                m_InDescriptors[i] = (InputDescriptor)descriptor;
+                inDescriptors[i] = (InputDescriptor)descriptor;
             }
-            for(int i = 0; i < m_OutDescriptors.Count; i++)
+            for(int i = 0; i < outDescriptors.Count; i++)
             {
-                IShaderValueDescriptor descriptor = m_OutDescriptors[i];
+                IShaderValueDescriptor descriptor = outDescriptors[i];
                 ValidateDescriptor(ref descriptor);
                 AddShaderValue(descriptor, ShaderValueDescriptorType.Output);
                 validShaderValues.Add(descriptor.id);
-                m_OutDescriptors[i] = (OutputDescriptor)descriptor;
+                outDescriptors[i] = (OutputDescriptor)descriptor;
             }
-            for(int i = 0; i < m_ParameterDescriptors.Count; i++)
+            for(int i = 0; i < parameterDescriptors.Count; i++)
             {
-                IShaderValueDescriptor descriptor = m_ParameterDescriptors[i];
+                IShaderValueDescriptor descriptor = parameterDescriptors[i];
                 ValidateDescriptor(ref descriptor);
                 AddShaderValue(descriptor, ShaderValueDescriptorType.Parameter);
                 validShaderValues.Add(descriptor.id);
-                m_ParameterDescriptors[i] = (InputDescriptor)descriptor;
+                parameterDescriptors[i] = (InputDescriptor)descriptor;
             }
             RemoveShaderValuesNotMatching(validShaderValues);
 
@@ -131,9 +191,9 @@ namespace UnityEditor.ShaderGraph.NodeLibrary
         {
             PropertySheet ps = new PropertySheet();
             ps.style.width = 400;
-            ps.Add(new InputDescriptorListView(this, m_InDescriptors, ShaderValueDescriptorType.Input));
-            ps.Add(new OutputDescriptorListView(this, m_OutDescriptors));
-            ps.Add(new InputDescriptorListView(this, m_ParameterDescriptors, ShaderValueDescriptorType.Parameter));
+            ps.Add(new InputDescriptorListView(this, inDescriptors, ShaderValueDescriptorType.Input));
+            ps.Add(new OutputDescriptorListView(this, outDescriptors));
+            ps.Add(new InputDescriptorListView(this, parameterDescriptors, ShaderValueDescriptorType.Parameter));
             ps.Add(new HlslSourceView(this, functionDescriptor));
             return ps;
         }

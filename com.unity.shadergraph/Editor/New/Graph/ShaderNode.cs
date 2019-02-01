@@ -243,7 +243,7 @@ namespace UnityEditor.ShaderGraph
             Dirty(ModificationScope.Topological);
         }
 
-        private void GetParameters(List<ShaderParameter> foundSlots)
+        internal void GetParameters(List<ShaderParameter> foundSlots)
         {
             foreach (var slot in m_Parameters)
             {

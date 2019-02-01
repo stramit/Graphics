@@ -12,8 +12,29 @@ namespace UnityEditor.ShaderGraph
 {
     class SubGraphOutputNode : ShaderNode, IHasSettings
     {
-        [SerializeField]
-        private List<InputDescriptor> m_InDescriptors = new List<InputDescriptor>();
+        private List<MaterialSlot> m_TempSlots = new List<MaterialSlot>();
+
+        private List<InputDescriptor> m_InDescriptors;
+
+        public List<InputDescriptor> inDescriptors
+        {
+            get
+            {
+                if(m_InDescriptors == null)
+                {
+                    m_InDescriptors = new List<InputDescriptor>();
+                    m_TempSlots.Clear();
+                    GetInputSlots(m_TempSlots);
+                    for(int i = 0; i < m_TempSlots.Count; i++)
+                    {
+                        if(m_TempSlots[i] is ShaderInputPort port)
+                            m_InDescriptors.Add(new InputDescriptor(port.id, port.RawDisplayName(), port.valueType, port.control));
+                    }
+                }
+                return m_InDescriptors;
+            }
+            set => m_InDescriptors = value;
+        }
 
         public ShaderStageCapability effectiveShaderStage
         {
@@ -69,13 +90,13 @@ namespace UnityEditor.ShaderGraph
         public override void ValidateNode()
         {
             List<int> validShaderValues = new List<int>();
-            for(int i = 0; i < m_InDescriptors.Count; i++)
+            for(int i = 0; i < inDescriptors.Count; i++)
             {
-                IShaderValueDescriptor descriptor = m_InDescriptors[i];
+                IShaderValueDescriptor descriptor = inDescriptors[i];
                 ValidateDescriptor(ref descriptor);
                 AddShaderValue(descriptor, ShaderValueDescriptorType.Input);
                 validShaderValues.Add(descriptor.id);
-                m_InDescriptors[i] = (InputDescriptor)descriptor;
+                inDescriptors[i] = (InputDescriptor)descriptor;
             }
             RemoveShaderValuesNotMatching(validShaderValues);
 
@@ -134,7 +155,7 @@ namespace UnityEditor.ShaderGraph
         {
             PropertySheet ps = new PropertySheet();
             ps.style.width = 400;
-            ps.Add(new InputDescriptorListView(this, m_InDescriptors, ShaderValueDescriptorType.Input));
+            ps.Add(new InputDescriptorListView(this, inDescriptors, ShaderValueDescriptorType.Input));
             return ps;
         }
 #endregion
