@@ -38,6 +38,7 @@ namespace UnityEditor.Graphing
         DrawState drawState { get; set; }
         bool hasError { get; }
         void ValidateNode();
+        void UpdatePortConnection();
         void UpdateNodeAfterDeserialization();
     }
 

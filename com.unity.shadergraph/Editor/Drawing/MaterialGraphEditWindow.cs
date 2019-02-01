@@ -130,6 +130,8 @@ namespace UnityEditor.ShaderGraph.Drawing
                 if (materialGraph == null)
                     return;
 
+                materialGraph.DispatchNodeChangeEvents();
+
                 if (graphEditorView == null)
                 {
                     messageManager.ClearAll();

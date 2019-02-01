@@ -74,7 +74,8 @@ namespace UnityEditor.ShaderGraph.Drawing
                         }
                     }
 
-                    if (type.IsClass && !type.IsAbstract && (type.IsSubclassOf(typeof(ShaderNode))))
+                    if (type.IsClass && !type.IsAbstract && (type.IsSubclassOf(typeof(ShaderNode)))
+                        && type != typeof(ShaderNodeInstance))
                     {
                         var node = (ShaderNode)Activator.CreateInstance(type);
                         NodeDefinitionContext nodeContext = new NodeDefinitionContext();
@@ -112,6 +113,12 @@ namespace UnityEditor.ShaderGraph.Drawing
                 node.propertyGuid = property1.guid;
                 node.owner = null;
                 AddEntries(node, new[] { "Properties", "Property: " + property.displayName }, nodeEntries);
+            }
+
+            foreach (var state in m_Graph.nodeTypeStates)
+            {
+                var node = new ShaderNodeInstance(state);
+                AddEntries(node, state.type.path.Split('/').Append(state.type.name).ToArray(), nodeEntries);
             }
 
             // Sort the entries lexicographically by group then title with the requirement that items always comes before sub-groups in the same group.

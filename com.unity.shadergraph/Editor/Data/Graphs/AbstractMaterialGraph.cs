@@ -66,8 +66,9 @@ namespace UnityEditor.ShaderGraph
         [NonSerialized]
         Stack<Identifier> m_FreeNodeTempIds = new Stack<Identifier>();
 
+        // TODO: Make this private again
         [NonSerialized]
-        List<AbstractMaterialNode> m_Nodes = new List<AbstractMaterialNode>();
+        public List<AbstractMaterialNode> m_Nodes = new List<AbstractMaterialNode>();
 
         [NonSerialized]
         Dictionary<Guid, INode> m_NodeDictionary = new Dictionary<Guid, INode>();
@@ -165,7 +166,7 @@ namespace UnityEditor.ShaderGraph
 
         #region Edge data
 
-        [NonSerialized]
+        [SerializeField]
         List<IEdge> m_Edges = new List<IEdge>();
 
         public IEnumerable<IEdge> edges
@@ -224,9 +225,102 @@ namespace UnityEditor.ShaderGraph
 
         public MessageManager messageManager { get; set; }
 
+        public List<NodeTypeState> nodeTypeStates { get; } = new List<NodeTypeState>();
+
+        int m_CurrentContextId = 1;
+
+        public int currentContextId => m_CurrentContextId;
+
+        [NonSerialized]
+        public bool shouldRepaintPreviews;
+
         public AbstractMaterialGraph()
         {
             m_GroupNodes[Guid.Empty] = new List<AbstractMaterialNode>();
+
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (var type in assembly.GetTypes())
+                {
+                    if (type.IsAbstract || type == typeof(object) || !typeof(ShaderNodeType).IsAssignableFrom(type))
+                    {
+                        continue;
+                    }
+
+                    var typeHasError = false;
+
+                    if (!type.IsSealed)
+                    {
+                        // There are performance benefits to be had if the class is sealed. Users can still do
+                        // inheritance if they insist, but the leaf class must be sealed. I think it's reasonable to
+                        // require that you cannot have a node inheriting from another node, but instead have to put
+                        // whatever common functionality you have into an abstract base class.
+                        Debug.LogError($"{type.FullName} implements {nameof(ShaderNodeType)}, but is not sealed.");
+                        typeHasError = true;
+                    }
+
+                    var constructor = type.GetConstructor(Type.EmptyTypes);
+                    if (constructor == null)
+                    {
+                        Debug.LogError($"{type.FullName} implements {nameof(ShaderNodeType)}, but does not have a public, parameterless constructor.");
+                        typeHasError = true;
+                    }
+
+                    if (typeHasError)
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        var stateType = typeof(NodeTypeState<>).MakeGenericType(type);
+                        var state = (NodeTypeState)stateType.GetConstructor(Type.EmptyTypes).Invoke(null);
+                        state.id = nodeTypeStates.Count;
+                        state.owner = this;
+                        state.baseNodeType = (ShaderNodeType)constructor.Invoke(null);
+                        var context = new NodeSetupContext(this, m_CurrentContextId, state);
+                        state.baseNodeType.Setup(ref context);
+                        if (!context.nodeTypeCreated)
+                        {
+                            throw new InvalidOperationException($"An {nameof(ShaderNodeType)} must provide a type via {nameof(NodeSetupContext)}.{nameof(NodeSetupContext.CreateNodeType)}({nameof(NodeTypeDescriptor)}).");
+                        }
+                        nodeTypeStates.Add(state);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
+                    finally
+                    {
+                        // We only want the context to be usable for the call to Setup. See NodeSetupContext.Validate().
+                        m_CurrentContextId = Math.Max(m_CurrentContextId + 1, 1);
+                    }
+                }
+            }
+        }
+
+        public void DispatchNodeChangeEvents()
+        {
+            foreach (var state in nodeTypeStates)
+            {
+                if (state.isDirty)
+                {
+                    var context = new NodeChangeContext(this, m_CurrentContextId, state);
+                    try
+                    {
+                        state.DispatchChanges(context);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
+                    finally
+                    {
+                        state.ClearChanges();
+                        m_CurrentContextId = Math.Max(m_CurrentContextId + 1, 1);
+                    }
+                }
+            }
         }
 
         public void ClearChanges()
@@ -338,6 +432,17 @@ namespace UnityEditor.ShaderGraph
             m_NodeDictionary.Add(materialNode.guid, materialNode);
             m_AddedNodes.Add(materialNode);
             m_GroupNodes[materialNode.groupGuid].Add(materialNode);
+
+            if (node is ShaderNodeInstance instanceNode)
+            {
+                instanceNode.UpdateStateReference();
+
+                if (instanceNode.isNew)
+                {
+                    instanceNode.typeState.addedNodes.Add(instanceNode.tempId.index);
+                    instanceNode.isNew = false;
+                }
+            }
         }
 
         public void RemoveNode(INode node)
@@ -373,6 +478,7 @@ namespace UnityEditor.ShaderGraph
                     RemoveGroupNoValidate(m_Groups.First(x => x.guid == materialNode.groupGuid));
                 }
             }
+            materialNode.owner = null;
         }
 
         void AddEdgeToNodeEdges(IEdge edge)
@@ -404,6 +510,9 @@ namespace UnityEditor.ShaderGraph
             NodeUtils.CollectNodesNodeFeedsInto(dependentNodes, toNode);
             if (dependentNodes.Contains(fromNode))
                 return null;
+
+            fromNode.UpdatePortConnection();
+            toNode.UpdatePortConnection();
 
             var fromSlot = fromNode.FindSlot<ISlot>(fromSlotRef.slotId);
             var toSlot = toNode.FindSlot<ISlot>(toSlotRef.slotId);
@@ -765,7 +874,14 @@ namespace UnityEditor.ShaderGraph
                 AddGroupData(groupData);
 
             foreach (var node in other.GetNodes<INode>())
+            {
                 AddNodeNoValidate(node);
+                if (node is ShaderNodeInstance instanceNode)
+                {
+                    instanceNode.UpdateStateReference();
+                    instanceNode.typeState.addedNodes.Add(instanceNode.tempId.index);
+                }
+            }
 
             foreach (var edge in other.edges)
                 ConnectNoValidate(edge.outputSlot, edge.inputSlot);
@@ -820,6 +936,10 @@ namespace UnityEditor.ShaderGraph
                         }
                     }
                 }
+                else if (node is ShaderNodeInstance instanceNode)
+                {
+                    instanceNode.isNew = true;
+                }
 
                 AbstractMaterialNode abstractMaterialNode = (AbstractMaterialNode)node;
                 // Check if the node is inside a group
@@ -867,16 +987,15 @@ namespace UnityEditor.ShaderGraph
         public void OnBeforeSerialize()
         {
             m_SerializableNodes = SerializationHelper.Serialize(GetNodes<INode>());
-            m_SerializableEdges = SerializationHelper.Serialize<IEdge>(m_Edges);
             m_SerializedProperties = SerializationHelper.Serialize<IShaderProperty>(m_Properties);
         }
 
         public virtual void OnAfterDeserialize()
         {
             // have to deserialize 'globals' before nodes
-            m_Properties = SerializationHelper.Deserialize<IShaderProperty>(m_SerializedProperties, GraphUtil.GetLegacyTypeRemapping());
-
-            var nodes = SerializationHelper.Deserialize<INode>(m_SerializableNodes, GraphUtil.GetLegacyTypeRemapping());
+            var legacyTypeRemapping = GraphUtil.GetLegacyTypeRemapping();
+            m_Properties = SerializationHelper.Deserialize<IShaderProperty>(m_SerializedProperties, legacyTypeRemapping);
+            var nodes = SerializationHelper.Deserialize<INode>(m_SerializableNodes, legacyTypeRemapping);
             m_Nodes = new List<AbstractMaterialNode>(nodes.Count);
             m_NodeDictionary = new Dictionary<Guid, INode>(nodes.Count);
             foreach (var node in nodes.OfType<AbstractMaterialNode>())
@@ -884,6 +1003,10 @@ namespace UnityEditor.ShaderGraph
                 node.owner = this;
                 node.UpdateNodeAfterDeserialization();
                 node.tempId = new Identifier(m_Nodes.Count);
+                if (node is ShaderNodeInstance instanceNode)
+                {
+                    instanceNode.typeState.addedNodes.Add(instanceNode.tempId.index);
+                }
                 m_Nodes.Add(node);
                 m_NodeDictionary.Add(node.guid, node);
 
@@ -895,8 +1018,9 @@ namespace UnityEditor.ShaderGraph
 
             m_SerializableNodes = null;
 
-            m_Edges = SerializationHelper.Deserialize<IEdge>(m_SerializableEdges, GraphUtil.GetLegacyTypeRemapping());
+            var oldEdges = SerializationHelper.Deserialize<IEdge>(m_SerializableEdges, legacyTypeRemapping);
             m_SerializableEdges = null;
+            m_Edges.AddRange(oldEdges);
             foreach (var edge in m_Edges)
                 AddEdgeToNodeEdges(edge);
         }
