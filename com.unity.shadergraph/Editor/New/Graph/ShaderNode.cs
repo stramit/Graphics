@@ -6,6 +6,7 @@ using UnityEditor.Graphing;
 
 namespace UnityEditor.ShaderGraph
 {
+    [Serializable]
     abstract class ShaderNode : AbstractMaterialNode
     {
         [SerializeField]
@@ -48,23 +49,25 @@ namespace UnityEditor.ShaderGraph
             }
             RemoveSlotsNameNotMatching(validSlotIds);
 
-            var validParameters = new List<Guid>();
+            var validParameters = new List<int>();
             if(descriptor.parameters != null)
             {
                 foreach (InputDescriptor parameter in descriptor.parameters)
                 {
                     AddParameter(new ShaderParameter(parameter));
-                    validParameters.Add(parameter.guid.guid);
+                    validParameters.Add(parameter.id);
                 }
             }
             RemoveParametersNameNotMatching(validParameters);
+
+            Debug.Log(parameters.Count);
         }
 #endregion
 
 #region ShaderValue
         internal IShaderValue GetShaderValue(IShaderValueDescriptor descriptor)
         {
-            var parameter = FindParameter(descriptor.guid.guid);
+            var parameter = FindParameter(descriptor.id);
             if(parameter != null)
                 return parameter;
 
@@ -80,9 +83,9 @@ namespace UnityEditor.ShaderGraph
         private void AddParameter(ShaderParameter parameter)
         {
             var addingParameter = parameter;
-            var foundParameter = FindParameter(parameter.guid.guid);
+            var foundParameter = FindParameter(parameter.id);
 
-            m_Parameters.RemoveAll(x => x.guid.guid == parameter.guid.guid);
+            m_Parameters.RemoveAll(x => x.id == parameter.id);
             m_Parameters.Add(parameter);
             parameter.owner = this;
 
@@ -94,25 +97,25 @@ namespace UnityEditor.ShaderGraph
             addingParameter.CopyValuesFrom(foundParameter);
         }
 
-        private void RemoveParameter(Guid parameterGuid)
+        private void RemoveParameter(int parameterId)
         {
-            m_Parameters.RemoveAll(x => x.guid.guid == parameterGuid);
+            m_Parameters.RemoveAll(x => x.id == parameterId);
             Dirty(ModificationScope.Topological);
         }
 
-        private ShaderParameter FindParameter(Guid guid)
+        private ShaderParameter FindParameter(int id)
         {
             foreach (var parameter in m_Parameters)
             {
-                if (parameter.guid.guid == guid)
+                if (parameter.id == id)
                     return parameter;
             }
             return null;
         }
 
-        private void RemoveParametersNameNotMatching(IEnumerable<Guid> parameterGuids, bool supressWarnings = false)
+        private void RemoveParametersNameNotMatching(IEnumerable<int> parameterIds, bool supressWarnings = false)
         {
-            var invalidParameters = m_Parameters.Select(x => x.guid.guid).Except(parameterGuids);
+            var invalidParameters = m_Parameters.Select(x => x.id).Except(parameterIds);
 
             foreach (var invalidParameter in invalidParameters.ToArray())
             {

@@ -47,6 +47,7 @@ namespace UnityEditor.ShaderGraph
             control = portDescriptor.control;
         }
 
+#region Controls
         public override VisualElement InstantiateControl()
         {
             var container = new VisualElement { name = "Container" };
@@ -55,7 +56,9 @@ namespace UnityEditor.ShaderGraph
                 container.style.width = control.portControlWidth;
             return container;
         }
+#endregion
 
+#region ValueData
         public void UpdateValueData(ShaderValueData valueData)
         {
             if(!this.valueData.Equals(valueData))
@@ -65,7 +68,9 @@ namespace UnityEditor.ShaderGraph
                 owner.Dirty(ModificationScope.Node);
             }
         }
+#endregion
 
+#region Copy
         public override IShaderValue Copy()
         {
             ShaderInputPort port = base.Copy() as ShaderInputPort;
@@ -84,12 +89,15 @@ namespace UnityEditor.ShaderGraph
                 this.valueData = port.valueData;
             }
         }
+#endregion
 
         // ----------------------------------------------------------------------------------------------------
         // LEGACY CODE
         // - Inherited from MaterialSlot
         // - Not used by ShaderNode API
 
+
+#region Legacy
         public override void GetPreviewProperties(List<PreviewProperty> properties, string name)
         {
             PreviewProperty pp = this.ToPreviewProperty(name);
@@ -128,5 +136,7 @@ namespace UnityEditor.ShaderGraph
         {
             return this.ToValueSnippet(precision);
         }
+#endregion
+
     }
 }

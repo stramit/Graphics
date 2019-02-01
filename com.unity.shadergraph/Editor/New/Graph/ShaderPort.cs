@@ -30,6 +30,7 @@ namespace UnityEditor.ShaderGraph
             m_ValueType = portDescriptor.valueType;
         }
 
+#region Copy
         public virtual IShaderValue Copy()
         {
             return new ShaderPort()
@@ -50,15 +51,19 @@ namespace UnityEditor.ShaderGraph
                 m_ValueType = port.valueType;
             }
         }
+#endregion
 
         // ----------------------------------------------------------------------------------------------------
         // LEGACY CODE
         // - Inherited from MaterialSlot
         // - Not used by ShaderNode API
 
+#region Legacy
         // TODO: Should only be used for ShaderInputPort but required by MaterialSlot
         public override void AddDefaultProperty(PropertyCollector properties, GenerationMode generationMode)
         {
         }
+#endregion
+
     }
 }

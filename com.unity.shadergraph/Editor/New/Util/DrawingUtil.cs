@@ -4,6 +4,8 @@ namespace UnityEditor.ShaderGraph.Drawing
 {
     internal static class DrawingUtil
     {
+
+#region ShaderInput
         internal static VisualElement GetInspectorRowForInput(IShaderInput input)
         {
             var container = new VisualElement { name = "Field" };
@@ -25,5 +27,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             container.Add(valueContainer);
             return container;
         }
+#endregion
+
     }
 }

@@ -12,6 +12,9 @@ namespace UnityEditor.ShaderGraph
         SerializableGuid m_Guid;
 
         [SerializeField]
+        int m_Id;
+
+        [SerializeField]
         SlotValueType m_ValueType;       
 
         [SerializeField]
@@ -27,6 +30,7 @@ namespace UnityEditor.ShaderGraph
         private SerializableControl m_SerializableControl = new SerializableControl();
 
         public INode owner { get; set; }
+        public int id => m_Id;
         public SerializableGuid guid => m_Guid;
         public SlotValueType valueType => m_ValueType;
         public ConcreteSlotValueType concreteValueType => m_ValueType.ToConcreteValueType();
@@ -62,12 +66,15 @@ namespace UnityEditor.ShaderGraph
         internal ShaderParameter(InputDescriptor descriptor)
         {
             m_Guid = descriptor.guid;
+            m_Id = descriptor.id;
             m_ValueType = descriptor.valueType;
             m_DisplayName = descriptor.name;
             m_ShaderOutputName = NodeUtils.GetHLSLSafeName(descriptor.name);
             m_ValueData = descriptor.valueData;
             control = descriptor.control;
         }
+
+#region ValueData
 
         public void UpdateValueData(ShaderValueData value)
         {
@@ -78,12 +85,15 @@ namespace UnityEditor.ShaderGraph
                 owner.Dirty(ModificationScope.Node);
             }
         }
+#endregion
 
+#region Copy
         public IShaderValue Copy()
         {
             return new ShaderParameter()
             {
                 m_Guid = this.guid,
+                m_Id = this.id,
                 m_ValueType = this.valueType,
                 m_DisplayName = this.displayName,
                 m_ShaderOutputName = this.outputName,
@@ -97,6 +107,7 @@ namespace UnityEditor.ShaderGraph
             if (parameter != null)
             {
                 m_Guid = parameter.guid;
+                m_Id = parameter.id;
                 m_ValueType = parameter.valueType;
                 m_DisplayName = parameter.displayName;
                 m_ShaderOutputName = parameter.outputName;
@@ -104,5 +115,7 @@ namespace UnityEditor.ShaderGraph
                 control = parameter.control;
             }
         }
+#endregion
+
     }
 }
