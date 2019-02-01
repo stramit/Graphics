@@ -5,6 +5,8 @@ namespace UnityEditor.ShaderGraph
 {
     internal static class ShaderValueTypeExtensions
     {
+
+#region Conversions
         internal static ConcreteSlotValueType ToConcreteValueType(this SlotValueType slotValueType)
         {
             switch (slotValueType)
@@ -44,7 +46,9 @@ namespace UnityEditor.ShaderGraph
                     throw new ArgumentOutOfRangeException();
             }
         }
+#endregion
 
+#region Controls
         internal static IShaderControl ToDefaultControl(this SlotValueType slotValueType)
         {
             switch (slotValueType)
@@ -85,5 +89,7 @@ namespace UnityEditor.ShaderGraph
                     throw new ArgumentOutOfRangeException();
             }
         }
+#endregion
+
     }
 }

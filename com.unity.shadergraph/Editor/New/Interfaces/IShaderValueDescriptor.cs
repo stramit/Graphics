@@ -7,6 +7,7 @@ namespace UnityEditor.ShaderGraph
     interface IShaderValueDescriptor
     {
         SerializableGuid guid { get; }
+        int id { get; }
 
         SlotType portType { get; }
         SlotValueType valueType { get; }

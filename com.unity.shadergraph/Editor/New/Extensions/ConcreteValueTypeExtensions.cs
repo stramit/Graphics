@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.Graphing;
 
@@ -7,6 +6,8 @@ namespace UnityEditor.ShaderGraph
 {
     internal static class ConcreteValueTypeExtensions
     {
+
+#region Properties
         internal static IShaderProperty ToShaderProperty(this ConcreteSlotValueType concreteSlotValueType)
         {
             switch (concreteSlotValueType)
@@ -80,5 +81,7 @@ namespace UnityEditor.ShaderGraph
                     throw new ArgumentOutOfRangeException();
             }
         }
+#endregion
+    
     }
 }

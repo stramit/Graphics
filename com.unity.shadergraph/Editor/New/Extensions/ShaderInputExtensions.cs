@@ -7,6 +7,8 @@ namespace UnityEditor.ShaderGraph
 {
     internal static class ShaderInputExtensions
     {
+
+#region Snippets
         internal static string ToValueSnippet(this IShaderInput shaderInput, AbstractMaterialNode.OutputPrecision precision)
         {
             var channelCount = SlotValueHelper.GetChannelCount(shaderInput.concreteValueType);
@@ -54,6 +56,24 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
+        internal static string ToValueReferenceSnippet(this IShaderValue shaderValue, AbstractMaterialNode.OutputPrecision precision, GenerationMode generationMode)
+        {
+            if (shaderValue is ShaderParameter parameter)
+            {
+                if (generationMode.IsPreview())
+                    return parameter.ToVariableSnippet();
+
+                return parameter.ToValueSnippet(precision);
+            }
+
+            if (shaderValue is ShaderPort port)
+                return port.InputValue(port.owner.owner, generationMode);
+
+            return string.Empty;
+        }
+#endregion
+
+#region Properties
         internal static IShaderProperty[] ToDefaultPropertyArray(this IShaderInput shaderInput, string overrideReferenceName = null)
         {
             if(shaderInput.concreteValueType == ConcreteSlotValueType.Gradient)
@@ -160,5 +180,7 @@ namespace UnityEditor.ShaderGraph
             }
             return pp;
         }
+#endregion
+
     }
 }

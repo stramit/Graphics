@@ -24,7 +24,7 @@ namespace UnityEditor.ShaderGraph
         }
 
         public ShaderPort(IShaderValueDescriptor portDescriptor)
-            : base(portDescriptor.guid.GetHashCode(), portDescriptor.name, portDescriptor.name, portDescriptor.portType, ShaderStageCapability.All, false)
+            : base(portDescriptor.id, portDescriptor.name, portDescriptor.name, portDescriptor.portType, ShaderStageCapability.All, false)
         {
             m_Guid = portDescriptor.guid;
             m_ValueType = portDescriptor.valueType;

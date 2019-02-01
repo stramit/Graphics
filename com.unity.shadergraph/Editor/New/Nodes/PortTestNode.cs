@@ -14,22 +14,22 @@ namespace UnityEditor.ShaderGraph
             name = "Port Test";
             UpdateNodeAfterDeserialization();
 
-            AddSlot(new ShaderInputPort(new InputDescriptor("Vector1", SlotValueType.Vector1)));
-            AddSlot(new ShaderInputPort(new InputDescriptor("Vector2", SlotValueType.Vector2)));
-            AddSlot(new ShaderInputPort(new InputDescriptor("Vector3", SlotValueType.Vector3)));
-            AddSlot(new ShaderInputPort(new InputDescriptor("Color3", SlotValueType.Vector3, new ColorControl(Color.white))));
-            AddSlot(new ShaderInputPort(new InputDescriptor("Vector4", SlotValueType.Vector4)));
-            AddSlot(new ShaderInputPort(new InputDescriptor("Color4", SlotValueType.Vector4, new ColorControl(Color.white))));
-            AddSlot(new ShaderInputPort(new InputDescriptor("Boolean", SlotValueType.Boolean)));
-            AddSlot(new ShaderInputPort(new InputDescriptor("Texture2D", SlotValueType.Texture2D)));
-            AddSlot(new ShaderInputPort(new InputDescriptor("Texture2DArray", SlotValueType.Texture2DArray)));
-            AddSlot(new ShaderInputPort(new InputDescriptor("Texture3D", SlotValueType.Texture3D)));
-            AddSlot(new ShaderInputPort(new InputDescriptor("Cubemap", SlotValueType.Cubemap)));
-            AddSlot(new ShaderInputPort(new InputDescriptor("Sampler", SlotValueType.SamplerState)));
-            AddSlot(new ShaderInputPort(new InputDescriptor("Matrix2x2", SlotValueType.Matrix2)));
-            AddSlot(new ShaderInputPort(new InputDescriptor("Matrix3x3", SlotValueType.Matrix3)));
-            AddSlot(new ShaderInputPort(new InputDescriptor("Matrix4x4", SlotValueType.Matrix4)));
-            AddSlot(new ShaderInputPort(new InputDescriptor("Gradient", SlotValueType.Gradient)));
+            AddSlot(new ShaderInputPort(new InputDescriptor(0, "Vector1", SlotValueType.Vector1)));
+            AddSlot(new ShaderInputPort(new InputDescriptor(1, "Vector2", SlotValueType.Vector2)));
+            AddSlot(new ShaderInputPort(new InputDescriptor(2, "Vector3", SlotValueType.Vector3)));
+            AddSlot(new ShaderInputPort(new InputDescriptor(3, "Color3", SlotValueType.Vector3, new ColorControl(Color.white))));
+            AddSlot(new ShaderInputPort(new InputDescriptor(4, "Vector4", SlotValueType.Vector4)));
+            AddSlot(new ShaderInputPort(new InputDescriptor(5, "Color4", SlotValueType.Vector4, new ColorControl(Color.white))));
+            AddSlot(new ShaderInputPort(new InputDescriptor(6, "Boolean", SlotValueType.Boolean)));
+            AddSlot(new ShaderInputPort(new InputDescriptor(7, "Texture2D", SlotValueType.Texture2D)));
+            AddSlot(new ShaderInputPort(new InputDescriptor(8, "Texture2DArray", SlotValueType.Texture2DArray)));
+            AddSlot(new ShaderInputPort(new InputDescriptor(9, "Texture3D", SlotValueType.Texture3D)));
+            AddSlot(new ShaderInputPort(new InputDescriptor(10, "Cubemap", SlotValueType.Cubemap)));
+            AddSlot(new ShaderInputPort(new InputDescriptor(11, "Sampler", SlotValueType.SamplerState)));
+            AddSlot(new ShaderInputPort(new InputDescriptor(12, "Matrix2x2", SlotValueType.Matrix2)));
+            AddSlot(new ShaderInputPort(new InputDescriptor(13, "Matrix3x3", SlotValueType.Matrix3)));
+            AddSlot(new ShaderInputPort(new InputDescriptor(14, "Matrix4x4", SlotValueType.Matrix4)));
+            AddSlot(new ShaderInputPort(new InputDescriptor(15, "Gradient", SlotValueType.Gradient)));
         }
     }
 }

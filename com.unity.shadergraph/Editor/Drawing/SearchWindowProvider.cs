@@ -63,7 +63,8 @@ namespace UnityEditor.ShaderGraph.Drawing
                 {
                     if (type.IsClass && !type.IsAbstract && (type.IsSubclassOf(typeof(AbstractMaterialNode)))
                         && type != typeof(PropertyNode)
-                        && type != typeof(SubGraphNode))
+                        && type != typeof(SubGraphNode)
+                        && type != typeof(ShaderNode))
                     {
                         var attrs = type.GetCustomAttributes(typeof(TitleAttribute), false) as TitleAttribute[];
                         if (attrs != null && attrs.Length > 0)
@@ -71,6 +72,14 @@ namespace UnityEditor.ShaderGraph.Drawing
                             var node = (AbstractMaterialNode)Activator.CreateInstance(type);
                             AddEntries(node, attrs[0].title, nodeEntries);
                         }
+                    }
+
+                    if (type.IsClass && !type.IsAbstract && (type.IsSubclassOf(typeof(ShaderNode))))
+                    {
+                        var node = (ShaderNode)Activator.CreateInstance(type);
+                        NodeDefinitionContext nodeContext = new NodeDefinitionContext();
+                        node.Setup(ref nodeContext);
+                        AddEntries(node, nodeContext.type.path.Split('/').Append(nodeContext.type.name).ToArray(), nodeEntries);
                     }
                 }
             }

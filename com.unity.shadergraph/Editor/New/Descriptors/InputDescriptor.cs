@@ -7,6 +7,7 @@ namespace UnityEditor.ShaderGraph
     struct InputDescriptor : IShaderValueDescriptor
     {
         public SerializableGuid guid => new SerializableGuid();
+        public int id { get; }
 
         public SlotType portType => SlotType.Input;
         public SlotValueType valueType { get; }
@@ -16,16 +17,18 @@ namespace UnityEditor.ShaderGraph
         public IShaderControl control;
         public ShaderValueData valueData;
 
-        public InputDescriptor(string name, SlotValueType valueType)
+        public InputDescriptor(int id, string name, SlotValueType valueType)
         {
+            this.id = id;
             this.name = name;
             this.valueType = valueType;
             this.control = valueType.ToDefaultControl();
             this.valueData = new ShaderValueData();
         }
 
-        public InputDescriptor(string name, SlotValueType valueType, IShaderControl control)
+        public InputDescriptor(int id, string name, SlotValueType valueType, IShaderControl control)
         {
+            this.id = id;
             this.name = name;
             this.valueType = valueType;
             
