@@ -5,7 +5,7 @@ using UnityEditor.Graphing;
 namespace UnityEditor.ShaderGraph
 {
     [Serializable]
-    class OutputDescriptor : IShaderValueDescriptor
+    struct OutputDescriptor : IShaderValueDescriptor
     {
         [SerializeField]
         SerializableGuid m_Guid;
@@ -17,10 +17,7 @@ namespace UnityEditor.ShaderGraph
         SlotValueType m_ValueType;       
 
         [SerializeField]
-        string m_Name = "Not Initilaized";
-
-        [SerializeField]
-        private ShaderValueData m_ValueData;
+        string m_Name;
 
         public SerializableGuid guid => m_Guid;
         public SlotType portType => SlotType.Output;
@@ -40,6 +37,7 @@ namespace UnityEditor.ShaderGraph
 
         public OutputDescriptor(int id, string name, SlotValueType valueType)
         {
+            m_Guid = new SerializableGuid();
             m_Id = id;
             m_Name = name;
             m_ValueType = valueType;

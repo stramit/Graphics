@@ -61,30 +61,36 @@ namespace UnityEditor.ShaderGraph.NodeLibrary
         public override void ValidateNode()
         {
             List<int> validShaderValues = new List<int>();
-            foreach(InputDescriptor descriptor in m_InDescriptors)
+            for(int i = 0; i < m_InDescriptors.Count; i++)
             {
-                ValidateDescriptor(descriptor);
+                IShaderValueDescriptor descriptor = m_InDescriptors[i];
+                ValidateDescriptor(ref descriptor);
                 AddShaderValue(descriptor, ShaderValueDescriptorType.Input);
                 validShaderValues.Add(descriptor.id);
+                m_InDescriptors[i] = (InputDescriptor)descriptor;
             }
-            foreach(OutputDescriptor descriptor in m_OutDescriptors)
+            for(int i = 0; i < m_OutDescriptors.Count; i++)
             {
-                ValidateDescriptor(descriptor);
+                IShaderValueDescriptor descriptor = m_OutDescriptors[i];
+                ValidateDescriptor(ref descriptor);
                 AddShaderValue(descriptor, ShaderValueDescriptorType.Output);
                 validShaderValues.Add(descriptor.id);
+                m_OutDescriptors[i] = (OutputDescriptor)descriptor;
             }
-            foreach(InputDescriptor descriptor in m_ParameterDescriptors)
+            for(int i = 0; i < m_ParameterDescriptors.Count; i++)
             {
-                ValidateDescriptor(descriptor);
+                IShaderValueDescriptor descriptor = m_ParameterDescriptors[i];
+                ValidateDescriptor(ref descriptor);
                 AddShaderValue(descriptor, ShaderValueDescriptorType.Parameter);
                 validShaderValues.Add(descriptor.id);
+                m_ParameterDescriptors[i] = (InputDescriptor)descriptor;
             }
             RemoveShaderValuesNotMatching(validShaderValues);
 
             base.ValidateNode();
         }
 
-        private void ValidateDescriptor(IShaderValueDescriptor descriptor)
+        private void ValidateDescriptor(ref IShaderValueDescriptor descriptor)
         {
             if(descriptor.id != -1)
                 return;

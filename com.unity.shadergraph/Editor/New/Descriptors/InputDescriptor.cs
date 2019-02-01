@@ -6,7 +6,7 @@ using UnityEditor.Graphing;
 namespace UnityEditor.ShaderGraph
 {
     [Serializable]
-    class InputDescriptor : IShaderValueDescriptor
+    struct InputDescriptor : IShaderValueDescriptor
     {
         [SerializeField]
         SerializableGuid m_Guid;
@@ -18,13 +18,13 @@ namespace UnityEditor.ShaderGraph
         SlotValueType m_ValueType;       
 
         [SerializeField]
-        string m_Name = "Not Initilaized";
+        string m_Name;
 
         [SerializeField]
         private ShaderValueData m_ValueData;
 
         [SerializeField]
-        private SerializableControl m_SerializableControl = new SerializableControl();
+        private SerializableControl m_SerializableControl;
 
         public SerializableGuid guid => m_Guid;
         public SlotType portType => SlotType.Input;
@@ -66,18 +66,26 @@ namespace UnityEditor.ShaderGraph
 
         public InputDescriptor(int id, string name, SlotValueType valueType)
         {
+            m_Guid = new SerializableGuid();
             m_Id = id;
             m_Name = name;
             m_ValueType = valueType;
+            m_ValueData = new ShaderValueData();
+            m_Control = null;
+            m_SerializableControl = new SerializableControl();
+            
             this.control = valueType.ToDefaultControl();
-            this.valueData = new ShaderValueData();
         }
 
         public InputDescriptor(int id, string name, SlotValueType valueType, IShaderControl control)
         {
+            m_Guid = new SerializableGuid();
             m_Id = id;
             m_Name = name;
             m_ValueType = valueType;
+            m_ValueData = new ShaderValueData();
+            m_Control = null;
+            m_SerializableControl = new SerializableControl();
             
             if(!control.validPortTypes.Contains(valueType))
             {

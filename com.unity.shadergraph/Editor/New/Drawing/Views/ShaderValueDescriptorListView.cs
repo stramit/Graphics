@@ -75,6 +75,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 EditorGUI.BeginChangeCheck();
                 IShaderValueDescriptor descriptor = (IShaderValueDescriptor)m_ReorderableList.list[index];
                 descriptor.name = EditorGUI.DelayedTextField( new Rect(rect.x, rect.y, labelWidth, EditorGUIUtility.singleLineHeight), descriptor.name, labelStyle); 
+                m_ReorderableList.list[index] = descriptor;
                 DrawDescriptorRow(m_ReorderableList, index, new Rect(rect.x + labelWidth, rect.y, rect.width, EditorGUIUtility.singleLineHeight));
                 if(EditorGUI.EndChangeCheck())
                     m_Node.ValidateNode();

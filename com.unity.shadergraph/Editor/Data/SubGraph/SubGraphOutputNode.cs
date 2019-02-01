@@ -69,11 +69,13 @@ namespace UnityEditor.ShaderGraph
         public override void ValidateNode()
         {
             List<int> validShaderValues = new List<int>();
-            foreach(InputDescriptor descriptor in m_InDescriptors)
+            for(int i = 0; i < m_InDescriptors.Count; i++)
             {
-                ValidateDescriptor(descriptor);
+                IShaderValueDescriptor descriptor = m_InDescriptors[i];
+                ValidateDescriptor(ref descriptor);
                 AddShaderValue(descriptor, ShaderValueDescriptorType.Input);
                 validShaderValues.Add(descriptor.id);
+                m_InDescriptors[i] = (InputDescriptor)descriptor;
             }
             RemoveShaderValuesNotMatching(validShaderValues);
 
@@ -81,7 +83,7 @@ namespace UnityEditor.ShaderGraph
             base.ValidateNode();
         }
 
-        private void ValidateDescriptor(IShaderValueDescriptor descriptor)
+        private void ValidateDescriptor(ref IShaderValueDescriptor descriptor)
         {
             if(descriptor.id != -1)
                 return;
