@@ -166,7 +166,7 @@ namespace UnityEditor.ShaderGraph
 
         #region Edge data
 
-        [SerializeField]
+        [NonSerialized]
         List<IEdge> m_Edges = new List<IEdge>();
 
         public IEnumerable<IEdge> edges
@@ -987,15 +987,15 @@ namespace UnityEditor.ShaderGraph
         public void OnBeforeSerialize()
         {
             m_SerializableNodes = SerializationHelper.Serialize(GetNodes<INode>());
+            m_SerializableEdges = SerializationHelper.Serialize<IEdge>(m_Edges);
             m_SerializedProperties = SerializationHelper.Serialize<IShaderProperty>(m_Properties);
         }
 
         public virtual void OnAfterDeserialize()
         {
             // have to deserialize 'globals' before nodes
-            var legacyTypeRemapping = GraphUtil.GetLegacyTypeRemapping();
-            m_Properties = SerializationHelper.Deserialize<IShaderProperty>(m_SerializedProperties, legacyTypeRemapping);
-            var nodes = SerializationHelper.Deserialize<INode>(m_SerializableNodes, legacyTypeRemapping);
+            m_Properties = SerializationHelper.Deserialize<IShaderProperty>(m_SerializedProperties, GraphUtil.GetLegacyTypeRemapping());
+            var nodes = SerializationHelper.Deserialize<INode>(m_SerializableNodes, GraphUtil.GetLegacyTypeRemapping());
             m_Nodes = new List<AbstractMaterialNode>(nodes.Count);
             m_NodeDictionary = new Dictionary<Guid, INode>(nodes.Count);
             foreach (var node in nodes.OfType<AbstractMaterialNode>())
@@ -1018,9 +1018,8 @@ namespace UnityEditor.ShaderGraph
 
             m_SerializableNodes = null;
 
-            var oldEdges = SerializationHelper.Deserialize<IEdge>(m_SerializableEdges, legacyTypeRemapping);
+            m_Edges = SerializationHelper.Deserialize<IEdge>(m_SerializableEdges, GraphUtil.GetLegacyTypeRemapping());
             m_SerializableEdges = null;
-            m_Edges.AddRange(oldEdges);
             foreach (var edge in m_Edges)
                 AddEdgeToNodeEdges(edge);
         }
