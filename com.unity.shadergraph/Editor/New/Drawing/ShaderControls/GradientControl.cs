@@ -36,10 +36,10 @@ namespace UnityEditor.ShaderGraph
             VisualElement control = new VisualElement() { name = "GradientControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/GradientControl"));
 
-            var gradientField = new GradientField() { value = shaderInput.value.gradient };
+            var gradientField = new GradientField() { value = shaderInput.valueData.gradient };
             gradientField.RegisterValueChangedCallback(evt =>
             {
-                if (evt.newValue.Equals(shaderInput.value.gradient))
+                if (evt.newValue.Equals(shaderInput.valueData.gradient))
                     return;
                 shaderInput.UpdateValueData(new ShaderValueData()
                 {

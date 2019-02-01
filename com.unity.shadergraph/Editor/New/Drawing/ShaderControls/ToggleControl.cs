@@ -36,10 +36,10 @@ namespace UnityEditor.ShaderGraph
             VisualElement control = new VisualElement() { name = "ToggleControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/ToggleControl"));
 
-            var toggleField = new Toggle() { value = shaderInput.value.boolean };
+            var toggleField = new Toggle() { value = shaderInput.valueData.boolean };
             toggleField.RegisterValueChangedCallback(evt =>
             {
-                if (evt.newValue.Equals(shaderInput.value.boolean))
+                if (evt.newValue.Equals(shaderInput.valueData.boolean))
                     return;
                 shaderInput.UpdateValueData(new ShaderValueData()
                 {

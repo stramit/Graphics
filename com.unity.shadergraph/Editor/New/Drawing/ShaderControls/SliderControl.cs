@@ -51,10 +51,10 @@ namespace UnityEditor.ShaderGraph
             Slider slider = null;
             FloatField floatField = null;
 
-            slider = new Slider(controlData.values[0], controlData.values[1]) { value = shaderInput.value.vector.x };
+            slider = new Slider(controlData.values[0], controlData.values[1]) { value = shaderInput.valueData.vector.x };
             slider.RegisterValueChangedCallback((evt) =>
             {
-                if (evt.newValue.Equals(shaderInput.value.vector.x))
+                if (evt.newValue.Equals(shaderInput.valueData.vector.x))
                     return;
                 floatField.value = evt.newValue;
                 shaderInput.UpdateValueData(new ShaderValueData()
@@ -63,10 +63,10 @@ namespace UnityEditor.ShaderGraph
                 });
             });
 
-            floatField = new FloatField { value = shaderInput.value.vector.x };
+            floatField = new FloatField { value = shaderInput.valueData.vector.x };
             floatField.RegisterValueChangedCallback(evt =>
             {
-                if (evt.newValue.Equals(shaderInput.value.vector.x))
+                if (evt.newValue.Equals(shaderInput.valueData.vector.x))
                     return;
                 shaderInput.UpdateValueData(new ShaderValueData()
                 {
@@ -75,8 +75,8 @@ namespace UnityEditor.ShaderGraph
             });
             floatField.Q("unity-text-input").RegisterCallback<FocusOutEvent>(evt =>
             {
-                float newValue = Mathf.Max(Mathf.Min(shaderInput.value.vector.x, controlData.values[1]), controlData.values[0]);
-                if (newValue.Equals(shaderInput.value.vector.x))
+                float newValue = Mathf.Max(Mathf.Min(shaderInput.valueData.vector.x, controlData.values[1]), controlData.values[0]);
+                if (newValue.Equals(shaderInput.valueData.vector.x))
                     return;
                 slider.value = newValue;
                 shaderInput.UpdateValueData(new ShaderValueData()

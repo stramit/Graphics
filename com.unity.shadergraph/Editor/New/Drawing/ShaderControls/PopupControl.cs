@@ -57,10 +57,10 @@ namespace UnityEditor.ShaderGraph
             VisualElement control = new VisualElement() { name = "PopupControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/PopupControl"));
 
-            var popupField = new PopupField<string>(entries, (int)shaderInput.value.vector.x);
+            var popupField = new PopupField<string>(entries, (int)shaderInput.valueData.vector.x);
             popupField.RegisterValueChangedCallback(evt =>
             {
-                if (popupField.index.Equals(shaderInput.value.vector.x))
+                if (popupField.index.Equals(shaderInput.valueData.vector.x))
                     return;
                 shaderInput.UpdateValueData(new ShaderValueData()
                 {

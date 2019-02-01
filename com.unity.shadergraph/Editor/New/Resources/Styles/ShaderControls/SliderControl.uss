@@ -1,0 +1,24 @@
+VisualElement > #SliderControl {
+    flex-direction: row;
+    margin-top: 2;
+    margin-bottom: 2;
+}
+
+.unity-base-field {
+    margin-top: 0;
+    margin-bottom: 0;
+    text-alignment: middle-left;
+}
+
+.unity-base-field__input{
+    width: 32;
+    text-alignment: middle-left;
+}
+
+.unity-slider {
+    min-width: 0;
+    border-right: 8;
+    flex-grow: 1;
+    overflow:visible;
+}
+

@@ -3,7 +3,7 @@ using UnityEditor.Graphing;
 
 namespace UnityEditor.ShaderGraph
 {
-    class OutputDescriptor : IShaderValueDescriptor
+    struct ValueDescriptor : IShaderValueDescriptor
     {
         public SerializableGuid guid => new SerializableGuid();
 
@@ -12,7 +12,7 @@ namespace UnityEditor.ShaderGraph
 
         public string name { get; }
 
-        public OutputDescriptor(string name, SlotValueType valueType)
+        public ValueDescriptor(string name, SlotValueType valueType)
         {
             this.name = name;
             this.valueType = valueType;

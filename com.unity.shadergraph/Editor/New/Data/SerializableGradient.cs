@@ -5,7 +5,7 @@ using UnityEngine;
 namespace UnityEditor.ShaderGraph
 {
     [Serializable]
-    struct SerializableGradient
+    class SerializableGradient
     {
         [SerializeField]
         Vector4[] m_ColorKeys;

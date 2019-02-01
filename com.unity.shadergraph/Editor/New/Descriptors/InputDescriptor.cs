@@ -4,7 +4,7 @@ using UnityEditor.Graphing;
 
 namespace UnityEditor.ShaderGraph
 {
-    class InputDescriptor : IShaderValueDescriptor
+    struct InputDescriptor : IShaderValueDescriptor
     {
         public SerializableGuid guid => new SerializableGuid();
 

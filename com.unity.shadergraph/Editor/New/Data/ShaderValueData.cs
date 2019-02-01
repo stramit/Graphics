@@ -41,13 +41,23 @@ namespace UnityEditor.ShaderGraph
 
         public Texture texture
         {
-            get => m_Texture.texture;
+            get
+            {
+                if(m_Texture == null)
+                    m_Texture = new SerializableTexture();
+                return m_Texture.texture;
+            }
             set => m_Texture.texture = value;
         }
 
         public Gradient gradient
         {
-            get => m_Gradient.gradient;
+            get
+            {
+                if(m_Gradient == null)
+                    m_Gradient = new SerializableGradient();
+                return m_Gradient.gradient;
+            }
             set => m_Gradient.gradient = value;
         }
     }

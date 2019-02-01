@@ -5,6 +5,46 @@ namespace UnityEditor.ShaderGraph
 {
     internal static class ShaderValueTypeExtensions
     {
+        internal static ConcreteSlotValueType ToConcreteValueType(this SlotValueType slotValueType)
+        {
+            switch (slotValueType)
+            {
+                case SlotValueType.Vector4:
+                case SlotValueType.DynamicVector:
+                case SlotValueType.Dynamic:
+                    return ConcreteSlotValueType.Vector4;
+                case SlotValueType.Vector3:
+                    return ConcreteSlotValueType.Vector3;
+                case SlotValueType.Vector2:
+                    return ConcreteSlotValueType.Vector2;
+                case SlotValueType.Vector1:
+                    return ConcreteSlotValueType.Vector1;
+                case SlotValueType.Boolean:
+                    return ConcreteSlotValueType.Boolean;
+                case SlotValueType.Texture2D:
+                    return ConcreteSlotValueType.Texture2D;
+                case SlotValueType.Texture3D:
+                    return ConcreteSlotValueType.Texture3D;
+                case SlotValueType.Texture2DArray:
+                    return ConcreteSlotValueType.Texture2DArray;
+                case SlotValueType.Cubemap:
+                    return ConcreteSlotValueType.Cubemap;
+                case SlotValueType.SamplerState:
+                    return ConcreteSlotValueType.SamplerState;
+                case SlotValueType.Matrix2:
+                    return ConcreteSlotValueType.Matrix2;
+                case SlotValueType.Matrix3:
+                    return ConcreteSlotValueType.Matrix3;
+                case SlotValueType.Matrix4:
+                case SlotValueType.DynamicMatrix:
+                    return ConcreteSlotValueType.Matrix4;
+                case SlotValueType.Gradient:
+                    return ConcreteSlotValueType.Gradient;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
         internal static IShaderControl ToDefaultControl(this SlotValueType slotValueType)
         {
             switch (slotValueType)

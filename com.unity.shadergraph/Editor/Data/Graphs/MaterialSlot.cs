@@ -226,7 +226,7 @@ namespace UnityEditor.ShaderGraph
         public string shaderOutputName
         {
             get { return m_ShaderOutputName; }
-            private set { m_ShaderOutputName = value; }
+            set { m_ShaderOutputName = value; }
         }
 
         public ShaderStageCapability stageCapability

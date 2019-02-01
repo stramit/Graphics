@@ -36,10 +36,10 @@ namespace UnityEditor.ShaderGraph
             VisualElement control = new VisualElement() { name = "IntegerControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/IntegerControl"));
 
-            var integerField = new IntegerField() { value = (int)shaderInput.value.vector.x };
+            var integerField = new IntegerField() { value = (int)shaderInput.valueData.vector.x };
             integerField.RegisterValueChangedCallback((evt) =>
             {
-                if (evt.newValue.Equals(shaderInput.value.vector.x))
+                if (evt.newValue.Equals(shaderInput.valueData.vector.x))
                     return;
                 shaderInput.UpdateValueData(new ShaderValueData()
                 {

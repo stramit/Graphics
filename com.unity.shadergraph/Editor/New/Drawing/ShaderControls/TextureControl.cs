@@ -37,11 +37,11 @@ namespace UnityEditor.ShaderGraph
             VisualElement control = new VisualElement() { name = "TextureControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/TextureControl"));
 
-            var objectField = new ObjectField { objectType = typeof(T), value = shaderInput.value.texture };
+            var objectField = new ObjectField { objectType = typeof(T), value = shaderInput.valueData.texture };
             objectField.RegisterValueChangedCallback(evt =>
             {
                 var texture = evt.newValue as T;
-                if (texture.Equals(shaderInput.value.texture))
+                if (texture.Equals(shaderInput.valueData.texture))
                     return;
                 shaderInput.UpdateValueData(new ShaderValueData()
                 {

@@ -45,10 +45,10 @@ namespace UnityEditor.ShaderGraph
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/ColorControl"));
 
             var alpha = shaderInput.concreteValueType == ConcreteSlotValueType.Vector4;
-            var colorField = new ColorField { value = shaderInput.value.vector, showAlpha = alpha, hdr = controlData.values[0] == 1, showEyeDropper = false };
+            var colorField = new ColorField { value = shaderInput.valueData.vector, showAlpha = alpha, hdr = controlData.values[0] == 1, showEyeDropper = false };
             colorField.RegisterValueChangedCallback(evt =>
             {
-                if (evt.newValue.Equals(shaderInput.value.vector))
+                if (evt.newValue.Equals(shaderInput.valueData.vector))
                     return;
                 shaderInput.UpdateValueData(new ShaderValueData()
                 {
