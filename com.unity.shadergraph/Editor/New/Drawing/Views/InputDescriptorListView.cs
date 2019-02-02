@@ -10,7 +10,6 @@ namespace UnityEditor.ShaderGraph.Drawing
     class InputDescriptorListView : ShaderValueDescriptorListView
     {
         private Dictionary<SlotValueType, List<Type>> m_ControlTypeMap;
-        private List<Type> m_TempTypes = new List<Type>();
 
         public Dictionary<SlotValueType, List<Type>> controlTypeMap
         {
@@ -29,24 +28,31 @@ namespace UnityEditor.ShaderGraph.Drawing
             {
                 foreach (var type in assembly.GetTypesOrNothing())
                 {
-                    if (type.IsClass && !type.IsAbstract && typeof(IShaderControl).IsAssignableFrom(type) && type != typeof(TextureControl<>))
+                    if (type.IsClass && !type.IsAbstract && typeof(IShaderControl).IsAssignableFrom(type) 
+                        && type != typeof(TextureControl<>) && type != typeof(DefaultControl))
                         controlInstances.Add(Activator.CreateInstance(type) as IShaderControl);
                 }
             }
 
-            var tempTypeList = new List<Type>();
             var typeMap = new Dictionary<SlotValueType, List<Type>>();
             for(int t = 0; t < Enum.GetNames(typeof(SlotValueType)).Length; t++)
             {
-                tempTypeList.Clear();
+                var types = new List<Type>();
                 for(int c = 0; c < controlInstances.Count; c++)
                 {
                     if(controlInstances[c].validPortTypes.ToList().Contains((SlotValueType)t))
-                        tempTypeList.Add(controlInstances[c].GetType());
+                        types.Add(controlInstances[c].GetType());
                 }
-                typeMap.Add((SlotValueType)t, tempTypeList);
+                typeMap.Add((SlotValueType)t, types);
             }
             return typeMap;
+        }
+
+        private int GetIndexOfControlType(SlotValueType valueType, IShaderControl controlType)
+        {
+            List<Type> types = new List<Type>();
+            controlTypeMap.TryGetValue(valueType, out types);
+            return types.IndexOf(controlType.GetType());
         }
 
         List<InputDescriptor> m_InputDescriptors;
@@ -66,12 +72,13 @@ namespace UnityEditor.ShaderGraph.Drawing
         {
             InputDescriptor descriptor = (InputDescriptor)list.list[index]; 
 
-            m_TempTypes = new List<Type>();
+            List<Type> tempTypes = new List<Type>();
+            SlotValueType previousValueType = descriptor.valueType;
             var valueType = (SlotValueType)EditorGUI.EnumPopup( new Rect(rect.x, rect.y, (rect.width - labelWidth) * 0.5f, EditorGUIUtility.singleLineHeight), descriptor.valueType);
-            controlTypeMap.TryGetValue(valueType, out m_TempTypes);  
-            var controlType = EditorGUI.Popup(new Rect(rect.x + (rect.width - labelWidth) * 0.5f, rect.y, (rect.width - labelWidth) * 0.5f, EditorGUIUtility.singleLineHeight), 0, m_TempTypes.Select(s => s.Name).ToArray());
-
-            list.list[index] = new InputDescriptor(descriptor.id, descriptor.name, valueType, valueType.ToDefaultControl()/*, GetControlFromIndex(controlValue, valueType)*/);
+            controlTypeMap.TryGetValue(valueType, out tempTypes);  
+            var controlIndex =  GetIndexOfControlType(valueType, previousValueType != valueType ? valueType.ToDefaultControl() : descriptor.control);
+            var controlType = EditorGUI.Popup(new Rect(rect.x + (rect.width - labelWidth) * 0.5f, rect.y, (rect.width - labelWidth) * 0.5f, EditorGUIUtility.singleLineHeight), controlIndex, tempTypes.Select(s => s.Name).ToArray());
+            list.list[index] = new InputDescriptor(descriptor.id, descriptor.name, valueType, (IShaderControl)Activator.CreateInstance(tempTypes[controlType]));
         }
     }
 }
