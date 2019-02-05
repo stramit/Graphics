@@ -2,21 +2,20 @@
 
 namespace UnityEditor.ShaderGraph.NodeLibrary
 {
-    sealed class AddNode : ShaderNode
+    sealed class TransposeNode : ShaderNode
     {
-        InputDescriptor m_A = new InputDescriptor(0, "A", SlotValueType.DynamicVector);
-        InputDescriptor m_B = new InputDescriptor(1, "B", SlotValueType.DynamicVector);
-        OutputDescriptor m_Out = new OutputDescriptor(2, "Out", SlotValueType.DynamicVector);
+        InputDescriptor m_In = new InputDescriptor(0, "In", SlotValueType.DynamicMatrix);
+        OutputDescriptor m_Out = new OutputDescriptor(1, "Out", SlotValueType.DynamicMatrix);
 
         internal override void Setup(ref NodeDefinitionContext context)
         {
             context.CreateNodeType(new NodeTypeDescriptor
             {
                 path = "INTERNAL",
-                name = "Add",
-                inPorts = new InputDescriptor[] { m_A, m_B },
+                name = "Matrix Transpose",
+                inPorts = new InputDescriptor[] { m_In },
                 outPorts = new OutputDescriptor[] { m_Out },
-                preview = true
+                preview = false
             });
         }
         
@@ -25,9 +24,9 @@ namespace UnityEditor.ShaderGraph.NodeLibrary
             IShaderValue shaderValue = GetShaderValue(m_Out);
             context.SetHlslFunction(new HlslFunctionDescriptor
             {
-                name = string.Format("Unity_Add{0}", NodeUtils.GetSlotDimension(shaderValue.concreteValueType)),
-                source = HlslSource.String("Out = A + B;"),
-                inArguments = new InputDescriptor[] { m_A, m_B },
+                name = string.Format("Unity_Tranpose{0}", NodeUtils.GetSlotDimension(shaderValue.concreteValueType)),
+                source = HlslSource.String("Out = transpose(In);"),
+                inArguments = new InputDescriptor[] { m_In },
                 outArguments = new OutputDescriptor[] { m_Out }
             });
         }

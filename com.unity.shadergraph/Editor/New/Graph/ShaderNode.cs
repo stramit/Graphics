@@ -105,8 +105,8 @@ namespace UnityEditor.ShaderGraph
             var dynamicInputSlotsToCompare = DictionaryPool<MaterialSlot, ConcreteSlotValueType>.Get();
             var skippedDynamicSlots = ListPool<MaterialSlot>.Get();
 
-            //var dynamicMatrixInputSlotsToCompare = DictionaryPool<DynamicMatrixMaterialSlot, ConcreteSlotValueType>.Get();
-            //var skippedDynamicMatrixSlots = ListPool<DynamicMatrixMaterialSlot>.Get();
+            var dynamicMatrixInputSlotsToCompare = DictionaryPool<MaterialSlot, ConcreteSlotValueType>.Get();
+            var skippedDynamicMatrixSlots = ListPool<MaterialSlot>.Get();
 
             // iterate the input slots
             s_TempSlots.Clear();
@@ -123,12 +123,14 @@ namespace UnityEditor.ShaderGraph
                     {
                         if (inputSlot.valueType == SlotValueType.DynamicVector)
                             skippedDynamicSlots.Add(inputPort);
+                        else if (inputSlot.valueType == SlotValueType.DynamicMatrix)
+                            skippedDynamicMatrixSlots.Add(inputPort);
                     }
                     else if (inputSlot is DynamicVectorMaterialSlot)
                         skippedDynamicSlots.Add(inputSlot as DynamicVectorMaterialSlot);
+                    else if (inputSlot is DynamicMatrixMaterialSlot)
+                        skippedDynamicMatrixSlots.Add(inputSlot as DynamicMatrixMaterialSlot);
 
-                    // if (inputSlot is DynamicMatrixMaterialSlot)
-                    //     skippedDynamicMatrixSlots.Add(inputSlot as DynamicMatrixMaterialSlot);
                     continue;
                 }
 
@@ -159,17 +161,22 @@ namespace UnityEditor.ShaderGraph
                         dynamicInputSlotsToCompare.Add(inputPort, outputConcreteType);
                         continue;
                     }
+                    else if (inputSlot.valueType == SlotValueType.DynamicMatrix)
+                    {
+                        dynamicMatrixInputSlotsToCompare.Add(inputPort, outputConcreteType);
+                        continue;
+                    }
                 }
                 else if (inputSlot is DynamicVectorMaterialSlot)
                 {
                     dynamicInputSlotsToCompare.Add(inputSlot as DynamicVectorMaterialSlot, outputConcreteType);
                     continue;
                 }
-                // else if (inputSlot is DynamicMatrixMaterialSlot)
-                // {
-                //     dynamicMatrixInputSlotsToCompare.Add((DynamicMatrixMaterialSlot)inputSlot, outputConcreteType);
-                //     continue;
-                // }
+                else if (inputSlot is DynamicMatrixMaterialSlot)
+                {
+                    dynamicMatrixInputSlotsToCompare.Add(inputSlot as DynamicMatrixMaterialSlot, outputConcreteType);
+                    continue;
+                }
 
                 // if we have a standard connection... just check the types work!
                 if (!ImplicitConversionExists(outputConcreteType, inputSlot.concreteValueType))
@@ -196,11 +203,22 @@ namespace UnityEditor.ShaderGraph
             }
 
             // and now dynamic matrices
-            // var dynamicMatrixType = ConvertDynamicMatrixInputTypeToConcrete(dynamicMatrixInputSlotsToCompare.Values);
-            // foreach (var dynamicKvP in dynamicMatrixInputSlotsToCompare)
-            //     dynamicKvP.Key.SetConcreteType(dynamicMatrixType);
-            // foreach (var skippedSlot in skippedDynamicMatrixSlots)
-            //     skippedSlot.SetConcreteType(dynamicMatrixType);
+            var dynamicMatrixType = ConvertDynamicMatrixInputTypeToConcrete(dynamicMatrixInputSlotsToCompare.Values);
+            foreach (var dynamicKvP in dynamicMatrixInputSlotsToCompare)
+            {
+                if(dynamicKvP.Key is ShaderPort dynamicPort)
+                    dynamicPort.SetConcreteType(dynamicMatrixType);
+                else if(dynamicKvP.Key is DynamicMatrixMaterialSlot dynamicSlot)
+                    dynamicSlot.SetConcreteType(dynamicMatrixType);
+            }
+                
+            foreach (var skippedSlot in skippedDynamicMatrixSlots)
+            {
+                if(skippedSlot is ShaderPort dynamicPort)
+                    dynamicPort.SetConcreteType(dynamicMatrixType);
+                else if(skippedSlot is DynamicMatrixMaterialSlot dynamicSlot)
+                    dynamicSlot.SetConcreteType(dynamicMatrixType);
+            }
 
             s_TempSlots.Clear();
             GetInputSlots(s_TempSlots);
@@ -224,21 +242,29 @@ namespace UnityEditor.ShaderGraph
                     continue;
                 }
 
-                if (outputPort != null &&  outputPort.valueType == SlotValueType.DynamicVector)
+                if (outputPort != null)
                 {
-                    outputPort.SetConcreteType(dynamicType);
-                    continue;
+                    if(outputPort.valueType == SlotValueType.DynamicVector)
+                    {
+                        outputPort.SetConcreteType(dynamicType);
+                        continue;
+                    }
+                    else if(outputPort.valueType == SlotValueType.DynamicMatrix)
+                    {
+                        outputPort.SetConcreteType(dynamicMatrixType);
+                        continue;
+                    }
                 }
                 else if (outputSlot is DynamicVectorMaterialSlot)
                 {
                     outputPort.SetConcreteType(dynamicType);
                     continue;
                 }
-                // else if (outputSlot is DynamicMatrixMaterialSlot)
-                // {
-                //     (outputSlot as DynamicMatrixMaterialSlot).SetConcreteType(dynamicMatrixType);
-                //     continue;
-                // }
+                else if (outputSlot is DynamicMatrixMaterialSlot)
+                {
+                    outputPort.SetConcreteType(dynamicMatrixType);
+                    continue;
+                }
             }
 
             isInError |= inputError;
@@ -260,8 +286,8 @@ namespace UnityEditor.ShaderGraph
             ListPool<MaterialSlot>.Release(skippedDynamicSlots);
             DictionaryPool<MaterialSlot, ConcreteSlotValueType>.Release(dynamicInputSlotsToCompare);
 
-            // ListPool<DynamicMatrixMaterialSlot>.Release(skippedDynamicMatrixSlots);
-            // DictionaryPool<DynamicMatrixMaterialSlot, ConcreteSlotValueType>.Release(dynamicMatrixInputSlotsToCompare);
+            ListPool<MaterialSlot>.Release(skippedDynamicMatrixSlots);
+            DictionaryPool<MaterialSlot, ConcreteSlotValueType>.Release(dynamicMatrixInputSlotsToCompare);
         }
 #endregion
 

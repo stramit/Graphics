@@ -74,17 +74,14 @@ namespace UnityEditor.ShaderGraph
                 case SlotValueType.SamplerState:
                     return new LabelControl("Default");
                 case SlotValueType.Matrix2:
-                    return new LabelControl("Identity");
                 case SlotValueType.Matrix3:
-                    return new LabelControl("Identity");
                 case SlotValueType.Matrix4:
+                case SlotValueType.DynamicMatrix:
                     return new LabelControl("Identity");
                 case SlotValueType.Gradient:
                     return new GradientControl();
                 case SlotValueType.DynamicVector:
                     return new DynamicVectorControl();
-                // TODO: Write Dynamic controls
-                case SlotValueType.DynamicMatrix:
                 case SlotValueType.Dynamic:
                 default:
                     throw new ArgumentOutOfRangeException();
