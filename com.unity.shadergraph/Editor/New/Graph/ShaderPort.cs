@@ -12,10 +12,12 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         SlotValueType m_ValueType;        
 
+        private ConcreteSlotValueType m_ConcreteValueType;
+
         public SerializableGuid guid => m_Guid;
 
         public override SlotValueType valueType => m_ValueType;
-        public override ConcreteSlotValueType concreteValueType => m_ValueType.ToConcreteValueType();
+        public override ConcreteSlotValueType concreteValueType => m_ConcreteValueType;
 
         public string outputName => shaderOutputName;  
 
@@ -28,6 +30,12 @@ namespace UnityEditor.ShaderGraph
         {
             m_Guid = portDescriptor.guid;
             m_ValueType = portDescriptor.valueType;
+            m_ConcreteValueType = m_ValueType.ToConcreteValueType();
+        }
+
+        public void SetConcreteType(ConcreteSlotValueType concreteValueType)
+        {
+            m_ConcreteValueType = concreteValueType;
         }
 
 #region Copy

@@ -25,7 +25,7 @@ namespace UnityEditor.ShaderGraph
             VisualElement control = new VisualElement() { name = "VectorControl" };
             control.styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderControls/VectorControl"));
             
-            for (var i = 0; i < controlData.labels.Length; i++)
+            for (var i = 0; i < shaderInput.concreteValueType.GetChannelCount(); i++)
                 AddField(control, shaderInput, i, controlData.labels[i]);
             return control;
         }

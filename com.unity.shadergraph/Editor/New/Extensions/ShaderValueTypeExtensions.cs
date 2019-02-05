@@ -81,8 +81,9 @@ namespace UnityEditor.ShaderGraph
                     return new LabelControl("Identity");
                 case SlotValueType.Gradient:
                     return new GradientControl();
-                // TODO: Write Dynamic controls
                 case SlotValueType.DynamicVector:
+                    return new DynamicVectorControl();
+                // TODO: Write Dynamic controls
                 case SlotValueType.DynamicMatrix:
                 case SlotValueType.Dynamic:
                 default:
