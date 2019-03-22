@@ -67,7 +67,7 @@ namespace UnityEditor.ShaderGraph
 
             var inputValue = GetSlotValue(InputSlotId, generationMode);
             var outputValue = GetSlotValue(OutputSlotId, generationMode);
-            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision), GetVariableNameForSlot(OutputSlotId));
+            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(OutputSlotId));
             sb.AppendLine("{0}3x3 _{1}_TangentMatrix = {0}3x3(IN.{2}SpaceTangent, IN.{2}SpaceBiTangent, IN.{2}SpaceNormal);", precision, GetVariableNameForNode(), NeededCoordinateSpace.World.ToString());
             sb.AppendLine("{0}3 _{1}_Position = IN.{2}SpacePosition;", precision, GetVariableNameForNode(), NeededCoordinateSpace.World.ToString());
             sb.AppendLine("{0}({1},_{2}_Position,_{2}_TangentMatrix, {3});", GetFunctionName(), inputValue, GetVariableNameForNode(), outputValue);
@@ -82,8 +82,8 @@ namespace UnityEditor.ShaderGraph
                     s.AppendLine("void {0}({2} In, {1}3 Position, {1}3x3 TangentMatrix, out {3} Out)",
                         GetFunctionName(),
                         precision,
-                        FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToString(precision),
-                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
+                        FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(),
+                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
                     using (s.BlockScope())
                     {
                         s.AppendLine("{0}3 worldDirivativeX = ddx(Position * 100);", precision);

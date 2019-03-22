@@ -128,7 +128,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     s.AppendLine("{1}3 {0}({1}3 ldrColor, {2} luminanceIntensity, {2} exposureWeight, {2} inverseCurrentExposureMultiplier)",
                         GetFunctionName(),
                         precision,
-                        intensitySlot.concreteValueType.ToString(precision));
+                        intensitySlot.concreteValueType.ToShaderString());
                     using (s.BlockScope())
                     {
                         if (normalizeColor.isOn)

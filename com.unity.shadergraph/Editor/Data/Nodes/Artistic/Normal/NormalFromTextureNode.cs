@@ -63,7 +63,7 @@ namespace UnityEditor.ShaderGraph
                 samplerValue = string.Format("sampler{0}", GetSlotValue(TextureInputId, generationMode));
 
             var sb = new ShaderStringBuilder();
-            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision), GetVariableNameForSlot(OutputSlotId));
+            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(OutputSlotId));
             sb.AppendLine("{0}({1}, {2}, {3}, {4}, {5}, {6});", GetFunctionName(), textureValue, samplerValue, uvValue, offsetValue, strengthValue, outputValue);
 
             visitor.AddShaderChunk(sb.ToString(), false);
@@ -73,12 +73,12 @@ namespace UnityEditor.ShaderGraph
         {
             var sb = new ShaderStringBuilder();
             sb.AppendLine("void {0}({1} Texture, {2} Sampler, {3} UV, {4} Offset, {5} Strength, out {6} Out)", GetFunctionName(),
-                FindInputSlot<MaterialSlot>(TextureInputId).concreteValueType.ToString(precision),
-                FindInputSlot<MaterialSlot>(SamplerInputId).concreteValueType.ToString(precision),
-                FindInputSlot<MaterialSlot>(UVInputId).concreteValueType.ToString(precision),
-                FindInputSlot<MaterialSlot>(OffsetInputId).concreteValueType.ToString(precision),
-                FindInputSlot<MaterialSlot>(StrengthInputId).concreteValueType.ToString(precision),
-                FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
+                FindInputSlot<MaterialSlot>(TextureInputId).concreteValueType.ToShaderString(),
+                FindInputSlot<MaterialSlot>(SamplerInputId).concreteValueType.ToShaderString(),
+                FindInputSlot<MaterialSlot>(UVInputId).concreteValueType.ToShaderString(),
+                FindInputSlot<MaterialSlot>(OffsetInputId).concreteValueType.ToShaderString(),
+                FindInputSlot<MaterialSlot>(StrengthInputId).concreteValueType.ToShaderString(),
+                FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
             using (sb.BlockScope())
             {
                 sb.AppendLine("Offset = pow(Offset, 3) * 0.1;");
@@ -102,12 +102,12 @@ namespace UnityEditor.ShaderGraph
             registry.ProvideFunction(GetFunctionName(), s =>
                 {
                     s.AppendLine("void {0}({1} Texture, {2} Sampler, {3} UV, {4} Offset, {5} Strength, out {6} Out)", GetFunctionName(),
-                        FindInputSlot<MaterialSlot>(TextureInputId).concreteValueType.ToString(precision),
-                        FindInputSlot<MaterialSlot>(SamplerInputId).concreteValueType.ToString(precision),
-                        FindInputSlot<MaterialSlot>(UVInputId).concreteValueType.ToString(precision),
-                        FindInputSlot<MaterialSlot>(OffsetInputId).concreteValueType.ToString(precision),
-                        FindInputSlot<MaterialSlot>(StrengthInputId).concreteValueType.ToString(precision),
-                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
+                        FindInputSlot<MaterialSlot>(TextureInputId).concreteValueType.ToShaderString(),
+                        FindInputSlot<MaterialSlot>(SamplerInputId).concreteValueType.ToShaderString(),
+                        FindInputSlot<MaterialSlot>(UVInputId).concreteValueType.ToShaderString(),
+                        FindInputSlot<MaterialSlot>(OffsetInputId).concreteValueType.ToShaderString(),
+                        FindInputSlot<MaterialSlot>(StrengthInputId).concreteValueType.ToShaderString(),
+                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
                     using (s.BlockScope())
                     {
                         s.AppendLine("Offset = pow(Offset, 3) * 0.1;");

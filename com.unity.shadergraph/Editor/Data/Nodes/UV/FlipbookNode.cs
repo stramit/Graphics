@@ -88,7 +88,7 @@ namespace UnityEditor.ShaderGraph
             var tileValue = GetSlotValue(TileSlotId, generationMode);
             var outputValue = GetSlotValue(OutputSlotId, generationMode);
 
-            sb.AppendLine("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType), GetVariableNameForSlot(OutputSlotId));
+            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(OutputSlotId));
             if (!generationMode.IsPreview())
             {
                 sb.AppendLine("{0}2 _{1}_Invert = {0}2 ({2}, {3});", precision, GetVariableNameForNode(), invertX.isOn ? 1 : 0, invertY.isOn ? 1 : 0);
@@ -127,14 +127,13 @@ namespace UnityEditor.ShaderGraph
         {
             registry.ProvideFunction(GetFunctionName(), s =>
                 {
-                    s.AppendLine("void {0} ({1} UV, {2} Width, {3} Height, {4} Tile, {5}2 Invert, out {6} Out)",
+                    s.AppendLine("void {0} ({1} UV, {2} Width, {3} Height, {4} Tile, $precision2 Invert, out {5} Out)",
                         GetFunctionName(),
-                        FindInputSlot<MaterialSlot>(UVSlotId).concreteValueType.ToString(precision),
-                        FindInputSlot<MaterialSlot>(WidthSlotId).concreteValueType.ToString(precision),
-                        FindInputSlot<MaterialSlot>(HeightSlotId).concreteValueType.ToString(precision),
-                        FindInputSlot<MaterialSlot>(TileSlotId).concreteValueType.ToString(precision),
-                        precision,
-                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
+                        FindInputSlot<MaterialSlot>(UVSlotId).concreteValueType.ToShaderString(),
+                        FindInputSlot<MaterialSlot>(WidthSlotId).concreteValueType.ToShaderString(),
+                        FindInputSlot<MaterialSlot>(HeightSlotId).concreteValueType.ToShaderString(),
+                        FindInputSlot<MaterialSlot>(TileSlotId).concreteValueType.ToShaderString(),
+                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
                     using (s.BlockScope())
                     {
                         s.AppendLine("Tile = fmod(Tile, Width*Height);");

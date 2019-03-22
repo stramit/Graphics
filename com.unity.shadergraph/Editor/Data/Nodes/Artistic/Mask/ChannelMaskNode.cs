@@ -43,7 +43,7 @@ namespace UnityEditor.ShaderGraph
                 bool alpha = (channelMask & 8) != 0;
                 channelSum = string.Format("{0}{1}{2}{3}", red ? "Red" : "", green ? "Green" : "", blue ? "Blue" : "", alpha ? "Alpha" : "");
             }
-            return string.Format("Unity_ChannelMask_{0}_{1}", channelSum, NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType));
+            return string.Format("Unity_ChannelMask_{0}_{1}", channelSum, FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
         }
 
         public sealed override void UpdateNodeAfterDeserialization()
@@ -81,7 +81,12 @@ namespace UnityEditor.ShaderGraph
 
         string GetFunctionPrototype(string argIn, string argOut)
         {
-            return string.Format("void {0} ({1} {2}, out {3} {4})", GetFunctionName(), NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindInputSlot<DynamicVectorMaterialSlot>(InputSlotId).concreteValueType), argIn, NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<DynamicVectorMaterialSlot>(OutputSlotId).concreteValueType), argOut);
+            return string.Format("void {0} ({1} {2}, out {3} {4})"
+                , GetFunctionName()
+                , FindInputSlot<DynamicVectorMaterialSlot>(InputSlotId).concreteValueType.ToShaderString()
+                , argIn
+                , FindOutputSlot<DynamicVectorMaterialSlot>(OutputSlotId).concreteValueType.ToShaderString()
+                , argOut);
         }
 
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
@@ -89,7 +94,7 @@ namespace UnityEditor.ShaderGraph
             ValidateChannelCount();
             string inputValue = GetSlotValue(InputSlotId, generationMode);
             string outputValue = GetSlotValue(OutputSlotId, generationMode);
-            visitor.AddShaderChunk(string.Format("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType), GetVariableNameForSlot(OutputSlotId)), true);
+            visitor.AddShaderChunk(string.Format("{0} {1};", FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(OutputSlotId)), true);
             visitor.AddShaderChunk(GetFunctionCallBody(inputValue, outputValue), true);
         }
 

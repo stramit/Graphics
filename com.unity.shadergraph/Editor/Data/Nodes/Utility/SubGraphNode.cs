@@ -169,7 +169,7 @@ namespace UnityEditor.ShaderGraph
                 GetOutputSlots(outputSlots);
                 foreach (var slot in outputSlots)
                 {
-                    visitor.AddShaderChunk($"{NodeUtils.ConvertConcreteSlotValueTypeToString(precision, slot.concreteValueType)} {GetVariableNameForSlot(slot.id)} = {slot.GetDefaultValue(GenerationMode.ForReals)};");
+                    visitor.AddShaderChunk($"{slot.concreteValueType.ToShaderString()} {GetVariableNameForSlot(slot.id)} = {slot.GetDefaultValue(GenerationMode.ForReals)};");
                 }
                 
                 return;
@@ -182,7 +182,7 @@ namespace UnityEditor.ShaderGraph
             visitor.AddShaderChunk(sb.ToString());
 
             foreach (var outSlot in subGraphData.outputs)
-                visitor.AddShaderChunk(string.Format("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, outSlot.concreteValueType), GetVariableNameForSlot(outSlot.id)));
+                visitor.AddShaderChunk(string.Format("{0} {1};", outSlot.concreteValueType.ToShaderString(), GetVariableNameForSlot(outSlot.id)));
 
             var arguments = new List<string>();
             foreach (var prop in subGraphData.inputs)

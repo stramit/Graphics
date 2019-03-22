@@ -106,7 +106,7 @@ namespace UnityEditor.ShaderGraph
             {
                 visitor.AddShaderChunk(string.Format("Gradient {0} = {1}", 
                     GetVariableNameForSlot(outputSlotId), 
-                    GradientUtils.GetGradientValue(gradient, precision, true, ";")));
+                    GradientUtils.GetGradientValue(gradient, true, ";")));
             }
         }
 

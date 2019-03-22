@@ -77,15 +77,15 @@ namespace UnityEditor.ShaderGraph
                 {
                     slots.OrderBy(s => s.id);
                     visitor.AddShaderChunk(string.Format("{0} _{1}_{2};",
-                        NodeUtils.ConvertConcreteSlotValueTypeToString(precision, slots[0].concreteValueType),
-                        GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(slots[0].shaderOutputName)));
+                        slots[0].concreteValueType.ToShaderString(),
+                        slots[0].shaderOutputName.ToString()));
                 }
                 return;
             }
             
             foreach (var argument in slots)
                 visitor.AddShaderChunk(string.Format("{0} _{1}_{2};",
-                    NodeUtils.ConvertConcreteSlotValueTypeToString(precision, argument.concreteValueType),
+                    argument.concreteValueType.ToShaderString(),
                     GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(argument.shaderOutputName)));
 
             string call = string.Format("{0}_{1}(", functionName, precision);
@@ -151,7 +151,7 @@ namespace UnityEditor.ShaderGraph
                 if (!first)
                     header += ", ";
                 first = false;
-                header += string.Format("{0} {1}", argument.concreteValueType.ToString(precision), argument.shaderOutputName);
+                header += string.Format("{0} {1}", argument.concreteValueType.ToShaderString(), argument.shaderOutputName);
             }
 
             slots.Clear();
@@ -161,7 +161,7 @@ namespace UnityEditor.ShaderGraph
                 if (!first)
                     header += ", ";
                 first = false;
-                header += string.Format("out {0} {1}", argument.concreteValueType.ToString(precision), argument.shaderOutputName);
+                header += string.Format("out {0} {1}", argument.concreteValueType.ToShaderString(), argument.shaderOutputName);
             }
             header += ")";
             return header;

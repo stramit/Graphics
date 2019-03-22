@@ -14,13 +14,6 @@ namespace UnityEditor.ShaderGraph
         protected static List<IEdge> s_TempEdges = new List<IEdge>();
         protected static List<PreviewProperty> s_TempPreviewProperties = new List<PreviewProperty>();
 
-        public enum OutputPrecision
-        {
-            @fixed,
-            @half,
-            @float
-        }
-
         [NonSerialized]
         private Guid m_Guid;
 
@@ -105,12 +98,12 @@ namespace UnityEditor.ShaderGraph
         }
 
         [SerializeField]
-        private OutputPrecision m_OutputPrecision = OutputPrecision.@float;
+        private Precision m_Precision = Precision.GraphDefault;
 
-        public OutputPrecision precision
+        public Precision precision
         {
-            get { return m_OutputPrecision; }
-            set { m_OutputPrecision = value; }
+            get { return m_Precision; }
+            set { m_Precision = value; }
         }
 
         [SerializeField]

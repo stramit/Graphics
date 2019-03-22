@@ -304,15 +304,14 @@ namespace UnityEditor.ShaderGraph.Drawing
 
             ps.Add(new PropertyRow(new Label("Precision")), (row) =>
             {
-                row.Add(new EnumField(AbstractMaterialNode.OutputPrecision.@float), (field) =>
+                row.Add(new EnumField(node.precision), (field) =>
                 {
-                    field.value = node.precision;
                     field.RegisterValueChangedCallback(evt =>
                     {
                         if (evt.newValue.Equals(node.precision))
                             return;
                         node.owner.owner.RegisterCompleteObjectUndo("Change precision");
-                        node.precision = (AbstractMaterialNode.OutputPrecision)evt.newValue;
+                        node.precision = (Precision)evt.newValue;
                         node.Dirty(ModificationScope.Graph);
                     });
                 });
@@ -327,7 +326,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             m_Settings = new PropertySheet();
 
             // Add default settings
-            AddDefaultSettings(m_Settings);
+            m_Settings.Add(AddDefaultSettings());
 
             // Add Node type specific settings
             var nodeTypeSettings = node as IHasSettings;

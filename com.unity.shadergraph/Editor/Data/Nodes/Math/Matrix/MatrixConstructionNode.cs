@@ -72,9 +72,9 @@ namespace UnityEditor.ShaderGraph
             var inputM2Value = GetSlotValue(InputSlotM2Id, generationMode);
             var inputM3Value = GetSlotValue(InputSlotM3Id, generationMode);
 
-            sb.AppendLine("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(Output4x4SlotId).concreteValueType), GetVariableNameForSlot(Output4x4SlotId));
-            sb.AppendLine("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(Output3x3SlotId).concreteValueType), GetVariableNameForSlot(Output3x3SlotId));
-            sb.AppendLine("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(Output2x2SlotId).concreteValueType), GetVariableNameForSlot(Output2x2SlotId));
+            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(Output4x4SlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(Output4x4SlotId));
+            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(Output3x3SlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(Output3x3SlotId));
+            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(Output2x2SlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(Output2x2SlotId));
             sb.AppendLine("{0}({1}, {2}, {3}, {4}, {5}, {6}, {7});",
                 GetFunctionName(),
                 inputM0Value,
@@ -94,10 +94,10 @@ namespace UnityEditor.ShaderGraph
                 {
                     s.AppendLine("void {0} ({1} M0, {1} M1, {1} M2, {1} M3, out {2} Out4x4, out {3} Out3x3, out {4} Out2x2)",
                         GetFunctionName(),
-                        FindInputSlot<MaterialSlot>(InputSlotM0Id).concreteValueType.ToString(precision),
-                        FindOutputSlot<MaterialSlot>(Output4x4SlotId).concreteValueType.ToString(precision),
-                        FindOutputSlot<MaterialSlot>(Output3x3SlotId).concreteValueType.ToString(precision),
-                        FindOutputSlot<MaterialSlot>(Output2x2SlotId).concreteValueType.ToString(precision));
+                        FindInputSlot<MaterialSlot>(InputSlotM0Id).concreteValueType.ToShaderString(),
+                        FindOutputSlot<MaterialSlot>(Output4x4SlotId).concreteValueType.ToShaderString(),
+                        FindOutputSlot<MaterialSlot>(Output3x3SlotId).concreteValueType.ToShaderString(),
+                        FindOutputSlot<MaterialSlot>(Output2x2SlotId).concreteValueType.ToShaderString());
                     using (s.BlockScope())
                     {
                         switch (m_Axis)

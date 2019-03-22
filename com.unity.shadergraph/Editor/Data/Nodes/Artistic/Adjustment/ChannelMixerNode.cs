@@ -74,7 +74,7 @@ namespace UnityEditor.ShaderGraph
             var inputValue = GetSlotValue(InputSlotId, generationMode);
             var outputValue = GetSlotValue(OutputSlotId, generationMode);
 
-            sb.AppendLine("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType), GetVariableNameForSlot(OutputSlotId));
+            sb.AppendLine("{0} {1};", FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(OutputSlotId));
             if (!generationMode.IsPreview())
             {
                 sb.AppendLine("{0}3 _{1}_Red = {0}3 ({2}, {3}, {4});", precision, GetVariableNameForNode(), channelMixer.outRed[0], channelMixer.outRed[1], channelMixer.outRed[2]);
@@ -141,13 +141,13 @@ namespace UnityEditor.ShaderGraph
                 {
                     s.AppendLine("void {0} ({1} In, {2}3 Red, {2}3 Green, {2}3 Blue, out {3} Out)",
                         GetFunctionName(),
-                        FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToString(precision),
+                        FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(),
                         precision,
-                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
+                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
                     using (s.BlockScope())
                     {
                         s.AppendLine("Out = {0}(dot(In, Red), dot(In, Green), dot(In, Blue));",
-                            FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
+                            FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
                     }
                 });
         }
