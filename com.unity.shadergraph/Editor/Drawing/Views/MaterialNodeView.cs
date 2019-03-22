@@ -4,11 +4,13 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEditor.Graphing;
+using UnityEditor.Graphing.Util;
 using UnityEditor.ShaderGraph.Drawing.Controls;
 using UnityEngine.Rendering;
 
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
+using UnityEditor.UIElements;
 using Node = UnityEditor.Experimental.GraphView.Node;
 
 namespace UnityEditor.ShaderGraph.Drawing
@@ -158,36 +160,36 @@ namespace UnityEditor.ShaderGraph.Drawing
             VisualElement m_TitleContainer;
             VisualElement m_ButtonContainer;
             m_TitleContainer = this.Q("title");
+
             // -----------------------------------------------------------------------------------
+            
+            m_NodeSettingsView = new NodeSettingsView();
+            m_NodeSettingsView.visible = false;
 
-            var settings = node as IHasSettings;
-            if (settings != null)
-            {
-                m_NodeSettingsView = new NodeSettingsView();
-                m_NodeSettingsView.visible = false;
+            Add(m_NodeSettingsView);
 
-                Add(m_NodeSettingsView);
+            m_SettingsButton = new VisualElement {name = "settings-button"};
+            m_SettingsButton.Add(new VisualElement { name = "icon" });
+            m_Settings = new VisualElement();
 
-                m_SettingsButton = new VisualElement {name = "settings-button"};
-                m_SettingsButton.Add(new VisualElement { name = "icon" });
+            m_Settings.Add(AddDefaultSettings());
 
-                m_Settings = settings.CreateSettingsElement();
+            // Add Node type specific settings
+            var nodeTypeSettings = node as IHasSettings;
+            if (nodeTypeSettings != null)
+                m_Settings.Add(nodeTypeSettings.CreateSettingsElement());
+            
+            // Add manipulators
+            m_SettingsButton.AddManipulator(new Clickable(() =>
+                {
+                    UpdateSettingsExpandedState();
+                }));
 
-                m_SettingsButton.AddManipulator(new Clickable(() =>
-                    {
-                        UpdateSettingsExpandedState();
-                    }));
-
-                // Remove this after updated to the correct API call has landed in trunk. ------------
-                m_ButtonContainer = new VisualElement { name = "button-container" };
-                m_ButtonContainer.style.flexDirection = FlexDirection.Row;
-                m_ButtonContainer.Add(m_SettingsButton);
-                m_ButtonContainer.Add(m_CollapseButton);
-                m_TitleContainer.Add(m_ButtonContainer);
-                // -----------------------------------------------------------------------------------
-                //titleButtonContainer.Add(m_SettingsButton);
-                //titleButtonContainer.Add(m_CollapseButton);
-            }
+            m_ButtonContainer = new VisualElement { name = "button-container" };
+            m_ButtonContainer.style.flexDirection = FlexDirection.Row;
+            m_ButtonContainer.Add(m_SettingsButton);
+            m_ButtonContainer.Add(m_CollapseButton);
+            m_TitleContainer.Add(m_ButtonContainer);
         }
 
         public void AttachError(string errString)
@@ -296,16 +298,43 @@ namespace UnityEditor.ShaderGraph.Drawing
             return graph.GetShader(node, GenerationMode.ForReals, node.name).shader;
         }
 
+        VisualElement AddDefaultSettings()
+        {
+            PropertySheet ps = new PropertySheet();
+
+            ps.Add(new PropertyRow(new Label("Precision")), (row) =>
+            {
+                row.Add(new EnumField(AbstractMaterialNode.OutputPrecision.@float), (field) =>
+                {
+                    field.value = node.precision;
+                    field.RegisterValueChangedCallback(evt =>
+                    {
+                        if (evt.newValue.Equals(node.precision))
+                            return;
+                        node.owner.owner.RegisterCompleteObjectUndo("Change precision");
+                        node.precision = (AbstractMaterialNode.OutputPrecision)evt.newValue;
+                        node.Dirty(ModificationScope.Graph);
+                    });
+                });
+            });
+
+            return ps;
+        }
+
         void RecreateSettings()
         {
-            var settings = node as IHasSettings;
-            if (settings != null)
-            {
-                m_Settings.RemoveFromHierarchy();
+            m_Settings.RemoveFromHierarchy();
+            m_Settings = new PropertySheet();
 
-                m_Settings = settings.CreateSettingsElement();
-                m_NodeSettingsView.Add(m_Settings);
-            }
+            // Add default settings
+            AddDefaultSettings(m_Settings);
+
+            // Add Node type specific settings
+            var nodeTypeSettings = node as IHasSettings;
+            if (nodeTypeSettings != null)
+                m_Settings.Add(nodeTypeSettings.CreateSettingsElement());
+
+            m_NodeSettingsView.Add(m_Settings);
         }
 
         void UpdateSettingsExpandedState()

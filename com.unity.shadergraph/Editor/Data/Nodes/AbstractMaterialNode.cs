@@ -104,6 +104,7 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
+        [SerializeField]
         private OutputPrecision m_OutputPrecision = OutputPrecision.@float;
 
         public OutputPrecision precision
