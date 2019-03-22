@@ -30,7 +30,7 @@ namespace UnityEditor.ShaderGraph
 
         public override string GetPropertyDeclarationString(string delimiter = ";")
         {
-            return "float4x4 " + referenceName + delimiter;
+            return "$precision4x4 " + referenceName + delimiter;
         }
 
         public override PreviewProperty GetPreviewMaterialProperty()

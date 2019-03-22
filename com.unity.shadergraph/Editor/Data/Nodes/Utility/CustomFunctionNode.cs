@@ -88,7 +88,7 @@ namespace UnityEditor.ShaderGraph
                     argument.concreteValueType.ToShaderString(),
                     GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(argument.shaderOutputName)));
 
-            string call = string.Format("{0}_{1}(", functionName, precision);
+            string call = string.Format("{0}_$precision(", functionName);
             bool first = true;
             
             slots.Clear();
@@ -141,7 +141,7 @@ namespace UnityEditor.ShaderGraph
 
         private string GetFunctionHeader()
         {
-            string header = string.Format("void {0}_{1}(", functionName, precision);
+            string header = string.Format("void {0}_$precision(", functionName);
             var first = true;
             List<MaterialSlot> slots = new List<MaterialSlot>();
 
