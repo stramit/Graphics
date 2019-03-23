@@ -98,7 +98,7 @@ namespace UnityEditor.ShaderGraph
         }
 
         [SerializeField]
-        private Precision m_Precision = Precision.GraphDefault;
+        private Precision m_Precision = Precision.Inherit;
 
         public Precision precision
         {

@@ -12,6 +12,7 @@ namespace UnityEditor.ShaderGraph
         public BitangentVectorNode()
         {
             name = "Bitangent Vector";
+            precision = Precision.Float;
             UpdateNodeAfterDeserialization();
         }
 

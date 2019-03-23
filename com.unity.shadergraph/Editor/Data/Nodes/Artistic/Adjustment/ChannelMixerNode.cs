@@ -27,7 +27,7 @@ namespace UnityEditor.ShaderGraph
 
         string GetFunctionName()
         {
-            return "Unity_ChannelMixer_" + precision;
+            return "Unity_ChannelMixer_$precision";
         }
 
         public sealed override void UpdateNodeAfterDeserialization()
@@ -77,9 +77,9 @@ namespace UnityEditor.ShaderGraph
             sb.AppendLine("{0} {1};", FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(OutputSlotId));
             if (!generationMode.IsPreview())
             {
-                sb.AppendLine("{0}3 _{1}_Red = {0}3 ({2}, {3}, {4});", precision, GetVariableNameForNode(), channelMixer.outRed[0], channelMixer.outRed[1], channelMixer.outRed[2]);
-                sb.AppendLine("{0}3 _{1}_Green = {0}3 ({2}, {3}, {4});", precision, GetVariableNameForNode(), channelMixer.outGreen[0], channelMixer.outGreen[1], channelMixer.outGreen[2]);
-                sb.AppendLine("{0}3 _{1}_Blue = {0}3 ({2}, {3}, {4});", precision, GetVariableNameForNode(), channelMixer.outBlue[0], channelMixer.outBlue[1], channelMixer.outBlue[2]);
+                sb.AppendLine("$precision3 _{0}_Red = $precision3 ({1}, {2}, {3});", GetVariableNameForNode(), channelMixer.outRed[0], channelMixer.outRed[1], channelMixer.outRed[2]);
+                sb.AppendLine("$precision3 _{0}_Green = $precision3 ({1}, {2}, {3});", GetVariableNameForNode(), channelMixer.outGreen[0], channelMixer.outGreen[1], channelMixer.outGreen[2]);
+                sb.AppendLine("$precision3 _{0}_Blue = $precision3 ({1}, {2}, {3});", GetVariableNameForNode(), channelMixer.outBlue[0], channelMixer.outBlue[1], channelMixer.outBlue[2]);
             }
             sb.AppendLine("{0}({1}, _{2}_Red, _{2}_Green, _{2}_Blue, {3});", GetFunctionName(), inputValue, GetVariableNameForNode(), outputValue);
 
@@ -139,10 +139,9 @@ namespace UnityEditor.ShaderGraph
         {
             registry.ProvideFunction(GetFunctionName(), s =>
                 {
-                    s.AppendLine("void {0} ({1} In, {2}3 Red, {2}3 Green, {2}3 Blue, out {3} Out)",
+                    s.AppendLine("void {0} ({1} In, $precision3 Red, $precision3 Green, $precision3 Blue, out {2} Out)",
                         GetFunctionName(),
                         FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(),
-                        precision,
                         FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
                     using (s.BlockScope())
                     {

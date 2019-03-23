@@ -12,6 +12,7 @@ namespace UnityEditor.ShaderGraph
         public TangentVectorNode()
         {
             name = "Tangent Vector";
+            precision = Precision.Float;
             UpdateNodeAfterDeserialization();
         }
 

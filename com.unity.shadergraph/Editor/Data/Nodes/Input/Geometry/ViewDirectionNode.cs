@@ -13,6 +13,7 @@ namespace UnityEditor.ShaderGraph
         public ViewDirectionNode()
         {
             name = "View Direction";
+            precision = Precision.Float;
             UpdateNodeAfterDeserialization();
         }
 

@@ -10,6 +10,7 @@ namespace UnityEditor.ShaderGraph
         public ScreenPositionNode()
         {
             name = "Screen Position";
+            precision = Precision.Float;
             UpdateNodeAfterDeserialization();
         }
 
@@ -49,7 +50,7 @@ namespace UnityEditor.ShaderGraph
 
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
         {
-            visitor.AddShaderChunk(string.Format("{0}4 {1} = {2};", precision, GetVariableNameForSlot(kOutputSlotId), m_ScreenSpaceType.ToValueAsVariable()), true);
+            visitor.AddShaderChunk(string.Format("$precision4 {0} = {1};", GetVariableNameForSlot(kOutputSlotId), m_ScreenSpaceType.ToValueAsVariable()), true);
         }
 
         public bool RequiresScreenPosition(ShaderStageCapability stageCapability)

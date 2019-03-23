@@ -2,10 +2,25 @@
 {
     internal static class ConcreteSlotValueTypeUtil
     {
-        internal static string precisionToken = "$precision";
-
-        internal static string ToShaderString(this ConcreteSlotValueType concreteSlotValueType)
+        internal static string ToShaderString(this ConcreteSlotValueType concreteSlotValueType, Precision precision = Precision.Inherit)
         {
+            string precisionToken;
+            switch(precision)
+            {
+                case Precision.Real:
+                    precisionToken = "real";
+                    break;
+                case Precision.Float:
+                    precisionToken = "float";
+                    break;
+                case Precision.Half:
+                    precisionToken = "half";
+                    break;
+                default:
+                    precisionToken = "$precision";
+                    break;
+            }
+
             switch (concreteSlotValueType)
             {
                 case ConcreteSlotValueType.Boolean:

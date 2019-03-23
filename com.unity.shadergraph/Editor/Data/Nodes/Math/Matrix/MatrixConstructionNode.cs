@@ -49,7 +49,7 @@ namespace UnityEditor.ShaderGraph
 
         string GetFunctionName()
         {
-            return string.Format("Unity_MatrixConstruction_{0}_{1}", axis, precision);
+            return string.Format("Unity_MatrixConstruction_{0}_$precision", axis);
         }
 
         public sealed override void UpdateNodeAfterDeserialization()
@@ -103,14 +103,14 @@ namespace UnityEditor.ShaderGraph
                         switch (m_Axis)
                         {
                             case MatrixAxis.Column:
-                                s.AppendLine("Out4x4 = {0}4x4(M0.x, M1.x, M2.x, M3.x, M0.y, M1.y, M2.y, M3.y, M0.z, M1.z, M2.z, M3.z, M0.w, M1.w, M2.w, M3.w);", precision);
-                                s.AppendLine("Out3x3 = {0}3x3(M0.x, M1.x, M2.x, M0.y, M1.y, M2.y, M0.z, M1.z, M2.z);", precision);
-                                s.AppendLine("Out2x2 = {0}2x2(M0.x, M1.x, M0.y, M1.y);", precision);
+                                s.AppendLine("Out4x4 = $precision4x4(M0.x, M1.x, M2.x, M3.x, M0.y, M1.y, M2.y, M3.y, M0.z, M1.z, M2.z, M3.z, M0.w, M1.w, M2.w, M3.w);");
+                                s.AppendLine("Out3x3 = $precision3x3(M0.x, M1.x, M2.x, M0.y, M1.y, M2.y, M0.z, M1.z, M2.z);");
+                                s.AppendLine("Out2x2 = $precision2x2(M0.x, M1.x, M0.y, M1.y);");
                                 break;
                             default:
-                                s.AppendLine("Out4x4 = {0}4x4(M0.x, M0.y, M0.z, M0.w, M1.x, M1.y, M1.z, M1.w, M2.x, M2.y, M2.z, M2.w, M3.x, M3.y, M3.z, M3.w);", precision);
-                                s.AppendLine("Out3x3 = {0}3x3(M0.x, M0.y, M0.z, M1.x, M1.y, M1.z, M2.x, M2.y, M2.z);", precision);
-                                s.AppendLine("Out2x2 = {0}2x2(M0.x, M0.y, M1.x, M1.y);", precision);
+                                s.AppendLine("Out4x4 = $precision4x4(M0.x, M0.y, M0.z, M0.w, M1.x, M1.y, M1.z, M1.w, M2.x, M2.y, M2.z, M2.w, M3.x, M3.y, M3.z, M3.w);");
+                                s.AppendLine("Out3x3 = $precision3x3(M0.x, M0.y, M0.z, M1.x, M1.y, M1.z, M2.x, M2.y, M2.z);");
+                                s.AppendLine("Out2x2 = $precision2x2(M0.x, M0.y, M1.x, M1.y);");
                                 break;
                         }
                     }

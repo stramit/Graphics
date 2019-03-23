@@ -106,7 +106,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             if (diffusionProfile != null)
                 hash = (diffusionProfile.profile.hash);
             
-            visitor.AddShaderChunk(precision + " " + GetVariableNameForSlot(0) + " = asfloat(uint(" + hash + "));", true);
+            visitor.AddShaderChunk("$precision " + GetVariableNameForSlot(0) + " = asfloat(uint(" + hash + "));", true);
         }
     }
 }

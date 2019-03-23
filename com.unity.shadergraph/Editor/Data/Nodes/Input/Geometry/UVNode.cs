@@ -32,6 +32,7 @@ namespace UnityEditor.ShaderGraph
         public UVNode()
         {
             name = "UV";
+            precision = Precision.Float;
             UpdateNodeAfterDeserialization();
         }
 
@@ -44,7 +45,7 @@ namespace UnityEditor.ShaderGraph
 
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
         {
-            visitor.AddShaderChunk(string.Format("{0}4 {1} = IN.{2};", precision, GetVariableNameForSlot(OutputSlotId), m_OutputChannel.GetUVName()), true);
+            visitor.AddShaderChunk(string.Format("$precision4 {0} = IN.{1};", GetVariableNameForSlot(OutputSlotId), m_OutputChannel.GetUVName()), true);
         }
 
         public bool RequiresMeshUV(UVChannel channel, ShaderStageCapability stageCapability)

@@ -103,8 +103,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             
             string inverseExposureMultiplier = (generationMode.IsPreview()) ? "1.0" : "GetInverseCurrentExposureMultiplier()";
             
-            sb.AppendLine(@"{0}3 {1} = {2}({3}.xyz, {4}, {5}, {6});",
-                precision,
+            sb.AppendLine(@"$precision3 {0} = {1}({2}.xyz, {3}, {4}, {5});",
                 outputValue,
                 GetFunctionName(),
                 colorValue,
@@ -125,9 +124,8 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
         {
             registry.ProvideFunction(GetFunctionName(), s =>
                 {
-                    s.AppendLine("{1}3 {0}({1}3 ldrColor, {2} luminanceIntensity, {2} exposureWeight, {2} inverseCurrentExposureMultiplier)",
+                    s.AppendLine("$precision3 {0}($precision3 ldrColor, {1} luminanceIntensity, {1} exposureWeight, {1} inverseCurrentExposureMultiplier)",
                         GetFunctionName(),
-                        precision,
                         intensitySlot.concreteValueType.ToShaderString());
                     using (s.BlockScope())
                     {
@@ -135,10 +133,10 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                         {
                             s.AppendLine("ldrColor = ldrColor * rcp(max(Luminance(ldrColor), 1e-6));");
                         }
-                        s.AppendLine("{0}3 hdrColor = ldrColor * luminanceIntensity;", precision);
+                        s.AppendLine("$precision3 hdrColor = ldrColor * luminanceIntensity;");
                         s.AppendNewLine();
                         s.AppendLine("// Inverse pre-expose using _EmissiveExposureWeight weight");
-                        s.AppendLine("hdrColor = lerp(hdrColor * inverseCurrentExposureMultiplier, hdrColor, exposureWeight);", precision);
+                        s.AppendLine("hdrColor = lerp(hdrColor * inverseCurrentExposureMultiplier, hdrColor, exposureWeight);");
                         s.AppendLine("return hdrColor;");
                     }
                 });

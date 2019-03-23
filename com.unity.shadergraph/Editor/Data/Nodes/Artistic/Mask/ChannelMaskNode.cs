@@ -129,15 +129,15 @@ namespace UnityEditor.ShaderGraph
                                     s.AppendLine("Out = In.r;");
                                     break;
                                 case 2:
-                                    s.AppendLine(string.Format("Out = {0}2({1}, {2});", precision,
+                                    s.AppendLine(string.Format("Out = $precision2({0}, {1});",
                                         red ? "In.r" : "0", green ? "In.g" : "0"));
                                     break;
                                 case 3:
-                                    s.AppendLine(string.Format("Out = {0}3({1}, {2}, {3});", precision,
+                                    s.AppendLine(string.Format("Out = $precision3({0}, {1}, {2});",
                                         red ? "In.r" : "0", green ? "In.g" : "0", blue ? "In.b" : "0"));
                                     break;
                                 case 4:
-                                    s.AppendLine(string.Format("Out = {0}4({1}, {2}, {3}, {4});", precision,
+                                    s.AppendLine(string.Format("Out = $precision4({0}, {1}, {2}, {3});",
                                         red ? "In.r" : "0", green ? "In.g" : "0", blue ? "In.b" : "0", alpha ? "In.a" : "0"));
                                     break;
                                 default:

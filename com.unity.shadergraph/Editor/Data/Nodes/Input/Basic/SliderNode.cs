@@ -62,7 +62,7 @@ namespace UnityEditor.ShaderGraph
             if (generationMode.IsPreview())
                 return;
 
-            visitor.AddShaderChunk(precision + " " + GetVariableNameForNode() + " = " + m_Value.x + ";", true);
+            visitor.AddShaderChunk("$precision " + GetVariableNameForNode() + " = " + m_Value.x + ";", true);
         }
 
         public override string GetVariableNameForSlot(int slotId)

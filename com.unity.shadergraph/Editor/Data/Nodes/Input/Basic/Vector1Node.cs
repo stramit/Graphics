@@ -35,8 +35,7 @@ namespace UnityEditor.ShaderGraph
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
         {
             var inputValue = GetSlotValue(InputSlotXId, generationMode);
-            visitor.AddShaderChunk(string.Format("{0} {1} = {2};"
-                , FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString()
+            visitor.AddShaderChunk(string.Format("$precision {0} = {1};"
                 , GetVariableNameForSlot(OutputSlotId)
                 , inputValue), false);
         }

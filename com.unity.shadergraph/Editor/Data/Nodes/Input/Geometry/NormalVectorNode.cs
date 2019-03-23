@@ -13,6 +13,7 @@ namespace UnityEditor.ShaderGraph
         public NormalVectorNode()
         {
             name = "Normal Vector";
+            precision = Precision.Float;
             UpdateNodeAfterDeserialization();
         }
 

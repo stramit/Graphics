@@ -34,7 +34,7 @@ namespace UnityEditor.ShaderGraph
 
         string GetFunctionName()
         {
-            return "Unity_Flipbook_" + precision;
+            return "Unity_Flipbook_$precision";
         }
 
         public sealed override void UpdateNodeAfterDeserialization()
@@ -91,7 +91,7 @@ namespace UnityEditor.ShaderGraph
             sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(OutputSlotId));
             if (!generationMode.IsPreview())
             {
-                sb.AppendLine("{0}2 _{1}_Invert = {0}2 ({2}, {3});", precision, GetVariableNameForNode(), invertX.isOn ? 1 : 0, invertY.isOn ? 1 : 0);
+                sb.AppendLine("$precision2 _{0}_Invert = $precision2 ({1}, {2});", GetVariableNameForNode(), invertX.isOn ? 1 : 0, invertY.isOn ? 1 : 0);
             }
             sb.AppendLine("{0}({1}, {2}, {3}, {4}, _{5}_Invert, {6});", GetFunctionName(), uvValue, widthValue, heightValue, tileValue, GetVariableNameForNode(), outputValue);
 
@@ -137,10 +137,10 @@ namespace UnityEditor.ShaderGraph
                     using (s.BlockScope())
                     {
                         s.AppendLine("Tile = fmod(Tile, Width*Height);");
-                        s.AppendLine("{0}2 tileCount = {0}2(1.0, 1.0) / {0}2(Width, Height);", precision);
-                        s.AppendLine("{0} tileY = abs(Invert.y * Height - (floor(Tile * tileCount.x) + Invert.y * 1));", precision);
-                        s.AppendLine("{0} tileX = abs(Invert.x * Width - ((Tile - Width * floor(Tile * tileCount.x)) + Invert.x * 1));", precision);
-                        s.AppendLine("Out = (UV + {0}2(tileX, tileY)) * tileCount;", precision);
+                        s.AppendLine("$precision2 tileCount = $precision2(1.0, 1.0) / {0}2(Width, Height);");
+                        s.AppendLine("$precision tileY = abs(Invert.y * Height - (floor(Tile * tileCount.x) + Invert.y * 1));");
+                        s.AppendLine("$precision tileX = abs(Invert.x * Width - ((Tile - Width * floor(Tile * tileCount.x)) + Invert.x * 1));");
+                        s.AppendLine("Out = (UV + $precision2(tileX, tileY)) * tileCount;");
                     }
                 });
         }

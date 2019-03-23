@@ -40,7 +40,7 @@ namespace UnityEditor.ShaderGraph
 
         string GetFunctionHeader()
         {
-            return string.Format("Unity_Multiply_{0}", precision);
+            return "Unity_Multiply_$precision";
         }
 
         public sealed override void UpdateNodeAfterDeserialization()

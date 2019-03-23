@@ -2,7 +2,7 @@
 {
     public enum Precision
     {
-        GraphDefault = -1,
+        Inherit,
         Real,
         Float,
         Half,

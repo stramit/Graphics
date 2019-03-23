@@ -157,21 +157,6 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        public void GenerateNodeFunction(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
-        {
-            var sb = new ShaderStringBuilder();
-            sb.AppendLine("void {0}({1} In, {2} Flip, out {3} Out)",
-                GetFunctionName(),
-                FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(),
-                FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(),
-                FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
-            using (sb.BlockScope())
-            {
-                sb.AppendLine("Out = (Flip * -2 + 1) * In;");
-            }
-            visitor.AddShaderChunk(sb.ToString(), true);
-        }
-
         public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             registry.ProvideFunction(GetFunctionName(), s =>
