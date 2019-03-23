@@ -137,7 +137,7 @@ namespace UnityEditor.ShaderGraph
 
         public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideFunction(GetFunctionName(), s =>
+            registry.ProvideFunction(GetFunctionName(), precision, s =>
                 {
                     s.AppendLine("void {0} ({1} In, $precision3 Red, $precision3 Green, $precision3 Blue, out {2} Out)",
                         GetFunctionName(),

@@ -528,9 +528,8 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             var graphRequirements = pixelRequirements.Union(vertexRequirements);
 
             // Function Registry tracks functions to remove duplicates, it wraps a string builder that stores the combined function string
-            ShaderStringBuilder graphNodeFunctions = new ShaderStringBuilder();
-            graphNodeFunctions.IncreaseIndent();
-            var functionRegistry = new FunctionRegistry(graphNodeFunctions);
+            var functionRegistry = new FunctionRegistry();
+            ShaderStringBuilder functions = new ShaderStringBuilder();
 
             // TODO: this can be a shared function for all HDRP master nodes -- From here through GraphUtil.GenerateSurfaceDescription(..)
 
@@ -601,6 +600,9 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     vertexGraphEvalFunctionName,
                     vertexGraphOutputStructName);
             }
+            
+            // Generate final functions
+            GraphUtil.GenerateFunctions(functions, functionRegistry, masterNode.owner);
 
             var blendCode = new ShaderStringBuilder();
             var cullCode = new ShaderStringBuilder();
@@ -678,7 +680,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             var graph = new ShaderGenerator();
             {
                 graph.AddShaderChunk("// Shared Graph Properties (uniform inputs)");
-                graph.AddShaderChunk(sharedProperties.GetPropertiesDeclaration(1));
+                graph.AddShaderChunk(sharedProperties.GetPropertiesDeclaration(masterNode.owner, 1));
 
                 if (vertexActive)
                 {
@@ -702,7 +704,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 graph.Deindent();
 
                 graph.AddShaderChunk("// Shared Graph Node Functions");
-                graph.AddShaderChunk(graphNodeFunctions.ToString());
+                graph.AddShaderChunk(functions.ToString());
 
                 if (vertexActive)
                 {

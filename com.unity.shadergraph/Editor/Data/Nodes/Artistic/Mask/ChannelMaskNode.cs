@@ -106,7 +106,7 @@ namespace UnityEditor.ShaderGraph
         public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             ValidateChannelCount();
-            registry.ProvideFunction(GetFunctionName(), s =>
+            registry.ProvideFunction(GetFunctionName(), precision, s =>
                 {
                     int channelCount = SlotValueHelper.GetChannelCount(FindSlot<MaterialSlot>(InputSlotId).concreteValueType);
                     s.AppendLine(GetFunctionPrototype("In", "Out"));

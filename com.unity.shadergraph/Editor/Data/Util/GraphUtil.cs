@@ -966,8 +966,9 @@ namespace UnityEditor.ShaderGraph
             bool isUber = node == null;
 
             var shaderProperties = new PropertyCollector();
-            var functionBuilder = new ShaderStringBuilder();
-            var functionRegistry = new FunctionRegistry(functionBuilder);
+
+            var functionRegistry = new FunctionRegistry();
+            var functions = new ShaderStringBuilder();
 
             var vertexDescriptionFunction = new ShaderStringBuilder(0);
 
@@ -1081,6 +1082,11 @@ namespace UnityEditor.ShaderGraph
             // ----------------------------------------------------- //
 
             // -------------------------------------
+            // Generate final functions
+
+            GenerateFunctions(functions, functionRegistry, graph);
+
+            // -------------------------------------
             // Generate Input structure for Vertex shader
 
             GenerateApplicationVertexInputs(requirements, vertexInputs);
@@ -1115,13 +1121,12 @@ namespace UnityEditor.ShaderGraph
                 finalShader.AppendLine(@"#include ""Packages/com.unity.shadergraph/ShaderGraphLibrary/Functions.hlsl""");
                 finalShader.AppendNewLine();
 
-                finalShader.AppendLines(shaderProperties.GetPropertiesDeclaration(0));
+                finalShader.AppendLines(shaderProperties.GetPropertiesDeclaration(graph, 0));
 
                 finalShader.AppendLines(surfaceDescriptionInputStruct.ToString());
                 finalShader.AppendNewLine();
 
-                finalShader.Concat(functionBuilder);
-                finalShader.AppendNewLine();
+                finalShader.AppendLines(functions.ToString());
 
                 finalShader.AppendLines(surfaceDescriptionStruct.ToString());
                 finalShader.AppendNewLine();
@@ -1147,6 +1152,21 @@ namespace UnityEditor.ShaderGraph
             results.shader = finalShader.ToString(out sourceMap);
             results.sourceMap = sourceMap;
             return results;
+        }
+
+        public static void GenerateFunctions(ShaderStringBuilder sb, FunctionRegistry functionRegistry, GraphData graph)
+        {
+            foreach(KeyValuePair<string, FunctionSource> functionSource in functionRegistry.sources)
+            {
+                string function = functionSource.Value.function;
+                Precision precision = functionSource.Value.precision;
+                if(precision == Precision.Inherit)
+                    precision = graph.precision;
+
+                function = function.Replace("$precision", precision.ToShaderString());
+                sb.AppendLines(function);
+                sb.AppendNewLine();
+            }
         }
 
         public static void GenerateSurfaceInputStruct(ShaderStringBuilder sb, ShaderGraphRequirements requirements, string structName)

@@ -144,7 +144,7 @@ namespace UnityEditor.ShaderGraph
             sortedSubGraphs.Sort((s1, s2) => s1.descendents.Contains(s2.assetGuid) ? 1 : s2.descendents.Contains(s1.assetGuid) ? -1 : 0);
             
             // Finally process the topologically sorted sub graphs without recursion.
-            var registry = new FunctionRegistry(new ShaderStringBuilder(), true);
+            var registry = new FunctionRegistry(true);
             var messageManager = new MessageManager();
             foreach (var subGraphData in sortedSubGraphs)
             {
@@ -258,7 +258,7 @@ namespace UnityEditor.ShaderGraph
                 if (node.hasError)
                 {
                     subGraphData.isValid = false;
-                    registry.ProvideFunction(subGraphData.functionName, sb => { });
+                    registry.ProvideFunction(subGraphData.functionName, Precision.Inherit, sb => { });
                     return;
                 }
             }
@@ -280,7 +280,7 @@ namespace UnityEditor.ShaderGraph
                 }
             }
 
-            registry.ProvideFunction(subGraphData.functionName, sb =>
+            registry.ProvideFunction(subGraphData.functionName, Precision.Inherit, sb =>
             {
                 var graphContext = new GraphContext(subGraphData.inputStructName);
 

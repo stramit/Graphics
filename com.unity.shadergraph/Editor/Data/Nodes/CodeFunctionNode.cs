@@ -434,7 +434,7 @@ namespace UnityEditor.ShaderGraph
 
         public virtual void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideFunction(GetFunctionName(), s =>
+            registry.ProvideFunction(GetFunctionName(), precision, s =>
                 {
                     s.AppendLine(GetFunctionHeader());
                     var functionBody = GetFunctionBody(GetFunctionToConvert());

@@ -125,7 +125,7 @@ namespace UnityEditor.ShaderGraph
 
         public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideFunction(GetFunctionName(), s =>
+            registry.ProvideFunction(GetFunctionName(), precision, s =>
                 {
                     s.AppendLine("void {0} ({1} UV, {2} Width, {3} Height, {4} Tile, $precision2 Invert, out {5} Out)",
                         GetFunctionName(),

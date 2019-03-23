@@ -163,8 +163,8 @@ namespace UnityEditor.Rendering.LWRP
             // String builders
 
             var shaderProperties = new PropertyCollector();
-            var functionBuilder = new ShaderStringBuilder(1);
-            var functionRegistry = new FunctionRegistry(functionBuilder);
+            var functionRegistry = new FunctionRegistry();
+            var functions = new ShaderStringBuilder();
 
             var defines = new ShaderStringBuilder(1);
             var graph = new ShaderStringBuilder(0);
@@ -359,6 +359,11 @@ namespace UnityEditor.Rendering.LWRP
             GraphUtil.GenerateApplicationVertexInputs(vertexRequirements.Union(pixelRequirements.Union(modelRequiements)), vertexInputStruct);
 
             // -------------------------------------
+            // Generate final functions
+
+            GraphUtil.GenerateFunctions(functions, functionRegistry, masterNode.owner);
+
+            // -------------------------------------
             // Generate standard transformations
             // This method ensures all required transform data is available in vertex and pixel stages
 
@@ -400,12 +405,12 @@ namespace UnityEditor.Rendering.LWRP
             // -------------------------------------
             // Combine Graph sections
 
-            graph.AppendLine(shaderProperties.GetPropertiesDeclaration(1));
+            graph.AppendLine(shaderProperties.GetPropertiesDeclaration(masterNode.owner, 1));
 
             graph.AppendLine(vertexDescriptionInputStruct.ToString());
             graph.AppendLine(surfaceDescriptionInputStruct.ToString());
 
-            graph.AppendLine(functionBuilder.ToString());
+            graph.AppendLines(functions.ToString());
 
             graph.AppendLine(vertexDescriptionStruct.ToString());
             graph.AppendLine(vertexDescriptionFunction.ToString());

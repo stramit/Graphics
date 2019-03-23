@@ -46,21 +46,21 @@ namespace UnityEditor.ShaderGraph
 
         public override void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideFunction("Unity_SimpleNoise_RandomValue", s => s.Append(@"
+            registry.ProvideFunction("Unity_SimpleNoise_RandomValue", precision, s => s.Append(@"
 inline $precision Unity_SimpleNoise_RandomValue_$precision ($precision2 UV)
 {
     return frac(sin(dot(UV, $precision2(12.9898, 78.233))) * 43758.5453);
 }
 "));
 
-            registry.ProvideFunction("Unity_SimpleNoise_Interpolate", s => s.Append(@"
+            registry.ProvideFunction("Unity_SimpleNoise_Interpolate", precision, s => s.Append(@"
 inline $precision Unity_SimpleNoise_Interpolate_$precision ($precision A, $precision B, $precision T)
 {
     return (1.0 - T) * A + (T * B);
 }
 "));
 
-            registry.ProvideFunction("Unity_SimpleNoise_ValueNoise", s => s.Append(@"
+            registry.ProvideFunction("Unity_SimpleNoise_ValueNoise", precision, s => s.Append(@"
 inline $precision Unity_SimpleNoise_ValueNoise_$precision ($precision2 UV)
 {
     $precision2 i = floor(UV);

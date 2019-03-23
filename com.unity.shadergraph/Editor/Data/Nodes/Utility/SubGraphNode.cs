@@ -431,10 +431,10 @@ namespace UnityEditor.ShaderGraph
             
             foreach (var functionName in subGraphData.functionNames)
             {
-                registry.ProvideFunction(functionName, s =>
+                var functionSource = database.functionSources[database.functionNames.BinarySearch(functionName)];
+                registry.ProvideFunction(functionName, functionSource.precision, s =>
                 {
-                    var functionSource = database.functionSources[database.functionNames.BinarySearch(functionName)];
-                    s.AppendLines(functionSource);
+                    s.AppendLines(functionSource.function);
                 });
             }
         }

@@ -97,7 +97,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             var edgesSampler = owner.GetEdges(samplerSlot.slotReference);
             var heightmap = GetSlotValue(kHeightmapSlotId, generationMode);
 
-            registry.ProvideFunction(GetFunctionName(), s =>
+            registry.ProvideFunction(GetFunctionName(), precision, s =>
                 {
                     s.AppendLine("$precision3 GetDisplacementObjectScale()");
                     using (s.BlockScope())
