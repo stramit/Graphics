@@ -138,11 +138,21 @@ namespace UnityEditor.ShaderGraph.Drawing
 
                     GUILayout.FlexibleSpace();
 
+                    // Precision
+                    EditorGUI.BeginChangeCheck();
+                    GUILayout.Label("Precision");
+                    graph.precision = (Precision)EditorGUILayout.EnumPopup(graph.precision, GUILayout.Width(100f));
+                    GUILayout.Space(4);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        foreach (var node in graph.GetNodes<AbstractMaterialNode>())
+                            node.Dirty(ModificationScope.Graph);
+                    }
+
+                    // Toggle Settings
                     EditorGUI.BeginChangeCheck();
                     m_ToggleSettings.isBlackboardVisible = GUILayout.Toggle(m_ToggleSettings.isBlackboardVisible, "Blackboard", EditorStyles.toolbarButton);
-
                     GUILayout.Space(6);
-
                     m_ToggleSettings.isPreviewVisible = GUILayout.Toggle(m_ToggleSettings.isPreviewVisible, "Main Preview", EditorStyles.toolbarButton);
                     if (EditorGUI.EndChangeCheck())
                     {
@@ -151,6 +161,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                         string serializedToggleables = JsonUtility.ToJson(m_ToggleSettings);
                         EditorUserSettings.SetConfigValue(k_ToggleSettings, serializedToggleables);
                     }
+
                     GUILayout.EndHorizontal();
                 });
             Add(toolbar);

@@ -4,22 +4,7 @@
     {
         internal static string ToShaderString(this ConcreteSlotValueType concreteSlotValueType, Precision precision = Precision.Inherit)
         {
-            string precisionToken;
-            switch(precision)
-            {
-                case Precision.Real:
-                    precisionToken = "real";
-                    break;
-                case Precision.Float:
-                    precisionToken = "float";
-                    break;
-                case Precision.Half:
-                    precisionToken = "half";
-                    break;
-                default:
-                    precisionToken = "$precision";
-                    break;
-            }
+            string precisionToken = precision == Precision.Inherit ? "$precision" : precision.ToShaderString();
 
             switch (concreteSlotValueType)
             {

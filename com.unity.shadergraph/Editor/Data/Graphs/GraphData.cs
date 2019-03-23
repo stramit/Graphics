@@ -227,6 +227,15 @@ namespace UnityEditor.ShaderGraph
         public MessageManager messageManager { get; set; }
         public bool isSubGraph { get; set; }
 
+        [SerializeField]
+        private Precision m_Precision;
+
+        public Precision precision
+        {
+            get => m_Precision;
+            set => m_Precision = value;
+        }
+
         [NonSerialized]
         private AbstractMaterialNode m_OutputNode;
 
