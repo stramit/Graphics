@@ -78,7 +78,8 @@ namespace UnityEditor.ShaderGraph
                     slots.OrderBy(s => s.id);
                     visitor.AddShaderChunk(string.Format("{0} _{1}_{2};",
                         slots[0].concreteValueType.ToShaderString(),
-                        slots[0].shaderOutputName.ToString()));
+                        GetVariableNameForNode(),
+                        NodeUtils.GetHLSLSafeName(slots[0].shaderOutputName)));
                 }
                 return;
             }
@@ -86,7 +87,8 @@ namespace UnityEditor.ShaderGraph
             foreach (var argument in slots)
                 visitor.AddShaderChunk(string.Format("{0} _{1}_{2};",
                     argument.concreteValueType.ToShaderString(),
-                    GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(argument.shaderOutputName)));
+                    GetVariableNameForNode(), 
+                    NodeUtils.GetHLSLSafeName(argument.shaderOutputName)));
 
             string call = string.Format("{0}_$precision(", functionName);
             bool first = true;
