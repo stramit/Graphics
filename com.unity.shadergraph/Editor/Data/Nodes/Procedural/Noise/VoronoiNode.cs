@@ -56,16 +56,22 @@ namespace UnityEditor.ShaderGraph
 ";
         }
 
-        public override void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        public override void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideFunction("unity_voronoi_noise_randomVector", s => s.Append(@"
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = "unity_voronoi_noise_randomVector",
+                builder = s => s.Append(@"
 inline float2 unity_voronoi_noise_randomVector (float2 UV, float offset)
 {
     float2x2 m = float2x2(15.27, 47.63, 99.41, 89.98);
     UV = frac(sin(mul(UV, m)) * 46839.32);
     return float2(sin(UV.y*+offset)*0.5+0.5, cos(UV.x*offset)*0.5+0.5);
 }
-"));
+")
+            });
+            
             base.GenerateNodeFunction(registry, graphContext, generationMode);
         }
     }

@@ -25,9 +25,13 @@ namespace UnityEditor.ShaderGraph
             return "{ Out = unity_gradientNoise(UV * Scale) + 0.5; }";
         }
 
-        public override void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        public override void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideFunction("unity_gradientNoise_dir", s => s.Append(@"
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = "unity_gradientNoise_dir",
+                builder = s => s.Append(@"
 float2 unity_gradientNoise_dir(float2 p)
 {
     // Permutation and hashing used in webgl-nosie goo.gl/pX7HtC
@@ -37,9 +41,14 @@ float2 unity_gradientNoise_dir(float2 p)
     x = frac(x / 41) * 2 - 1;
     return normalize(float2(x - floor(x + 0.5), abs(x) - 0.5));
 }
-"));
+")
+            });
 
-            registry.ProvideFunction("unity_gradientNoise", s => s.Append(@"
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = "unity_gradientNoise",
+                builder = s => s.Append(@"
 float unity_gradientNoise(float2 p)
 {
     float2 ip = floor(p);
@@ -51,7 +60,8 @@ float unity_gradientNoise(float2 p)
     fp = fp * fp * fp * (fp * (fp * 6 - 15) + 10);
     return lerp(lerp(d00, d01, fp.y), lerp(d10, d11, fp.y), fp.x);
 }
-"));
+")
+            });
 
             base.GenerateNodeFunction(registry, graphContext, generationMode);
         }

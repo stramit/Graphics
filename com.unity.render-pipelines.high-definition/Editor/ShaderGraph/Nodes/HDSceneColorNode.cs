@@ -64,34 +64,39 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             return "Unity_HDRP_SampleSceneColor";
         }
 
-        public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideFunction(GetFunctionName(), s =>
-                {
-                    s.AppendLine("{1}3 {0}({1}2 uv, {1} lod, {1} exposureMultiplier)",
-                        GetFunctionName(),
-                        precision
-                    );
-                    using (s.BlockScope())
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetFunctionName(),
+                builder = s =>
                     {
-                        if (generationMode.IsPreview())
+                        s.AppendLine("{1}3 {0}({1}2 uv, {1} lod, {1} exposureMultiplier)",
+                            GetFunctionName(),
+                            precision
+                        );
+                        using (s.BlockScope())
                         {
-                            s.AppendLine("// Sampling the scene color is not supported in the preview");
-                            s.AppendLine("return float3(0.0, 0.0, 0.0);");
-                        }
-                        else
-                        {
-                            if (exposure.isOn)
+                            if (generationMode.IsPreview())
                             {
-                                s.AppendLine("exposureMultiplier = 1.0;");
+                                s.AppendLine("// Sampling the scene color is not supported in the preview");
+                                s.AppendLine("return float3(0.0, 0.0, 0.0);");
                             }
-                            s.AppendLine("#if defined(REQUIRE_OPAQUE_TEXTURE) && defined(_SURFACE_TYPE_TRANSPARENT)");
-                            s.AppendLine("return SampleCameraColor(uv, lod) * exposureMultiplier;", precision);
-                            s.AppendLine("#endif");
-                            s.AppendLine("return float3(0.0, 0.0, 0.0);");
+                            else
+                            {
+                                if (exposure.isOn)
+                                {
+                                    s.AppendLine("exposureMultiplier = 1.0;");
+                                }
+                                s.AppendLine("#if defined(REQUIRE_OPAQUE_TEXTURE) && defined(_SURFACE_TYPE_TRANSPARENT)");
+                                s.AppendLine("return SampleCameraColor(uv, lod) * exposureMultiplier;", precision);
+                                s.AppendLine("#endif");
+                                s.AppendLine("return float3(0.0, 0.0, 0.0);");
+                            }
                         }
                     }
-                });
+            });
         }
 
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)

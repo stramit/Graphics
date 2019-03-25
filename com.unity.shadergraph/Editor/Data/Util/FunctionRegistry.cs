@@ -1,54 +1,111 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace UnityEditor.ShaderGraph
 {
-    class FunctionRegistry
+    [Serializable]
+    struct ShaderSnippet
     {
-        Dictionary<string, string> m_Sources = new Dictionary<string, string>();
-        bool m_Validate = false;
-        ShaderStringBuilder m_Builder;
+        public string identifier;
+        public string snippet;
 
-        public FunctionRegistry(ShaderStringBuilder builder, bool validate = false)
+        public static ShaderSnippet Build(string name, string snippet)
         {
-            m_Builder = builder;
+            return new ShaderSnippet()
+            {
+                identifier = name,
+                snippet = snippet,
+            };
+        }
+
+        public override bool Equals(object obj)
+        {
+            var other = (ShaderSnippet)obj;
+            return this.identifier == other.identifier
+                && this.snippet == other.snippet;
+        }
+    }
+
+    struct ShaderSnippetDescriptor
+    {
+        public Guid source;
+        public string identifier;
+        public Action<ShaderStringBuilder> builder;
+    }
+
+    class ShaderSnippetRegistry
+    {
+        List<KeyValuePair<Guid, ShaderSnippet>> m_Snippets = new List<KeyValuePair<Guid, ShaderSnippet>>();
+        ShaderStringBuilder m_Builder = new ShaderStringBuilder();
+        bool m_Validate = false;
+
+        public List<KeyValuePair<Guid, ShaderSnippet>> snippets => m_Snippets;
+        public List<string> names { get; } = new List<string>();
+
+        public ShaderSnippetRegistry(bool validate = false)
+        {
             m_Validate = validate;
         }
 
-        internal ShaderStringBuilder builder => m_Builder;
-
-        public Dictionary<string, string> sources => m_Sources;
-        
-        public List<string> names { get; } = new List<string>();
-
-        public void ProvideFunction(string name, Action<ShaderStringBuilder> generator)
+        public void ProvideSnippet(ShaderSnippetDescriptor descriptor)
         {
-            string existingSource;
-            if (m_Sources.TryGetValue(name, out existingSource))
+            m_Builder.Clear();
+            // ShaderSnippet existingSnippet;
+            // if (m_Sources.TryGetValue(descriptor.source, out existingSnippet))
+            // {
+            //     if (m_Validate)
+            //     {
+            //         descriptor.builder(m_Builder);
+            //         var snippet = ShaderSnippet.Build(descriptor.name, m_Builder.ToString());
+            //         if (!snippet.Equals(existingSnippet))
+            //             Debug.LogErrorFormat(@"Function `{0}` has varying implementations:{1}{1}{2}{1}{1}{3}", name, Environment.NewLine, source, existingSnippet);
+            //     }
+            // }
+            // else
+            // {
+                descriptor.builder(m_Builder);
+                var snippet = ShaderSnippet.Build(descriptor.identifier, m_Builder.ToString());
+                m_Snippets.Add(new KeyValuePair<Guid, ShaderSnippet>(descriptor.source, snippet));
+            // }
+
+            names.Add(descriptor.identifier);
+        }
+
+        public string[] GetSnippets()
+        {
+            List<string> snippetStrings = new List<string>();
+            foreach(KeyValuePair<Guid, ShaderSnippet> entry in snippets)
             {
-                if (m_Validate)
-                {
-                    var startIndex = builder.length;
-                    generator(builder);
-                    var length = builder.length - startIndex;
-                    var source = builder.ToString(startIndex, length);
-                    builder.length -= length;
-                    if (source != existingSource)
-                        Debug.LogErrorFormat(@"Function `{0}` has varying implementations:{1}{1}{2}{1}{1}{3}", name, Environment.NewLine, source, existingSource);
-                }
-            }
-            else
-            {
-                builder.AppendNewLine();
-                var startIndex = builder.length;
-                generator(builder);
-                var length = builder.length - startIndex;
-                var source = m_Validate ? builder.ToString(startIndex, length) : string.Empty;
-                m_Sources.Add(name, source);
+                snippetStrings.Add(entry.Value.snippet);
             }
 
-            names.Add(name);
+            return snippetStrings.ToArray();
+        }
+
+        public string[] GetUniqueSnippets()
+        {
+            Dictionary<string, string> snippetStrings = new Dictionary<string, string>();
+            foreach(KeyValuePair<Guid, ShaderSnippet> entry in snippets)
+            {
+                ShaderSnippet snippet = entry.Value;
+                if(!snippetStrings.ContainsKey(snippet.identifier))
+                    snippetStrings.Add(snippet.identifier, snippet.snippet);
+            }
+
+            return snippetStrings.Select(s => s.Value).ToArray();
+        }
+
+        public bool ContainsIdentifier(string identifier)
+        {
+            foreach(KeyValuePair<Guid, ShaderSnippet> entry in snippets)
+            {
+                if(entry.Value.identifier == identifier)
+                    return true;
+            }
+            
+            return false;
         }
     }
 }

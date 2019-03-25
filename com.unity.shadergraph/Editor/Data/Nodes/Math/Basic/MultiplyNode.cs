@@ -64,36 +64,41 @@ namespace UnityEditor.ShaderGraph
             visitor.AddShaderChunk(sb.ToString(), false);
         }
 
+        public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        {
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetFunctionName(),
+                builder =  s =>
+                    {
+                        s.AppendLine("void {0} ({1} A, {2} B, out {3} Out)",
+                            GetFunctionHeader(),
+                            FindInputSlot<MaterialSlot>(Input1SlotId).concreteValueType.ToString(precision),
+                            FindInputSlot<MaterialSlot>(Input2SlotId).concreteValueType.ToString(precision),
+                            FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
+                        using (s.BlockScope())
+                        {
+                            switch (m_MultiplyType)
+                            {
+                                case MultiplyType.Vector:
+                                    s.AppendLine("Out = A * B;");
+                                    break;
+                                default:
+                                    s.AppendLine("Out = mul(A, B);");
+                                    break;
+                            }
+                        }
+                    }
+            });
+        }
+
         string GetFunctionName()
         {
             return string.Format("{0}_{1}_{2}",
                 GetFunctionHeader(),
                 FindInputSlot<MaterialSlot>(Input1SlotId).concreteValueType.ToString(precision),
                 FindInputSlot<MaterialSlot>(Input2SlotId).concreteValueType.ToString(precision));
-        }
-
-        public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
-        {
-            registry.ProvideFunction(GetFunctionName(), s =>
-                {
-                    s.AppendLine("void {0} ({1} A, {2} B, out {3} Out)",
-                        GetFunctionHeader(),
-                        FindInputSlot<MaterialSlot>(Input1SlotId).concreteValueType.ToString(precision),
-                        FindInputSlot<MaterialSlot>(Input2SlotId).concreteValueType.ToString(precision),
-                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
-                    using (s.BlockScope())
-                    {
-                        switch (m_MultiplyType)
-                        {
-                            case MultiplyType.Vector:
-                                s.AppendLine("Out = A * B;");
-                                break;
-                            default:
-                                s.AppendLine("Out = mul(A, B);");
-                                break;
-                        }
-                    }
-                });
         }
 
         // Internal validation

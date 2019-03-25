@@ -438,15 +438,20 @@ namespace UnityEditor.ShaderGraph
             return result;
         }
 
-        public virtual void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        public virtual void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideFunction(GetFunctionName(), s =>
-                {
-                    s.AppendLine(GetFunctionHeader());
-                    var functionBody = GetFunctionBody(GetFunctionToConvert());
-                    var lines = functionBody.Trim('\r', '\n', '\t', ' ');
-                    s.AppendLines(lines);
-                });
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetFunctionName(),
+                builder = s =>
+                    {
+                        s.AppendLine(GetFunctionHeader());
+                        var functionBody = GetFunctionBody(GetFunctionToConvert());
+                        var lines = functionBody.Trim('\r', '\n', '\t', ' ');
+                        s.AppendLines(lines);
+                    }
+            });
         }
 
         private static SlotAttribute GetSlotAttribute([NotNull] ParameterInfo info)

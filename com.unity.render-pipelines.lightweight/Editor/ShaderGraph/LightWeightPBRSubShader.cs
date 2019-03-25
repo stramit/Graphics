@@ -165,8 +165,7 @@ namespace UnityEditor.Rendering.LWRP
             // String builders
 
             var shaderProperties = new PropertyCollector();
-            var functionBuilder = new ShaderStringBuilder(1);
-            var functionRegistry = new FunctionRegistry(functionBuilder);
+            var functionRegistry = new ShaderSnippetRegistry();
 
             var defines = new ShaderStringBuilder(1);
             var graph = new ShaderStringBuilder(0);
@@ -407,7 +406,9 @@ namespace UnityEditor.Rendering.LWRP
             graph.AppendLine(vertexDescriptionInputStruct.ToString());
             graph.AppendLine(surfaceDescriptionInputStruct.ToString());
 
-            graph.AppendLine(functionBuilder.ToString());
+            string[] nodeFunctions = functionRegistry.GetUniqueSnippets();
+            foreach(string function in nodeFunctions)
+                graph.AppendLine(function.ToString());
 
             graph.AppendLine(vertexDescriptionStruct.ToString());
             graph.AppendLine(vertexDescriptionFunction.ToString());

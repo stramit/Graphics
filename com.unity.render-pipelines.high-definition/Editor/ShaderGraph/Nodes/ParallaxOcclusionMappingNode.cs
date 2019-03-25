@@ -88,7 +88,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             base.ValidateNode();
         }
 
-        public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             string perPixelDisplacementInclude = @"#include ""Packages/com.unity.render-pipelines.core/ShaderLibrary/PerPixelDisplacement.hlsl""";
 
@@ -97,36 +97,41 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             var edgesSampler = owner.GetEdges(samplerSlot.slotReference);
             var heightmap = GetSlotValue(kHeightmapSlotId, generationMode);
 
-            registry.ProvideFunction(GetFunctionName(), s =>
-                {
-                    s.AppendLine("{0}3 GetDisplacementObjectScale()", precision);
-                    using (s.BlockScope())
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetFunctionName(),
+                builder = s =>
                     {
-                        s.AppendLines(@"
-float3 objectScale = float3(1.0, 1.0, 1.0);
-float4x4 worldTransform = GetWorldToObjectMatrix();
+                        s.AppendLine("{0}3 GetDisplacementObjectScale()", precision);
+                        using (s.BlockScope())
+                        {
+                            s.AppendLines(@"
+    float3 objectScale = float3(1.0, 1.0, 1.0);
+    float4x4 worldTransform = GetWorldToObjectMatrix();
 
-objectScale.x = length(float3(worldTransform._m00, worldTransform._m01, worldTransform._m02));
-objectScale.z = length(float3(worldTransform._m20, worldTransform._m21, worldTransform._m22));
+    objectScale.x = length(float3(worldTransform._m00, worldTransform._m01, worldTransform._m02));
+    objectScale.z = length(float3(worldTransform._m20, worldTransform._m21, worldTransform._m22));
 
-return objectScale;");
-                    }
+    return objectScale;");
+                        }
 
-                    s.AppendLine("// Required struct and function for the ParallaxOcclusionMapping function:");
-                    s.AppendLine("struct PerPixelHeightDisplacementParam");
-                    using (s.BlockSemicolonScope())
-                    {
-                        s.AppendLine("{0}2 uv;", precision);
+                        s.AppendLine("// Required struct and function for the ParallaxOcclusionMapping function:");
+                        s.AppendLine("struct PerPixelHeightDisplacementParam");
+                        using (s.BlockSemicolonScope())
+                        {
+                            s.AppendLine("{0}2 uv;", precision);
+                        }
+                        s.AppendLine("{0} ComputePerPixelHeightDisplacement({0}2 texOffsetCurrent, {0} lod, PerPixelHeightDisplacementParam param)", precision);
+                        using (s.BlockScope())
+                        {
+                            s.AppendLine("return SAMPLE_TEXTURE2D_LOD({0}, {1}, param.uv + texOffsetCurrent, lod).r;",
+                                heightmap,
+                                edgesSampler.Any() ? GetSlotValue(kHeightmapSamplerSlotId, generationMode) : "sampler" + heightmap);
+                        }
+                        s.Append(perPixelDisplacementInclude);
                     }
-                    s.AppendLine("{0} ComputePerPixelHeightDisplacement({0}2 texOffsetCurrent, {0} lod, PerPixelHeightDisplacementParam param)", precision);
-                    using (s.BlockScope())
-                    {
-                        s.AppendLine("return SAMPLE_TEXTURE2D_LOD({0}, {1}, param.uv + texOffsetCurrent, lod).r;",
-                            heightmap,
-                            edgesSampler.Any() ? GetSlotValue(kHeightmapSamplerSlotId, generationMode) : "sampler" + heightmap);
-                    }
-                    s.Append(perPixelDisplacementInclude);
-                });
+            });
         }
 
         public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)

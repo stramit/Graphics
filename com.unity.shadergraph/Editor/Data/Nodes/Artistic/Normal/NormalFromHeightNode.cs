@@ -75,32 +75,37 @@ namespace UnityEditor.ShaderGraph
             visitor.AddShaderChunk(sb.ToString(), false);
         }
 
-        public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideFunction(GetFunctionName(), s =>
-                {
-                    s.AppendLine("void {0}({2} In, {1}3 Position, {1}3x3 TangentMatrix, out {3} Out)",
-                        GetFunctionName(),
-                        precision,
-                        FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToString(precision),
-                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
-                    using (s.BlockScope())
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetFunctionName(),
+                builder = s => 
                     {
-                        s.AppendLine("{0}3 worldDirivativeX = ddx(Position * 100);", precision);
-                        s.AppendLine("{0}3 worldDirivativeY = ddy(Position * 100);", precision);
-                        s.AppendNewLine();
-                        s.AppendLine("{0}3 crossX = cross(TangentMatrix[2].xyz, worldDirivativeX);", precision);
-                        s.AppendLine("{0}3 crossY = cross(TangentMatrix[2].xyz, worldDirivativeY);", precision);
-                        s.AppendLine("{0}3 d = abs(dot(crossY, worldDirivativeX));", precision);
-                        s.AppendLine("{0}3 inToNormal = ((((In + ddx(In)) - In) * crossY) + (((In + ddy(In)) - In) * crossX)) * sign(d);", precision);
-                        s.AppendLine("inToNormal.y *= -1.0;", precision);
-                        s.AppendNewLine();
-                        s.AppendLine("Out = normalize((d * TangentMatrix[2].xyz) - inToNormal);", precision);
+                        s.AppendLine("void {0}({2} In, {1}3 Position, {1}3x3 TangentMatrix, out {3} Out)",
+                            GetFunctionName(),
+                            precision,
+                            FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToString(precision),
+                            FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
+                        using (s.BlockScope())
+                        {
+                            s.AppendLine("{0}3 worldDirivativeX = ddx(Position * 100);", precision);
+                            s.AppendLine("{0}3 worldDirivativeY = ddy(Position * 100);", precision);
+                            s.AppendNewLine();
+                            s.AppendLine("{0}3 crossX = cross(TangentMatrix[2].xyz, worldDirivativeX);", precision);
+                            s.AppendLine("{0}3 crossY = cross(TangentMatrix[2].xyz, worldDirivativeY);", precision);
+                            s.AppendLine("{0}3 d = abs(dot(crossY, worldDirivativeX));", precision);
+                            s.AppendLine("{0}3 inToNormal = ((((In + ddx(In)) - In) * crossY) + (((In + ddy(In)) - In) * crossX)) * sign(d);", precision);
+                            s.AppendLine("inToNormal.y *= -1.0;", precision);
+                            s.AppendNewLine();
+                            s.AppendLine("Out = normalize((d * TangentMatrix[2].xyz) - inToNormal);", precision);
 
-                        if(outputSpace == OutputSpace.Tangent)
-                            s.AppendLine("Out = TransformWorldToTangent(Out, TangentMatrix);");
+                            if(outputSpace == OutputSpace.Tangent)
+                                s.AppendLine("Out = TransformWorldToTangent(Out, TangentMatrix);");
+                        }
                     }
-                });
+            });
         }
 
         public NeededCoordinateSpace RequiresTangent(ShaderStageCapability stageCapability)

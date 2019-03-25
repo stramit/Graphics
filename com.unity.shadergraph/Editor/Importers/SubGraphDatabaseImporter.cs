@@ -145,7 +145,7 @@ namespace UnityEditor.ShaderGraph
             sortedSubGraphs.Sort((s1, s2) => s1.descendents.Contains(s2.assetGuid) ? 1 : s2.descendents.Contains(s1.assetGuid) ? -1 : 0);
             
             // Finally process the topologically sorted sub graphs without recursion.
-            var registry = new FunctionRegistry(new ShaderStringBuilder(), true);
+            var registry = new ShaderSnippetRegistry(true);
             var messageManager = new MessageManager();
             foreach (var subGraphData in sortedSubGraphs)
             {
@@ -192,21 +192,28 @@ namespace UnityEditor.ShaderGraph
             {
                 foreach (var functionName in subGraphData.functionNames)
                 {
-                    if (!registry.sources.ContainsKey(functionName))
+                    if (!registry.ContainsIdentifier(functionName))
                     {
-                        registry.sources.Add(functionName, database.functionSources[database.functionNames.BinarySearch(functionName)]);
+                        int snippetIndex = database.functionNames.BinarySearch(functionName);
+                        ShaderSnippet snippet = new ShaderSnippet()
+                        {
+                            identifier = functionName,
+                            snippet = database.functionSnippets[snippetIndex]
+                        };
+                        registry.snippets.Add(new KeyValuePair<Guid, ShaderSnippet>(database.functionSources[snippetIndex], snippet));
                     }
                 }
             }
 
-            var functions = registry.sources.ToList();
+            var functions = registry.snippets.ToList();
             functions.Sort((p1, p2) => p1.Key.CompareTo(p2.Key));
             database.functionNames.Clear();
-            database.functionSources.Clear();
+            database.functionSnippets.Clear();
             foreach (var pair in functions)
             {
-                database.functionNames.Add(pair.Key);
-                database.functionSources.Add(pair.Value);
+                database.functionSources.Add(pair.Key);
+                database.functionNames.Add(pair.Value.identifier);
+                database.functionSnippets.Add(pair.Value.snippet);
             }
 
             ctx.AddObjectToAsset("MainAsset", database);
@@ -215,7 +222,7 @@ namespace UnityEditor.ShaderGraph
             SubGraphDatabase.instance = null;
         }
 
-        static void ProcessSubGraph(Dictionary<string, SubGraphData> subGraphMap, FunctionRegistry registry, SubGraphData subGraphData, GraphData graph)
+        static void ProcessSubGraph(Dictionary<string, SubGraphData> subGraphMap, ShaderSnippetRegistry registry, SubGraphData subGraphData, GraphData graph)
         {
             registry.names.Clear();
             subGraphData.functionNames.Clear();
@@ -259,7 +266,12 @@ namespace UnityEditor.ShaderGraph
                 if (node.hasError)
                 {
                     subGraphData.isValid = false;
-                    registry.ProvideFunction(subGraphData.functionName, sb => { });
+                    registry.ProvideSnippet(new ShaderSnippetDescriptor()
+                    {
+                        source = new Guid(),
+                        identifier = subGraphData.functionName, 
+                        builder = s => { }
+                    });
                     return;
                 }
             }
@@ -281,46 +293,51 @@ namespace UnityEditor.ShaderGraph
                 }
             }
 
-            registry.ProvideFunction(subGraphData.functionName, sb =>
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
             {
-                var graphContext = new GraphContext(subGraphData.inputStructName);
-
-                GraphUtil.GenerateSurfaceInputStruct(sb, subGraphData.requirements, subGraphData.inputStructName);
-                sb.AppendNewLine();
-
-                // Generate arguments... first INPUTS
-                var arguments = new List<string>();
-                foreach (var prop in subGraphData.inputs)
-                    arguments.Add(string.Format("{0}", prop.GetPropertyAsArgumentString()));
-
-                // now pass surface inputs
-                arguments.Add(string.Format("{0} IN", subGraphData.inputStructName));
-
-                // Now generate outputs
-                foreach (var output in subGraphData.outputs)
-                    arguments.Add($"out {output.concreteValueType.ToString(outputNode.precision)} {output.shaderOutputName}");
-
-                // Create the function prototype from the arguments
-                sb.AppendLine("void {0}({1})"
-                    , subGraphData.functionName
-                    , arguments.Aggregate((current, next) => $"{current}, {next}"));
-
-                // now generate the function
-                using (sb.BlockScope())
-                {
-                    // Just grab the body from the active nodes
-                    var bodyGenerator = new ShaderGenerator();
-                    foreach (var node in nodes)
+                source = new Guid(),
+                identifier = subGraphData.functionName,
+                builder = sb =>
                     {
-                        if (node is IGeneratesBodyCode)
-                            (node as IGeneratesBodyCode).GenerateNodeCode(bodyGenerator, graphContext, GenerationMode.ForReals);
+                        var graphContext = new GraphContext(subGraphData.inputStructName);
+
+                        GraphUtil.GenerateSurfaceInputStruct(sb, subGraphData.requirements, subGraphData.inputStructName);
+                        sb.AppendNewLine();
+
+                        // Generate arguments... first INPUTS
+                        var arguments = new List<string>();
+                        foreach (var prop in subGraphData.inputs)
+                            arguments.Add(string.Format("{0}", prop.GetPropertyAsArgumentString()));
+
+                        // now pass surface inputs
+                        arguments.Add(string.Format("{0} IN", subGraphData.inputStructName));
+
+                        // Now generate outputs
+                        foreach (var output in subGraphData.outputs)
+                            arguments.Add($"out {output.concreteValueType.ToString(outputNode.precision)} {output.shaderOutputName}");
+
+                        // Create the function prototype from the arguments
+                        sb.AppendLine("void {0}({1})"
+                            , subGraphData.functionName
+                            , arguments.Aggregate((current, next) => $"{current}, {next}"));
+
+                        // now generate the function
+                        using (sb.BlockScope())
+                        {
+                            // Just grab the body from the active nodes
+                            var bodyGenerator = new ShaderGenerator();
+                            foreach (var node in nodes)
+                            {
+                                if (node is IGeneratesBodyCode)
+                                    (node as IGeneratesBodyCode).GenerateNodeCode(bodyGenerator, graphContext, GenerationMode.ForReals);
+                            }
+
+                            foreach (var slot in subGraphData.outputs)
+                                bodyGenerator.AddShaderChunk($"{slot.shaderOutputName} = {outputNode.GetSlotValue(slot.id, GenerationMode.ForReals)};");
+
+                            sb.Append(bodyGenerator.GetShaderString(1));
+                        }
                     }
-
-                    foreach (var slot in subGraphData.outputs)
-                        bodyGenerator.AddShaderChunk($"{slot.shaderOutputName} = {outputNode.GetSlotValue(slot.id, GenerationMode.ForReals)};");
-
-                    sb.Append(bodyGenerator.GetShaderString(1));
-                }
             });
             
             subGraphData.functionNames.AddRange(registry.names.Distinct());

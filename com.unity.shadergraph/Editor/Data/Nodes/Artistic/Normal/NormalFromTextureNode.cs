@@ -69,60 +69,37 @@ namespace UnityEditor.ShaderGraph
             visitor.AddShaderChunk(sb.ToString(), false);
         }
 
-        public void GenerateNodeFunction(ShaderGenerator visitor, GenerationMode generationMode)
+        public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            var sb = new ShaderStringBuilder();
-            sb.AppendLine("void {0}({1} Texture, {2} Sampler, {3} UV, {4} Offset, {5} Strength, out {6} Out)", GetFunctionName(),
-                FindInputSlot<MaterialSlot>(TextureInputId).concreteValueType.ToString(precision),
-                FindInputSlot<MaterialSlot>(SamplerInputId).concreteValueType.ToString(precision),
-                FindInputSlot<MaterialSlot>(UVInputId).concreteValueType.ToString(precision),
-                FindInputSlot<MaterialSlot>(OffsetInputId).concreteValueType.ToString(precision),
-                FindInputSlot<MaterialSlot>(StrengthInputId).concreteValueType.ToString(precision),
-                FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
-            using (sb.BlockScope())
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
             {
-                sb.AppendLine("Offset = pow(Offset, 3) * 0.1;");
-                sb.AppendLine("{0}2 offsetU = float2(UV.x + Offset, UV.y);", precision);
-                sb.AppendLine("{0}2 offsetV = float2(UV.x, UV.y + Offset);", precision);
-
-                sb.AppendLine("{0} normalSample = Texture.Sample(Sampler, UV).x;", precision);
-                sb.AppendLine("{0} uSample = Texture.Sample(Sampler, offsetU).x;", precision);
-                sb.AppendLine("{0} vSample = Texture.Sample(Sampler, offsetV).x;", precision);
-
-                sb.AppendLine("{0}3 va = float3(1, 0, (uSample - normalSample) * Strength);", precision);
-                sb.AppendLine("{0}3 vb = float3(0, 1, (vSample - normalSample) * Strength);", precision);
-                sb.AppendLine("Out = normalize(cross(va, vb));");
-            }
-
-            visitor.AddShaderChunk(sb.ToString(), true);
-        }
-
-        public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
-        {
-            registry.ProvideFunction(GetFunctionName(), s =>
-                {
-                    s.AppendLine("void {0}({1} Texture, {2} Sampler, {3} UV, {4} Offset, {5} Strength, out {6} Out)", GetFunctionName(),
-                        FindInputSlot<MaterialSlot>(TextureInputId).concreteValueType.ToString(precision),
-                        FindInputSlot<MaterialSlot>(SamplerInputId).concreteValueType.ToString(precision),
-                        FindInputSlot<MaterialSlot>(UVInputId).concreteValueType.ToString(precision),
-                        FindInputSlot<MaterialSlot>(OffsetInputId).concreteValueType.ToString(precision),
-                        FindInputSlot<MaterialSlot>(StrengthInputId).concreteValueType.ToString(precision),
-                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
-                    using (s.BlockScope())
+                source = guid,
+                identifier = GetFunctionName(),
+                builder = s =>
                     {
-                        s.AppendLine("Offset = pow(Offset, 3) * 0.1;");
-                        s.AppendLine("{0}2 offsetU = float2(UV.x + Offset, UV.y);", precision);
-                        s.AppendLine("{0}2 offsetV = float2(UV.x, UV.y + Offset);", precision);
+                        s.AppendLine("void {0}({1} Texture, {2} Sampler, {3} UV, {4} Offset, {5} Strength, out {6} Out)", GetFunctionName(),
+                            FindInputSlot<MaterialSlot>(TextureInputId).concreteValueType.ToString(precision),
+                            FindInputSlot<MaterialSlot>(SamplerInputId).concreteValueType.ToString(precision),
+                            FindInputSlot<MaterialSlot>(UVInputId).concreteValueType.ToString(precision),
+                            FindInputSlot<MaterialSlot>(OffsetInputId).concreteValueType.ToString(precision),
+                            FindInputSlot<MaterialSlot>(StrengthInputId).concreteValueType.ToString(precision),
+                            FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
+                        using (s.BlockScope())
+                        {
+                            s.AppendLine("Offset = pow(Offset, 3) * 0.1;");
+                            s.AppendLine("{0}2 offsetU = float2(UV.x + Offset, UV.y);", precision);
+                            s.AppendLine("{0}2 offsetV = float2(UV.x, UV.y + Offset);", precision);
 
-                        s.AppendLine("{0} normalSample = Texture.Sample(Sampler, UV);", precision);
-                        s.AppendLine("{0} uSample = Texture.Sample(Sampler, offsetU);", precision);
-                        s.AppendLine("{0} vSample = Texture.Sample(Sampler, offsetV);", precision);
+                            s.AppendLine("{0} normalSample = Texture.Sample(Sampler, UV);", precision);
+                            s.AppendLine("{0} uSample = Texture.Sample(Sampler, offsetU);", precision);
+                            s.AppendLine("{0} vSample = Texture.Sample(Sampler, offsetV);", precision);
 
-                        s.AppendLine("{0}3 va = float3(1, 0, (uSample - normalSample) * Strength);", precision);
-                        s.AppendLine("{0}3 vb = float3(0, 1, (vSample - normalSample) * Strength);", precision);
-                        s.AppendLine("Out = normalize(cross(va, vb));");
+                            s.AppendLine("{0}3 va = float3(1, 0, (uSample - normalSample) * Strength);", precision);
+                            s.AppendLine("{0}3 vb = float3(0, 1, (vSample - normalSample) * Strength);", precision);
+                            s.AppendLine("Out = normalize(cross(va, vb));");
+                        }
                     }
-                });
+            });
         }
 
         public bool RequiresMeshUV(UVChannel channel, ShaderStageCapability stageCapability)

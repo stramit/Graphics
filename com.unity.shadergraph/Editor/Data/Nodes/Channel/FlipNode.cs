@@ -132,6 +132,27 @@ namespace UnityEditor.ShaderGraph
             visitor.AddShaderChunk(sb.ToString(), false);
         }
 
+        public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        {
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetFunctionName(),
+                builder = s =>
+                    {
+                        s.AppendLine("void {0}({1} In, {2} Flip, out {3} Out)",
+                            GetFunctionName(),
+                            FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToString(precision),
+                            FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToString(precision),
+                            FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
+                        using (s.BlockScope())
+                        {
+                            s.AppendLine("Out = (Flip * -2 + 1) * In;");
+                        }
+                    }
+            });
+        }
+
         public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)
         {
             base.CollectPreviewMaterialProperties(properties);
@@ -155,37 +176,6 @@ namespace UnityEditor.ShaderGraph
                 overrideReferenceName = string.Format("_{0}_Flip", GetVariableNameForNode()),
                 generatePropertyBlock = false
             });
-        }
-
-        public void GenerateNodeFunction(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
-        {
-            var sb = new ShaderStringBuilder();
-            sb.AppendLine("void {0}({1} In, {2} Flip, out {3} Out)",
-                GetFunctionName(),
-                FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToString(precision),
-                FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToString(precision),
-                FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
-            using (sb.BlockScope())
-            {
-                sb.AppendLine("Out = (Flip * -2 + 1) * In;");
-            }
-            visitor.AddShaderChunk(sb.ToString(), true);
-        }
-
-        public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
-        {
-            registry.ProvideFunction(GetFunctionName(), s =>
-                {
-                    s.AppendLine("void {0}({1} In, {2} Flip, out {3} Out)",
-                        GetFunctionName(),
-                        FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToString(precision),
-                        FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToString(precision),
-                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
-                    using (s.BlockScope())
-                    {
-                        s.AppendLine("Out = (Flip * -2 + 1) * In;");
-                    }
-                });
         }
     }
 }

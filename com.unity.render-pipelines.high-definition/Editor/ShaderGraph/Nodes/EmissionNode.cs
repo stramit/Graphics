@@ -121,27 +121,32 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             return "Unity_HDRP_GetEmissionHDRColor";
         }
 
-        public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideFunction(GetFunctionName(), s =>
-                {
-                    s.AppendLine("{1}3 {0}({1}3 ldrColor, {2} luminanceIntensity, {2} exposureWeight, {2} inverseCurrentExposureMultiplier)",
-                        GetFunctionName(),
-                        precision,
-                        intensitySlot.concreteValueType.ToString(precision));
-                    using (s.BlockScope())
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetFunctionName(),
+                builder = s =>
                     {
-                        if (normalizeColor.isOn)
+                        s.AppendLine("{1}3 {0}({1}3 ldrColor, {2} luminanceIntensity, {2} exposureWeight, {2} inverseCurrentExposureMultiplier)",
+                            GetFunctionName(),
+                            precision,
+                            intensitySlot.concreteValueType.ToString(precision));
+                        using (s.BlockScope())
                         {
-                            s.AppendLine("ldrColor = ldrColor * rcp(max(Luminance(ldrColor), 1e-6));");
+                            if (normalizeColor.isOn)
+                            {
+                                s.AppendLine("ldrColor = ldrColor * rcp(max(Luminance(ldrColor), 1e-6));");
+                            }
+                            s.AppendLine("{0}3 hdrColor = ldrColor * luminanceIntensity;", precision);
+                            s.AppendNewLine();
+                            s.AppendLine("// Inverse pre-expose using _EmissiveExposureWeight weight");
+                            s.AppendLine("hdrColor = lerp(hdrColor * inverseCurrentExposureMultiplier, hdrColor, exposureWeight);", precision);
+                            s.AppendLine("return hdrColor;");
                         }
-                        s.AppendLine("{0}3 hdrColor = ldrColor * luminanceIntensity;", precision);
-                        s.AppendNewLine();
-                        s.AppendLine("// Inverse pre-expose using _EmissiveExposureWeight weight");
-                        s.AppendLine("hdrColor = lerp(hdrColor * inverseCurrentExposureMultiplier, hdrColor, exposureWeight);", precision);
-                        s.AppendLine("return hdrColor;");
                     }
-                });
+            });
         }
 
         Vector3 GetHDREmissionColor(Vector3 ldrColor, float intensity)

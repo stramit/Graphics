@@ -117,28 +117,33 @@ namespace UnityEditor.ShaderGraph
             visitor.AddShaderChunk(call, true);
         }
 
-        public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             if(!IsValidFunction())
                 return;
 
-            registry.ProvideFunction(functionName, builder =>
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
             {
-                switch (sourceType)
-                {
-                    case HlslSourceType.File:
-                        builder.AppendLine($"#include \"{functionSource}\"");
-                        break;
-                    case HlslSourceType.String:
-                        builder.AppendLine(GetFunctionHeader());
-                        using(builder.BlockScope())
+                source = guid,
+                identifier = functionName,
+                builder = s =>
+                    {
+                        switch (sourceType)
                         {
-                            builder.AppendLines(functionBody);
+                            case HlslSourceType.File:
+                                s.AppendLine($"#include \"{functionSource}\"");
+                                break;
+                            case HlslSourceType.String:
+                                s.AppendLine(GetFunctionHeader());
+                                using(s.BlockScope())
+                                {
+                                    s.AppendLines(functionBody);
+                                }
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
                         }
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                    }
             });
         }
 

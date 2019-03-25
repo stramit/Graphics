@@ -528,9 +528,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             var graphRequirements = pixelRequirements.Union(vertexRequirements);
 
             // Function Registry tracks functions to remove duplicates, it wraps a string builder that stores the combined function string
-            ShaderStringBuilder graphNodeFunctions = new ShaderStringBuilder();
-            graphNodeFunctions.IncreaseIndent();
-            var functionRegistry = new FunctionRegistry(graphNodeFunctions);
+            var functionRegistry = new ShaderSnippetRegistry();
 
             // TODO: this can be a shared function for all HDRP master nodes -- From here through GraphUtil.GenerateSurfaceDescription(..)
 
@@ -702,7 +700,9 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 graph.Deindent();
 
                 graph.AddShaderChunk("// Shared Graph Node Functions");
-                graph.AddShaderChunk(graphNodeFunctions.ToString());
+                string[] nodeFunctions = functionRegistry.GetUniqueSnippets();
+                foreach(string function in nodeFunctions)
+                    graph.AddShaderChunk(function.ToString());
 
                 if (vertexActive)
                 {

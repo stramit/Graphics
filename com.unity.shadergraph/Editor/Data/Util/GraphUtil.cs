@@ -959,8 +959,7 @@ namespace UnityEditor.ShaderGraph
             var results = new GenerationResults();
 
             var shaderProperties = new PropertyCollector();
-            var functionBuilder = new ShaderStringBuilder();
-            var functionRegistry = new FunctionRegistry(functionBuilder);
+            var functionRegistry = new ShaderSnippetRegistry();
 
             var vertexDescriptionFunction = new ShaderStringBuilder(0);
 
@@ -1084,7 +1083,9 @@ namespace UnityEditor.ShaderGraph
                 finalShader.AppendLines(surfaceDescriptionInputStruct.ToString());
                 finalShader.AppendNewLine();
 
-                finalShader.Concat(functionBuilder);
+                string[] nodeFunctions = functionRegistry.GetUniqueSnippets();
+                foreach(string function in nodeFunctions)
+                    finalShader.AppendLines(function.ToString());
                 finalShader.AppendNewLine();
 
                 finalShader.AppendLines(surfaceDescriptionStruct.ToString());
@@ -1107,9 +1108,7 @@ namespace UnityEditor.ShaderGraph
             // Finalize
 
             results.configuredTextures = shaderProperties.GetConfiguredTexutres();
-            ShaderSourceMap sourceMap;
-            results.shader = finalShader.ToString(out sourceMap);
-            results.sourceMap = sourceMap;
+            results.shader = finalShader.ToString();
             return results;
         }
 
@@ -1186,7 +1185,7 @@ namespace UnityEditor.ShaderGraph
             AbstractMaterialNode rootNode,
             GraphData graph,
             ShaderStringBuilder surfaceDescriptionFunction,
-            FunctionRegistry functionRegistry,
+            ShaderSnippetRegistry functionRegistry,
             PropertyCollector shaderProperties,
             ShaderGraphRequirements requirements,
             GenerationMode mode,
@@ -1212,7 +1211,6 @@ namespace UnityEditor.ShaderGraph
                 {
                     if (activeNode is IGeneratesFunction functionNode)
                     {
-                        functionRegistry.builder.currentNode = activeNode;
                         functionNode.GenerateNodeFunction(functionRegistry, graphContext, mode);
                     }
 
@@ -1225,7 +1223,6 @@ namespace UnityEditor.ShaderGraph
                 }
 
                 surfaceDescriptionFunction.AppendLines(sg.GetShaderString(0));
-                functionRegistry.builder.currentNode = null;
 
                 if (rootNode is IMasterNode || rootNode is SubGraphOutputNode)
                 {
@@ -1284,7 +1281,7 @@ namespace UnityEditor.ShaderGraph
         public static void GenerateVertexDescriptionFunction(
             GraphData graph,
             ShaderStringBuilder builder,
-            FunctionRegistry functionRegistry,
+            ShaderSnippetRegistry functionRegistry,
             PropertyCollector shaderProperties,
             GenerationMode mode,
             List<AbstractMaterialNode> nodes,
@@ -1310,7 +1307,6 @@ namespace UnityEditor.ShaderGraph
                     var generatesFunction = node as IGeneratesFunction;
                     if (generatesFunction != null)
                     {
-                        functionRegistry.builder.currentNode = node;
                         generatesFunction.GenerateNodeFunction(functionRegistry, graphContext, mode);
                     }
                     var generatesBodyCode = node as IGeneratesBodyCode;

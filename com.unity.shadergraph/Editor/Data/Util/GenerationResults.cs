@@ -9,7 +9,6 @@ namespace UnityEditor.ShaderGraph
         public List<PropertyCollector.TextureInfo> configuredTextures;
         public PreviewMode previewMode { get; set; }
         public Vector1ShaderProperty outputIdProperty { get; set; }
-        public ShaderSourceMap sourceMap { get; set; }
 
         public GenerationResults()
         {

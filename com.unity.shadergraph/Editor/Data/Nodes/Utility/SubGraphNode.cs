@@ -422,7 +422,7 @@ namespace UnityEditor.ShaderGraph
         }
         }
 
-        public virtual void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        public virtual void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             if (subGraphData == null || hasError)
                 return;
@@ -431,10 +431,15 @@ namespace UnityEditor.ShaderGraph
             
             foreach (var functionName in subGraphData.functionNames)
             {
-                registry.ProvideFunction(functionName, s =>
+                registry.ProvideSnippet(new ShaderSnippetDescriptor()
                 {
-                    var functionSource = database.functionSources[database.functionNames.BinarySearch(functionName)];
-                    s.AppendLines(functionSource);
+                    source = guid,
+                    identifier = functionName,
+                    builder = s =>
+                        {
+                            var functionSource = database.functionSnippets[database.functionNames.BinarySearch(functionName)];
+                            s.AppendLines(functionSource);
+                        }
                 });
             }
         }
