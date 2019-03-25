@@ -192,15 +192,15 @@ namespace UnityEditor.ShaderGraph
             {
                 foreach (var functionName in subGraphData.functionNames)
                 {
-                    if (!registry.ContainsIdentifier(functionName))
+                    if (!registry.snippets.ContainsKey(functionName))
                     {
                         int snippetIndex = database.functionNames.BinarySearch(functionName);
                         ShaderSnippet snippet = new ShaderSnippet()
                         {
-                            identifier = functionName,
+                            source = database.functionSources[snippetIndex],
                             snippet = database.functionSnippets[snippetIndex]
                         };
-                        registry.snippets.Add(new KeyValuePair<Guid, ShaderSnippet>(database.functionSources[snippetIndex], snippet));
+                        registry.snippets.Add(functionName, snippet);
                     }
                 }
             }
@@ -211,8 +211,8 @@ namespace UnityEditor.ShaderGraph
             database.functionSnippets.Clear();
             foreach (var pair in functions)
             {
-                database.functionSources.Add(pair.Key);
-                database.functionNames.Add(pair.Value.identifier);
+                database.functionNames.Add(pair.Key);
+                database.functionSources.Add(pair.Value.source);
                 database.functionSnippets.Add(pair.Value.snippet);
             }
 
