@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace UnityEditor.ShaderGraph
 {
-    [Serializable]
     struct ShaderSnippet
     {
         public Guid source;
