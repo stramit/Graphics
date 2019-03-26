@@ -334,7 +334,7 @@ namespace UnityEditor.ShaderGraph
                             }
                             string[] bodySnippets = bodyRegistry.GetSnippets();
                             foreach(string snippet in bodySnippets)
-                                s.AppendLine(snippet);
+                                s.AppendLines(snippet);
 
                             foreach (var slot in subGraphData.outputs)
                                 s.AppendLine($"{slot.shaderOutputName} = {outputNode.GetSlotValue(slot.id, GenerationMode.ForReals)};");

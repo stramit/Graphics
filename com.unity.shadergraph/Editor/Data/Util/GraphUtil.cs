@@ -1224,7 +1224,7 @@ namespace UnityEditor.ShaderGraph
 
                 string[] bodyCodeSnippets = bodyCodeRegistry.GetSnippets();
                 foreach(string snippet in bodyCodeSnippets)
-                    surfaceDescriptionFunction.AppendLine(snippet);
+                    surfaceDescriptionFunction.AppendLines(snippet);
 
                 if (rootNode is IMasterNode || rootNode is SubGraphOutputNode)
                 {
@@ -1321,7 +1321,7 @@ namespace UnityEditor.ShaderGraph
                 
                 string[] bodyCodeSnippets = bodyCodeRegistry.GetSnippets();
                 foreach(string snippet in bodyCodeSnippets)
-                    builder.AppendLine(snippet);
+                    builder.AppendLines(snippet);
                     
                 foreach (var slot in slots)
                 {
