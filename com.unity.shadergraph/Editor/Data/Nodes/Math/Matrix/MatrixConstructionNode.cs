@@ -64,28 +64,32 @@ namespace UnityEditor.ShaderGraph
             RemoveSlotsNameNotMatching(new int[] { InputSlotM0Id, InputSlotM1Id, InputSlotM2Id, InputSlotM3Id, Output4x4SlotId, Output3x3SlotId, Output2x2SlotId });
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            var sb = new ShaderStringBuilder();
             var inputM0Value = GetSlotValue(InputSlotM0Id, generationMode);
             var inputM1Value = GetSlotValue(InputSlotM1Id, generationMode);
             var inputM2Value = GetSlotValue(InputSlotM2Id, generationMode);
             var inputM3Value = GetSlotValue(InputSlotM3Id, generationMode);
-
-            sb.AppendLine("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(Output4x4SlotId).concreteValueType), GetVariableNameForSlot(Output4x4SlotId));
-            sb.AppendLine("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(Output3x3SlotId).concreteValueType), GetVariableNameForSlot(Output3x3SlotId));
-            sb.AppendLine("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(Output2x2SlotId).concreteValueType), GetVariableNameForSlot(Output2x2SlotId));
-            sb.AppendLine("{0}({1}, {2}, {3}, {4}, {5}, {6}, {7});",
-                GetFunctionName(),
-                inputM0Value,
-                inputM1Value,
-                inputM2Value,
-                inputM3Value,
-                GetVariableNameForSlot(Output4x4SlotId),
-                GetVariableNameForSlot(Output3x3SlotId),
-                GetVariableNameForSlot(Output2x2SlotId));
-
-            visitor.AddShaderChunk(sb.ToString(), false);
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetVariableNameForNode(),
+                builder = s =>
+                    {
+                        s.AppendLine("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(Output4x4SlotId).concreteValueType), GetVariableNameForSlot(Output4x4SlotId));
+                        s.AppendLine("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(Output3x3SlotId).concreteValueType), GetVariableNameForSlot(Output3x3SlotId));
+                        s.AppendLine("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(Output2x2SlotId).concreteValueType), GetVariableNameForSlot(Output2x2SlotId));
+                        s.AppendLine("{0}({1}, {2}, {3}, {4}, {5}, {6}, {7});",
+                            GetFunctionName(),
+                            inputM0Value,
+                            inputM1Value,
+                            inputM2Value,
+                            inputM3Value,
+                            GetVariableNameForSlot(Output4x4SlotId),
+                            GetVariableNameForSlot(Output3x3SlotId),
+                            GetVariableNameForSlot(Output2x2SlotId));
+                    }
+            });
         }
 
         public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)

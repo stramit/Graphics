@@ -99,14 +99,22 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 #pragma warning restore 618
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             uint hash = 0;
             
             if (diffusionProfile != null)
                 hash = (diffusionProfile.profile.hash);
             
-            visitor.AddShaderChunk(precision + " " + GetVariableNameForSlot(0) + " = asfloat(uint(" + hash + "));", true);
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetVariableNameForNode(),
+                builder = s =>
+                    {
+                        s.AppendLine("{0} {1} = asfloat(uint({2}));", precision, GetVariableNameForSlot(0), hash);
+                    }
+            });
         }
     }
 }

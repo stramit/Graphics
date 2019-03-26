@@ -160,57 +160,61 @@ namespace UnityEditor.ShaderGraph
         }
 
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            var sb = new ShaderStringBuilder();
-            if (subGraphData == null || hasError)
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
             {
-                var outputSlots = new List<MaterialSlot>();
-                GetOutputSlots(outputSlots);
-                foreach (var slot in outputSlots)
-                {
-                    visitor.AddShaderChunk($"{NodeUtils.ConvertConcreteSlotValueTypeToString(precision, slot.concreteValueType)} {GetVariableNameForSlot(slot.id)} = {slot.GetDefaultValue(GenerationMode.ForReals)};");
-                }
-                
-                return;
-            }
+                source = guid,
+                identifier = GetVariableNameForNode(),
+                builder = s =>
+                    {
+                        if (subGraphData == null || hasError)
+                        {
+                            var outputSlots = new List<MaterialSlot>();
+                            GetOutputSlots(outputSlots);
+                            foreach (var slot in outputSlots)
+                            {
+                                s.AppendLine($"{NodeUtils.ConvertConcreteSlotValueTypeToString(precision, slot.concreteValueType)} {GetVariableNameForSlot(slot.id)} = {slot.GetDefaultValue(GenerationMode.ForReals)};");
+                            }
+                            
+                            return;
+                        }
 
-            var inputVariableName = $"_{GetVariableNameForNode()}";
-            
-            GraphUtil.GenerateSurfaceInputTransferCode(sb, subGraphData.requirements, subGraphData.inputStructName, inputVariableName);
-            
-            visitor.AddShaderChunk(sb.ToString());
+                        var inputVariableName = $"_{GetVariableNameForNode()}";
+                        
+                        GraphUtil.GenerateSurfaceInputTransferCode(s, subGraphData.requirements, subGraphData.inputStructName, inputVariableName);
 
-            foreach (var outSlot in subGraphData.outputs)
-                visitor.AddShaderChunk(string.Format("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, outSlot.concreteValueType), GetVariableNameForSlot(outSlot.id)));
+                        foreach (var outSlot in subGraphData.outputs)
+                            s.AppendLine("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, outSlot.concreteValueType), GetVariableNameForSlot(outSlot.id));
 
-            var arguments = new List<string>();
-            foreach (var prop in subGraphData.inputs)
-            {
-                var inSlotId = m_PropertyIds[m_PropertyGuids.IndexOf(prop.guid.ToString())];
+                        var arguments = new List<string>();
+                        foreach (var prop in subGraphData.inputs)
+                        {
+                            var inSlotId = m_PropertyIds[m_PropertyGuids.IndexOf(prop.guid.ToString())];
 
-                if (prop is TextureShaderProperty)
-                    arguments.Add(string.Format("TEXTURE2D_ARGS({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
-                else if (prop is Texture2DArrayShaderProperty)
-                    arguments.Add(string.Format("TEXTURE2D_ARRAY_ARGS({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
-                else if (prop is Texture3DShaderProperty)
-                    arguments.Add(string.Format("TEXTURE3D_ARGS({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
-                else if (prop is CubemapShaderProperty)
-                    arguments.Add(string.Format("TEXTURECUBE_ARGS({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
-                else
-                    arguments.Add(GetSlotValue(inSlotId, generationMode));
-            }
+                            if (prop is TextureShaderProperty)
+                                arguments.Add(string.Format("TEXTURE2D_ARGS({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
+                            else if (prop is Texture2DArrayShaderProperty)
+                                arguments.Add(string.Format("TEXTURE2D_ARRAY_ARGS({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
+                            else if (prop is Texture3DShaderProperty)
+                                arguments.Add(string.Format("TEXTURE3D_ARGS({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
+                            else if (prop is CubemapShaderProperty)
+                                arguments.Add(string.Format("TEXTURECUBE_ARGS({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
+                            else
+                                arguments.Add(GetSlotValue(inSlotId, generationMode));
+                        }
 
-            // pass surface inputs through
-            arguments.Add(inputVariableName);
+                        // pass surface inputs through
+                        arguments.Add(inputVariableName);
 
-            foreach (var outSlot in subGraphData.outputs)
-                arguments.Add(GetVariableNameForSlot(outSlot.id));
+                        foreach (var outSlot in subGraphData.outputs)
+                            arguments.Add(GetVariableNameForSlot(outSlot.id));
 
-            visitor.AddShaderChunk(
-                string.Format("{0}({1});"
-                    , subGraphData.functionName
-                    , arguments.Aggregate((current, next) => string.Format("{0}, {1}", current, next))));
+                        s.AppendLine("{0}({1});"
+                                , subGraphData.functionName
+                                , arguments.Aggregate((current, next) => string.Format("{0}, {1}", current, next)));
+                    }
+            });
         }
 
         public void OnEnable()

@@ -32,10 +32,19 @@ namespace UnityEditor.ShaderGraph
             RemoveSlotsNameNotMatching(new[] { OutputSlotId, InputSlotXId });
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             var inputValue = GetSlotValue(InputSlotXId, generationMode);
-            visitor.AddShaderChunk(precision + " " + GetVariableNameForSlot(OutputSlotId) + " = " + inputValue + ";", false);
+
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetVariableNameForNode(),
+                builder = s =>
+                    {
+                        s.AppendLine("{0} {1} = {2};", precision, GetVariableNameForSlot(OutputSlotId), inputValue);
+                    }
+            });
         }
 
         public AbstractShaderProperty AsShaderProperty()

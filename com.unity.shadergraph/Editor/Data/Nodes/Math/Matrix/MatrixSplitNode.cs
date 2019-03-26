@@ -65,10 +65,9 @@ namespace UnityEditor.ShaderGraph
 
         static int[] s_OutputSlots = {OutputSlotRId, OutputSlotGId, OutputSlotBId, OutputSlotAId};
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             var inputValue = GetSlotValue(InputSlotId, generationMode);
-
             var inputSlot = FindInputSlot<MaterialSlot>(InputSlotId);
             var numInputRows = 0;
             bool useIndentity = false;
@@ -88,41 +87,49 @@ namespace UnityEditor.ShaderGraph
 
             int concreteRowCount = useIndentity ? 2 : numInputRows;
 
-            for (var r = 0; r < 4; r++)
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
             {
-                string outputValue;
-                if (r >= numInputRows)
-                {
-                    outputValue = string.Format("{0}{1}(", precision, concreteRowCount);
-                    for (int c = 0; c < concreteRowCount; c++)
+                source = guid,
+                identifier = GetVariableNameForNode(),
+                builder = s =>
                     {
-                        if (c != 0)
-                            outputValue += ", ";
-                        outputValue += Matrix4x4.identity.GetRow(r)[c];
-                    }
-                    outputValue += ")";
-                }
-                else
-                {
-                    switch (m_Axis)
-                    {
-                        case MatrixAxis.Column:
-                            outputValue = string.Format("{0}{1}(", precision, numInputRows);
-                            for (int c = 0; c < numInputRows; c++)
+                        for (var r = 0; r < 4; r++)
+                        {
+                            string outputValue;
+                            if (r >= numInputRows)
                             {
-                                if (c != 0)
-                                    outputValue += ", ";
-                                outputValue += string.Format("{0}[{1}].{2}", inputValue, c, s_ComponentList[r]);
+                                outputValue = string.Format("{0}{1}(", precision, concreteRowCount);
+                                for (int c = 0; c < concreteRowCount; c++)
+                                {
+                                    if (c != 0)
+                                        outputValue += ", ";
+                                    outputValue += Matrix4x4.identity.GetRow(r)[c];
+                                }
+                                outputValue += ")";
                             }
-                            outputValue += ")";
-                            break;
-                        default:
-                            outputValue = string.Format("{0}[{1}]", inputValue, r);
-                            break;
+                            else
+                            {
+                                switch (m_Axis)
+                                {
+                                    case MatrixAxis.Column:
+                                        outputValue = string.Format("{0}{1}(", precision, numInputRows);
+                                        for (int c = 0; c < numInputRows; c++)
+                                        {
+                                            if (c != 0)
+                                                outputValue += ", ";
+                                            outputValue += string.Format("{0}[{1}].{2}", inputValue, c, s_ComponentList[r]);
+                                        }
+                                        outputValue += ")";
+                                        break;
+                                    default:
+                                        outputValue = string.Format("{0}[{1}]", inputValue, r);
+                                        break;
+                                }
+                            }
+                            s.AppendLine("{0}{1} {2} = {3};", precision, concreteRowCount, GetVariableNameForSlot(s_OutputSlots[r]), outputValue);
+                        }
                     }
-                }
-                visitor.AddShaderChunk(string.Format("{0}{1} {2} = {3};", precision, concreteRowCount, GetVariableNameForSlot(s_OutputSlots[r]), outputValue), true);
-            }
+            });
         }
 
         public override void ValidateNode()

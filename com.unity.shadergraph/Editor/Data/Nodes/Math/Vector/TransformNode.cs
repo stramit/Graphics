@@ -95,7 +95,7 @@ namespace UnityEditor.ShaderGraph
             RemoveSlotsNameNotMatching(new[] { InputSlotId, OutputSlotId });
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             NodeUtils.SlotConfigurationExceptionIfBadConfiguration(this, new[] { InputSlotId }, new[] { OutputSlotId });
             string inputValue = string.Format("{0}.xyz", GetSlotValue(InputSlotId, generationMode));
@@ -189,13 +189,23 @@ namespace UnityEditor.ShaderGraph
                     transformString = inputValue;
                 }
             }
-            if (requiresTransposeTangentTransform)
-                visitor.AddShaderChunk(string.Format("float3x3 {0} = transpose(float3x3(IN.{1}SpaceTangent, IN.{1}SpaceBiTangent, IN.{1}SpaceNormal));", transposeTargetTransformString, CoordinateSpace.World.ToString()), true);
-            else if (requiresTangentTransform)
-                visitor.AddShaderChunk(string.Format("float3x3 {0} = float3x3(IN.{1}SpaceTangent, IN.{1}SpaceBiTangent, IN.{1}SpaceNormal);", targetTransformString, tangentTransformSpace), true);
-            visitor.AddShaderChunk(string.Format("{0} {1} = {2};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType),
-                    GetVariableNameForSlot(OutputSlotId),
-                    transformString), true);
+
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetVariableNameForNode(),
+                builder = s =>
+                    {
+                        if (requiresTransposeTangentTransform)
+                            s.AppendLine("float3x3 {0} = transpose(float3x3(IN.{1}SpaceTangent, IN.{1}SpaceBiTangent, IN.{1}SpaceNormal));", transposeTargetTransformString, CoordinateSpace.World.ToString());
+                        else if (requiresTangentTransform)
+                            s.AppendLine("float3x3 {0} = float3x3(IN.{1}SpaceTangent, IN.{1}SpaceBiTangent, IN.{1}SpaceNormal);", targetTransformString, tangentTransformSpace);
+                        
+                        s.AppendLine("{0} {1} = {2};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType),
+                                GetVariableNameForSlot(OutputSlotId),
+                                transformString);
+                    }
+            });
         }
 
         bool RequiresWorldSpaceTangentTransform()

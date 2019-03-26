@@ -89,10 +89,8 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             });
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            var sb = new ShaderStringBuilder();
-
             var colorValue = GetSlotValue(kEmissionColorInputSlotId, generationMode);
             var intensityValue = GetSlotValue(kEmissionIntensityInputSlotId, generationMode);
             var exposureWeightValue = GetSlotValue(kEmissionExposureWeightInputSlotId, generationMode);
@@ -102,18 +100,23 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 intensityValue = "ConvertEvToLuminance(" + intensityValue + ")";
             
             string inverseExposureMultiplier = (generationMode.IsPreview()) ? "1.0" : "GetInverseCurrentExposureMultiplier()";
-            
-            sb.AppendLine(@"{0}3 {1} = {2}({3}.xyz, {4}, {5}, {6});",
-                precision,
-                outputValue,
-                GetFunctionName(),
-                colorValue,
-                intensityValue,
-                exposureWeightValue,
-                inverseExposureMultiplier
-            );
 
-            visitor.AddShaderChunk(sb.ToString(), true);
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetVariableNameForNode(),
+                builder = s =>
+                    {
+                        s.AppendLine(@"{0}3 {1} = {2}({3}.xyz, {4}, {5}, {6});",
+                            precision,
+                            outputValue,
+                            GetFunctionName(),
+                            colorValue,
+                            intensityValue,
+                            exposureWeightValue,
+                            inverseExposureMultiplier);
+                    }
+            });
         }
 
         string GetFunctionName()

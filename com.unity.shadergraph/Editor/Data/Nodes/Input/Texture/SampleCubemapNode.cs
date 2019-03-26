@@ -46,24 +46,28 @@ namespace UnityEditor.ShaderGraph
             get { return PreviewMode.Preview3D; }
         }
 
-        // Node generations
-        public virtual void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public virtual void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            //Sampler input slot
             var samplerSlot = FindInputSlot<MaterialSlot>(SamplerInputId);
             var edgesSampler = owner.GetEdges(samplerSlot.slotReference);
-
             var id = GetSlotValue(CubemapInputId, generationMode);
-            string result = string.Format("{0}4 {1} = SAMPLE_TEXTURECUBE_LOD({2}, {3}, reflect(-{4}, {5}), {6});"
-                    , precision
-                    , GetVariableNameForSlot(OutputSlotId)
-                    , id
-                    , edgesSampler.Any() ? GetSlotValue(SamplerInputId, generationMode) : "sampler" + id
-                    , GetSlotValue(ViewDirInputId, generationMode)
-                    , GetSlotValue(NormalInputId, generationMode)
-                    , GetSlotValue(LODInputId, generationMode));
 
-            visitor.AddShaderChunk(result, true);
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetVariableNameForNode(),
+                builder = s => 
+                    {
+                        s.AppendLine("{0}4 {1} = SAMPLE_TEXTURECUBE_LOD({2}, {3}, reflect(-{4}, {5}), {6});"
+                            , precision
+                            , GetVariableNameForSlot(OutputSlotId)
+                            , id
+                            , edgesSampler.Any() ? GetSlotValue(SamplerInputId, generationMode) : "sampler" + id
+                            , GetSlotValue(ViewDirInputId, generationMode)
+                            , GetSlotValue(NormalInputId, generationMode)
+                            , GetSlotValue(LODInputId, generationMode));
+                    }
+            });
         }
 
         public NeededCoordinateSpace RequiresViewDirection(ShaderStageCapability stageCapability)

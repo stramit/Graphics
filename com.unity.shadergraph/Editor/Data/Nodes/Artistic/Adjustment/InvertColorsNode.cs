@@ -102,32 +102,37 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            var sb = new ShaderStringBuilder();
-
             var inputValue = GetSlotValue(InputSlotId, generationMode);
             var outputValue = GetSlotValue(OutputSlotId, generationMode);
-            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision), GetVariableNameForSlot(OutputSlotId));
 
-            if (!generationMode.IsPreview())
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
             {
-                sb.AppendLine("{0} _{1}_InvertColors = {0} ({2}",
-                    FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision),
-                    GetVariableNameForNode(),
-                    Convert.ToInt32(m_RedChannel));
-                if (channelCount > 1)
-                    sb.Append(", {0}", Convert.ToInt32(m_GreenChannel));
-                if (channelCount > 2)
-                    sb.Append(", {0}", Convert.ToInt32(m_BlueChannel));
-                if (channelCount > 3)
-                    sb.Append(", {0}", Convert.ToInt32(m_AlphaChannel));
-                sb.Append(");");
-            }
+                source = guid,
+                identifier = GetVariableNameForNode(),
+                builder = s =>
+                    {
+                        s.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision), GetVariableNameForSlot(OutputSlotId));
 
-            sb.AppendLine("{0}({1}, _{2}_InvertColors, {3});", GetFunctionName(), inputValue, GetVariableNameForNode(), outputValue);
+                        if (!generationMode.IsPreview())
+                        {
+                            s.AppendLine("{0} _{1}_InvertColors = {0} ({2}",
+                                FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision),
+                                GetVariableNameForNode(),
+                                Convert.ToInt32(m_RedChannel));
+                            if (channelCount > 1)
+                                s.Append(", {0}", Convert.ToInt32(m_GreenChannel));
+                            if (channelCount > 2)
+                                s.Append(", {0}", Convert.ToInt32(m_BlueChannel));
+                            if (channelCount > 3)
+                                s.Append(", {0}", Convert.ToInt32(m_AlphaChannel));
+                            s.Append(");");
+                        }
 
-            visitor.AddShaderChunk(sb.ToString(), false);
+                        s.AppendLine("{0}({1}, _{2}_InvertColors, {3});", GetFunctionName(), inputValue, GetVariableNameForNode(), outputValue);
+                    }
+            });
         }
 
         public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)

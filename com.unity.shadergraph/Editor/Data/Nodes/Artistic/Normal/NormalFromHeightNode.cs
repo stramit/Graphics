@@ -61,18 +61,23 @@ namespace UnityEditor.ShaderGraph
             RemoveSlotsNameNotMatching(new[] { InputSlotId, OutputSlotId });
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            var sb = new ShaderStringBuilder();
-
             var inputValue = GetSlotValue(InputSlotId, generationMode);
             var outputValue = GetSlotValue(OutputSlotId, generationMode);
-            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision), GetVariableNameForSlot(OutputSlotId));
-            sb.AppendLine("{0}3x3 _{1}_TangentMatrix = {0}3x3(IN.{2}SpaceTangent, IN.{2}SpaceBiTangent, IN.{2}SpaceNormal);", precision, GetVariableNameForNode(), NeededCoordinateSpace.World.ToString());
-            sb.AppendLine("{0}3 _{1}_Position = IN.{2}SpacePosition;", precision, GetVariableNameForNode(), NeededCoordinateSpace.World.ToString());
-            sb.AppendLine("{0}({1},_{2}_Position,_{2}_TangentMatrix, {3});", GetFunctionName(), inputValue, GetVariableNameForNode(), outputValue);
-
-            visitor.AddShaderChunk(sb.ToString(), false);
+            
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetVariableNameForNode(),
+                builder = s =>
+                    {
+                        s.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision), GetVariableNameForSlot(OutputSlotId));
+                        s.AppendLine("{0}3x3 _{1}_TangentMatrix = {0}3x3(IN.{2}SpaceTangent, IN.{2}SpaceBiTangent, IN.{2}SpaceNormal);", precision, GetVariableNameForNode(), NeededCoordinateSpace.World.ToString());
+                        s.AppendLine("{0}3 _{1}_Position = IN.{2}SpacePosition;", precision, GetVariableNameForNode(), NeededCoordinateSpace.World.ToString());
+                        s.AppendLine("{0}({1},_{2}_Position,_{2}_TangentMatrix, {3});", GetFunctionName(), inputValue, GetVariableNameForNode(), outputValue);
+                    }
+            });
         }
 
         public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)

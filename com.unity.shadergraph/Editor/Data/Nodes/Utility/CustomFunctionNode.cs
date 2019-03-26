@@ -69,52 +69,60 @@ namespace UnityEditor.ShaderGraph
 
         public static string defaultFunctionBody => m_DefaultFunctionBody;
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             List<MaterialSlot> slots = new List<MaterialSlot>();
             GetOutputSlots<MaterialSlot>(slots);
 
-            if(!IsValidFunction())
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
             {
-                if(generationMode == GenerationMode.Preview && slots.Count != 0)
-                {
-                    slots.OrderBy(s => s.id);
-                    visitor.AddShaderChunk(string.Format("{0} _{1}_{2};",
-                        NodeUtils.ConvertConcreteSlotValueTypeToString(precision, slots[0].concreteValueType),
-                        GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(slots[0].shaderOutputName)));
-                }
-                return;
-            }
-            
-            foreach (var argument in slots)
-                visitor.AddShaderChunk(string.Format("{0} _{1}_{2};",
-                    NodeUtils.ConvertConcreteSlotValueTypeToString(precision, argument.concreteValueType),
-                    GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(argument.shaderOutputName)));
+                source = guid,
+                identifier = GetVariableNameForNode(),
+                builder = s =>
+                    {
+                        if(!IsValidFunction())
+                        {
+                            if(generationMode == GenerationMode.Preview && slots.Count != 0)
+                            {
+                                slots.OrderBy(p => p.id);
+                                s.AppendLine("{0} _{1}_{2};",
+                                    NodeUtils.ConvertConcreteSlotValueTypeToString(precision, slots[0].concreteValueType),
+                                    GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(slots[0].shaderOutputName));
+                            }
+                            return;
+                        }
+                        
+                        foreach (var argument in slots)
+                            s.AppendLine("{0} _{1}_{2};",
+                                NodeUtils.ConvertConcreteSlotValueTypeToString(precision, argument.concreteValueType),
+                                GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(argument.shaderOutputName));
 
-            string call = string.Format("{0}_{1}(", functionName, precision);
-            bool first = true;
-            
-            slots.Clear();
-            GetInputSlots<MaterialSlot>(slots);
-            foreach (var argument in slots)
-            {
-                if (!first)
-                    call += ", ";
-                first = false;
-                call += SlotInputValue(argument, generationMode);
-            }
+                        string call = string.Format("{0}_{1}(", functionName, precision);
+                        bool first = true;
+                        
+                        slots.Clear();
+                        GetInputSlots<MaterialSlot>(slots);
+                        foreach (var argument in slots)
+                        {
+                            if (!first)
+                                call += ", ";
+                            first = false;
+                            call += SlotInputValue(argument, generationMode);
+                        }
 
-            slots.Clear();
-            GetOutputSlots<MaterialSlot>(slots);
-            foreach (var argument in slots)
-            {
-                if (!first)
-                    call += ", ";
-                first = false;
-                call += string.Format("_{0}_{1}", GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(argument.shaderOutputName));
-            }
-            call += ");";
-            visitor.AddShaderChunk(call, true);
+                        slots.Clear();
+                        GetOutputSlots<MaterialSlot>(slots);
+                        foreach (var argument in slots)
+                        {
+                            if (!first)
+                                call += ", ";
+                            first = false;
+                            call += string.Format("_{0}_{1}", GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(argument.shaderOutputName));
+                        }
+                        call += ");";
+                        s.AppendLine(call);
+                    }
+            });
         }
 
         public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)

@@ -1205,7 +1205,7 @@ namespace UnityEditor.ShaderGraph
             surfaceDescriptionFunction.AppendLine(String.Format("{0} {1}(SurfaceDescriptionInputs IN)", surfaceDescriptionName, functionName), false);
             using (surfaceDescriptionFunction.BlockScope())
             {
-                ShaderGenerator sg = new ShaderGenerator();
+                ShaderSnippetRegistry bodyCodeRegistry = new ShaderSnippetRegistry();
                 surfaceDescriptionFunction.AppendLine("{0} surface = ({0})0;", surfaceDescriptionName);
                 foreach (var activeNode in activeNodeList.OfType<AbstractMaterialNode>())
                 {
@@ -1216,13 +1216,15 @@ namespace UnityEditor.ShaderGraph
 
                     if (activeNode is IGeneratesBodyCode bodyNode)
                     {
-                        bodyNode.GenerateNodeCode(sg, graphContext, mode);
+                        bodyNode.GenerateNodeCode(bodyCodeRegistry, graphContext, mode);
                     }
 
                     activeNode.CollectShaderProperties(shaderProperties, mode);
                 }
 
-                surfaceDescriptionFunction.AppendLines(sg.GetShaderString(0));
+                string[] bodyCodeSnippets = bodyCodeRegistry.GetSnippets();
+                foreach(string snippet in bodyCodeSnippets)
+                    surfaceDescriptionFunction.AppendLine(snippet);
 
                 if (rootNode is IMasterNode || rootNode is SubGraphOutputNode)
                 {
@@ -1300,7 +1302,7 @@ namespace UnityEditor.ShaderGraph
             builder.AppendLine("{0} {1}({2} IN)", graphOutputStructName, functionName, graphInputStructName);
             using (builder.BlockScope())
             {
-                ShaderGenerator sg = new ShaderGenerator();
+                ShaderSnippetRegistry bodyCodeRegistry = new ShaderSnippetRegistry();
                 builder.AppendLine("{0} description = ({0})0;", graphOutputStructName);
                 foreach (var node in nodes.OfType<AbstractMaterialNode>())
                 {
@@ -1312,11 +1314,15 @@ namespace UnityEditor.ShaderGraph
                     var generatesBodyCode = node as IGeneratesBodyCode;
                     if (generatesBodyCode != null)
                     {
-                        generatesBodyCode.GenerateNodeCode(sg, graphContext, mode);
+                        generatesBodyCode.GenerateNodeCode(bodyCodeRegistry, graphContext, mode);
                     }
                     node.CollectShaderProperties(shaderProperties, mode);
                 }
-                builder.AppendLines(sg.GetShaderString(0));
+                
+                string[] bodyCodeSnippets = bodyCodeRegistry.GetSnippets();
+                foreach(string snippet in bodyCodeSnippets)
+                    builder.AppendLine(snippet);
+                    
                 foreach (var slot in slots)
                 {
                     var isSlotConnected = slot.owner.owner.GetEdges(slot.slotReference).Any();

@@ -4,7 +4,7 @@ using UnityEngine;
 namespace UnityEditor.ShaderGraph
 {
     [Title("Input", "Gradient", "Sample Gradient")]
-    class SampleGradient : CodeFunctionNode, IGeneratesBodyCode
+    class SampleGradient : CodeFunctionNode
     {
         public SampleGradient()
         {

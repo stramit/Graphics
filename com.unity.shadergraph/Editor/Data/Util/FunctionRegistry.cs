@@ -26,6 +26,11 @@ namespace UnityEditor.ShaderGraph
             return this.source == other.source
                 && this.snippet == other.snippet;
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 
     struct ShaderSnippetDescriptor

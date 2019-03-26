@@ -99,24 +99,27 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             });
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            var sb = new ShaderStringBuilder();
-
             string exposureMultiplier = (exposure.isOn || generationMode.IsPreview()) ? "1.0" : "GetInverseCurrentExposureMultiplier()";
             string uv = GetSlotValue(kUvInputSlotId, generationMode);
             string lod = GetSlotValue(kLodInputSlotId, generationMode);
 
-            sb.AppendLine("{0}3 {1} = {2}({3}.xy, {4}, {5});",
-                precision,
-                GetVariableNameForSlot(kColorOutputSlotId),
-                GetFunctionName(),
-                uv,
-                lod,
-                exposureMultiplier
-            );
-
-            visitor.AddShaderChunk(sb.ToString(), true);
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetVariableNameForNode(),
+                builder = s =>
+                    {
+                        s.AppendLine("{0}3 {1} = {2}({3}.xy, {4}, {5});",
+                            precision,
+                            GetVariableNameForSlot(kColorOutputSlotId),
+                            GetFunctionName(),
+                            uv,
+                            lod,
+                            exposureMultiplier);
+                    }
+            });
         }
 
         public bool RequiresCameraOpaqueTexture(ShaderStageCapability stageCapability)

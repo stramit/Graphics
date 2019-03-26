@@ -46,14 +46,13 @@ namespace UnityEditor.ShaderGraph
             RemoveSlotsNameNotMatching(new[] { TextureInputId, UVInputId, SamplerInputId, OffsetInputId, StrengthInputId, OutputSlotId });
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             var textureValue = GetSlotValue(TextureInputId, generationMode);
             var uvValue = GetSlotValue(UVInputId, generationMode);
             var offsetValue = GetSlotValue(OffsetInputId, generationMode);
             var strengthValue = GetSlotValue(StrengthInputId, generationMode);
             var outputValue = GetSlotValue(OutputSlotId, generationMode);
-
             var samplerSlot = FindInputSlot<MaterialSlot>(SamplerInputId);
             var edgesSampler = owner.GetEdges(samplerSlot.slotReference);
             string samplerValue;
@@ -62,11 +61,16 @@ namespace UnityEditor.ShaderGraph
             else
                 samplerValue = string.Format("sampler{0}", GetSlotValue(TextureInputId, generationMode));
 
-            var sb = new ShaderStringBuilder();
-            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision), GetVariableNameForSlot(OutputSlotId));
-            sb.AppendLine("{0}({1}, {2}, {3}, {4}, {5}, {6});", GetFunctionName(), textureValue, samplerValue, uvValue, offsetValue, strengthValue, outputValue);
-
-            visitor.AddShaderChunk(sb.ToString(), false);
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetVariableNameForNode(),
+                builder = s =>
+                    {
+                        s.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision), GetVariableNameForSlot(OutputSlotId));
+                        s.AppendLine("{0}({1}, {2}, {3}, {4}, {5}, {6});", GetFunctionName(), textureValue, samplerValue, uvValue, offsetValue, strengthValue, outputValue);
+                    }
+            });
         }
 
         public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)

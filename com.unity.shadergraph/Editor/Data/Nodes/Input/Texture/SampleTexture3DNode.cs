@@ -36,24 +36,27 @@ namespace UnityEditor.ShaderGraph
             RemoveSlotsNameNotMatching(new[] { OutputSlotId, TextureInputId, UVInput, SamplerInput });
         }
 
-        // Node generations
-        public virtual void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public virtual void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             var uvName = GetSlotValue(UVInput, generationMode);
-
-            //Sampler input slot
             var samplerSlot = FindInputSlot<MaterialSlot>(SamplerInput);
             var edgesSampler = owner.GetEdges(samplerSlot.slotReference);
-
             var id = GetSlotValue(TextureInputId, generationMode);
-            var result = string.Format("{0}4 {1} = SAMPLE_TEXTURE3D({2}, {3}, {4});"
-                    , precision
-                    , GetVariableNameForSlot(OutputSlotId)
-                    , id
-                    , edgesSampler.Any() ? GetSlotValue(SamplerInput, generationMode) : "sampler" + id
-                    , uvName);
 
-            visitor.AddShaderChunk(result, true);
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            {
+                source = guid,
+                identifier = GetVariableNameForNode(),
+                builder = s =>
+                    {
+                        s.AppendLine("{0}4 {1} = SAMPLE_TEXTURE3D({2}, {3}, {4});"
+                            , precision
+                            , GetVariableNameForSlot(OutputSlotId)
+                            , id
+                            , edgesSampler.Any() ? GetSlotValue(SamplerInput, generationMode) : "sampler" + id
+                            , uvName);
+                    }
+            });
         }
     }
 }

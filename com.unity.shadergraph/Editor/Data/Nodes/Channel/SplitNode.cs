@@ -39,10 +39,9 @@ namespace UnityEditor.ShaderGraph
 
         static int[] s_OutputSlots = {OutputSlotRId, OutputSlotGId, OutputSlotBId, OutputSlotAId};
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             var inputValue = GetSlotValue(InputSlotId, generationMode);
-
             var inputSlot = FindInputSlot<MaterialSlot>(InputSlotId);
             var numInputChannels = 0;
             if (inputSlot != null)
@@ -52,12 +51,20 @@ namespace UnityEditor.ShaderGraph
                     numInputChannels = 0;
             }
 
-            for (var i = 0; i < 4; i++)
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
             {
-                var outputFormat = numInputChannels == 1 ? inputValue : string.Format("{0}[{1}]", inputValue, i);
-                var outputValue = i >= numInputChannels ? "0" : outputFormat;
-                visitor.AddShaderChunk(string.Format("{0} {1} = {2};", precision, GetVariableNameForSlot(s_OutputSlots[i]), outputValue), true);
-            }
+                source = guid,
+                identifier = GetVariableNameForNode(),
+                builder = s =>
+                    {
+                        for (var i = 0; i < 4; i++)
+                        {
+                            var outputFormat = numInputChannels == 1 ? inputValue : string.Format("{0}[{1}]", inputValue, i);
+                            var outputValue = i >= numInputChannels ? "0" : outputFormat;
+                            s.AppendLine("{0} {1} = {2};", precision, GetVariableNameForSlot(s_OutputSlots[i]), outputValue);
+                        }
+                    }
+            });
         }
     }
 }

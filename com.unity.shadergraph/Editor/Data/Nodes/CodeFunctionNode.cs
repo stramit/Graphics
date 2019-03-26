@@ -340,36 +340,43 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             s_TempSlots.Clear();
             GetOutputSlots(s_TempSlots);
-            foreach (var outSlot in s_TempSlots)
+
+            registry.ProvideSnippet(new ShaderSnippetDescriptor()
             {
-                visitor.AddShaderChunk(GetParamTypeName(outSlot) + " " + GetVariableNameForSlot(outSlot.id) + ";", true);
-            }
+                source = guid,
+                identifier = GetVariableNameForNode(),
+                builder = s =>
+                    {
+                        foreach (var outSlot in s_TempSlots)
+                            s.AppendLine("{0} {1};", GetParamTypeName(outSlot), GetVariableNameForSlot(outSlot.id));
 
-            string call = GetFunctionName() + "(";
-            bool first = true;
-            s_TempSlots.Clear();
-            GetSlots(s_TempSlots);
-            s_TempSlots.Sort((slot1, slot2) => slot1.id.CompareTo(slot2.id));
-            foreach (var slot in s_TempSlots)
-            {
-                if (!first)
-                {
-                    call += ", ";
-                }
-                first = false;
+                        string call = GetFunctionName() + "(";
+                        bool first = true;
+                        s_TempSlots.Clear();
+                        GetSlots(s_TempSlots);
+                        s_TempSlots.Sort((slot1, slot2) => slot1.id.CompareTo(slot2.id));
+                        foreach (var slot in s_TempSlots)
+                        {
+                            if (!first)
+                            {
+                                call += ", ";
+                            }
+                            first = false;
 
-                if (slot.isInputSlot)
-                    call += GetSlotValue(slot.id, generationMode);
-                else
-                    call += GetVariableNameForSlot(slot.id);
-            }
-            call += ");";
+                            if (slot.isInputSlot)
+                                call += GetSlotValue(slot.id, generationMode);
+                            else
+                                call += GetVariableNameForSlot(slot.id);
+                        }
+                        call += ");";
 
-            visitor.AddShaderChunk(call, true);
+                        s.AppendLines(call);
+                    }
+            });
         }
 
         private string GetParamTypeName(MaterialSlot slot)
