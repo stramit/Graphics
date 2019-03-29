@@ -145,7 +145,7 @@ namespace UnityEditor.ShaderGraph
             sortedSubGraphs.Sort((s1, s2) => s1.descendents.Contains(s2.assetGuid) ? 1 : s2.descendents.Contains(s1.assetGuid) ? -1 : 0);
             
             // Finally process the topologically sorted sub graphs without recursion.
-            var registry = new ShaderSnippetRegistry(true);
+            var registry = new ShaderSnippetRegistry(true) { allowDuplicates = false };
             var messageManager = new MessageManager();
             foreach (var subGraphData in sortedSubGraphs)
             {
@@ -326,15 +326,13 @@ namespace UnityEditor.ShaderGraph
                         using (s.BlockScope())
                         {
                             // Just grab the body from the active nodes
-                            var bodyRegistry = new ShaderSnippetRegistry();
+                            var bodyRegistry = new ShaderSnippetRegistry() { allowDuplicates = true };
                             foreach (var node in nodes)
                             {
                                 if (node is IGeneratesBodyCode)
                                     (node as IGeneratesBodyCode).GenerateNodeCode(bodyRegistry, graphContext, GenerationMode.ForReals);
                             }
-                            string[] bodySnippets = bodyRegistry.GetSnippets();
-                            foreach(string snippet in bodySnippets)
-                                s.AppendLines(snippet);
+                            s.AppendLines(bodyRegistry.GetSnippetsAsString());
 
                             foreach (var slot in subGraphData.outputs)
                                 s.AppendLine($"{slot.shaderOutputName} = {outputNode.GetSlotValue(slot.id, GenerationMode.ForReals)};");

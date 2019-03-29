@@ -959,7 +959,7 @@ namespace UnityEditor.ShaderGraph
             var results = new GenerationResults();
 
             var shaderProperties = new PropertyCollector();
-            var functionRegistry = new ShaderSnippetRegistry();
+            var functionRegistry = new ShaderSnippetRegistry() { allowDuplicates = false };
 
             var vertexDescriptionFunction = new ShaderStringBuilder(0);
 
@@ -1083,10 +1083,7 @@ namespace UnityEditor.ShaderGraph
                 finalShader.AppendLines(surfaceDescriptionInputStruct.ToString());
                 finalShader.AppendNewLine();
 
-                string[] nodeFunctions = functionRegistry.GetUniqueSnippets();
-                foreach(string function in nodeFunctions)
-                    finalShader.AppendLines(function.ToString());
-                finalShader.AppendNewLine();
+                finalShader.AppendLines(functionRegistry.GetSnippetsAsString(true));
 
                 finalShader.AppendLines(surfaceDescriptionStruct.ToString());
                 finalShader.AppendNewLine();
@@ -1205,7 +1202,7 @@ namespace UnityEditor.ShaderGraph
             surfaceDescriptionFunction.AppendLine(String.Format("{0} {1}(SurfaceDescriptionInputs IN)", surfaceDescriptionName, functionName), false);
             using (surfaceDescriptionFunction.BlockScope())
             {
-                ShaderSnippetRegistry bodyCodeRegistry = new ShaderSnippetRegistry();
+                ShaderSnippetRegistry bodyCodeRegistry = new ShaderSnippetRegistry() { allowDuplicates = true };
                 surfaceDescriptionFunction.AppendLine("{0} surface = ({0})0;", surfaceDescriptionName);
                 foreach (var activeNode in activeNodeList.OfType<AbstractMaterialNode>())
                 {
@@ -1222,9 +1219,7 @@ namespace UnityEditor.ShaderGraph
                     activeNode.CollectShaderProperties(shaderProperties, mode);
                 }
 
-                string[] bodyCodeSnippets = bodyCodeRegistry.GetSnippets();
-                foreach(string snippet in bodyCodeSnippets)
-                    surfaceDescriptionFunction.AppendLines(snippet);
+                surfaceDescriptionFunction.AppendLines(bodyCodeRegistry.GetSnippetsAsString());
 
                 if (rootNode is IMasterNode || rootNode is SubGraphOutputNode)
                 {
@@ -1302,7 +1297,7 @@ namespace UnityEditor.ShaderGraph
             builder.AppendLine("{0} {1}({2} IN)", graphOutputStructName, functionName, graphInputStructName);
             using (builder.BlockScope())
             {
-                ShaderSnippetRegistry bodyCodeRegistry = new ShaderSnippetRegistry();
+                ShaderSnippetRegistry bodyCodeRegistry = new ShaderSnippetRegistry() { allowDuplicates = true };
                 builder.AppendLine("{0} description = ({0})0;", graphOutputStructName);
                 foreach (var node in nodes.OfType<AbstractMaterialNode>())
                 {
@@ -1319,9 +1314,7 @@ namespace UnityEditor.ShaderGraph
                     node.CollectShaderProperties(shaderProperties, mode);
                 }
                 
-                string[] bodyCodeSnippets = bodyCodeRegistry.GetSnippets();
-                foreach(string snippet in bodyCodeSnippets)
-                    builder.AppendLines(snippet);
+                builder.AppendLines(bodyCodeRegistry.GetSnippetsAsString());
                     
                 foreach (var slot in slots)
                 {

@@ -136,7 +136,7 @@ namespace UnityEngine.Rendering.LWRP
             // String builders
 
             var shaderProperties = new PropertyCollector();
-            var functionRegistry = new ShaderSnippetRegistry();
+            var functionRegistry = new ShaderSnippetRegistry() { allowDuplicates = false };
 
             var defines = new ShaderStringBuilder(1);
             var graph = new ShaderStringBuilder(0);
@@ -371,9 +371,7 @@ namespace UnityEngine.Rendering.LWRP
             graph.AppendLine(vertexDescriptionInputStruct.ToString());
             graph.AppendLine(surfaceDescriptionInputStruct.ToString());
 
-            string[] nodeFunctions = functionRegistry.GetUniqueSnippets();
-            foreach(string function in nodeFunctions)
-                graph.AppendLine(function.ToString());
+            graph.AppendLine(functionRegistry.GetSnippetsAsString(true));
 
             graph.AppendLine(vertexDescriptionStruct.ToString());
             graph.AppendLine(vertexDescriptionFunction.ToString());

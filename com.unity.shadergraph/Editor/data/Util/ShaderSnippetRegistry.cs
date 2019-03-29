@@ -47,6 +47,7 @@ namespace UnityEditor.ShaderGraph
 
         public Dictionary<string, ShaderSnippet> snippets => m_Snippets;
         public List<string> names { get; } = new List<string>();
+        public bool allowDuplicates { get; set; }
 
         public ShaderSnippetRegistry(bool validate = false)
         {
@@ -57,7 +58,7 @@ namespace UnityEditor.ShaderGraph
         {
             m_Builder.Clear();
             ShaderSnippet existingSnippet;
-            if (m_Snippets.TryGetValue(descriptor.identifier, out existingSnippet))
+            if (!allowDuplicates && m_Snippets.TryGetValue(descriptor.identifier, out existingSnippet))
             {
                 if (m_Validate)
                 {
@@ -77,22 +78,16 @@ namespace UnityEditor.ShaderGraph
             names.Add(descriptor.identifier);
         }
 
-        public string[] GetSnippets()
+        public string GetSnippetsAsString(bool appendNewLineBetweenSnippets = false)
         {
-            return snippets.Select(s => s.Value.snippet).ToArray();
-        }
-
-        public string[] GetUniqueSnippets()
-        {
-            Dictionary<string, string> snippetStrings = new Dictionary<string, string>();
+            m_Builder.Clear();
             foreach(KeyValuePair<string, ShaderSnippet> entry in snippets)
             {
-                ShaderSnippet snippet = entry.Value;
-                if(!snippetStrings.ContainsKey(entry.Key))
-                    snippetStrings.Add(entry.Key, snippet.snippet);
+                m_Builder.AppendLines(entry.Value.snippet);
+                if(appendNewLineBetweenSnippets)
+                    m_Builder.AppendNewLine();
             }
-
-            return snippetStrings.Select(s => s.Value).ToArray();
+            return m_Builder.ToString();
         }
     }
 }
