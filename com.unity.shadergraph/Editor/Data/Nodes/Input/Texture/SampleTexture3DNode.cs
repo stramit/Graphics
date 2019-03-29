@@ -43,20 +43,15 @@ namespace UnityEditor.ShaderGraph
             var edgesSampler = owner.GetEdges(samplerSlot.slotReference);
             var id = GetSlotValue(TextureInputId, generationMode);
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        s.AppendLine("{0}4 {1} = SAMPLE_TEXTURE3D({2}, {3}, {4});"
-                            , precision
-                            , GetVariableNameForSlot(OutputSlotId)
-                            , id
-                            , edgesSampler.Any() ? GetSlotValue(SamplerInput, generationMode) : "sampler" + id
-                            , uvName);
-                    }
-            });
+                s.AppendLine("{0}4 {1} = SAMPLE_TEXTURE3D({2}, {3}, {4});"
+                    , precision
+                    , GetVariableNameForSlot(OutputSlotId)
+                    , id
+                    , edgesSampler.Any() ? GetSlotValue(SamplerInput, generationMode) : "sampler" + id
+                    , uvName);
+            }
         }
     }
 }

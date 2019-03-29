@@ -345,38 +345,33 @@ namespace UnityEditor.ShaderGraph
             s_TempSlots.Clear();
             GetOutputSlots(s_TempSlots);
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
+                foreach (var outSlot in s_TempSlots)
+                    s.AppendLine("{0} {1};", GetParamTypeName(outSlot), GetVariableNameForSlot(outSlot.id));
+
+                string call = GetFunctionName() + "(";
+                bool first = true;
+                s_TempSlots.Clear();
+                GetSlots(s_TempSlots);
+                s_TempSlots.Sort((slot1, slot2) => slot1.id.CompareTo(slot2.id));
+                foreach (var slot in s_TempSlots)
+                {
+                    if (!first)
                     {
-                        foreach (var outSlot in s_TempSlots)
-                            s.AppendLine("{0} {1};", GetParamTypeName(outSlot), GetVariableNameForSlot(outSlot.id));
-
-                        string call = GetFunctionName() + "(";
-                        bool first = true;
-                        s_TempSlots.Clear();
-                        GetSlots(s_TempSlots);
-                        s_TempSlots.Sort((slot1, slot2) => slot1.id.CompareTo(slot2.id));
-                        foreach (var slot in s_TempSlots)
-                        {
-                            if (!first)
-                            {
-                                call += ", ";
-                            }
-                            first = false;
-
-                            if (slot.isInputSlot)
-                                call += GetSlotValue(slot.id, generationMode);
-                            else
-                                call += GetVariableNameForSlot(slot.id);
-                        }
-                        call += ");";
-
-                        s.AppendLines(call);
+                        call += ", ";
                     }
-            });
+                    first = false;
+
+                    if (slot.isInputSlot)
+                        call += GetSlotValue(slot.id, generationMode);
+                    else
+                        call += GetVariableNameForSlot(slot.id);
+                }
+                call += ");";
+
+                s.AppendLines(call);
+            }
         }
 
         private string GetParamTypeName(MaterialSlot slot)
@@ -447,18 +442,13 @@ namespace UnityEditor.ShaderGraph
 
         public virtual void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetFunctionName(), guid, out var s))
             {
-                source = guid,
-                identifier = GetFunctionName(),
-                builder = s =>
-                    {
-                        s.AppendLine(GetFunctionHeader());
-                        var functionBody = GetFunctionBody(GetFunctionToConvert());
-                        var lines = functionBody.Trim('\r', '\n', '\t', ' ');
-                        s.AppendLines(lines);
-                    }
-            });
+                s.AppendLine(GetFunctionHeader());
+                var functionBody = GetFunctionBody(GetFunctionToConvert());
+                var lines = functionBody.Trim('\r', '\n', '\t', ' ');
+                s.AppendLines(lines);
+            }
         }
 
         private static SlotAttribute GetSlotAttribute([NotNull] ParameterInfo info)

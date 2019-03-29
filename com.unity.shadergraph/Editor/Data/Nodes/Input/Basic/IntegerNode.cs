@@ -61,15 +61,10 @@ namespace UnityEditor.ShaderGraph
             if (generationMode.IsPreview())
                 return;
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s => 
-                    {
-                        s.AppendLine("{0} {1} = {2};", precision, GetVariableNameForNode(), m_Value);
-                    }
-            });
+                s.AppendLine("{0} {1} = {2};", precision, GetVariableNameForNode(), m_Value);
+            }
         }
 
         public override string GetVariableNameForSlot(int slotId)

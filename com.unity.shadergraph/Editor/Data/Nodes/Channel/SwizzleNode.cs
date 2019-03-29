@@ -131,31 +131,26 @@ namespace UnityEditor.ShaderGraph
             var inputValue = GetSlotValue(InputSlotId, generationMode);
             var inputValueType = FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType;
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        if (inputValueType == ConcreteSlotValueType.Vector1)
-                            s.AppendLine("{0} {1} = {2};", outputSlotType, outputName, inputValue);
-                        else if (generationMode == GenerationMode.ForReals)
-                            s.AppendLine("{0} {1} = {2}.{3}{4}{5}{6};",
-                                    outputSlotType,
-                                    outputName,
-                                    inputValue,
-                                    s_ComponentList[m_RedChannel].ToString(CultureInfo.InvariantCulture),
-                                    s_ComponentList[m_GreenChannel].ToString(CultureInfo.InvariantCulture),
-                                    s_ComponentList[m_BlueChannel].ToString(CultureInfo.InvariantCulture),
-                                    s_ComponentList[m_AlphaChannel].ToString(CultureInfo.InvariantCulture));
-                        else
-                            s.AppendLine("{0} {1} = {0}({3}[((int){2} >> 0) & 3], {3}[((int){2} >> 2) & 3], {3}[((int){2} >> 4) & 3], {3}[((int){2} >> 6) & 3]);",
-                                    outputSlotType,
-                                    outputName,
-                                    GetVariableNameForNode(), // Name of the uniform we encode swizzle values into
-                                    inputValue);
-                    }
-            });
+                if (inputValueType == ConcreteSlotValueType.Vector1)
+                    s.AppendLine("{0} {1} = {2};", outputSlotType, outputName, inputValue);
+                else if (generationMode == GenerationMode.ForReals)
+                    s.AppendLine("{0} {1} = {2}.{3}{4}{5}{6};",
+                            outputSlotType,
+                            outputName,
+                            inputValue,
+                            s_ComponentList[m_RedChannel].ToString(CultureInfo.InvariantCulture),
+                            s_ComponentList[m_GreenChannel].ToString(CultureInfo.InvariantCulture),
+                            s_ComponentList[m_BlueChannel].ToString(CultureInfo.InvariantCulture),
+                            s_ComponentList[m_AlphaChannel].ToString(CultureInfo.InvariantCulture));
+                else
+                    s.AppendLine("{0} {1} = {0}({3}[((int){2} >> 0) & 3], {3}[((int){2} >> 2) & 3], {3}[((int){2} >> 4) & 3], {3}[((int){2} >> 6) & 3]);",
+                            outputSlotType,
+                            outputName,
+                            GetVariableNameForNode(), // Name of the uniform we encode swizzle values into
+                            inputValue);
+            }
         }
 
         public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)

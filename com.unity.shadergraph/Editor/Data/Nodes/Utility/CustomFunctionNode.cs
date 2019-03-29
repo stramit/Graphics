@@ -74,55 +74,50 @@ namespace UnityEditor.ShaderGraph
             List<MaterialSlot> slots = new List<MaterialSlot>();
             GetOutputSlots<MaterialSlot>(slots);
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
+                if(!IsValidFunction())
+                {
+                    if(generationMode == GenerationMode.Preview && slots.Count != 0)
                     {
-                        if(!IsValidFunction())
-                        {
-                            if(generationMode == GenerationMode.Preview && slots.Count != 0)
-                            {
-                                slots.OrderBy(p => p.id);
-                                s.AppendLine("{0} _{1}_{2};",
-                                    NodeUtils.ConvertConcreteSlotValueTypeToString(precision, slots[0].concreteValueType),
-                                    GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(slots[0].shaderOutputName));
-                            }
-                            return;
-                        }
-                        
-                        foreach (var argument in slots)
-                            s.AppendLine("{0} _{1}_{2};",
-                                NodeUtils.ConvertConcreteSlotValueTypeToString(precision, argument.concreteValueType),
-                                GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(argument.shaderOutputName));
-
-                        string call = string.Format("{0}_{1}(", functionName, precision);
-                        bool first = true;
-                        
-                        slots.Clear();
-                        GetInputSlots<MaterialSlot>(slots);
-                        foreach (var argument in slots)
-                        {
-                            if (!first)
-                                call += ", ";
-                            first = false;
-                            call += SlotInputValue(argument, generationMode);
-                        }
-
-                        slots.Clear();
-                        GetOutputSlots<MaterialSlot>(slots);
-                        foreach (var argument in slots)
-                        {
-                            if (!first)
-                                call += ", ";
-                            first = false;
-                            call += string.Format("_{0}_{1}", GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(argument.shaderOutputName));
-                        }
-                        call += ");";
-                        s.AppendLine(call);
+                        slots.OrderBy(p => p.id);
+                        s.AppendLine("{0} _{1}_{2};",
+                            NodeUtils.ConvertConcreteSlotValueTypeToString(precision, slots[0].concreteValueType),
+                            GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(slots[0].shaderOutputName));
                     }
-            });
+                    return;
+                }
+                
+                foreach (var argument in slots)
+                    s.AppendLine("{0} _{1}_{2};",
+                        NodeUtils.ConvertConcreteSlotValueTypeToString(precision, argument.concreteValueType),
+                        GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(argument.shaderOutputName));
+
+                string call = string.Format("{0}_{1}(", functionName, precision);
+                bool first = true;
+                
+                slots.Clear();
+                GetInputSlots<MaterialSlot>(slots);
+                foreach (var argument in slots)
+                {
+                    if (!first)
+                        call += ", ";
+                    first = false;
+                    call += SlotInputValue(argument, generationMode);
+                }
+
+                slots.Clear();
+                GetOutputSlots<MaterialSlot>(slots);
+                foreach (var argument in slots)
+                {
+                    if (!first)
+                        call += ", ";
+                    first = false;
+                    call += string.Format("_{0}_{1}", GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(argument.shaderOutputName));
+                }
+                call += ");";
+                s.AppendLine(call);
+            }
         }
 
         public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
@@ -130,29 +125,24 @@ namespace UnityEditor.ShaderGraph
             if(!IsValidFunction())
                 return;
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(functionName, guid, out var s))
             {
-                source = guid,
-                identifier = functionName,
-                builder = s =>
-                    {
-                        switch (sourceType)
+                switch (sourceType)
+                {
+                    case HlslSourceType.File:
+                        s.AppendLine($"#include \"{functionSource}\"");
+                        break;
+                    case HlslSourceType.String:
+                        s.AppendLine(GetFunctionHeader());
+                        using(s.BlockScope())
                         {
-                            case HlslSourceType.File:
-                                s.AppendLine($"#include \"{functionSource}\"");
-                                break;
-                            case HlslSourceType.String:
-                                s.AppendLine(GetFunctionHeader());
-                                using(s.BlockScope())
-                                {
-                                    s.AppendLines(functionBody);
-                                }
-                                break;
-                            default:
-                                throw new ArgumentOutOfRangeException();
+                            s.AppendLines(functionBody);
                         }
-                    }
-            });
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
         }
 
         private string GetFunctionHeader()

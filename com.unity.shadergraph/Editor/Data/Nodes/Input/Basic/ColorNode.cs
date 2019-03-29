@@ -79,21 +79,16 @@ namespace UnityEditor.ShaderGraph
             if (generationMode.IsPreview())
                 return;
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s => 
-                    {
-                        s.AppendLine(@"{0}4 {1} = IsGammaSpace() ? {0}4({2}, {3}, {4}, {5}) : {0}4(SRGBToLinear({0}3({2}, {3}, {4})), {5});"
-                            , precision
-                            , GetVariableNameForNode()
-                            , NodeUtils.FloatToShaderValue(color.color.r)
-                            , NodeUtils.FloatToShaderValue(color.color.g)
-                            , NodeUtils.FloatToShaderValue(color.color.b)
-                            , NodeUtils.FloatToShaderValue(color.color.a));
-                    }
-            });
+                s.AppendLine(@"{0}4 {1} = IsGammaSpace() ? {0}4({2}, {3}, {4}, {5}) : {0}4(SRGBToLinear({0}3({2}, {3}, {4})), {5});"
+                    , precision
+                    , GetVariableNameForNode()
+                    , NodeUtils.FloatToShaderValue(color.color.r)
+                    , NodeUtils.FloatToShaderValue(color.color.g)
+                    , NodeUtils.FloatToShaderValue(color.color.b)
+                    , NodeUtils.FloatToShaderValue(color.color.a));
+            }
         }
 
         public override string GetVariableNameForSlot(int slotId)

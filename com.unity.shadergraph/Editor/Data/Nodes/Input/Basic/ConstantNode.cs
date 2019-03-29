@@ -61,15 +61,10 @@ namespace UnityEditor.ShaderGraph
 
         public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s => 
-                    {
-                        s.AppendLine("{0} {1} = {2};", precision, GetVariableNameForNode(), m_constantList[constant].ToString(CultureInfo.InvariantCulture));
-                    }
-            });
+                s.AppendLine("{0} {1} = {2};", precision, GetVariableNameForNode(), m_constantList[constant].ToString(CultureInfo.InvariantCulture));
+            }
         }
 
         public override string GetVariableNameForSlot(int slotId)

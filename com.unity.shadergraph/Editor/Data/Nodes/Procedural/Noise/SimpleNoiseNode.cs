@@ -46,33 +46,29 @@ namespace UnityEditor.ShaderGraph
 
         public override void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet("unity_noise_randomValue", guid, out var s))
             {
-                source = guid,
-                identifier = "unity_noise_randomValue",
-                builder = s => s.Append(@"
+                s.Append(@"
 inline float unity_noise_randomValue (float2 uv)
 {
     return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
 }
-")});
+");
+            }
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet("unity_noise_interpolate", guid, out var s))
             {
-                source = guid,
-                identifier = "unity_noise_interpolate",
-                builder = s => s.Append(@"
+                s.Append(@"
 inline float unity_noise_interpolate (float a, float b, float t)
 {
     return (1.0-t)*a + (t*b);
 }
-")});
+");
+            }
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet("unity_valueNoise", guid, out var s))
             {
-                source = guid,
-                identifier = "unity_valueNoise",
-                builder = s => s.Append(@"
+                s.Append(@"
 inline float unity_valueNoise (float2 uv)
 {
     float2 i = floor(uv);
@@ -94,7 +90,8 @@ inline float unity_valueNoise (float2 uv)
     float t = unity_noise_interpolate(bottomOfGrid, topOfGrid, f.y);
     return t;
 }
-")});
+");
+            }
 
             base.GenerateNodeFunction(registry, graphContext, generationMode);
         }

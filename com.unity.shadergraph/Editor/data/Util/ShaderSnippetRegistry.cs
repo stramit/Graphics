@@ -32,11 +32,17 @@ namespace UnityEditor.ShaderGraph
         }
     }
 
-    struct ShaderSnippetDescriptor
+    struct ShaderSnippetDescriptor : IDisposable
     {
+        public ShaderSnippetRegistry registry { get; set; }
+
         public Guid source;
         public string identifier;
-        public Action<ShaderStringBuilder> builder;
+
+        public void Dispose()
+        {
+            registry.EndSnippet(this);
+        }
     }
 
     class ShaderSnippetRegistry
@@ -54,15 +60,25 @@ namespace UnityEditor.ShaderGraph
             m_Validate = validate;
         }
 
-        public void ProvideSnippet(ShaderSnippetDescriptor descriptor)
+        public ShaderSnippetDescriptor ProvideSnippet(string identifier, Guid source, out ShaderStringBuilder s)
         {
-            m_Builder.Clear();
+            s = m_Builder;
+            
+            return(new ShaderSnippetDescriptor()
+            {
+                registry = this,
+                identifier = identifier,
+                source = source,
+            });
+        }
+
+        public void EndSnippet(ShaderSnippetDescriptor descriptor)
+        {
             ShaderSnippet existingSnippet;
             if (!allowDuplicates && m_Snippets.TryGetValue(descriptor.identifier, out existingSnippet))
             {
                 if (m_Validate)
                 {
-                    descriptor.builder(m_Builder);
                     var snippet = ShaderSnippet.Build(descriptor.source, m_Builder.ToString());
                     if (!snippet.Equals(existingSnippet))
                         Debug.LogErrorFormat(@"Function `{0}` has varying implementations:{1}{1}{2}{1}{1}{3}", descriptor.identifier, Environment.NewLine, snippet, existingSnippet);
@@ -70,12 +86,12 @@ namespace UnityEditor.ShaderGraph
             }
             else
             {
-                descriptor.builder(m_Builder);
                 var snippet = ShaderSnippet.Build(descriptor.source, m_Builder.ToString());
                 m_Snippets.Add(descriptor.identifier, snippet);
             }
 
             names.Add(descriptor.identifier);
+            m_Builder.Clear();
         }
 
         public string GetSnippetsAsString(bool appendNewLineBetweenSnippets = false)

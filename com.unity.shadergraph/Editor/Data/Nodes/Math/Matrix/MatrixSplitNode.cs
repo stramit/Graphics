@@ -87,49 +87,44 @@ namespace UnityEditor.ShaderGraph
 
             int concreteRowCount = useIndentity ? 2 : numInputRows;
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
+                for (var r = 0; r < 4; r++)
+                {
+                    string outputValue;
+                    if (r >= numInputRows)
                     {
-                        for (var r = 0; r < 4; r++)
+                        outputValue = string.Format("{0}{1}(", precision, concreteRowCount);
+                        for (int c = 0; c < concreteRowCount; c++)
                         {
-                            string outputValue;
-                            if (r >= numInputRows)
-                            {
-                                outputValue = string.Format("{0}{1}(", precision, concreteRowCount);
-                                for (int c = 0; c < concreteRowCount; c++)
+                            if (c != 0)
+                                outputValue += ", ";
+                            outputValue += Matrix4x4.identity.GetRow(r)[c];
+                        }
+                        outputValue += ")";
+                    }
+                    else
+                    {
+                        switch (m_Axis)
+                        {
+                            case MatrixAxis.Column:
+                                outputValue = string.Format("{0}{1}(", precision, numInputRows);
+                                for (int c = 0; c < numInputRows; c++)
                                 {
                                     if (c != 0)
                                         outputValue += ", ";
-                                    outputValue += Matrix4x4.identity.GetRow(r)[c];
+                                    outputValue += string.Format("{0}[{1}].{2}", inputValue, c, s_ComponentList[r]);
                                 }
                                 outputValue += ")";
-                            }
-                            else
-                            {
-                                switch (m_Axis)
-                                {
-                                    case MatrixAxis.Column:
-                                        outputValue = string.Format("{0}{1}(", precision, numInputRows);
-                                        for (int c = 0; c < numInputRows; c++)
-                                        {
-                                            if (c != 0)
-                                                outputValue += ", ";
-                                            outputValue += string.Format("{0}[{1}].{2}", inputValue, c, s_ComponentList[r]);
-                                        }
-                                        outputValue += ")";
-                                        break;
-                                    default:
-                                        outputValue = string.Format("{0}[{1}]", inputValue, r);
-                                        break;
-                                }
-                            }
-                            s.AppendLine("{0}{1} {2} = {3};", precision, concreteRowCount, GetVariableNameForSlot(s_OutputSlots[r]), outputValue);
+                                break;
+                            default:
+                                outputValue = string.Format("{0}[{1}]", inputValue, r);
+                                break;
                         }
                     }
-            });
+                    s.AppendLine("{0}{1} {2} = {3};", precision, concreteRowCount, GetVariableNameForSlot(s_OutputSlots[r]), outputValue);
+                }
+            }
         }
 
         public override void ValidateNode()

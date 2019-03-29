@@ -101,22 +101,17 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             
             string inverseExposureMultiplier = (generationMode.IsPreview()) ? "1.0" : "GetInverseCurrentExposureMultiplier()";
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        s.AppendLine(@"{0}3 {1} = {2}({3}.xyz, {4}, {5}, {6});",
-                            precision,
-                            outputValue,
-                            GetFunctionName(),
-                            colorValue,
-                            intensityValue,
-                            exposureWeightValue,
-                            inverseExposureMultiplier);
-                    }
-            });
+                s.AppendLine(@"{0}3 {1} = {2}({3}.xyz, {4}, {5}, {6});",
+                    precision,
+                    outputValue,
+                    GetFunctionName(),
+                    colorValue,
+                    intensityValue,
+                    exposureWeightValue,
+                    inverseExposureMultiplier);
+            }
         }
 
         string GetFunctionName()
@@ -126,30 +121,25 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
         public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetFunctionName(), guid, out var s))
             {
-                source = guid,
-                identifier = GetFunctionName(),
-                builder = s =>
+                s.AppendLine("{1}3 {0}({1}3 ldrColor, {2} luminanceIntensity, {2} exposureWeight, {2} inverseCurrentExposureMultiplier)",
+                    GetFunctionName(),
+                    precision,
+                    intensitySlot.concreteValueType.ToString(precision));
+                using (s.BlockScope())
+                {
+                    if (normalizeColor.isOn)
                     {
-                        s.AppendLine("{1}3 {0}({1}3 ldrColor, {2} luminanceIntensity, {2} exposureWeight, {2} inverseCurrentExposureMultiplier)",
-                            GetFunctionName(),
-                            precision,
-                            intensitySlot.concreteValueType.ToString(precision));
-                        using (s.BlockScope())
-                        {
-                            if (normalizeColor.isOn)
-                            {
-                                s.AppendLine("ldrColor = ldrColor * rcp(max(Luminance(ldrColor), 1e-6));");
-                            }
-                            s.AppendLine("{0}3 hdrColor = ldrColor * luminanceIntensity;", precision);
-                            s.AppendNewLine();
-                            s.AppendLine("// Inverse pre-expose using _EmissiveExposureWeight weight");
-                            s.AppendLine("hdrColor = lerp(hdrColor * inverseCurrentExposureMultiplier, hdrColor, exposureWeight);", precision);
-                            s.AppendLine("return hdrColor;");
-                        }
+                        s.AppendLine("ldrColor = ldrColor * rcp(max(Luminance(ldrColor), 1e-6));");
                     }
-            });
+                    s.AppendLine("{0}3 hdrColor = ldrColor * luminanceIntensity;", precision);
+                    s.AppendNewLine();
+                    s.AppendLine("// Inverse pre-expose using _EmissiveExposureWeight weight");
+                    s.AppendLine("hdrColor = lerp(hdrColor * inverseCurrentExposureMultiplier, hdrColor, exposureWeight);", precision);
+                    s.AppendLine("return hdrColor;");
+                }
+            }
         }
 
         Vector3 GetHDREmissionColor(Vector3 ldrColor, float intensity)

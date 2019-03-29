@@ -82,96 +82,91 @@ namespace UnityEditor.ShaderGraph
             var edgesSampler = owner.GetEdges(samplerSlot.slotReference);
             var id = GetSlotValue(TextureInputId, generationMode);
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        s.AppendLine("{0}3 {1}_UV = {2} * {3};", precision, GetVariableNameForNode(),
-                            GetSlotValue(PositionInputId, generationMode), GetSlotValue(TileInputId, generationMode));
+                s.AppendLine("{0}3 {1}_UV = {2} * {3};", precision, GetVariableNameForNode(),
+                    GetSlotValue(PositionInputId, generationMode), GetSlotValue(TileInputId, generationMode));
 
-                        switch (textureType)
-                        {
-                            // Whiteout blend method
-                            // https://medium.com/@bgolus/normal-mapping-for-a-triplanar-shader-10bf39dca05a
-                            case TextureType.Normal:
-                                s.AppendLine("{0}3 {1}_Blend = max(pow(abs({2}), {3}), 0);", precision, GetVariableNameForNode(),
-                                GetSlotValue(NormalInputId, generationMode), GetSlotValue(BlendInputId, generationMode));
-                                s.AppendLine("{0}_Blend /= ({0}_Blend.x + {0}_Blend.y + {0}_Blend.z ).xxx;", GetVariableNameForNode());
+                switch (textureType)
+                {
+                    // Whiteout blend method
+                    // https://medium.com/@bgolus/normal-mapping-for-a-triplanar-shader-10bf39dca05a
+                    case TextureType.Normal:
+                        s.AppendLine("{0}3 {1}_Blend = max(pow(abs({2}), {3}), 0);", precision, GetVariableNameForNode(),
+                        GetSlotValue(NormalInputId, generationMode), GetSlotValue(BlendInputId, generationMode));
+                        s.AppendLine("{0}_Blend /= ({0}_Blend.x + {0}_Blend.y + {0}_Blend.z ).xxx;", GetVariableNameForNode());
 
-                                s.AppendLine("{0}3 {1}_X = UnpackNormalmapRGorAG(SAMPLE_TEXTURE2D({2}, {3}, {1}_UV.zy));"
-                                , precision
-                                , GetVariableNameForNode()
-                                , id
-                                , edgesSampler.Any() ? GetSlotValue(SamplerInputId, generationMode) : "sampler" + id);
+                        s.AppendLine("{0}3 {1}_X = UnpackNormalmapRGorAG(SAMPLE_TEXTURE2D({2}, {3}, {1}_UV.zy));"
+                        , precision
+                        , GetVariableNameForNode()
+                        , id
+                        , edgesSampler.Any() ? GetSlotValue(SamplerInputId, generationMode) : "sampler" + id);
 
-                                s.AppendLine("{0}3 {1}_Y = UnpackNormalmapRGorAG(SAMPLE_TEXTURE2D({2}, {3}, {1}_UV.xz));"
-                                , precision
-                                , GetVariableNameForNode()
-                                , id
-                                , edgesSampler.Any() ? GetSlotValue(SamplerInputId, generationMode) : "sampler" + id);
+                        s.AppendLine("{0}3 {1}_Y = UnpackNormalmapRGorAG(SAMPLE_TEXTURE2D({2}, {3}, {1}_UV.xz));"
+                        , precision
+                        , GetVariableNameForNode()
+                        , id
+                        , edgesSampler.Any() ? GetSlotValue(SamplerInputId, generationMode) : "sampler" + id);
 
-                                s.AppendLine("{0}3 {1}_Z = UnpackNormalmapRGorAG(SAMPLE_TEXTURE2D({2}, {3}, {1}_UV.xy));"
-                                , precision
-                                , GetVariableNameForNode()
-                                , id
-                                , edgesSampler.Any() ? GetSlotValue(SamplerInputId, generationMode) : "sampler" + id);
+                        s.AppendLine("{0}3 {1}_Z = UnpackNormalmapRGorAG(SAMPLE_TEXTURE2D({2}, {3}, {1}_UV.xy));"
+                        , precision
+                        , GetVariableNameForNode()
+                        , id
+                        , edgesSampler.Any() ? GetSlotValue(SamplerInputId, generationMode) : "sampler" + id);
 
-                                s.AppendLine("{0}_X = {1}3({0}_X.xy + {2}.zy, abs({0}_X.z) * {2}.x);"
-                                , GetVariableNameForNode()
-                                , precision
-                                , GetSlotValue(NormalInputId, generationMode));
+                        s.AppendLine("{0}_X = {1}3({0}_X.xy + {2}.zy, abs({0}_X.z) * {2}.x);"
+                        , GetVariableNameForNode()
+                        , precision
+                        , GetSlotValue(NormalInputId, generationMode));
 
-                                s.AppendLine("{0}_Y = {1}3({0}_Y.xy + {2}.xz, abs({0}_Y.z) * {2}.y);"
-                                , GetVariableNameForNode()
-                                , precision
-                                , GetSlotValue(NormalInputId, generationMode));
+                        s.AppendLine("{0}_Y = {1}3({0}_Y.xy + {2}.xz, abs({0}_Y.z) * {2}.y);"
+                        , GetVariableNameForNode()
+                        , precision
+                        , GetSlotValue(NormalInputId, generationMode));
 
-                                s.AppendLine("{0}_Z = {1}3({0}_Z.xy + {2}.xy, abs({0}_Z.z) * {2}.z);"
-                                , GetVariableNameForNode()
-                                , precision
-                                , GetSlotValue(NormalInputId, generationMode));
+                        s.AppendLine("{0}_Z = {1}3({0}_Z.xy + {2}.xy, abs({0}_Z.z) * {2}.z);"
+                        , GetVariableNameForNode()
+                        , precision
+                        , GetSlotValue(NormalInputId, generationMode));
 
-                                s.AppendLine("{0}4 {1} = {0}4(normalize({2}_X.zyx * {2}_Blend.x + {2}_Y.xzy * {2}_Blend.y + {2}_Z.xyz * {2}_Blend.z), 1);"
-                                , precision
-                                , GetVariableNameForSlot(OutputSlotId)
-                                , GetVariableNameForNode());
-                                s.AppendLine("float3x3 {0}_Transform = float3x3(IN.WorldSpaceTangent, IN.WorldSpaceBiTangent, IN.WorldSpaceNormal);", GetVariableNameForNode());
-                                s.AppendLine("{0}.rgb = TransformWorldToTangent({0}.rgb, {1}_Transform);"
-                                , GetVariableNameForSlot(OutputSlotId)
-                                , GetVariableNameForNode());
-                                break;
-                            default:
-                                s.AppendLine("{0}3 {1}_Blend = pow(abs({2}), {3});", precision, GetVariableNameForNode(),
-                                GetSlotValue(NormalInputId, generationMode), GetSlotValue(BlendInputId, generationMode));
-                                s.AppendLine("{0}_Blend /= dot({0}_Blend, 1.0);", GetVariableNameForNode());
-                                s.AppendLine("{0}4 {1}_X = SAMPLE_TEXTURE2D({2}, {3}, {1}_UV.zy);"
-                                , precision
-                                , GetVariableNameForNode()
-                                , id
-                                , edgesSampler.Any() ? GetSlotValue(SamplerInputId, generationMode) : "sampler" + id);
+                        s.AppendLine("{0}4 {1} = {0}4(normalize({2}_X.zyx * {2}_Blend.x + {2}_Y.xzy * {2}_Blend.y + {2}_Z.xyz * {2}_Blend.z), 1);"
+                        , precision
+                        , GetVariableNameForSlot(OutputSlotId)
+                        , GetVariableNameForNode());
+                        s.AppendLine("float3x3 {0}_Transform = float3x3(IN.WorldSpaceTangent, IN.WorldSpaceBiTangent, IN.WorldSpaceNormal);", GetVariableNameForNode());
+                        s.AppendLine("{0}.rgb = TransformWorldToTangent({0}.rgb, {1}_Transform);"
+                        , GetVariableNameForSlot(OutputSlotId)
+                        , GetVariableNameForNode());
+                        break;
+                    default:
+                        s.AppendLine("{0}3 {1}_Blend = pow(abs({2}), {3});", precision, GetVariableNameForNode(),
+                        GetSlotValue(NormalInputId, generationMode), GetSlotValue(BlendInputId, generationMode));
+                        s.AppendLine("{0}_Blend /= dot({0}_Blend, 1.0);", GetVariableNameForNode());
+                        s.AppendLine("{0}4 {1}_X = SAMPLE_TEXTURE2D({2}, {3}, {1}_UV.zy);"
+                        , precision
+                        , GetVariableNameForNode()
+                        , id
+                        , edgesSampler.Any() ? GetSlotValue(SamplerInputId, generationMode) : "sampler" + id);
 
-                                s.AppendLine("{0}4 {1}_Y = SAMPLE_TEXTURE2D({2}, {3}, {1}_UV.xz);"
-                                , precision
-                                , GetVariableNameForNode()
-                                , id
-                                , edgesSampler.Any() ? GetSlotValue(SamplerInputId, generationMode) : "sampler" + id);
+                        s.AppendLine("{0}4 {1}_Y = SAMPLE_TEXTURE2D({2}, {3}, {1}_UV.xz);"
+                        , precision
+                        , GetVariableNameForNode()
+                        , id
+                        , edgesSampler.Any() ? GetSlotValue(SamplerInputId, generationMode) : "sampler" + id);
 
-                                s.AppendLine("{0}4 {1}_Z = SAMPLE_TEXTURE2D({2}, {3}, {1}_UV.xy);"
-                                , precision
-                                , GetVariableNameForNode()
-                                , id
-                                , edgesSampler.Any() ? GetSlotValue(SamplerInputId, generationMode) : "sampler" + id);
+                        s.AppendLine("{0}4 {1}_Z = SAMPLE_TEXTURE2D({2}, {3}, {1}_UV.xy);"
+                        , precision
+                        , GetVariableNameForNode()
+                        , id
+                        , edgesSampler.Any() ? GetSlotValue(SamplerInputId, generationMode) : "sampler" + id);
 
-                                s.AppendLine("{0}4 {1} = {2}_X * {2}_Blend.x + {2}_Y * {2}_Blend.y + {2}_Z * {2}_Blend.z;"
-                                , precision
-                                , GetVariableNameForSlot(OutputSlotId)
-                                , GetVariableNameForNode());
-                                break;
-                        }
-                    }
-            });
+                        s.AppendLine("{0}4 {1} = {2}_X * {2}_Blend.x + {2}_Y * {2}_Blend.y + {2}_Z * {2}_Blend.z;"
+                        , precision
+                        , GetVariableNameForSlot(OutputSlotId)
+                        , GetVariableNameForNode());
+                        break;
+                }
+            }
         }
 
         public NeededCoordinateSpace RequiresPosition(ShaderStageCapability stageCapability)

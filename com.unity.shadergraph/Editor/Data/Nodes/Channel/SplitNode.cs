@@ -51,20 +51,15 @@ namespace UnityEditor.ShaderGraph
                     numInputChannels = 0;
             }
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        for (var i = 0; i < 4; i++)
-                        {
-                            var outputFormat = numInputChannels == 1 ? inputValue : string.Format("{0}[{1}]", inputValue, i);
-                            var outputValue = i >= numInputChannels ? "0" : outputFormat;
-                            s.AppendLine("{0} {1} = {2};", precision, GetVariableNameForSlot(s_OutputSlots[i]), outputValue);
-                        }
-                    }
-            });
+                for (var i = 0; i < 4; i++)
+                {
+                    var outputFormat = numInputChannels == 1 ? inputValue : string.Format("{0}[{1}]", inputValue, i);
+                    var outputValue = i >= numInputChannels ? "0" : outputFormat;
+                    s.AppendLine("{0} {1} = {2};", precision, GetVariableNameForSlot(s_OutputSlots[i]), outputValue);
+                }
+            }
         }
     }
 }

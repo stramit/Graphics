@@ -105,16 +105,11 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             
             if (diffusionProfile != null)
                 hash = (diffusionProfile.profile.hash);
-            
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        s.AppendLine("{0} {1} = asfloat(uint({2}));", precision, GetVariableNameForSlot(0), hash);
-                    }
-            });
+                s.AppendLine("{0} {1} = asfloat(uint({2}));", precision, GetVariableNameForSlot(0), hash);
+            }
         }
     }
 }

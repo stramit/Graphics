@@ -44,15 +44,10 @@ namespace UnityEditor.ShaderGraph
 
         public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        s.AppendLine("{0}4 {1} = IN.{2};", precision, GetVariableNameForSlot(OutputSlotId), m_OutputChannel.GetUVName());
-                    }
-            });
+                s.AppendLine("{0}4 {1} = IN.{2};", precision, GetVariableNameForSlot(OutputSlotId), m_OutputChannel.GetUVName());
+            }
         }
 
         public bool RequiresMeshUV(UVChannel channel, ShaderStageCapability stageCapability)

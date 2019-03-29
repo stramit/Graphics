@@ -35,16 +35,11 @@ namespace UnityEditor.ShaderGraph
 
         public virtual void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        s.AppendLine("{0} {1} = {2}_TexelSize.z;", precision, GetVariableNameForSlot(OutputSlotWId), GetSlotValue(TextureInputId, generationMode));
-                        s.AppendLine("{0} {1} = {2}_TexelSize.w;", precision, GetVariableNameForSlot(OutputSlotHId), GetSlotValue(TextureInputId, generationMode));
-                    }
-            });
+                s.AppendLine("{0} {1} = {2}_TexelSize.z;", precision, GetVariableNameForSlot(OutputSlotWId), GetSlotValue(TextureInputId, generationMode));
+                s.AppendLine("{0} {1} = {2}_TexelSize.w;", precision, GetVariableNameForSlot(OutputSlotHId), GetSlotValue(TextureInputId, generationMode));
+            }
         }
 
         public bool RequiresMeshUV(UVChannel channel, ShaderStageCapability stageCapability)

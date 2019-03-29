@@ -27,11 +27,9 @@ namespace UnityEditor.ShaderGraph
 
         public override void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet("unity_gradientNoise_dir", guid, out var s))
             {
-                source = guid,
-                identifier = "unity_gradientNoise_dir",
-                builder = s => s.Append(@"
+                s.Append(@"
 float2 unity_gradientNoise_dir(float2 p)
 {
     // Permutation and hashing used in webgl-nosie goo.gl/pX7HtC
@@ -41,14 +39,12 @@ float2 unity_gradientNoise_dir(float2 p)
     x = frac(x / 41) * 2 - 1;
     return normalize(float2(x - floor(x + 0.5), abs(x) - 0.5));
 }
-")
-            });
+");
+            }
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet("unity_gradientNoise", guid, out var s))
             {
-                source = guid,
-                identifier = "unity_gradientNoise",
-                builder = s => s.Append(@"
+                s.Append(@"
 float unity_gradientNoise(float2 p)
 {
     float2 ip = floor(p);
@@ -60,8 +56,8 @@ float unity_gradientNoise(float2 p)
     fp = fp * fp * fp * (fp * (fp * 6 - 15) + 10);
     return lerp(lerp(d00, d01, fp.y), lerp(d10, d11, fp.y), fp.x);
 }
-")
-            });
+");
+            }
 
             base.GenerateNodeFunction(registry, graphContext, generationMode);
         }

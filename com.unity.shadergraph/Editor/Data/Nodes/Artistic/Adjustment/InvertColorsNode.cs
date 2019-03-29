@@ -107,53 +107,43 @@ namespace UnityEditor.ShaderGraph
             var inputValue = GetSlotValue(InputSlotId, generationMode);
             var outputValue = GetSlotValue(OutputSlotId, generationMode);
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        s.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision), GetVariableNameForSlot(OutputSlotId));
+                s.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision), GetVariableNameForSlot(OutputSlotId));
 
-                        if (!generationMode.IsPreview())
-                        {
-                            s.AppendLine("{0} _{1}_InvertColors = {0} ({2}",
-                                FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision),
-                                GetVariableNameForNode(),
-                                Convert.ToInt32(m_RedChannel));
-                            if (channelCount > 1)
-                                s.Append(", {0}", Convert.ToInt32(m_GreenChannel));
-                            if (channelCount > 2)
-                                s.Append(", {0}", Convert.ToInt32(m_BlueChannel));
-                            if (channelCount > 3)
-                                s.Append(", {0}", Convert.ToInt32(m_AlphaChannel));
-                            s.Append(");");
-                        }
+                if (!generationMode.IsPreview())
+                {
+                    s.AppendLine("{0} _{1}_InvertColors = {0} ({2}",
+                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision),
+                        GetVariableNameForNode(),
+                        Convert.ToInt32(m_RedChannel));
+                    if (channelCount > 1)
+                        s.Append(", {0}", Convert.ToInt32(m_GreenChannel));
+                    if (channelCount > 2)
+                        s.Append(", {0}", Convert.ToInt32(m_BlueChannel));
+                    if (channelCount > 3)
+                        s.Append(", {0}", Convert.ToInt32(m_AlphaChannel));
+                    s.Append(");");
+                }
 
-                        s.AppendLine("{0}({1}, _{2}_InvertColors, {3});", GetFunctionName(), inputValue, GetVariableNameForNode(), outputValue);
-                    }
-            });
+                s.AppendLine("{0}({1}, _{2}_InvertColors, {3});", GetFunctionName(), inputValue, GetVariableNameForNode(), outputValue);
+            }
         }
 
         public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetFunctionName(), guid, out var s))
             {
-                source = guid,
-                identifier = GetFunctionName(),
-                builder = s =>
-                    {
-                        s.AppendLine("void {0}({1} In, {2} InvertColors, out {3} Out)",
-                            GetFunctionName(),
-                            FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToString(precision),
-                            FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToString(precision),
-                            FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
-                        using (s.BlockScope())
-                        {
-                            s.AppendLine("Out = abs(InvertColors - In);");
-                        }
-                    }
-            });
+                s.AppendLine("void {0}({1} In, {2} InvertColors, out {3} Out)",
+                    GetFunctionName(),
+                    FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToString(precision),
+                    FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToString(precision),
+                    FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
+                using (s.BlockScope())
+                {
+                    s.AppendLine("Out = abs(InvertColors - In);");
+                }
+            }
         }
 
         public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)

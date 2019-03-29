@@ -88,40 +88,35 @@ namespace UnityEditor.ShaderGraph
 
         public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s => 
+                if (!generationMode.IsPreview())
+                {
+                    switch (material.type)
                     {
-                        if (!generationMode.IsPreview())
-                        {
-                            switch (material.type)
-                            {
-                                case DielectricMaterialType.Custom:
-                                    s.AppendLine("{0} _{1}_IOR = {2};", precision, GetVariableNameForNode(), material.indexOfRefraction);
-                                    break;
-                                case DielectricMaterialType.Common:
-                                    s.AppendLine("{0} _{1}_Range = {2};", precision, GetVariableNameForNode(), material.range);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        switch (material.type)
-                        {
-                            case DielectricMaterialType.Common:
-                                s.AppendLine("{0} {1} = lerp(0.034, 0.048, _{2}_Range);", precision, GetVariableNameForSlot(kOutputSlotId), GetVariableNameForNode());
-                                break;
-                            case DielectricMaterialType.Custom:
-                                s.AppendLine("{0} {1} = pow(_{2}_IOR - 1, 2) / pow(_{2}_IOR + 1, 2);", precision, GetVariableNameForSlot(kOutputSlotId), GetVariableNameForNode());
-                                break;
-                            default:
-                                s.AppendLine("{0} {1} = {2};", precision, GetVariableNameForSlot(kOutputSlotId), m_MaterialList[material.type].ToString(CultureInfo.InvariantCulture));
-                                break;
-                        }
+                        case DielectricMaterialType.Custom:
+                            s.AppendLine("{0} _{1}_IOR = {2};", precision, GetVariableNameForNode(), material.indexOfRefraction);
+                            break;
+                        case DielectricMaterialType.Common:
+                            s.AppendLine("{0} _{1}_Range = {2};", precision, GetVariableNameForNode(), material.range);
+                            break;
+                        default:
+                            break;
                     }
-            });
+                }
+                switch (material.type)
+                {
+                    case DielectricMaterialType.Common:
+                        s.AppendLine("{0} {1} = lerp(0.034, 0.048, _{2}_Range);", precision, GetVariableNameForSlot(kOutputSlotId), GetVariableNameForNode());
+                        break;
+                    case DielectricMaterialType.Custom:
+                        s.AppendLine("{0} {1} = pow(_{2}_IOR - 1, 2) / pow(_{2}_IOR + 1, 2);", precision, GetVariableNameForSlot(kOutputSlotId), GetVariableNameForNode());
+                        break;
+                    default:
+                        s.AppendLine("{0} {1} = {2};", precision, GetVariableNameForSlot(kOutputSlotId), m_MaterialList[material.type].ToString(CultureInfo.InvariantCulture));
+                        break;
+                }
+            }
         }
 
         public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)

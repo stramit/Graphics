@@ -190,22 +190,17 @@ namespace UnityEditor.ShaderGraph
                 }
             }
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        if (requiresTransposeTangentTransform)
-                            s.AppendLine("float3x3 {0} = transpose(float3x3(IN.{1}SpaceTangent, IN.{1}SpaceBiTangent, IN.{1}SpaceNormal));", transposeTargetTransformString, CoordinateSpace.World.ToString());
-                        else if (requiresTangentTransform)
-                            s.AppendLine("float3x3 {0} = float3x3(IN.{1}SpaceTangent, IN.{1}SpaceBiTangent, IN.{1}SpaceNormal);", targetTransformString, tangentTransformSpace);
-                        
-                        s.AppendLine("{0} {1} = {2};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType),
-                                GetVariableNameForSlot(OutputSlotId),
-                                transformString);
-                    }
-            });
+                if (requiresTransposeTangentTransform)
+                    s.AppendLine("float3x3 {0} = transpose(float3x3(IN.{1}SpaceTangent, IN.{1}SpaceBiTangent, IN.{1}SpaceNormal));", transposeTargetTransformString, CoordinateSpace.World.ToString());
+                else if (requiresTangentTransform)
+                    s.AppendLine("float3x3 {0} = float3x3(IN.{1}SpaceTangent, IN.{1}SpaceBiTangent, IN.{1}SpaceNormal);", targetTransformString, tangentTransformSpace);
+                
+                s.AppendLine("{0} {1} = {2};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType),
+                        GetVariableNameForSlot(OutputSlotId),
+                        transformString);
+            }
         }
 
         bool RequiresWorldSpaceTangentTransform()

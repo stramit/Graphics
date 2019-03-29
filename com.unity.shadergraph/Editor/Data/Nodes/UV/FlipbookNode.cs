@@ -87,33 +87,28 @@ namespace UnityEditor.ShaderGraph
             var tileValue = GetSlotValue(TileSlotId, generationMode);
             var outputValue = GetSlotValue(OutputSlotId, generationMode);
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        s.AppendLine("{0} {1};"
-                            , NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType)
-                            , GetVariableNameForSlot(OutputSlotId));
-                        
-                        if (!generationMode.IsPreview())
-                            s.AppendLine("{0}2 _{1}_Invert = {0}2 ({2}, {3});"
-                                , precision
-                                , GetVariableNameForNode()
-                                , invertX.isOn ? 1 : 0
-                                , invertY.isOn ? 1 : 0);
+                s.AppendLine("{0} {1};"
+                    , NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType)
+                    , GetVariableNameForSlot(OutputSlotId));
+                
+                if (!generationMode.IsPreview())
+                    s.AppendLine("{0}2 _{1}_Invert = {0}2 ({2}, {3});"
+                        , precision
+                        , GetVariableNameForNode()
+                        , invertX.isOn ? 1 : 0
+                        , invertY.isOn ? 1 : 0);
 
-                        s.AppendLine("{0}({1}, {2}, {3}, {4}, _{5}_Invert, {6});"
-                            , GetFunctionName()
-                            , uvValue
-                            , widthValue
-                            , heightValue
-                            , tileValue
-                            , GetVariableNameForNode()
-                            , outputValue);
-                    }
-            });
+                s.AppendLine("{0}({1}, {2}, {3}, {4}, _{5}_Invert, {6});"
+                    , GetFunctionName()
+                    , uvValue
+                    , widthValue
+                    , heightValue
+                    , tileValue
+                    , GetVariableNameForNode()
+                    , outputValue);
+            }
         }
 
         public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)
@@ -143,30 +138,25 @@ namespace UnityEditor.ShaderGraph
 
         public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetFunctionName(), guid, out var s))
             {
-                source = guid,
-                identifier = GetFunctionName(),
-                builder = s =>
-                    {
-                        s.AppendLine("void {0} ({1} UV, {2} Width, {3} Height, {4} Tile, {5}2 Invert, out {6} Out)",
-                            GetFunctionName(),
-                            FindInputSlot<MaterialSlot>(UVSlotId).concreteValueType.ToString(precision),
-                            FindInputSlot<MaterialSlot>(WidthSlotId).concreteValueType.ToString(precision),
-                            FindInputSlot<MaterialSlot>(HeightSlotId).concreteValueType.ToString(precision),
-                            FindInputSlot<MaterialSlot>(TileSlotId).concreteValueType.ToString(precision),
-                            precision,
-                            FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
-                        using (s.BlockScope())
-                        {
-                            s.AppendLine("Tile = fmod(Tile, Width*Height);");
-                            s.AppendLine("{0}2 tileCount = {0}2(1.0, 1.0) / {0}2(Width, Height);", precision);
-                            s.AppendLine("{0} tileY = abs(Invert.y * Height - (floor(Tile * tileCount.x) + Invert.y * 1));", precision);
-                            s.AppendLine("{0} tileX = abs(Invert.x * Width - ((Tile - Width * floor(Tile * tileCount.x)) + Invert.x * 1));", precision);
-                            s.AppendLine("Out = (UV + {0}2(tileX, tileY)) * tileCount;", precision);
-                        }
-                    }
-            });
+                s.AppendLine("void {0} ({1} UV, {2} Width, {3} Height, {4} Tile, {5}2 Invert, out {6} Out)",
+                    GetFunctionName(),
+                    FindInputSlot<MaterialSlot>(UVSlotId).concreteValueType.ToString(precision),
+                    FindInputSlot<MaterialSlot>(WidthSlotId).concreteValueType.ToString(precision),
+                    FindInputSlot<MaterialSlot>(HeightSlotId).concreteValueType.ToString(precision),
+                    FindInputSlot<MaterialSlot>(TileSlotId).concreteValueType.ToString(precision),
+                    precision,
+                    FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
+                using (s.BlockScope())
+                {
+                    s.AppendLine("Tile = fmod(Tile, Width*Height);");
+                    s.AppendLine("{0}2 tileCount = {0}2(1.0, 1.0) / {0}2(Width, Height);", precision);
+                    s.AppendLine("{0} tileY = abs(Invert.y * Height - (floor(Tile * tileCount.x) + Invert.y * 1));", precision);
+                    s.AppendLine("{0} tileX = abs(Invert.x * Width - ((Tile - Width * floor(Tile * tileCount.x)) + Invert.x * 1));", precision);
+                    s.AppendLine("Out = (UV + {0}2(tileX, tileY)) * tileCount;", precision);
+                }
+            }
         }
 
         public bool RequiresMeshUV(UVChannel channel, ShaderStageCapability stageCapability)

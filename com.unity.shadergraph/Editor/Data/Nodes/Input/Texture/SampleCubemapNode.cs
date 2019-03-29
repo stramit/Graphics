@@ -52,22 +52,17 @@ namespace UnityEditor.ShaderGraph
             var edgesSampler = owner.GetEdges(samplerSlot.slotReference);
             var id = GetSlotValue(CubemapInputId, generationMode);
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s => 
-                    {
-                        s.AppendLine("{0}4 {1} = SAMPLE_TEXTURECUBE_LOD({2}, {3}, reflect(-{4}, {5}), {6});"
-                            , precision
-                            , GetVariableNameForSlot(OutputSlotId)
-                            , id
-                            , edgesSampler.Any() ? GetSlotValue(SamplerInputId, generationMode) : "sampler" + id
-                            , GetSlotValue(ViewDirInputId, generationMode)
-                            , GetSlotValue(NormalInputId, generationMode)
-                            , GetSlotValue(LODInputId, generationMode));
-                    }
-            });
+                s.AppendLine("{0}4 {1} = SAMPLE_TEXTURECUBE_LOD({2}, {3}, reflect(-{4}, {5}), {6});"
+                    , precision
+                    , GetVariableNameForSlot(OutputSlotId)
+                    , id
+                    , edgesSampler.Any() ? GetSlotValue(SamplerInputId, generationMode) : "sampler" + id
+                    , GetSlotValue(ViewDirInputId, generationMode)
+                    , GetSlotValue(NormalInputId, generationMode)
+                    , GetSlotValue(LODInputId, generationMode));
+            }
         }
 
         public NeededCoordinateSpace RequiresViewDirection(ShaderStageCapability stageCapability)

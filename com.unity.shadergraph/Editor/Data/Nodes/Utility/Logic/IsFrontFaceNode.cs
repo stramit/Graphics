@@ -30,15 +30,10 @@ namespace UnityEditor.ShaderGraph
 
         public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-			registry.ProvideSnippet(new ShaderSnippetDescriptor()
-			{
-				source = guid,
-				identifier = GetVariableNameForNode(),
-				builder = s =>
-					{
-						s.AppendLine("{0} {1} = max(0, IN.{2});", precision, GetVariableNameForSlot(OutputSlotId), ShaderGeneratorNames.FaceSign);
-					}
-			});
+			using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
+            {
+                s.AppendLine("{0} {1} = max(0, IN.{2});", precision, GetVariableNameForSlot(OutputSlotId), ShaderGeneratorNames.FaceSign);
+            }
         }
 
 		public bool RequiresFaceSign(ShaderStageCapability stageCapability = ShaderStageCapability.Fragment)

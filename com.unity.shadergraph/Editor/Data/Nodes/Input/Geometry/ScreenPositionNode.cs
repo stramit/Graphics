@@ -49,15 +49,10 @@ namespace UnityEditor.ShaderGraph
 
         public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        s.AppendLine("{0}4 {1} = {2};", precision, GetVariableNameForSlot(kOutputSlotId), m_ScreenSpaceType.ToValueAsVariable());
-                    }
-            });
+                s.AppendLine("{0}4 {1} = {2};", precision, GetVariableNameForSlot(kOutputSlotId), m_ScreenSpaceType.ToValueAsVariable());
+            }
         }
 
         public bool RequiresScreenPosition(ShaderStageCapability stageCapability)

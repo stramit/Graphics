@@ -97,41 +97,36 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             var edgesSampler = owner.GetEdges(samplerSlot.slotReference);
             var heightmap = GetSlotValue(kHeightmapSlotId, generationMode);
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetFunctionName(), guid, out var s))
             {
-                source = guid,
-                identifier = GetFunctionName(),
-                builder = s =>
-                    {
-                        s.AppendLine("{0}3 GetDisplacementObjectScale()", precision);
-                        using (s.BlockScope())
-                        {
-                            s.AppendLines(@"
-    float3 objectScale = float3(1.0, 1.0, 1.0);
-    float4x4 worldTransform = GetWorldToObjectMatrix();
+                s.AppendLine("{0}3 GetDisplacementObjectScale()", precision);
+                using (s.BlockScope())
+                {
+                    s.AppendLines(@"
+float3 objectScale = float3(1.0, 1.0, 1.0);
+float4x4 worldTransform = GetWorldToObjectMatrix();
 
-    objectScale.x = length(float3(worldTransform._m00, worldTransform._m01, worldTransform._m02));
-    objectScale.z = length(float3(worldTransform._m20, worldTransform._m21, worldTransform._m22));
+objectScale.x = length(float3(worldTransform._m00, worldTransform._m01, worldTransform._m02));
+objectScale.z = length(float3(worldTransform._m20, worldTransform._m21, worldTransform._m22));
 
-    return objectScale;");
-                        }
+return objectScale;");
+                }
 
-                        s.AppendLine("// Required struct and function for the ParallaxOcclusionMapping function:");
-                        s.AppendLine("struct PerPixelHeightDisplacementParam");
-                        using (s.BlockSemicolonScope())
-                        {
-                            s.AppendLine("{0}2 uv;", precision);
-                        }
-                        s.AppendLine("{0} ComputePerPixelHeightDisplacement({0}2 texOffsetCurrent, {0} lod, PerPixelHeightDisplacementParam param)", precision);
-                        using (s.BlockScope())
-                        {
-                            s.AppendLine("return SAMPLE_TEXTURE2D_LOD({0}, {1}, param.uv + texOffsetCurrent, lod).r;",
-                                heightmap,
-                                edgesSampler.Any() ? GetSlotValue(kHeightmapSamplerSlotId, generationMode) : "sampler" + heightmap);
-                        }
-                        s.Append(perPixelDisplacementInclude);
-                    }
-            });
+                s.AppendLine("// Required struct and function for the ParallaxOcclusionMapping function:");
+                s.AppendLine("struct PerPixelHeightDisplacementParam");
+                using (s.BlockSemicolonScope())
+                {
+                    s.AppendLine("{0}2 uv;", precision);
+                }
+                s.AppendLine("{0} ComputePerPixelHeightDisplacement({0}2 texOffsetCurrent, {0} lod, PerPixelHeightDisplacementParam param)", precision);
+                using (s.BlockScope())
+                {
+                    s.AppendLine("return SAMPLE_TEXTURE2D_LOD({0}, {1}, param.uv + texOffsetCurrent, lod).r;",
+                        heightmap,
+                        edgesSampler.Any() ? GetSlotValue(kHeightmapSamplerSlotId, generationMode) : "sampler" + heightmap);
+                }
+                s.Append(perPixelDisplacementInclude);
+            }
         }
 
         public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
@@ -149,13 +144,9 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             string tmpViewDirUV = GetVariableNameForNode() + "_ViewDirUV";
             string tmpOutHeight = GetVariableNameForNode() + "_OutHeight";
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        s.AppendLine(@"
+                s.AppendLine(@"
 {0}3 {5} = IN.{3} * GetDisplacementObjectScale().xzy;
 float {6} = {5}.z;
 float {7} = {4} * 0.01;
@@ -165,36 +156,35 @@ float {7} = {4} * 0.01;
 
 PerPixelHeightDisplacementParam {1};
 {1}.uv = {2};",
-                            precision,
-                            tmpPOMParam,
-                            uvs,
-                            CoordinateSpace.Tangent.ToVariableName(InterpolatorType.ViewDirection),
-                            amplitude, // cm in the interface so we multiply by 0.01 in the shader to convert in meter
-                            tmpViewDir,
-                            tmpNdotV,
-                            tmpMaxHeight,
-                            tmpViewDirUV);
-                            
-                        s.AppendLine(@"
+                    precision,
+                    tmpPOMParam,
+                    uvs,
+                    CoordinateSpace.Tangent.ToVariableName(InterpolatorType.ViewDirection),
+                    amplitude, // cm in the interface so we multiply by 0.01 in the shader to convert in meter
+                    tmpViewDir,
+                    tmpNdotV,
+                    tmpMaxHeight,
+                    tmpViewDirUV);
+                    
+                s.AppendLine(@"
 {0} {11};
 {0}2 {1} = {9} + ParallaxOcclusionMapping({2}, {3}, {4}, {5}, {6}, {11});
 
 {0} {7} = ({8} - {11} * {8}) / max({10}, 0.0001);
 ",
-                            precision,
-                            GetVariableNameForSlot(kParallaxUVsOutputSlotId),
-                            lod,
-                            lodThreshold,
-                            steps,
-                            tmpViewDirUV,
-                            tmpPOMParam,
-                            GetVariableNameForSlot(kPixelDepthOffsetOutputSlotId),
-                            tmpMaxHeight,
-                            uvs,
-                            tmpNdotV,
-                            tmpOutHeight);
-                    }
-            });
+                    precision,
+                    GetVariableNameForSlot(kParallaxUVsOutputSlotId),
+                    lod,
+                    lodThreshold,
+                    steps,
+                    tmpViewDirUV,
+                    tmpPOMParam,
+                    GetVariableNameForSlot(kPixelDepthOffsetOutputSlotId),
+                    tmpMaxHeight,
+                    uvs,
+                    tmpNdotV,
+                    tmpOutHeight);
+            }
         }
 
         public NeededCoordinateSpace RequiresViewDirection(ShaderStageCapability stageCapability = ShaderStageCapability.All)

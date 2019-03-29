@@ -36,15 +36,10 @@ namespace UnityEditor.ShaderGraph
         {
             var inputValue = GetSlotValue(InputSlotXId, generationMode);
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        s.AppendLine("{0} {1} = {2};", precision, GetVariableNameForSlot(OutputSlotId), inputValue);
-                    }
-            });
+                s.AppendLine("{0} {1} = {2};", precision, GetVariableNameForSlot(OutputSlotId), inputValue);
+            }
         }
 
         public AbstractShaderProperty AsShaderProperty()

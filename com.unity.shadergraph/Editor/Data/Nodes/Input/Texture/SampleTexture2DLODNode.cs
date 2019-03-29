@@ -103,34 +103,29 @@ namespace UnityEditor.ShaderGraph
             var lodSlot = GetSlotValue(LODInput, generationMode);
             var id = GetSlotValue(TextureInputId, generationMode);
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        s.AppendLine("{0}4 {1} = SAMPLE_TEXTURE2D_LOD({2}, {3}, {4}, {5});"
-                            , precision
-                            , GetVariableNameForSlot(OutputSlotRGBAId)
-                            , id
-                            , edgesSampler.Any() ? GetSlotValue(SamplerInput, generationMode) : "sampler" + id
-                            , uvName
-                            , lodSlot);
+                s.AppendLine("{0}4 {1} = SAMPLE_TEXTURE2D_LOD({2}, {3}, {4}, {5});"
+                    , precision
+                    , GetVariableNameForSlot(OutputSlotRGBAId)
+                    , id
+                    , edgesSampler.Any() ? GetSlotValue(SamplerInput, generationMode) : "sampler" + id
+                    , uvName
+                    , lodSlot);
 
-                        if (textureType == TextureType.Normal)
-                        {
-                            if (normalMapSpace == NormalMapSpace.Tangent)
-                                s.AppendLine("{0}.rgb = UnpackNormalmapRGorAG({0});", GetVariableNameForSlot(OutputSlotRGBAId));
-                            else
-                                s.AppendLine("{0}.rgb = UnpackNormalRGB({0});", GetVariableNameForSlot(OutputSlotRGBAId));
-                        }
+                if (textureType == TextureType.Normal)
+                {
+                    if (normalMapSpace == NormalMapSpace.Tangent)
+                        s.AppendLine("{0}.rgb = UnpackNormalmapRGorAG({0});", GetVariableNameForSlot(OutputSlotRGBAId));
+                    else
+                        s.AppendLine("{0}.rgb = UnpackNormalRGB({0});", GetVariableNameForSlot(OutputSlotRGBAId));
+                }
 
-                        s.AppendLine("{0} {1} = {2}.r;", precision, GetVariableNameForSlot(OutputSlotRId), GetVariableNameForSlot(OutputSlotRGBAId));
-                        s.AppendLine("{0} {1} = {2}.g;", precision, GetVariableNameForSlot(OutputSlotGId), GetVariableNameForSlot(OutputSlotRGBAId));
-                        s.AppendLine("{0} {1} = {2}.b;", precision, GetVariableNameForSlot(OutputSlotBId), GetVariableNameForSlot(OutputSlotRGBAId));
-                        s.AppendLine("{0} {1} = {2}.a;", precision, GetVariableNameForSlot(OutputSlotAId), GetVariableNameForSlot(OutputSlotRGBAId));
-                    }
-            });
+                s.AppendLine("{0} {1} = {2}.r;", precision, GetVariableNameForSlot(OutputSlotRId), GetVariableNameForSlot(OutputSlotRGBAId));
+                s.AppendLine("{0} {1} = {2}.g;", precision, GetVariableNameForSlot(OutputSlotGId), GetVariableNameForSlot(OutputSlotRGBAId));
+                s.AppendLine("{0} {1} = {2}.b;", precision, GetVariableNameForSlot(OutputSlotBId), GetVariableNameForSlot(OutputSlotRGBAId));
+                s.AppendLine("{0} {1} = {2}.a;", precision, GetVariableNameForSlot(OutputSlotAId), GetVariableNameForSlot(OutputSlotRGBAId));
+            }
         }
 
         public bool RequiresMeshUV(UVChannel channel, ShaderStageCapability stageCapability)

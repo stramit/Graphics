@@ -57,45 +57,35 @@ namespace UnityEditor.ShaderGraph
             var input2Value = GetSlotValue(Input2SlotId, generationMode);
             var outputValue = GetSlotValue(OutputSlotId, generationMode);
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        s.AppendLine("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType), GetVariableNameForSlot(OutputSlotId));
-                        s.AppendLine("{0}({1}, {2}, {3});", GetFunctionHeader(), input1Value, input2Value, outputValue);
-                    }
-            });
+                s.AppendLine("{0} {1};", NodeUtils.ConvertConcreteSlotValueTypeToString(precision, FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType), GetVariableNameForSlot(OutputSlotId));
+                s.AppendLine("{0}({1}, {2}, {3});", GetFunctionHeader(), input1Value, input2Value, outputValue);
+            }
         }
 
         public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetFunctionName(), guid, out var s))
             {
-                source = guid,
-                identifier = GetFunctionName(),
-                builder =  s =>
+                s.AppendLine("void {0} ({1} A, {2} B, out {3} Out)",
+                    GetFunctionHeader(),
+                    FindInputSlot<MaterialSlot>(Input1SlotId).concreteValueType.ToString(precision),
+                    FindInputSlot<MaterialSlot>(Input2SlotId).concreteValueType.ToString(precision),
+                    FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
+                using (s.BlockScope())
+                {
+                    switch (m_MultiplyType)
                     {
-                        s.AppendLine("void {0} ({1} A, {2} B, out {3} Out)",
-                            GetFunctionHeader(),
-                            FindInputSlot<MaterialSlot>(Input1SlotId).concreteValueType.ToString(precision),
-                            FindInputSlot<MaterialSlot>(Input2SlotId).concreteValueType.ToString(precision),
-                            FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToString(precision));
-                        using (s.BlockScope())
-                        {
-                            switch (m_MultiplyType)
-                            {
-                                case MultiplyType.Vector:
-                                    s.AppendLine("Out = A * B;");
-                                    break;
-                                default:
-                                    s.AppendLine("Out = mul(A, B);");
-                                    break;
-                            }
-                        }
+                        case MultiplyType.Vector:
+                            s.AppendLine("Out = A * B;");
+                            break;
+                        default:
+                            s.AppendLine("Out = mul(A, B);");
+                            break;
                     }
-            });
+                }
+            }
         }
 
         string GetFunctionName()

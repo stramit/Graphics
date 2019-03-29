@@ -267,12 +267,9 @@ namespace UnityEditor.ShaderGraph
                 if (node.hasError)
                 {
                     subGraphData.isValid = false;
-                    registry.ProvideSnippet(new ShaderSnippetDescriptor()
+                    using(registry.ProvideSnippet(subGraphData.functionName, guid, out var s))
                     {
-                        source = guid,
-                        identifier = subGraphData.functionName, 
-                        builder = s => { }
-                    });
+                    }
                     return;
                 }
             }
@@ -293,52 +290,47 @@ namespace UnityEditor.ShaderGraph
                     generatesFunction.GenerateNodeFunction(registry, new GraphContext(subGraphData.inputStructName), GenerationMode.ForReals);
                 }
             }
-
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            
+            using(registry.ProvideSnippet(subGraphData.functionName, guid, out var s))
             {
-                source = guid,
-                identifier = subGraphData.functionName,
-                builder = s =>
+                var graphContext = new GraphContext(subGraphData.inputStructName);
+
+                GraphUtil.GenerateSurfaceInputStruct(s, subGraphData.requirements, subGraphData.inputStructName);
+                s.AppendNewLine();
+
+                // Generate arguments... first INPUTS
+                var arguments = new List<string>();
+                foreach (var prop in subGraphData.inputs)
+                    arguments.Add(string.Format("{0}", prop.GetPropertyAsArgumentString()));
+
+                // now pass surface inputs
+                arguments.Add(string.Format("{0} IN", subGraphData.inputStructName));
+
+                // Now generate outputs
+                foreach (var output in subGraphData.outputs)
+                    arguments.Add($"out {output.concreteValueType.ToString(outputNode.precision)} {output.shaderOutputName}");
+
+                // Create the function prototype from the arguments
+                s.AppendLine("void {0}({1})"
+                    , subGraphData.functionName
+                    , arguments.Aggregate((current, next) => $"{current}, {next}"));
+
+                // now generate the function
+                using (s.BlockScope())
+                {
+                    // Just grab the body from the active nodes
+                    var bodyRegistry = new ShaderSnippetRegistry() { allowDuplicates = true };
+                    foreach (var node in nodes)
                     {
-                        var graphContext = new GraphContext(subGraphData.inputStructName);
-
-                        GraphUtil.GenerateSurfaceInputStruct(s, subGraphData.requirements, subGraphData.inputStructName);
-                        s.AppendNewLine();
-
-                        // Generate arguments... first INPUTS
-                        var arguments = new List<string>();
-                        foreach (var prop in subGraphData.inputs)
-                            arguments.Add(string.Format("{0}", prop.GetPropertyAsArgumentString()));
-
-                        // now pass surface inputs
-                        arguments.Add(string.Format("{0} IN", subGraphData.inputStructName));
-
-                        // Now generate outputs
-                        foreach (var output in subGraphData.outputs)
-                            arguments.Add($"out {output.concreteValueType.ToString(outputNode.precision)} {output.shaderOutputName}");
-
-                        // Create the function prototype from the arguments
-                        s.AppendLine("void {0}({1})"
-                            , subGraphData.functionName
-                            , arguments.Aggregate((current, next) => $"{current}, {next}"));
-
-                        // now generate the function
-                        using (s.BlockScope())
-                        {
-                            // Just grab the body from the active nodes
-                            var bodyRegistry = new ShaderSnippetRegistry() { allowDuplicates = true };
-                            foreach (var node in nodes)
-                            {
-                                if (node is IGeneratesBodyCode)
-                                    (node as IGeneratesBodyCode).GenerateNodeCode(bodyRegistry, graphContext, GenerationMode.ForReals);
-                            }
-                            s.AppendLines(bodyRegistry.GetSnippetsAsString());
-
-                            foreach (var slot in subGraphData.outputs)
-                                s.AppendLine($"{slot.shaderOutputName} = {outputNode.GetSlotValue(slot.id, GenerationMode.ForReals)};");
-                        }
+                        if (node is IGeneratesBodyCode)
+                            (node as IGeneratesBodyCode).GenerateNodeCode(bodyRegistry, graphContext, GenerationMode.ForReals);
                     }
-            });
+                    s.AppendLines(bodyRegistry.GetSnippetsAsString());
+
+                    foreach (var slot in subGraphData.outputs)
+                        s.AppendLine($"{slot.shaderOutputName} = {outputNode.GetSlotValue(slot.id, GenerationMode.ForReals)};");
+                }
+            }
             
             subGraphData.functionNames.AddRange(registry.names.Distinct());
 

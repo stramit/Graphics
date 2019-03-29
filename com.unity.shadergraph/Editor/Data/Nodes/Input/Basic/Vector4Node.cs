@@ -49,21 +49,16 @@ namespace UnityEditor.ShaderGraph
             var inputWValue = GetSlotValue(InputSlotWId, generationMode);
             var outputName = GetVariableNameForSlot(outputSlotId);
 
-            registry.ProvideSnippet(new ShaderSnippetDescriptor()
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                source = guid,
-                identifier = GetVariableNameForNode(),
-                builder = s =>
-                    {
-                        s.AppendLine("{0}4 {1} = {0}4({2},{3},{4},{5});",
-                            precision,
-                            outputName,
-                            inputXValue,
-                            inputYValue,
-                            inputZValue,
-                            inputWValue);
-                    }
-            });
+                s.AppendLine("{0}4 {1} = {0}4({2},{3},{4},{5});",
+                    precision,
+                    outputName,
+                    inputXValue,
+                    inputYValue,
+                    inputZValue,
+                    inputWValue);
+            }
         }
 
         public AbstractShaderProperty AsShaderProperty()
