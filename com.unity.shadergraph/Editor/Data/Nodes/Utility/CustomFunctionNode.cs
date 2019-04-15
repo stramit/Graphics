@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEditor.Graphing;
+using UnityEditor.Rendering;
 using UnityEngine.UIElements;
 using UnityEditor.ShaderGraph.Drawing;
 
@@ -11,6 +12,8 @@ namespace UnityEditor.ShaderGraph
     [Title("Utility", "Custom Function")]
     class CustomFunctionNode : AbstractMaterialNode, IGeneratesBodyCode, IGeneratesFunction, IHasSettings
     {
+        static string s_MissingOutputSlot = "A Custom Function Node must have at least one output slot";
+
         public CustomFunctionNode()
         {
             name = "Custom Function";
@@ -66,79 +69,80 @@ namespace UnityEditor.ShaderGraph
 
         public static string defaultFunctionBody => m_DefaultFunctionBody;
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             List<MaterialSlot> slots = new List<MaterialSlot>();
             GetOutputSlots<MaterialSlot>(slots);
 
-            if(!IsValidFunction())
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                if(generationMode == GenerationMode.Preview && slots.Count != 0)
+                if(!IsValidFunction())
                 {
-                    slots.OrderBy(s => s.id);
-                    visitor.AddShaderChunk(string.Format("{0} _{1}_{2};",
-                        slots[0].concreteValueType.ToShaderString(),
-                        GetVariableNameForNode(),
-                        NodeUtils.GetHLSLSafeName(slots[0].shaderOutputName)));
+                    if(generationMode == GenerationMode.Preview && slots.Count != 0)
+                    {
+                        slots.OrderBy(p => p.id);
+                        s.AppendLine("{0} _{1}_{2};",
+                            slots[0].concreteValueType.ToShaderString(),
+                            GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(slots[0].shaderOutputName));
+                    }
+                    return;
                 }
-                return;
-            }
-            
-            foreach (var argument in slots)
-                visitor.AddShaderChunk(string.Format("{0} _{1}_{2};",
-                    argument.concreteValueType.ToShaderString(),
-                    GetVariableNameForNode(), 
-                    NodeUtils.GetHLSLSafeName(argument.shaderOutputName)));
+                
+                foreach (var argument in slots)
+                    s.AppendLine("{0} _{1}_{2};",
+                        argument.concreteValueType.ToShaderString(),
+                        GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(argument.shaderOutputName));
 
-            string call = string.Format("{0}_$precision(", functionName);
-            bool first = true;
-            
-            slots.Clear();
-            GetInputSlots<MaterialSlot>(slots);
-            foreach (var argument in slots)
-            {
-                if (!first)
-                    call += ", ";
-                first = false;
-                call += SlotInputValue(argument, generationMode);
-            }
+                string call = string.Format("{0}_$precision(", functionName);
+                bool first = true;
+                
+                slots.Clear();
+                GetInputSlots<MaterialSlot>(slots);
+                foreach (var argument in slots)
+                {
+                    if (!first)
+                        call += ", ";
+                    first = false;
+                    call += SlotInputValue(argument, generationMode);
+                }
 
-            slots.Clear();
-            GetOutputSlots<MaterialSlot>(slots);
-            foreach (var argument in slots)
-            {
-                if (!first)
-                    call += ", ";
-                first = false;
-                call += string.Format("_{0}_{1}", GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(argument.shaderOutputName));
+                slots.Clear();
+                GetOutputSlots<MaterialSlot>(slots);
+                foreach (var argument in slots)
+                {
+                    if (!first)
+                        call += ", ";
+                    first = false;
+                    call += string.Format("_{0}_{1}", GetVariableNameForNode(), NodeUtils.GetHLSLSafeName(argument.shaderOutputName));
+                }
+                call += ");";
+                s.AppendLine(call);
             }
-            call += ");";
-            visitor.AddShaderChunk(call, true);
         }
 
-        public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             if(!IsValidFunction())
                 return;
 
-            registry.ProvideFunction(functionName, precision, builder =>
+            using(registry.ProvideSnippet(functionName, guid, out var s))
             {
                 switch (sourceType)
                 {
                     case HlslSourceType.File:
-                        builder.AppendLine($"#include \"{functionSource}\"");
+                        s.AppendLine($"#include \"{functionSource}\"");
                         break;
                     case HlslSourceType.String:
-                        builder.AppendLine(GetFunctionHeader());
-                        using(builder.BlockScope())
+                        s.AppendLine(GetFunctionHeader());
+                        using(s.BlockScope())
                         {
-                            builder.AppendLines(functionBody);
+                            s.AppendLines(functionBody);
                         }
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-            });
+            }
         }
 
         private string GetFunctionHeader()
@@ -205,6 +209,16 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
+        public override void ValidateNode()
+        {
+            if (!this.GetOutputSlots<MaterialSlot>().Any())
+            {
+                owner.AddValidationError(tempId, s_MissingOutputSlot, ShaderCompilerMessageSeverity.Warning);
+            }
+            
+            base.ValidateNode();
+        }
+        
         public override void GetSourceAssetDependencies(List<string> paths)
         {
             base.GetSourceAssetDependencies(paths);

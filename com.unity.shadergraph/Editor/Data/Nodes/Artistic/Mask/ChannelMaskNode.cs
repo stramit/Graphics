@@ -89,63 +89,68 @@ namespace UnityEditor.ShaderGraph
                 , argOut);
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             ValidateChannelCount();
             string inputValue = GetSlotValue(InputSlotId, generationMode);
             string outputValue = GetSlotValue(OutputSlotId, generationMode);
-            visitor.AddShaderChunk(string.Format("{0} {1};", FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(OutputSlotId)), true);
-            visitor.AddShaderChunk(GetFunctionCallBody(inputValue, outputValue), true);
+
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
+            {
+                s.AppendLine("{0} {1};", FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(OutputSlotId));
+                s.AppendLine(GetFunctionCallBody(inputValue, outputValue));
+            }
+        }
+
+        public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        {
+            ValidateChannelCount();
+
+            using(registry.ProvideSnippet(GetFunctionName(), guid, out var s))
+            {
+                int channelCount = SlotValueHelper.GetChannelCount(FindSlot<MaterialSlot>(InputSlotId).concreteValueType);
+                s.AppendLine(GetFunctionPrototype("In", "Out"));
+                using (s.BlockScope())
+                {
+                    if (channelMask == 0)
+                        s.AppendLine("Out = 0;");
+                    else if (channelMask == -1)
+                        s.AppendLine("Out = In;");
+                    else
+                    {
+                        bool red = (channelMask & 1) != 0;
+                        bool green = (channelMask & 2) != 0;
+                        bool blue = (channelMask & 4) != 0;
+                        bool alpha = (channelMask & 8) != 0;
+
+                        switch (channelCount)
+                        {
+                            case 1:
+                                s.AppendLine("Out = In.r;");
+                                break;
+                            case 2:
+                                s.AppendLine(string.Format("Out = $precision2({0}, {1});",
+                                    red ? "In.r" : "0", green ? "In.g" : "0"));
+                                break;
+                            case 3:
+                                s.AppendLine(string.Format("Out = $precision3({0}, {1}, {2});",
+                                    red ? "In.r" : "0", green ? "In.g" : "0", blue ? "In.b" : "0"));
+                                break;
+                            case 4:
+                                s.AppendLine(string.Format("Out = $precision4({0}, {1}, {2}, {3});",
+                                    red ? "In.r" : "0", green ? "In.g" : "0", blue ? "In.b" : "0", alpha ? "In.a" : "0"));
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
+                    }
+                }
+            }
         }
 
         string GetFunctionCallBody(string inputValue, string outputValue)
         {
             return GetFunctionName() + " (" + inputValue + ", " + outputValue + ");";
-        }
-
-        public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
-        {
-            ValidateChannelCount();
-            registry.ProvideFunction(GetFunctionName(), precision, s =>
-                {
-                    int channelCount = SlotValueHelper.GetChannelCount(FindSlot<MaterialSlot>(InputSlotId).concreteValueType);
-                    s.AppendLine(GetFunctionPrototype("In", "Out"));
-                    using (s.BlockScope())
-                    {
-                        if (channelMask == 0)
-                            s.AppendLine("Out = 0;");
-                        else if (channelMask == -1)
-                            s.AppendLine("Out = In;");
-                        else
-                        {
-                            bool red = (channelMask & 1) != 0;
-                            bool green = (channelMask & 2) != 0;
-                            bool blue = (channelMask & 4) != 0;
-                            bool alpha = (channelMask & 8) != 0;
-
-                            switch (channelCount)
-                            {
-                                case 1:
-                                    s.AppendLine("Out = In.r;");
-                                    break;
-                                case 2:
-                                    s.AppendLine(string.Format("Out = $precision2({0}, {1});",
-                                        red ? "In.r" : "0", green ? "In.g" : "0"));
-                                    break;
-                                case 3:
-                                    s.AppendLine(string.Format("Out = $precision3({0}, {1}, {2});",
-                                        red ? "In.r" : "0", green ? "In.g" : "0", blue ? "In.b" : "0"));
-                                    break;
-                                case 4:
-                                    s.AppendLine(string.Format("Out = $precision4({0}, {1}, {2}, {3});",
-                                        red ? "In.r" : "0", green ? "In.g" : "0", blue ? "In.b" : "0", alpha ? "In.a" : "0"));
-                                    break;
-                                default:
-                                    throw new ArgumentOutOfRangeException();
-                            }
-                        }
-                    }
-                });
         }
     }
 }

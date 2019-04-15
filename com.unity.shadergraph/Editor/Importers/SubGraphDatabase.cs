@@ -34,6 +34,8 @@ namespace UnityEditor.ShaderGraph
         
         public List<string> functionNames = new List<string>();
         
-        public List<FunctionSource> functionSources = new List<FunctionSource>();
+        public List<Guid> functionSources = new List<Guid>();
+        
+        public List<string> functionSnippets = new List<string>();
     }
 }

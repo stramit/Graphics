@@ -51,17 +51,41 @@ namespace UnityEditor.ShaderGraph
             RemoveSlotsNameNotMatching(new[] { Input1SlotId, Input2SlotId, OutputSlotId });
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            var sb = new ShaderStringBuilder();
             var input1Value = GetSlotValue(Input1SlotId, generationMode);
             var input2Value = GetSlotValue(Input2SlotId, generationMode);
             var outputValue = GetSlotValue(OutputSlotId, generationMode);
 
-            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(OutputSlotId));
-            sb.AppendLine("{0}({1}, {2}, {3});", GetFunctionHeader(), input1Value, input2Value, outputValue);
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
+            {
+                s.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(OutputSlotId));
+                s.AppendLine("{0}({1}, {2}, {3});", GetFunctionHeader(), input1Value, input2Value, outputValue);
+            }
+        }
 
-            visitor.AddShaderChunk(sb.ToString(), false);
+        public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        {
+            using(registry.ProvideSnippet(GetFunctionName(), guid, out var s))
+            {
+                s.AppendLine("void {0} ({1} A, {2} B, out {3} Out)",
+                    GetFunctionHeader(),
+                    FindInputSlot<MaterialSlot>(Input1SlotId).concreteValueType.ToShaderString(),
+                    FindInputSlot<MaterialSlot>(Input2SlotId).concreteValueType.ToShaderString(),
+                    FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
+                using (s.BlockScope())
+                {
+                    switch (m_MultiplyType)
+                    {
+                        case MultiplyType.Vector:
+                            s.AppendLine("Out = A * B;");
+                            break;
+                        default:
+                            s.AppendLine("Out = mul(A, B);");
+                            break;
+                    }
+                }
+            }
         }
 
         string GetFunctionName()
@@ -70,30 +94,6 @@ namespace UnityEditor.ShaderGraph
                 GetFunctionHeader(),
                 FindInputSlot<MaterialSlot>(Input1SlotId).concreteValueType.ToShaderString(),
                 FindInputSlot<MaterialSlot>(Input2SlotId).concreteValueType.ToShaderString());
-        }
-
-        public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
-        {
-            registry.ProvideFunction(GetFunctionName(), precision, s =>
-                {
-                    s.AppendLine("void {0} ({1} A, {2} B, out {3} Out)",
-                        GetFunctionHeader(),
-                        FindInputSlot<MaterialSlot>(Input1SlotId).concreteValueType.ToShaderString(),
-                        FindInputSlot<MaterialSlot>(Input2SlotId).concreteValueType.ToShaderString(),
-                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
-                    using (s.BlockScope())
-                    {
-                        switch (m_MultiplyType)
-                        {
-                            case MultiplyType.Vector:
-                                s.AppendLine("Out = A * B;");
-                                break;
-                            default:
-                                s.AppendLine("Out = mul(A, B);");
-                                break;
-                        }
-                    }
-                });
         }
 
         // Internal validation

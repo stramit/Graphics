@@ -79,23 +79,35 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            var sb = new ShaderStringBuilder();
             var uvValue = GetSlotValue(UVSlotId, generationMode);
             var widthValue = GetSlotValue(WidthSlotId, generationMode);
             var heightValue = GetSlotValue(HeightSlotId, generationMode);
             var tileValue = GetSlotValue(TileSlotId, generationMode);
             var outputValue = GetSlotValue(OutputSlotId, generationMode);
 
-            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(OutputSlotId));
-            if (!generationMode.IsPreview())
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                sb.AppendLine("$precision2 _{0}_Invert = $precision2 ({1}, {2});", GetVariableNameForNode(), invertX.isOn ? 1 : 0, invertY.isOn ? 1 : 0);
-            }
-            sb.AppendLine("{0}({1}, {2}, {3}, {4}, _{5}_Invert, {6});", GetFunctionName(), uvValue, widthValue, heightValue, tileValue, GetVariableNameForNode(), outputValue);
+                s.AppendLine("{0} {1};"
+                    , FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString()
+                    , GetVariableNameForSlot(OutputSlotId));
+                
+                if (!generationMode.IsPreview())
+                    s.AppendLine("$precision2 _{0}_Invert = $precision2 ({1}, {2});"
+                        , GetVariableNameForNode()
+                        , invertX.isOn ? 1 : 0
+                        , invertY.isOn ? 1 : 0);
 
-            visitor.AddShaderChunk(sb.ToString(), false);
+                s.AppendLine("{0}({1}, {2}, {3}, {4}, _{5}_Invert, {6});"
+                    , GetFunctionName()
+                    , uvValue
+                    , widthValue
+                    , heightValue
+                    , tileValue
+                    , GetVariableNameForNode()
+                    , outputValue);
+            }
         }
 
         public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)
@@ -123,26 +135,26 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideFunction(GetFunctionName(), precision, s =>
+            using(registry.ProvideSnippet(GetFunctionName(), guid, out var s))
+            {
+                s.AppendLine("void {0} ({1} UV, {2} Width, {3} Height, {4} Tile, $precision2 Invert, out {5} Out)",
+                    GetFunctionName(),
+                    FindInputSlot<MaterialSlot>(UVSlotId).concreteValueType.ToShaderString(),
+                    FindInputSlot<MaterialSlot>(WidthSlotId).concreteValueType.ToShaderString(),
+                    FindInputSlot<MaterialSlot>(HeightSlotId).concreteValueType.ToShaderString(),
+                    FindInputSlot<MaterialSlot>(TileSlotId).concreteValueType.ToShaderString(),
+                    FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
+                using (s.BlockScope())
                 {
-                    s.AppendLine("void {0} ({1} UV, {2} Width, {3} Height, {4} Tile, $precision2 Invert, out {5} Out)",
-                        GetFunctionName(),
-                        FindInputSlot<MaterialSlot>(UVSlotId).concreteValueType.ToShaderString(),
-                        FindInputSlot<MaterialSlot>(WidthSlotId).concreteValueType.ToShaderString(),
-                        FindInputSlot<MaterialSlot>(HeightSlotId).concreteValueType.ToShaderString(),
-                        FindInputSlot<MaterialSlot>(TileSlotId).concreteValueType.ToShaderString(),
-                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
-                    using (s.BlockScope())
-                    {
-                        s.AppendLine("Tile = fmod(Tile, Width*Height);");
-                        s.AppendLine("$precision2 tileCount = $precision2(1.0, 1.0) / {0}2(Width, Height);");
-                        s.AppendLine("$precision tileY = abs(Invert.y * Height - (floor(Tile * tileCount.x) + Invert.y * 1));");
-                        s.AppendLine("$precision tileX = abs(Invert.x * Width - ((Tile - Width * floor(Tile * tileCount.x)) + Invert.x * 1));");
-                        s.AppendLine("Out = (UV + $precision2(tileX, tileY)) * tileCount;");
-                    }
-                });
+                    s.AppendLine("Tile = fmod(Tile, Width*Height);");
+                    s.AppendLine("$precision2 tileCount = $precision2(1.0, 1.0) / $precision2(Width, Height);");
+                    s.AppendLine("$precision tileY = abs(Invert.y * Height - (floor(Tile * tileCount.x) + Invert.y * 1));");
+                    s.AppendLine("$precision tileX = abs(Invert.x * Width - ((Tile - Width * floor(Tile * tileCount.x)) + Invert.x * 1));");
+                    s.AppendLine("Out = (UV + $precision2(tileX, tileY)) * tileCount;");
+                }
+            }
         }
 
         public bool RequiresMeshUV(UVChannel channel, ShaderStageCapability stageCapability)

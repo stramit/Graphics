@@ -160,57 +160,56 @@ namespace UnityEditor.ShaderGraph
         }
 
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            var sb = new ShaderStringBuilder();
-            if (subGraphData == null || hasError)
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                var outputSlots = new List<MaterialSlot>();
-                GetOutputSlots(outputSlots);
-                foreach (var slot in outputSlots)
+                if (subGraphData == null || hasError)
                 {
-                    visitor.AddShaderChunk($"{slot.concreteValueType.ToShaderString()} {GetVariableNameForSlot(slot.id)} = {slot.GetDefaultValue(GenerationMode.ForReals)};");
+                    var outputSlots = new List<MaterialSlot>();
+                    GetOutputSlots(outputSlots);
+                    foreach (var slot in outputSlots)
+                    {
+                        s.AppendLine($"{slot.concreteValueType.ToShaderString()} {GetVariableNameForSlot(slot.id)} = {slot.GetDefaultValue(GenerationMode.ForReals)};");
+                    }
+                    
+                    return;
                 }
+
+                var inputVariableName = $"_{GetVariableNameForNode()}";
                 
-                return;
+                GraphUtil.GenerateSurfaceInputTransferCode(s, subGraphData.requirements, subGraphData.inputStructName, inputVariableName);
+
+                foreach (var outSlot in subGraphData.outputs)
+                    s.AppendLine("{0} {1};", outSlot.concreteValueType.ToShaderString(), GetVariableNameForSlot(outSlot.id));
+
+                var arguments = new List<string>();
+                foreach (var prop in subGraphData.inputs)
+                {
+                    var inSlotId = m_PropertyIds[m_PropertyGuids.IndexOf(prop.guid.ToString())];
+
+                    if (prop is TextureShaderProperty)
+                        arguments.Add(string.Format("TEXTURE2D_ARGS({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
+                    else if (prop is Texture2DArrayShaderProperty)
+                        arguments.Add(string.Format("TEXTURE2D_ARRAY_ARGS({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
+                    else if (prop is Texture3DShaderProperty)
+                        arguments.Add(string.Format("TEXTURE3D_ARGS({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
+                    else if (prop is CubemapShaderProperty)
+                        arguments.Add(string.Format("TEXTURECUBE_ARGS({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
+                    else
+                        arguments.Add(GetSlotValue(inSlotId, generationMode));
+                }
+
+                // pass surface inputs through
+                arguments.Add(inputVariableName);
+
+                foreach (var outSlot in subGraphData.outputs)
+                    arguments.Add(GetVariableNameForSlot(outSlot.id));
+
+                s.AppendLine("{0}({1});"
+                        , subGraphData.functionName
+                        , arguments.Aggregate((current, next) => string.Format("{0}, {1}", current, next)));
             }
-
-            var inputVariableName = $"_{GetVariableNameForNode()}";
-            
-            GraphUtil.GenerateSurfaceInputTransferCode(sb, subGraphData.requirements, subGraphData.inputStructName, inputVariableName);
-            
-            visitor.AddShaderChunk(sb.ToString());
-
-            foreach (var outSlot in subGraphData.outputs)
-                visitor.AddShaderChunk(string.Format("{0} {1};", outSlot.concreteValueType.ToShaderString(), GetVariableNameForSlot(outSlot.id)));
-
-            var arguments = new List<string>();
-            foreach (var prop in subGraphData.inputs)
-            {
-                var inSlotId = m_PropertyIds[m_PropertyGuids.IndexOf(prop.guid.ToString())];
-
-                if (prop is TextureShaderProperty)
-                    arguments.Add(string.Format("TEXTURE2D_ARGS({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
-                else if (prop is Texture2DArrayShaderProperty)
-                    arguments.Add(string.Format("TEXTURE2D_ARRAY_ARGS({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
-                else if (prop is Texture3DShaderProperty)
-                    arguments.Add(string.Format("TEXTURE3D_ARGS({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
-                else if (prop is CubemapShaderProperty)
-                    arguments.Add(string.Format("TEXTURECUBE_ARGS({0}, sampler{0})", GetSlotValue(inSlotId, generationMode)));
-                else
-                    arguments.Add(GetSlotValue(inSlotId, generationMode));
-            }
-
-            // pass surface inputs through
-            arguments.Add(inputVariableName);
-
-            foreach (var outSlot in subGraphData.outputs)
-                arguments.Add(GetVariableNameForSlot(outSlot.id));
-
-            visitor.AddShaderChunk(
-                string.Format("{0}({1});"
-                    , subGraphData.functionName
-                    , arguments.Aggregate((current, next) => string.Format("{0}, {1}", current, next))));
         }
 
         public void OnEnable()
@@ -422,7 +421,7 @@ namespace UnityEditor.ShaderGraph
         }
         }
 
-        public virtual void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        public virtual void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             if (subGraphData == null || hasError)
                 return;
@@ -431,11 +430,11 @@ namespace UnityEditor.ShaderGraph
             
             foreach (var functionName in subGraphData.functionNames)
             {
-                var functionSource = database.functionSources[database.functionNames.BinarySearch(functionName)];
-                registry.ProvideFunction(functionName, functionSource.precision, s =>
+                using(registry.ProvideSnippet(functionName, guid, out var s))
                 {
-                    s.AppendLines(functionSource.function);
-                });
+                    var functionSource = database.functionSnippets[database.functionNames.BinarySearch(functionName)];
+                    s.AppendLines(functionSource);
+                }
             }
         }
 

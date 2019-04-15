@@ -38,9 +38,11 @@ namespace UnityEditor.ShaderGraph
 ";
         }
 
-        public override void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        public override void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideFunction("Unity_GradientNoise_Dir", precision, s => s.Append(@"
+            using(registry.ProvideSnippet("Unity_GradientNoise_Dir", guid, out var s))
+            {
+                s.Append(@"
 $precision2 Unity_GradientNoise_Dir_$precision($precision2 p)
 {
     // Permutation and hashing used in webgl-nosie goo.gl/pX7HtC
@@ -50,7 +52,8 @@ $precision2 Unity_GradientNoise_Dir_$precision($precision2 p)
     x = frac(x / 41) * 2 - 1;
     return normalize($precision2(x - floor(x + 0.5), abs(x) - 0.5));
 }
-"));
+");
+            }
 
             base.GenerateNodeFunction(registry, graphContext, generationMode);
         }

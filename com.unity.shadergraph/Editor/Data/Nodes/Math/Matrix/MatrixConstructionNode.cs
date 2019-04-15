@@ -64,57 +64,57 @@ namespace UnityEditor.ShaderGraph
             RemoveSlotsNameNotMatching(new int[] { InputSlotM0Id, InputSlotM1Id, InputSlotM2Id, InputSlotM3Id, Output4x4SlotId, Output3x3SlotId, Output2x2SlotId });
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            var sb = new ShaderStringBuilder();
             var inputM0Value = GetSlotValue(InputSlotM0Id, generationMode);
             var inputM1Value = GetSlotValue(InputSlotM1Id, generationMode);
             var inputM2Value = GetSlotValue(InputSlotM2Id, generationMode);
             var inputM3Value = GetSlotValue(InputSlotM3Id, generationMode);
 
-            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(Output4x4SlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(Output4x4SlotId));
-            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(Output3x3SlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(Output3x3SlotId));
-            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(Output2x2SlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(Output2x2SlotId));
-            sb.AppendLine("{0}({1}, {2}, {3}, {4}, {5}, {6}, {7});",
-                GetFunctionName(),
-                inputM0Value,
-                inputM1Value,
-                inputM2Value,
-                inputM3Value,
-                GetVariableNameForSlot(Output4x4SlotId),
-                GetVariableNameForSlot(Output3x3SlotId),
-                GetVariableNameForSlot(Output2x2SlotId));
-
-            visitor.AddShaderChunk(sb.ToString(), false);
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
+            {
+                s.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(Output4x4SlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(Output4x4SlotId));
+                s.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(Output3x3SlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(Output3x3SlotId));
+                s.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(Output2x2SlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(Output2x2SlotId));
+                s.AppendLine("{0}({1}, {2}, {3}, {4}, {5}, {6}, {7});",
+                    GetFunctionName(),
+                    inputM0Value,
+                    inputM1Value,
+                    inputM2Value,
+                    inputM3Value,
+                    GetVariableNameForSlot(Output4x4SlotId),
+                    GetVariableNameForSlot(Output3x3SlotId),
+                    GetVariableNameForSlot(Output2x2SlotId));
+            }
         }
 
-        public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideFunction(GetFunctionName(), precision, s =>
+            using(registry.ProvideSnippet(GetFunctionName(), guid, out var s))
+            {
+                s.AppendLine("void {0} ({1} M0, {1} M1, {1} M2, {1} M3, out {2} Out4x4, out {3} Out3x3, out {4} Out2x2)",
+                    GetFunctionName(),
+                    FindInputSlot<MaterialSlot>(InputSlotM0Id).concreteValueType.ToShaderString(),
+                    FindOutputSlot<MaterialSlot>(Output4x4SlotId).concreteValueType.ToShaderString(),
+                    FindOutputSlot<MaterialSlot>(Output3x3SlotId).concreteValueType.ToShaderString(),
+                    FindOutputSlot<MaterialSlot>(Output2x2SlotId).concreteValueType.ToShaderString());
+                using (s.BlockScope())
                 {
-                    s.AppendLine("void {0} ({1} M0, {1} M1, {1} M2, {1} M3, out {2} Out4x4, out {3} Out3x3, out {4} Out2x2)",
-                        GetFunctionName(),
-                        FindInputSlot<MaterialSlot>(InputSlotM0Id).concreteValueType.ToShaderString(),
-                        FindOutputSlot<MaterialSlot>(Output4x4SlotId).concreteValueType.ToShaderString(),
-                        FindOutputSlot<MaterialSlot>(Output3x3SlotId).concreteValueType.ToShaderString(),
-                        FindOutputSlot<MaterialSlot>(Output2x2SlotId).concreteValueType.ToShaderString());
-                    using (s.BlockScope())
+                    switch (m_Axis)
                     {
-                        switch (m_Axis)
-                        {
-                            case MatrixAxis.Column:
-                                s.AppendLine("Out4x4 = $precision4x4(M0.x, M1.x, M2.x, M3.x, M0.y, M1.y, M2.y, M3.y, M0.z, M1.z, M2.z, M3.z, M0.w, M1.w, M2.w, M3.w);");
-                                s.AppendLine("Out3x3 = $precision3x3(M0.x, M1.x, M2.x, M0.y, M1.y, M2.y, M0.z, M1.z, M2.z);");
-                                s.AppendLine("Out2x2 = $precision2x2(M0.x, M1.x, M0.y, M1.y);");
-                                break;
-                            default:
-                                s.AppendLine("Out4x4 = $precision4x4(M0.x, M0.y, M0.z, M0.w, M1.x, M1.y, M1.z, M1.w, M2.x, M2.y, M2.z, M2.w, M3.x, M3.y, M3.z, M3.w);");
-                                s.AppendLine("Out3x3 = $precision3x3(M0.x, M0.y, M0.z, M1.x, M1.y, M1.z, M2.x, M2.y, M2.z);");
-                                s.AppendLine("Out2x2 = $precision2x2(M0.x, M0.y, M1.x, M1.y);");
-                                break;
-                        }
+                        case MatrixAxis.Column:
+                            s.AppendLine("Out4x4 = $precision4x4(M0.x, M1.x, M2.x, M3.x, M0.y, M1.y, M2.y, M3.y, M0.z, M1.z, M2.z, M3.z, M0.w, M1.w, M2.w, M3.w);");
+                            s.AppendLine("Out3x3 = $precision3x3(M0.x, M1.x, M2.x, M0.y, M1.y, M2.y, M0.z, M1.z, M2.z);");
+                            s.AppendLine("Out2x2 = $precision2x2(M0.x, M1.x, M0.y, M1.y);");
+                            break;
+                        default:
+                            s.AppendLine("Out4x4 = $precision4x4(M0.x, M0.y, M0.z, M0.w, M1.x, M1.y, M1.z, M1.w, M2.x, M2.y, M2.z, M2.w, M3.x, M3.y, M3.z, M3.w);");
+                            s.AppendLine("Out3x3 = $precision3x3(M0.x, M0.y, M0.z, M1.x, M1.y, M1.z, M2.x, M2.y, M2.z);");
+                            s.AppendLine("Out2x2 = $precision2x2(M0.x, M0.y, M1.x, M1.y);");
+                            break;
                     }
-                });
+                }
+            }
         }
     }
 }

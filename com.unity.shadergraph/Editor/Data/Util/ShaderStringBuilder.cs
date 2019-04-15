@@ -6,13 +6,6 @@ using UnityEditor.Graphing;
 
 namespace UnityEditor.ShaderGraph
 {
-    struct ShaderStringMapping
-    {
-        public AbstractMaterialNode node { get; set; }
-        public int startIndex { get; set; }
-        public int count { get; set; }
-    }
-
     class ShaderStringBuilder : IDisposable
     {
         enum ScopeType
@@ -25,31 +18,13 @@ namespace UnityEditor.ShaderGraph
         StringBuilder m_StringBuilder;
         Stack<ScopeType> m_ScopeStack;
         int m_IndentationLevel;
-        ShaderStringMapping m_CurrentMapping;
-        List<ShaderStringMapping> m_Mappings;
 
         const string k_IndentationString = "    ";
-
-        internal AbstractMaterialNode currentNode
-        {
-            get { return m_CurrentMapping.node; }
-            set
-            {
-                m_CurrentMapping.count = m_StringBuilder.Length - m_CurrentMapping.startIndex;
-                if (m_CurrentMapping.count > 0)
-                    m_Mappings.Add(m_CurrentMapping);
-                m_CurrentMapping.node = value;
-                m_CurrentMapping.startIndex = m_StringBuilder.Length;
-                m_CurrentMapping.count = 0;
-            }
-        }
 
         public ShaderStringBuilder()
         {
             m_StringBuilder = new StringBuilder();
             m_ScopeStack = new Stack<ScopeType>();
-            m_Mappings = new List<ShaderStringMapping>();
-            m_CurrentMapping = new ShaderStringMapping();
         }
 
         public ShaderStringBuilder(int indentationLevel)
@@ -186,33 +161,12 @@ namespace UnityEditor.ShaderGraph
 
         public void Concat(ShaderStringBuilder other)
         {
-            // First re-add all the mappings from `other`, such that their mappings are transformed.
-            foreach (var mapping in other.m_Mappings)
-            {
-                currentNode = mapping.node;
-
-                // Use `AppendLines` to indent according to the current indentation.
-                AppendLines(other.ToString(mapping.startIndex, mapping.count));
-            }
-            currentNode = other.currentNode;
-            AppendLines(other.ToString(other.m_CurrentMapping.startIndex, other.length - other.m_CurrentMapping.startIndex));
+            AppendLines(other.ToString());
         }
 
         public override string ToString()
         {
             return m_StringBuilder.ToString();
-        }
-
-        public string ToString(out ShaderSourceMap sourceMap)
-        {
-            m_CurrentMapping.count = m_StringBuilder.Length - m_CurrentMapping.startIndex;
-            if (m_CurrentMapping.count > 0)
-                m_Mappings.Add(m_CurrentMapping);
-            var source = m_StringBuilder.ToString();
-            sourceMap = new ShaderSourceMap(source, m_Mappings);
-            m_Mappings.RemoveAt(m_Mappings.Count - 1);
-            m_CurrentMapping.count = 0;
-            return source;
         }
 
         public string ToString(int startIndex, int length)

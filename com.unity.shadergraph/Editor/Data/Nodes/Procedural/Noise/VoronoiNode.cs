@@ -52,16 +52,20 @@ namespace UnityEditor.ShaderGraph
 ";
         }
 
-        public override void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        public override void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            registry.ProvideFunction("Unity_Voronoi_RandomVector", precision, s => s.Append(@"
+            using(registry.ProvideSnippet("Unity_Voronoi_RandomVector", guid, out var s))
+            {
+                s.Append(@"
 inline $precision2 Unity_Voronoi_RandomVector_$precision ($precision2 UV, $precision Offset)
 {
     $precision2x2 m = $precision2x2(15.27, 47.63, 99.41, 89.98);
     UV = frac(sin(mul(UV, m)) * 46839.32);
     return $precision2(sin(UV.y *+Offset) * 0.5 + 0.5, cos(UV.x * Offset) * 0.5 + 0.5);
 }
-"));
+");
+            }
+            
             base.GenerateNodeFunction(registry, graphContext, generationMode);
         }
     }

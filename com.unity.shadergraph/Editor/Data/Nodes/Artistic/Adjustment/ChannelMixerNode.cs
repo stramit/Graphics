@@ -68,22 +68,38 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            var sb = new ShaderStringBuilder();
             var inputValue = GetSlotValue(InputSlotId, generationMode);
             var outputValue = GetSlotValue(OutputSlotId, generationMode);
 
-            sb.AppendLine("{0} {1};", FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(OutputSlotId));
-            if (!generationMode.IsPreview())
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                sb.AppendLine("$precision3 _{0}_Red = $precision3 ({1}, {2}, {3});", GetVariableNameForNode(), channelMixer.outRed[0], channelMixer.outRed[1], channelMixer.outRed[2]);
-                sb.AppendLine("$precision3 _{0}_Green = $precision3 ({1}, {2}, {3});", GetVariableNameForNode(), channelMixer.outGreen[0], channelMixer.outGreen[1], channelMixer.outGreen[2]);
-                sb.AppendLine("$precision3 _{0}_Blue = $precision3 ({1}, {2}, {3});", GetVariableNameForNode(), channelMixer.outBlue[0], channelMixer.outBlue[1], channelMixer.outBlue[2]);
+                s.AppendLine("{0} {1};", FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(OutputSlotId));
+                if (!generationMode.IsPreview())
+                {
+                    s.AppendLine("$precision3 _{0}_Red = $precision3 ({1}, {2}, {3});", GetVariableNameForNode(), channelMixer.outRed[0], channelMixer.outRed[1], channelMixer.outRed[2]);
+                    s.AppendLine("$precision3 _{0}_Green = $precision3 ({1}, {2}, {3});", GetVariableNameForNode(), channelMixer.outGreen[0], channelMixer.outGreen[1], channelMixer.outGreen[2]);
+                    s.AppendLine("$precision3 _{0}_Blue = $precision3 ({1}, {2}, {3});", GetVariableNameForNode(), channelMixer.outBlue[0], channelMixer.outBlue[1], channelMixer.outBlue[2]);
+                }
+                s.AppendLine("{0}({1}, _{2}_Red, _{2}_Green, _{2}_Blue, {3});", GetFunctionName(), inputValue, GetVariableNameForNode(), outputValue);
             }
-            sb.AppendLine("{0}({1}, _{2}_Red, _{2}_Green, _{2}_Blue, {3});", GetFunctionName(), inputValue, GetVariableNameForNode(), outputValue);
+        }
 
-            visitor.AddShaderChunk(sb.ToString(), false);
+        public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        {
+            using(registry.ProvideSnippet(GetFunctionName(), guid, out var s))
+            {
+                s.AppendLine("void {0} ({1} In, $precision3 Red, $precision3 Green, $precision3 Blue, out {3} Out)",
+                    GetFunctionName(),
+                    FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(),
+                    FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
+                using (s.BlockScope())
+                {
+                    s.AppendLine("Out = {0}(dot(In, Red), dot(In, Green), dot(In, Blue));",
+                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
+                }
+            }
         }
 
         public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)
@@ -133,22 +149,6 @@ namespace UnityEditor.ShaderGraph
                 overrideReferenceName = string.Format("_{0}_Blue", GetVariableNameForNode()),
                 generatePropertyBlock = false
             });
-        }
-
-        public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
-        {
-            registry.ProvideFunction(GetFunctionName(), precision, s =>
-                {
-                    s.AppendLine("void {0} ({1} In, $precision3 Red, $precision3 Green, $precision3 Blue, out {2} Out)",
-                        GetFunctionName(),
-                        FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(),
-                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
-                    using (s.BlockScope())
-                    {
-                        s.AppendLine("Out = {0}(dot(In, Red), dot(In, Green), dot(In, Blue));",
-                            FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
-                    }
-                });
         }
     }
 }

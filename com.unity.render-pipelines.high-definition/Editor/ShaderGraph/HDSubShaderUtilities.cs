@@ -528,8 +528,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             var graphRequirements = pixelRequirements.Union(vertexRequirements);
 
             // Function Registry tracks functions to remove duplicates, it wraps a string builder that stores the combined function string
-            var functionRegistry = new FunctionRegistry();
-            ShaderStringBuilder functions = new ShaderStringBuilder();
+            var functionRegistry = new ShaderSnippetRegistry() { allowDuplicates = false };
 
             // TODO: this can be a shared function for all HDRP master nodes -- From here through GraphUtil.GenerateSurfaceDescription(..)
 
@@ -551,7 +550,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             HDRPShaderStructs.AddActiveFieldsFromPixelGraphRequirements(activeFields, pixelRequirements);
 
             // build the graph outputs structure, and populate activeFields with the fields of that structure
-            GraphUtil.GenerateSurfaceDescriptionStruct(pixelGraphOutputs, pixelSlots, true, pixelGraphOutputStructName, activeFields);
+            GraphUtil.GenerateSurfaceDescriptionStruct(pixelGraphOutputs, pixelSlots, pixelGraphOutputStructName, activeFields);
 
             // Build the graph evaluation code, to evaluate the specified slots
             GraphUtil.GenerateSurfaceDescriptionFunction(
@@ -680,7 +679,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             var graph = new ShaderGenerator();
             {
                 graph.AddShaderChunk("// Shared Graph Properties (uniform inputs)");
-                graph.AddShaderChunk(sharedProperties.GetPropertiesDeclaration(masterNode.owner, 1));
+                graph.AddShaderChunk(sharedProperties.GetPropertiesDeclaration(masterNode.owner, 1, mode));
 
                 if (vertexActive)
                 {
@@ -704,7 +703,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 graph.Deindent();
 
                 graph.AddShaderChunk("// Shared Graph Node Functions");
-                graph.AddShaderChunk(functions.ToString());
+                graph.AddShaderChunk(functionRegistry.GetSnippetsAsString());
 
                 if (vertexActive)
                 {
@@ -1013,7 +1012,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             return result;
         }
 
-        public static void GetStencilStateForDepthOrMV(bool receiveDecals, bool receiveSSR, bool useObjectVelocity, ref Pass pass)
+        public static void GetStencilStateForDepthOrMV(bool receiveDecals, bool receiveSSR, bool useObjectMotionVector, ref Pass pass)
         {
             int stencilWriteMask = (int)HDRenderPipeline.StencilBitMask.DecalsForwardOutputNormalBuffer;
             int stencilRef = receiveDecals ? (int)HDRenderPipeline.StencilBitMask.DecalsForwardOutputNormalBuffer : 0;
@@ -1021,8 +1020,8 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             stencilWriteMask |= (int)HDRenderPipeline.StencilBitMask.DoesntReceiveSSR;
             stencilRef |= !receiveSSR ? (int)HDRenderPipeline.StencilBitMask.DoesntReceiveSSR : 0;
 
-            stencilWriteMask |= useObjectVelocity ? (int)HDRenderPipeline.StencilBitMask.ObjectVelocity : 0;
-            stencilRef |= useObjectVelocity ? (int)HDRenderPipeline.StencilBitMask.ObjectVelocity : 0;
+            stencilWriteMask |= useObjectMotionVector ? (int)HDRenderPipeline.StencilBitMask.ObjectMotionVectors : 0;
+            stencilRef |= useObjectMotionVector ? (int)HDRenderPipeline.StencilBitMask.ObjectMotionVectors : 0;
 
             if (stencilWriteMask != 0)
             {

@@ -89,30 +89,28 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            var sb = new ShaderStringBuilder();
-            if (!generationMode.IsPreview())
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                sb.AppendLine("$precision3 _{0}_m0 = $precision3 ({1}, {2}, {3});",
-                    GetVariableNameForNode(),
-                    NodeUtils.FloatToShaderValue(m_Row0.x),
-                    NodeUtils.FloatToShaderValue(m_Row0.y),
-                    NodeUtils.FloatToShaderValue(m_Row0.z));
-                sb.AppendLine("$precision3 _{0}_m1 = $precision3 ({1}, {2}, {3});", 
-                    GetVariableNameForNode(),
-                    NodeUtils.FloatToShaderValue(m_Row1.x),
-                    NodeUtils.FloatToShaderValue(m_Row1.y),
-                    NodeUtils.FloatToShaderValue(m_Row1.z));
-                sb.AppendLine("$precision3 _{0}_m2 = $precision3 ({1}, {2}, {3});", 
-                    GetVariableNameForNode(),
-                    NodeUtils.FloatToShaderValue(m_Row2.x),
-                    NodeUtils.FloatToShaderValue(m_Row2.y),
-                    NodeUtils.FloatToShaderValue(m_Row2.z));
+                if (!generationMode.IsPreview())
+                {
+                    s.AppendLine("$precision3 _{0}_m0 = $precision3 ({1}, {2}, {3});", GetVariableNameForNode(),
+                        NodeUtils.FloatToShaderValue(m_Row0.x),
+                        NodeUtils.FloatToShaderValue(m_Row0.y),
+                        NodeUtils.FloatToShaderValue(m_Row0.z));
+                    s.AppendLine("$precision3 _{0}_m1 = $precision3 ({1}, {2}, {3});", GetVariableNameForNode(),
+                        NodeUtils.FloatToShaderValue(m_Row1.x),
+                        NodeUtils.FloatToShaderValue(m_Row1.y),
+                        NodeUtils.FloatToShaderValue(m_Row1.z));
+                    s.AppendLine("$precision3 _{0}_m2 = $precision3 ({1}, {2}, {3});", GetVariableNameForNode(),
+                        NodeUtils.FloatToShaderValue(m_Row2.x),
+                        NodeUtils.FloatToShaderValue(m_Row2.y),
+                        NodeUtils.FloatToShaderValue(m_Row2.z));
+                }
+                s.AppendLine("$precision3x3 {0} = $precision3x3 (_{0}_m0.x, _{0}_m0.y, _{0}_m0.z, _{0}_m1.x, _{0}_m1.y, _{0}_m1.z, _{0}_m2.x, _{0}_m2.y, _{0}_m2.z);",
+                    GetVariableNameForNode());
             }
-            sb.AppendLine("$precision3x3 {0} = $precision3x3 (_{0}_m0.x, _{0}_m0.y, _{0}_m0.z, _{0}_m1.x, _{0}_m1.y, _{0}_m1.z, _{0}_m2.x, _{0}_m2.y, _{0}_m2.z);",
-                GetVariableNameForNode());
-            visitor.AddShaderChunk(sb.ToString(), false);
         }
 
         public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)

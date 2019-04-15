@@ -37,20 +37,23 @@ namespace UnityEditor.ShaderGraph
             return sb.ToString();
         }
 
-        public string GetPropertiesDeclaration(GraphData graphData, int baseIndentLevel)
+        public string GetPropertiesDeclaration(GraphData graphData, int baseIndentLevel, GenerationMode mode)
         {
             var builder = new ShaderStringBuilder(baseIndentLevel);
-            GetPropertiesDeclaration(builder);
+            GetPropertiesDeclaration(builder, mode);
             var value = builder.ToString();
+            // MATT: Set this per property...
+            // Then remove GraphData as an argumen
             value = value.Replace("$precision", graphData.precision.ToShaderString());
             return value;
         }
 
-        public void GetPropertiesDeclaration(ShaderStringBuilder builder)
+        public void GetPropertiesDeclaration(ShaderStringBuilder builder, GenerationMode mode)
         {
+            var batchAll = mode == GenerationMode.Preview;
             builder.AppendLine("CBUFFER_START(UnityPerMaterial)");
-            builder.IncreaseIndent();
-            foreach (var prop in properties.Where(n => n.isBatchable && n.generatePropertyBlock))
+            
+            foreach (var prop in properties.Where(n => batchAll || (n.generatePropertyBlock && n.isBatchable)))
             {
                 builder.AppendLine(prop.GetPropertyDeclarationString());
             }
@@ -58,6 +61,9 @@ namespace UnityEditor.ShaderGraph
             builder.AppendLine("CBUFFER_END");
             builder.AppendNewLine();
 
+            if (batchAll)
+                return;
+            
             foreach (var prop in properties.Where(n => !n.isBatchable || !n.generatePropertyBlock))
             {
                 builder.AppendLine(prop.GetPropertyDeclarationString());

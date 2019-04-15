@@ -88,7 +88,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             base.ValidateNode();
         }
 
-        public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             string perPixelDisplacementInclude = @"#include ""Packages/com.unity.render-pipelines.core/ShaderLibrary/PerPixelDisplacement.hlsl""";
 
@@ -97,12 +97,12 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             var edgesSampler = owner.GetEdges(samplerSlot.slotReference);
             var heightmap = GetSlotValue(kHeightmapSlotId, generationMode);
 
-            registry.ProvideFunction(GetFunctionName(), precision, s =>
+            using(registry.ProvideSnippet(GetFunctionName(), guid, out var s))
+            {
+                s.AppendLine("$precision3 GetDisplacementObjectScale()");
+                using (s.BlockScope())
                 {
-                    s.AppendLine("$precision3 GetDisplacementObjectScale()");
-                    using (s.BlockScope())
-                    {
-                        s.AppendLines(@"
+                    s.AppendLines(@"
 float3 objectScale = float3(1.0, 1.0, 1.0);
 float4x4 worldTransform = GetWorldToObjectMatrix();
 
@@ -110,26 +110,26 @@ objectScale.x = length(float3(worldTransform._m00, worldTransform._m01, worldTra
 objectScale.z = length(float3(worldTransform._m20, worldTransform._m21, worldTransform._m22));
 
 return objectScale;");
-                    }
+                }
 
-                    s.AppendLine("// Required struct and function for the ParallaxOcclusionMapping function:");
-                    s.AppendLine("struct PerPixelHeightDisplacementParam");
-                    using (s.BlockSemicolonScope())
-                    {
-                        s.AppendLine("$precision2 uv;");
-                    }
-                    s.AppendLine("$precision ComputePerPixelHeightDisplacement($precision2 texOffsetCurrent, $precision lod, PerPixelHeightDisplacementParam param)");
-                    using (s.BlockScope())
-                    {
-                        s.AppendLine("return SAMPLE_TEXTURE2D_LOD({0}, {1}, param.uv + texOffsetCurrent, lod).r;",
-                            heightmap,
-                            edgesSampler.Any() ? GetSlotValue(kHeightmapSamplerSlotId, generationMode) : "sampler" + heightmap);
-                    }
-                    s.Append(perPixelDisplacementInclude);
-                });
+                s.AppendLine("// Required struct and function for the ParallaxOcclusionMapping function:");
+                s.AppendLine("struct PerPixelHeightDisplacementParam");
+                using (s.BlockSemicolonScope())
+                {
+                    s.AppendLine("$precision2 uv;");
+                }
+                s.AppendLine("$precision ComputePerPixelHeightDisplacement($precision2 texOffsetCurrent, $precision lod, PerPixelHeightDisplacementParam param)");
+                using (s.BlockScope())
+                {
+                    s.AppendLine("return SAMPLE_TEXTURE2D_LOD({0}, {1}, param.uv + texOffsetCurrent, lod).r;",
+                        heightmap,
+                        edgesSampler.Any() ? GetSlotValue(kHeightmapSamplerSlotId, generationMode) : "sampler" + heightmap);
+                }
+                s.Append(perPixelDisplacementInclude);
+            }
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             string amplitude = GetSlotValue(kAmplitudeSlotId, generationMode);
             string steps = GetSlotValue(kStepsSlotId, generationMode);
@@ -144,43 +144,45 @@ return objectScale;");
             string tmpViewDirUV = GetVariableNameForNode() + "_ViewDirUV";
             string tmpOutHeight = GetVariableNameForNode() + "_OutHeight";
 
-            visitor.AddShaderChunk(String.Format(@"
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
+            {
+                s.AppendLine(@"
 $precision3 {4} = IN.{2} * GetDisplacementObjectScale().xzy;
 float {5} = {4}.z;
 float {6} = {3} * 0.01;
 
 // Transform the view vector into the UV space.
-$precision3 {7}    = normalize($precision3({4}.xy * {6}, {4}.z)); // TODO: skip normalize
+$precision3 {6}    = normalize($precision3({3}.xy * {5}, {3}.z)); // TODO: skip normalize
 
 PerPixelHeightDisplacementParam {0};
 {0}.uv = {1};",
-                tmpPOMParam,
-                uvs,
-                CoordinateSpace.Tangent.ToVariableName(InterpolatorType.ViewDirection),
-                amplitude, // cm in the interface so we multiply by 0.01 in the shader to convert in meter
-                tmpViewDir,
-                tmpNdotV,
-                tmpMaxHeight,
-                tmpViewDirUV
-                ));
-            visitor.AddShaderChunk(String.Format(@"
+                    tmpPOMParam,
+                    uvs,
+                    CoordinateSpace.Tangent.ToVariableName(InterpolatorType.ViewDirection),
+                    amplitude, // cm in the interface so we multiply by 0.01 in the shader to convert in meter
+                    tmpViewDir,
+                    tmpNdotV,
+                    tmpMaxHeight,
+                    tmpViewDirUV);
+                    
+                s.AppendLine(@"
 $precision {10};
 $precision2 {0} = {8} + ParallaxOcclusionMapping({1}, {2}, {3}, {4}, {5}, {10});
 
-$precision {6} = ({7} - {10} * {7}) / max({9}, 0.0001);
+$precision {5} = ({6} - {9} * {6}) / max({8}, 0.0001);
 ",
-                GetVariableNameForSlot(kParallaxUVsOutputSlotId),
-                lod,
-                lodThreshold,
-                steps,
-                tmpViewDirUV,
-                tmpPOMParam,
-                GetVariableNameForSlot(kPixelDepthOffsetOutputSlotId),
-                tmpMaxHeight,
-                uvs,
-                tmpNdotV,
-                tmpOutHeight
-                ));
+                    GetVariableNameForSlot(kParallaxUVsOutputSlotId),
+                    lod,
+                    lodThreshold,
+                    steps,
+                    tmpViewDirUV,
+                    tmpPOMParam,
+                    GetVariableNameForSlot(kPixelDepthOffsetOutputSlotId),
+                    tmpMaxHeight,
+                    uvs,
+                    tmpNdotV,
+                    tmpOutHeight);
+            }
         }
 
         public NeededCoordinateSpace RequiresViewDirection(ShaderStageCapability stageCapability = ShaderStageCapability.All)

@@ -102,32 +102,48 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            var sb = new ShaderStringBuilder();
-
             var inputValue = GetSlotValue(InputSlotId, generationMode);
             var outputValue = GetSlotValue(OutputSlotId, generationMode);
-            sb.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(OutputSlotId));
 
-            if (!generationMode.IsPreview())
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                sb.AppendLine("{0} _{1}_InvertColors = {0} ({2}",
-                    FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString(),
-                    GetVariableNameForNode(),
-                    Convert.ToInt32(m_RedChannel));
-                if (channelCount > 1)
-                    sb.Append(", {0}", Convert.ToInt32(m_GreenChannel));
-                if (channelCount > 2)
-                    sb.Append(", {0}", Convert.ToInt32(m_BlueChannel));
-                if (channelCount > 3)
-                    sb.Append(", {0}", Convert.ToInt32(m_AlphaChannel));
-                sb.Append(");");
+                s.AppendLine("{0} {1};", FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString(), GetVariableNameForSlot(OutputSlotId));
+
+                if (!generationMode.IsPreview())
+                {
+                    s.AppendLine("{0} _{1}_InvertColors = {0} ({2}",
+                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString(),
+                        GetVariableNameForNode(),
+                        Convert.ToInt32(m_RedChannel));
+                    if (channelCount > 1)
+                        s.Append(", {0}", Convert.ToInt32(m_GreenChannel));
+                    if (channelCount > 2)
+                        s.Append(", {0}", Convert.ToInt32(m_BlueChannel));
+                    if (channelCount > 3)
+                        s.Append(", {0}", Convert.ToInt32(m_AlphaChannel));
+                    s.Append(");");
+                }
+
+                s.AppendLine("{0}({1}, _{2}_InvertColors, {3});", GetFunctionName(), inputValue, GetVariableNameForNode(), outputValue);
             }
+        }
 
-            sb.AppendLine("{0}({1}, _{2}_InvertColors, {3});", GetFunctionName(), inputValue, GetVariableNameForNode(), outputValue);
-
-            visitor.AddShaderChunk(sb.ToString(), false);
+        public void GenerateNodeFunction(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
+        {
+            using(registry.ProvideSnippet(GetFunctionName(), guid, out var s))
+            {
+                s.AppendLine("void {0}({1} In, {2} InvertColors, out {3} Out)",
+                    GetFunctionName(),
+                    FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(),
+                    FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(),
+                    FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
+                using (s.BlockScope())
+                {
+                    s.AppendLine("Out = abs(InvertColors - In);");
+                }
+            }
         }
 
         public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)
@@ -153,37 +169,6 @@ namespace UnityEditor.ShaderGraph
                 overrideReferenceName = string.Format("_{0}_InvertColors", GetVariableNameForNode()),
                 generatePropertyBlock = false
             });
-        }
-
-        public void GenerateNodeFunction(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
-        {
-            var sb = new ShaderStringBuilder();
-            sb.AppendLine("void {0}({1} In, {2} InvertColors, out {3} Out)",
-                GetFunctionName(),
-                FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(),
-                FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(),
-                FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
-            using (sb.BlockScope())
-            {
-                sb.AppendLine("Out = abs(InvertColors - In);");
-            }
-            visitor.AddShaderChunk(sb.ToString(), true);
-        }
-
-        public void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
-        {
-            registry.ProvideFunction(GetFunctionName(), precision, s =>
-                {
-                    s.AppendLine("void {0}({1} In, {2} InvertColors, out {3} Out)",
-                        GetFunctionName(),
-                        FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(),
-                        FindInputSlot<MaterialSlot>(InputSlotId).concreteValueType.ToShaderString(),
-                        FindOutputSlot<MaterialSlot>(OutputSlotId).concreteValueType.ToShaderString());
-                    using (s.BlockScope())
-                    {
-                        s.AppendLine("Out = abs(InvertColors - In);");
-                    }
-                });
         }
     }
 }

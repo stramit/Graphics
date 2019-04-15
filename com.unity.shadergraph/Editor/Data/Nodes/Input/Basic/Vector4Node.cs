@@ -41,7 +41,7 @@ namespace UnityEditor.ShaderGraph
             RemoveSlotsNameNotMatching(new[] { OutputSlotId, InputSlotXId, InputSlotYId, InputSlotZId, InputSlotWId });
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
             var inputXValue = GetSlotValue(InputSlotXId, generationMode);
             var inputYValue = GetSlotValue(InputSlotYId, generationMode);
@@ -49,13 +49,15 @@ namespace UnityEditor.ShaderGraph
             var inputWValue = GetSlotValue(InputSlotWId, generationMode);
             var outputName = GetVariableNameForSlot(outputSlotId);
 
-            var s = string.Format("$precision4 {0} = $precision4({1}, {2}, {3}, {4});",
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
+            {
+                s.AppendLine("$precision4 {0} = $precision4({1}, {2}, {3}, {4});",
                     outputName,
                     inputXValue,
                     inputYValue,
                     inputZValue,
                     inputWValue);
-            visitor.AddShaderChunk(s, true);
+            }
         }
 
         public AbstractShaderProperty AsShaderProperty()

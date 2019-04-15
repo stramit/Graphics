@@ -72,23 +72,21 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        public void GenerateNodeCode(ShaderGenerator visitor, GraphContext graphContext, GenerationMode generationMode)
+        public void GenerateNodeCode(ShaderSnippetRegistry registry, GraphContext graphContext, GenerationMode generationMode)
         {
-            var sb = new ShaderStringBuilder();
-            if (!generationMode.IsPreview())
+            using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
-                sb.AppendLine("$precision2 _{0}_m0 = $precision2 ({1}, {2});",
-                    GetVariableNameForNode(),
-                    NodeUtils.FloatToShaderValue(m_Row0.x),
-                    NodeUtils.FloatToShaderValue(m_Row0.y));
-                sb.AppendLine("$precision2 _{0}_m1 = $precision2 ({1}, {2});",
-                    GetVariableNameForNode(),
-                    NodeUtils.FloatToShaderValue(m_Row1.x),
-                    NodeUtils.FloatToShaderValue(m_Row1.y));
+                if (!generationMode.IsPreview())
+                {
+                    s.AppendLine("$precision2 _{0}_m0 = $precision2 ({1}, {2});", GetVariableNameForNode(),
+                        NodeUtils.FloatToShaderValue(m_Row0.x),
+                        NodeUtils.FloatToShaderValue(m_Row0.y));
+                    s.AppendLine("$precision2 _{0}_m1 = $precision2 ({1}, {2});", GetVariableNameForNode(),
+                        NodeUtils.FloatToShaderValue(m_Row1.x),
+                        NodeUtils.FloatToShaderValue(m_Row1.y));
+                }
+                s.AppendLine("$precision2x2 {0} = $precision2x2 (_{0}_m0.x, _{0}_m0.y, _{0}_m1.x, _{0}_m1.y);", GetVariableNameForNode());
             }
-            sb.AppendLine("$precision2x2 {0} = $precision2x2 (_{0}_m0.x, _{0}_m0.y, _{0}_m1.x, _{0}_m1.y);",
-                GetVariableNameForNode());
-            visitor.AddShaderChunk(sb.ToString(), false);
         }
 
         public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)
