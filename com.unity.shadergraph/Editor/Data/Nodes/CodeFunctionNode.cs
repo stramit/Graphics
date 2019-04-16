@@ -348,7 +348,7 @@ namespace UnityEditor.ShaderGraph
             using(registry.ProvideSnippet(GetVariableNameForNode(), guid, out var s))
             {
                 foreach (var outSlot in s_TempSlots)
-                    s.AppendLine("{0} {1};", GetParamTypeName(outSlot), GetVariableNameForSlot(outSlot.id));
+                    s.AppendLine("{0} {1};", outSlot.concreteValueType.ToShaderString(), GetVariableNameForSlot(outSlot.id));
 
                 string call = GetFunctionName() + "(";
                 bool first = true;

@@ -43,8 +43,8 @@ namespace UnityEditor.ShaderGraph
             GetPropertiesDeclaration(builder, mode);
             var value = builder.ToString();
             // MATT: Set this per property...
-            // Then remove GraphData as an argumen
-            value = value.Replace("$precision", graphData.precision.ToShaderString());
+            // Then remove GraphData as an argument
+            // value = value.Replace("$precision", graphData.precision.ToShaderString());
             return value;
         }
 
@@ -52,7 +52,7 @@ namespace UnityEditor.ShaderGraph
         {
             var batchAll = mode == GenerationMode.Preview;
             builder.AppendLine("CBUFFER_START(UnityPerMaterial)");
-            
+            builder.IncreaseIndent();
             foreach (var prop in properties.Where(n => batchAll || (n.generatePropertyBlock && n.isBatchable)))
             {
                 builder.AppendLine(prop.GetPropertyDeclarationString());

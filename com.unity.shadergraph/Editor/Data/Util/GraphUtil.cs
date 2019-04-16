@@ -1044,11 +1044,6 @@ namespace UnityEditor.ShaderGraph
             // ----------------------------------------------------- //
 
             // -------------------------------------
-            // Generate final functions
-
-            GenerateFunctions(functions, functionRegistry, graph);
-
-            // -------------------------------------
             // Generate Input structure for Vertex shader
 
             GenerateApplicationVertexInputs(requirements, vertexInputs);
@@ -1089,7 +1084,7 @@ namespace UnityEditor.ShaderGraph
                 finalShader.AppendLines(surfaceDescriptionInputStruct.ToString());
                 finalShader.AppendNewLine();
 
-                finalShader.AppendLines(functionRegistry.GetSnippetsAsString(true));
+                finalShader.AppendLines(ProcessSnippets(functionRegistry, graph, true));
 
                 finalShader.AppendLines(surfaceDescriptionStruct.ToString());
                 finalShader.AppendNewLine();
@@ -1115,19 +1110,29 @@ namespace UnityEditor.ShaderGraph
             return results;
         }
 
-        public static void GenerateFunctions(ShaderStringBuilder sb, FunctionRegistry functionRegistry, GraphData graph)
+        public static string ProcessSnippets(ShaderSnippetRegistry snippetRegistry, GraphData graph, bool appendNewLineBetweenSnippets = false)
         {
-            foreach(KeyValuePair<string, FunctionSource> functionSource in functionRegistry.sources)
+            ShaderStringBuilder sb = new ShaderStringBuilder();
+
+            foreach(KeyValuePair<string, ShaderSnippet> shaderSnippet in snippetRegistry.snippets)
             {
-                string function = functionSource.Value.function;
-                Precision precision = functionSource.Value.precision;
+                string snippet = shaderSnippet.Value.snippet;
+
+                // --------------------------------------------------
+                // Precision
+                // MATT: Get actual snippet precisions from source guids...
+                Precision precision = Precision.Inherit; // shaderSnippet.Value.precision;
                 if(precision == Precision.Inherit)
                     precision = graph.precision;
+                snippet = snippet.Replace("$precision", precision.ToShaderString());
 
-                function = function.Replace("$precision", precision.ToShaderString());
-                sb.AppendLines(function);
-                sb.AppendNewLine();
+                sb.AppendLines(snippet);
+
+                if(appendNewLineBetweenSnippets)
+                    sb.AppendNewLine();
             }
+
+            return sb.ToString();
         }
 
         public static void GenerateSurfaceInputStruct(ShaderStringBuilder sb, ShaderGraphRequirements requirements, string structName)

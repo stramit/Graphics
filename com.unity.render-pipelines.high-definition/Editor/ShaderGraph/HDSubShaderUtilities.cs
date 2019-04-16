@@ -599,9 +599,6 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     vertexGraphEvalFunctionName,
                     vertexGraphOutputStructName);
             }
-            
-            // Generate final functions
-            GraphUtil.GenerateFunctions(functions, functionRegistry, masterNode.owner);
 
             var blendCode = new ShaderStringBuilder();
             var cullCode = new ShaderStringBuilder();
@@ -703,7 +700,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 graph.Deindent();
 
                 graph.AddShaderChunk("// Shared Graph Node Functions");
-                graph.AddShaderChunk(functionRegistry.GetSnippetsAsString());
+                graph.AddShaderChunk(GraphUtil.ProcessSnippets(functionRegistry, masterNode.owner, true));
 
                 if (vertexActive)
                 {

@@ -360,11 +360,6 @@ namespace UnityEditor.Rendering.LWRP
             GraphUtil.GenerateApplicationVertexInputs(vertexRequirements.Union(pixelRequirements.Union(modelRequiements)), vertexInputStruct);
 
             // -------------------------------------
-            // Generate final functions
-
-            GraphUtil.GenerateFunctions(functions, functionRegistry, masterNode.owner);
-
-            // -------------------------------------
             // Generate standard transformations
             // This method ensures all required transform data is available in vertex and pixel stages
 
@@ -411,7 +406,7 @@ namespace UnityEditor.Rendering.LWRP
             graph.AppendLine(vertexDescriptionInputStruct.ToString());
             graph.AppendLine(surfaceDescriptionInputStruct.ToString());
 
-            graph.AppendLine(functionRegistry.GetSnippetsAsString(true));
+            graph.AppendLine(GraphUtil.ProcessSnippets(functionRegistry, masterNode.owner, true));
 
             graph.AppendLine(vertexDescriptionStruct.ToString());
             graph.AppendLine(vertexDescriptionFunction.ToString());
