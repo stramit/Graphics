@@ -176,7 +176,7 @@ namespace UnityEditor.Rendering.LWRP
 
             var surfaceDescriptionInputStruct = new ShaderStringBuilder(1);
             var surfaceDescriptionStruct = new ShaderStringBuilder(1);
-            var surfaceDescriptionFunction = new ShaderStringBuilder(1);
+            var surfaceDescriptionFunction = new ShaderSnippetRegistry() { allowDuplicates = true };
 
             var vertexInputStruct = new ShaderStringBuilder(1);
             var vertexOutputStruct = new ShaderStringBuilder(2);
@@ -412,7 +412,7 @@ namespace UnityEditor.Rendering.LWRP
             graph.AppendLine(vertexDescriptionFunction.ToString());
 
             graph.AppendLine(surfaceDescriptionStruct.ToString());
-            graph.AppendLine(surfaceDescriptionFunction.ToString());
+            graph.AppendLine(GraphUtil.ProcessSnippets(surfaceDescriptionFunction, masterNode.owner));
 
             graph.AppendLine(vertexInputStruct.ToString());
 

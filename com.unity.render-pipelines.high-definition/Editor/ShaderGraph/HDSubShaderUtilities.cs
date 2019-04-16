@@ -543,7 +543,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             string pixelGraphInputStructName = "SurfaceDescriptionInputs";
             string pixelGraphOutputStructName = "SurfaceDescription";
             string pixelGraphEvalFunctionName = "SurfaceDescriptionFunction";
-            ShaderStringBuilder pixelGraphEvalFunction = new ShaderStringBuilder();
+            ShaderSnippetRegistry pixelGraphEvalFunction = new ShaderSnippetRegistry() { allowDuplicates = true };
             ShaderStringBuilder pixelGraphOutputs = new ShaderStringBuilder();
 
             // build initial requirements
@@ -712,7 +712,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
                 graph.AddShaderChunk("// Pixel Graph Evaluation");
                 graph.Indent();
-                graph.AddShaderChunk(pixelGraphEvalFunction.ToString());
+                graph.AddShaderChunk(GraphUtil.ProcessSnippets(pixelGraphEvalFunction, masterNode.owner));
                 graph.Deindent();
             }
 

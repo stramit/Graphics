@@ -966,7 +966,7 @@ namespace UnityEditor.ShaderGraph
 
             var surfaceDescriptionInputStruct = new ShaderStringBuilder(0);
             var surfaceDescriptionStruct = new ShaderStringBuilder(0);
-            var surfaceDescriptionFunction = new ShaderStringBuilder(0);
+            var surfaceDescriptionFunction = new ShaderSnippetRegistry() { allowDuplicates = true };
 
             var vertexInputs = new ShaderStringBuilder(0);
 
@@ -1120,12 +1120,23 @@ namespace UnityEditor.ShaderGraph
 
                 // --------------------------------------------------
                 // Precision
-                // MATT: Get actual snippet precisions from source guids...
+                
                 AbstractMaterialNode node = graph.GetNodeFromGuid(shaderSnippet.Value.source);
-                var snippetPrecision = node.concretePrecision;
-                snippet = snippet.Replace("$precision", snippetPrecision.ToShaderString());
-
-                sb.AppendLines(snippet);
+                
+                // If Guid is empty use graph precision
+                if (shaderSnippet.Value.source == Guid.Empty)
+                {
+                    var graphPrecision = graph.precision;
+                    snippet = snippet.Replace("$precision", graphPrecision.ToShaderString());
+                    sb.AppendLines(snippet);
+                }
+                // Use node precision
+                else if (node != null)
+                {
+                    var snippetPrecision = node.concretePrecision;
+                    snippet = snippet.Replace("$precision", snippetPrecision.ToShaderString());
+                    sb.AppendLines(snippet);
+                }
 
                 if(appendNewLineBetweenSnippets)
                     sb.AppendNewLine();
@@ -1205,7 +1216,7 @@ namespace UnityEditor.ShaderGraph
             List<AbstractMaterialNode> activeNodeList,
             AbstractMaterialNode rootNode,
             GraphData graph,
-            ShaderStringBuilder surfaceDescriptionFunction,
+            ShaderSnippetRegistry surfaceDescriptionRegistry,
             ShaderSnippetRegistry functionRegistry,
             PropertyCollector shaderProperties,
             ShaderGraphRequirements requirements,
@@ -1222,59 +1233,75 @@ namespace UnityEditor.ShaderGraph
             GraphContext graphContext = new GraphContext(graphInputStructName);
 
             graph.CollectShaderProperties(shaderProperties, mode);
-
-            surfaceDescriptionFunction.AppendLine(String.Format("{0} {1}(SurfaceDescriptionInputs IN)", surfaceDescriptionName, functionName), false);
-            using (surfaceDescriptionFunction.BlockScope())
+            
+            using(surfaceDescriptionRegistry.ProvideSnippet("PopulateSurfaceData_Start", Guid.Empty, out var s))
             {
-                ShaderSnippetRegistry bodyCodeRegistry = new ShaderSnippetRegistry() { allowDuplicates = true };
-                surfaceDescriptionFunction.AppendLine("{0} surface = ({0})0;", surfaceDescriptionName);
-                foreach (var activeNode in activeNodeList.OfType<AbstractMaterialNode>())
+                s.AppendLine("{0} {1}(SurfaceDescriptionInputs IN)", surfaceDescriptionName, functionName);
+                s.AppendLine("{");
+                s.IncreaseIndent();
+                s.AppendLine("{0} surface = ({0})0;", surfaceDescriptionName);
+            }
+            
+            foreach (var activeNode in activeNodeList.OfType<AbstractMaterialNode>())
+            {
+                if (activeNode is IGeneratesFunction functionNode)
                 {
-                    if (activeNode is IGeneratesFunction functionNode)
-                    {
-                        functionNode.GenerateNodeFunction(functionRegistry, graphContext, mode);
-                    }
-
-                    if (activeNode is IGeneratesBodyCode bodyNode)
-                    {
-                        bodyNode.GenerateNodeCode(bodyCodeRegistry, graphContext, mode);
-                    }
-
-                    activeNode.CollectShaderProperties(shaderProperties, mode);
+                    functionNode.GenerateNodeFunction(functionRegistry, graphContext, mode);
                 }
 
-                surfaceDescriptionFunction.AppendLines(bodyCodeRegistry.GetSnippetsAsString());
-
-                if (rootNode is IMasterNode || rootNode is SubGraphOutputNode)
+                if (activeNode is IGeneratesBodyCode bodyNode)
                 {
-                    var usedSlots = slots ?? rootNode.GetInputSlots<MaterialSlot>();
-                    foreach (var input in usedSlots)
+                    bodyNode.GenerateNodeCode(surfaceDescriptionRegistry, graphContext, mode);
+                }
+
+                activeNode.CollectShaderProperties(shaderProperties, mode);
+            }
+            
+            if (rootNode is IMasterNode || rootNode is SubGraphOutputNode)
+            {
+                var usedSlots = slots ?? rootNode.GetInputSlots<MaterialSlot>();
+                foreach (var input in usedSlots)
+                {
+                    if (input != null)
                     {
-                        if (input != null)
+                        var foundEdges = graph.GetEdges(input.slotReference).ToArray();
+                        if (foundEdges.Any())
                         {
-                            var foundEdges = graph.GetEdges(input.slotReference).ToArray();
-                            if (foundEdges.Any())
+                            using(surfaceDescriptionRegistry.ProvideSnippet(string.Format("PopulateSurfaceData_Remap{0}", input.shaderOutputName), Guid.Empty, out var s))
                             {
-                                surfaceDescriptionFunction.AppendLine("surface.{0} = {1};",
+                                s.AppendLine("surface.{0} = {1};",
                                     NodeUtils.GetHLSLSafeName(input.shaderOutputName),
                                     rootNode.GetSlotValue(input.id, mode));
                             }
-                            else
+                        }
+                        else
+                        {
+                            using(surfaceDescriptionRegistry.ProvideSnippet(string.Format("PopulateSurfaceData_Remap{0}", input.shaderOutputName), Guid.Empty, out var s))
                             {
-                                surfaceDescriptionFunction.AppendLine("surface.{0} = {1};",
+                                s.AppendLine("surface.{0} = {1};",
                                     NodeUtils.GetHLSLSafeName(input.shaderOutputName), input.GetDefaultValue(mode));
                             }
                         }
                     }
                 }
-                else if (rootNode.hasPreview)
+            }
+            else if (rootNode.hasPreview)
+            {
+                foreach (var slot in rootNode.GetOutputSlots<MaterialSlot>())
                 {
-                    foreach (var slot in rootNode.GetOutputSlots<MaterialSlot>())
-                        surfaceDescriptionFunction.AppendLine("surface.{0} = {1};",
+                    using(surfaceDescriptionRegistry.ProvideSnippet("PopulateSurfaceData_Preview", Guid.Empty, out var s))
+                    {
+                        s.AppendLine("surface.{0} = {1};",
                             NodeUtils.GetHLSLSafeName(slot.shaderOutputName), rootNode.GetSlotValue(slot.id, mode));
+                    }
                 }
-
-                surfaceDescriptionFunction.AppendLine("return surface;");
+            }
+            
+            using(surfaceDescriptionRegistry.ProvideSnippet("PopulateSurfaceData_End", Guid.Empty, out var s))
+            {
+                s.AppendLine("return surface;");
+                s.DecreaseIndent();
+                s.AppendLine("}");
             }
         }
 
