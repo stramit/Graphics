@@ -3,8 +3,15 @@
     public enum Precision
     {
         Inherit,
-        Real,
         Float,
+        Real,
+        Half,
+    }
+
+    public enum ConcretePrecision
+    {  
+        Float,
+        Real,
         Half,
     }
 }

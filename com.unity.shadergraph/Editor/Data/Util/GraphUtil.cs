@@ -1121,10 +1121,9 @@ namespace UnityEditor.ShaderGraph
                 // --------------------------------------------------
                 // Precision
                 // MATT: Get actual snippet precisions from source guids...
-                Precision precision = Precision.Inherit; // shaderSnippet.Value.precision;
-                if(precision == Precision.Inherit)
-                    precision = graph.precision;
-                snippet = snippet.Replace("$precision", precision.ToShaderString());
+                AbstractMaterialNode node = graph.GetNodeFromGuid(shaderSnippet.Value.source);
+                var snippetPrecision = node.concretePrecision;
+                snippet = snippet.Replace("$precision", snippetPrecision.ToShaderString());
 
                 sb.AppendLines(snippet);
 

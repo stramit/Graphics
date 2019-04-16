@@ -333,7 +333,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                             return;
                         node.owner.owner.RegisterCompleteObjectUndo("Change precision");
                         node.precision = (Precision)evt.newValue;
-                        node.Dirty(ModificationScope.Graph);
+                        node.Dirty(ModificationScope.Topological);
                     });
                 });
             });

@@ -2,18 +2,33 @@
 {
     internal static class PrecisionUtil
     {
-        internal static string ToShaderString(this Precision precision)
+        internal static string ToShaderString(this ConcretePrecision precision)
+        {
+            switch(precision)
+            {
+                case ConcretePrecision.Real:
+                    return "real";
+                case ConcretePrecision.Float:
+                    return "float";
+                case ConcretePrecision.Half:
+                    return "half";
+                default:
+                    return "float";
+            }
+        }
+
+        internal static ConcretePrecision ToConcrete(this Precision precision)
         {
             switch(precision)
             {
                 case Precision.Real:
-                    return "real";
+                    return ConcretePrecision.Real;
                 case Precision.Float:
-                    return "float";
+                    return ConcretePrecision.Float;
                 case Precision.Half:
-                    return "half";
+                    return ConcretePrecision.Half;
                 default:
-                    return "float";
+                    return ConcretePrecision.Float;
             }
         }
     }

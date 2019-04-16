@@ -97,6 +97,10 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
+        private ConcretePrecision m_ConcretePrecision = ConcretePrecision.Float;
+
+        public ConcretePrecision concretePrecision => m_ConcretePrecision;
+
         [SerializeField]
         private Precision m_Precision = Precision.Inherit;
 
@@ -305,6 +309,64 @@ namespace UnityEditor.ShaderGraph
         }
 
         protected const string k_validationErrorMessage = "Error found during node validation";
+
+        public bool ValidateConcretePrecision(ref string errorMessage)
+        {
+            // If Node has a precision override use that
+            if (precision != Precision.Inherit)
+            {
+                m_ConcretePrecision = precision.ToConcrete();
+                return false;
+            }
+           
+            // Get inputs
+            s_TempSlots.Clear();
+            GetInputSlots(s_TempSlots);
+            
+            // If no inputs were found use the precision of the Graph
+            // This can be removed when parameters are considered as true inputs
+            if (s_TempSlots.Count == 0)
+            {
+                m_ConcretePrecision = owner.precision;
+                return false;
+            }
+            
+            // Otherwise compare precisions from inputs
+            var precisionsToCompare = new List<int>();
+            bool isInError = false;
+            
+            foreach (var inputSlot in s_TempSlots)
+            {
+                // If input port doesnt have an edge use the Graph's precision for that input
+                var edges = owner.GetEdges(inputSlot.slotReference).ToList();
+                if (!edges.Any())
+                {
+                    precisionsToCompare.Add((int)owner.precision);
+                    continue;
+                }
+                
+                // Get output node from edge
+                var outputSlotRef = edges[0].outputSlot;
+                var outputNode = owner.GetNodeFromGuid(outputSlotRef.nodeGuid);
+                if (outputNode == null)
+                {
+                    errorMessage = string.Format("Failed to find Node with Guid {0}", outputSlotRef.nodeGuid);
+                    isInError = true;
+                    continue;
+                }
+                
+                // Use precision from connected Node
+                precisionsToCompare.Add((int)outputNode.concretePrecision);
+            }
+            
+            // Use highest precision from all input sources
+            m_ConcretePrecision = (ConcretePrecision)precisionsToCompare.OrderBy(x => x).First();
+            
+            // Clean up
+            s_TempSlots.Clear();
+            return isInError;
+        }
+        
         public virtual void ValidateNode()
         {
             var isInError = false;
@@ -421,6 +483,7 @@ namespace UnityEditor.ShaderGraph
             GetOutputSlots(s_TempSlots);
             isInError |= s_TempSlots.Any(x => x.hasError);
             isInError |= CalculateNodeHasError(ref errorMessage);
+            isInError |= ValidateConcretePrecision(ref errorMessage);
             hasError = isInError;
 
             if (isInError)
