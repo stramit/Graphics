@@ -383,7 +383,7 @@ namespace UnityEngine.Rendering.LWRP
             graph.AppendLine(GraphUtil.ProcessSnippets(vertexDescriptionStruct, masterNode.owner));
             graph.AppendLine(GraphUtil.ProcessSnippets(vertexDescriptionFunction, masterNode.owner));
 
-            graph.AppendLine(GraphUtil.ProcessSnippets(surfaceDescriptionFunction, masterNode.owner));
+            graph.AppendLine(GraphUtil.ProcessSnippets(surfaceDescriptionStruct, masterNode.owner));
             graph.AppendLine(GraphUtil.ProcessSnippets(surfaceDescriptionFunction, masterNode.owner));
 
             graph.AppendLine(vertexInputStruct.ToString());
