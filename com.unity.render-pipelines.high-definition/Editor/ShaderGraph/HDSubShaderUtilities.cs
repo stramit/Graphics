@@ -599,6 +599,10 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     vertexGraphEvalFunctionName,
                     vertexGraphOutputStructName);
             }
+            
+            // Generate final properties snippets
+            ShaderSnippetRegistry shaderPropertiesRegistry = new ShaderSnippetRegistry() { allowDuplicates = true };
+            sharedProperties.GetPropertiesDeclaration(shaderPropertiesRegistry, mode);
 
             var blendCode = new ShaderStringBuilder();
             var cullCode = new ShaderStringBuilder();
@@ -676,7 +680,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             var graph = new ShaderGenerator();
             {
                 graph.AddShaderChunk("// Shared Graph Properties (uniform inputs)");
-                graph.AddShaderChunk(sharedProperties.GetPropertiesDeclaration(masterNode.owner, 1, mode));
+                graph.AddShaderChunk(GraphUtil.ProcessSnippets(shaderPropertiesRegistry, masterNode.owner));
 
                 if (vertexActive)
                 {

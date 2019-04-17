@@ -136,6 +136,8 @@ namespace UnityEngine.Rendering.LWRP
             // String builders
 
             var shaderProperties = new PropertyCollector();
+            var shaderPropertiesRegistry = new ShaderSnippetRegistry() { allowDuplicates = true };
+            
             var functionRegistry = new ShaderSnippetRegistry() { allowDuplicates = false };
 
             var defines = new ShaderStringBuilder(1);
@@ -318,6 +320,11 @@ namespace UnityEngine.Rendering.LWRP
             // ----------------------------------------------------- //
             //           GENERATE VERTEX > PIXEL PIPELINE            //
             // ----------------------------------------------------- //
+            
+            // -------------------------------------
+            // Generate final property snippets
+
+            shaderProperties.GetPropertiesDeclaration(shaderPropertiesRegistry, mode);
 
             // -------------------------------------
             // Generate Input structure for Vertex shader
@@ -366,7 +373,7 @@ namespace UnityEngine.Rendering.LWRP
             // -------------------------------------
             // Combine Graph sections
 
-            graph.AppendLine(shaderProperties.GetPropertiesDeclaration(masterNode.owner, 1, mode));
+            graph.AppendLine(GraphUtil.ProcessSnippets(shaderPropertiesRegistry, masterNode.owner));
 
             graph.AppendLine(vertexDescriptionInputStruct.ToString());
             graph.AppendLine(surfaceDescriptionInputStruct.ToString());

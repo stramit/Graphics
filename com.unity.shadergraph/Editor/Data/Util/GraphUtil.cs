@@ -959,6 +959,7 @@ namespace UnityEditor.ShaderGraph
             var results = new GenerationResults();
 
             var shaderProperties = new PropertyCollector();
+            var shaderPropertiesRegistry = new ShaderSnippetRegistry() { allowDuplicates = true };
 
             var functionRegistry = new ShaderSnippetRegistry() { allowDuplicates = false };
 
@@ -1042,6 +1043,11 @@ namespace UnityEditor.ShaderGraph
             // ----------------------------------------------------- //
             //           GENERATE VERTEX > PIXEL PIPELINE            //
             // ----------------------------------------------------- //
+            
+            // -------------------------------------
+            // Generate final property snippets
+
+            shaderProperties.GetPropertiesDeclaration(shaderPropertiesRegistry, mode);
 
             // -------------------------------------
             // Generate Input structure for Vertex shader
@@ -1078,7 +1084,7 @@ namespace UnityEditor.ShaderGraph
                 finalShader.AppendLine(@"#include ""Packages/com.unity.shadergraph/ShaderGraphLibrary/Functions.hlsl""");
                 finalShader.AppendNewLine();
 
-                finalShader.AppendLines(shaderProperties.GetPropertiesDeclaration(graph, 0, mode));
+                finalShader.AppendLines(ProcessSnippets(shaderPropertiesRegistry, graph));
                 finalShader.AppendNewLine();
 
                 finalShader.AppendLines(surfaceDescriptionInputStruct.ToString());
@@ -1122,6 +1128,7 @@ namespace UnityEditor.ShaderGraph
                 // Precision
                 
                 AbstractMaterialNode node = graph.GetNodeFromGuid(shaderSnippet.Value.source);
+                AbstractShaderProperty prop = graph.properties.Where(x => x.guid == shaderSnippet.Value.source).FirstOrDefault();
                 
                 // If Guid is empty use graph precision
                 if (shaderSnippet.Value.source == Guid.Empty)
@@ -1134,6 +1141,13 @@ namespace UnityEditor.ShaderGraph
                 else if (node != null)
                 {
                     var snippetPrecision = node.concretePrecision;
+                    snippet = snippet.Replace("$precision", snippetPrecision.ToShaderString());
+                    sb.AppendLines(snippet);
+                }
+                // Use property precision
+                else if(prop != null)
+                {
+                    var snippetPrecision = prop.precision == Precision.Inherit ? graph.precision : prop.precision.ToConcrete();
                     snippet = snippet.Replace("$precision", snippetPrecision.ToShaderString());
                     sb.AppendLines(snippet);
                 }

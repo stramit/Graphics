@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,37 +38,46 @@ namespace UnityEditor.ShaderGraph
             return sb.ToString();
         }
 
-        public string GetPropertiesDeclaration(GraphData graphData, int baseIndentLevel, GenerationMode mode)
-        {
-            var builder = new ShaderStringBuilder(baseIndentLevel);
-            GetPropertiesDeclaration(builder, mode);
-            var value = builder.ToString();
-            return value;
-        }
-
-        public void GetPropertiesDeclaration(ShaderStringBuilder builder, GenerationMode mode)
+        public void GetPropertiesDeclaration(ShaderSnippetRegistry registry, GenerationMode mode)
         {
             var batchAll = mode == GenerationMode.Preview;
-            builder.AppendLine("CBUFFER_START(UnityPerMaterial)");
-            builder.IncreaseIndent();
+            
+            using(registry.ProvideSnippet("PerMaterialCBuffer_Start", Guid.Empty, out var s))
+            {
+                s.AppendLine("CBUFFER_START(UnityPerMaterial)");
+                s.IncreaseIndent();
+            }
+            
             foreach (var prop in properties.Where(n => batchAll || (n.generatePropertyBlock && n.isBatchable)))
             {
-                string propertyDeclaration = prop.GetPropertyDeclarationString();
-                propertyDeclaration = propertyDeclaration.Replace("$precision", prop.precision.ToConcrete().ToShaderString());
-                builder.AppendLine(propertyDeclaration);
+                using(registry.ProvideSnippet(string.Format("PerMaterialCBuffer_{0}", prop.referenceName), prop.guid, out var s))
+                {
+                    s.AppendLine(prop.GetPropertyDeclarationString());
+                }
             }
-            builder.DecreaseIndent();
-            builder.AppendLine("CBUFFER_END");
-            builder.AppendNewLine();
+            
+            using(registry.ProvideSnippet("PerMaterialCBuffer_End", Guid.Empty, out var s))
+            {
+                s.DecreaseIndent();
+                s.AppendLine("CBUFFER_END");
+                s.AppendNewLine();
+            }
 
             if (batchAll)
                 return;
             
             foreach (var prop in properties.Where(n => !n.isBatchable || !n.generatePropertyBlock))
             {
-                builder.AppendLine(prop.GetPropertyDeclarationString());
+                using(registry.ProvideSnippet(string.Format("UnbatchedUniforms_{0}", prop.referenceName), prop.guid, out var s))
+                {
+                    s.AppendLine(prop.GetPropertyDeclarationString());
+                }
             }
-            builder.AppendNewLine();
+            
+            using(registry.ProvideSnippet("UnbatchedUniforms_End", Guid.Empty, out var s))
+            {
+                s.AppendNewLine();
+            }
         }
 
         public List<TextureInfo> GetConfiguredTexutres()
