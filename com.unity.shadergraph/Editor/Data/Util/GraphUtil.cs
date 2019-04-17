@@ -1298,7 +1298,7 @@ namespace UnityEditor.ShaderGraph
                         var foundEdges = graph.GetEdges(input.slotReference).ToArray();
                         if (foundEdges.Any())
                         {
-                            using(surfaceDescriptionRegistry.ProvideSnippet(string.Format("PopulateSurfaceData_Remap{0}", input.shaderOutputName), Guid.Empty, out var s))
+                            using(surfaceDescriptionRegistry.ProvideSnippet(string.Format("PopulateSurfaceData_Remap{0}", input.shaderOutputName), rootNode.guid, out var s))
                             {
                                 s.AppendLine("surface.{0} = {1};",
                                     NodeUtils.GetHLSLSafeName(input.shaderOutputName),
@@ -1307,7 +1307,7 @@ namespace UnityEditor.ShaderGraph
                         }
                         else
                         {
-                            using(surfaceDescriptionRegistry.ProvideSnippet(string.Format("PopulateSurfaceData_Remap{0}", input.shaderOutputName), Guid.Empty, out var s))
+                            using(surfaceDescriptionRegistry.ProvideSnippet(string.Format("PopulateSurfaceData_Remap{0}", input.shaderOutputName), rootNode.guid, out var s))
                             {
                                 s.AppendLine("surface.{0} = {1};",
                                     NodeUtils.GetHLSLSafeName(input.shaderOutputName), input.GetDefaultValue(mode));
@@ -1415,7 +1415,7 @@ namespace UnityEditor.ShaderGraph
                 var slotName = NodeUtils.GetHLSLSafeName(slot.shaderOutputName);
                 var slotValue = isSlotConnected ? ((AbstractMaterialNode)slot.owner).GetSlotValue(slot.id, mode) : slot.GetDefaultValue(mode);
                 
-                using(vertexDescriptionRegistry.ProvideSnippet(string.Format("PopulateVertexData_Remap{0}", slot.shaderOutputName), Guid.Empty, out var s))
+                using(vertexDescriptionRegistry.ProvideSnippet(string.Format("PopulateVertexData_Remap{0}", slot.shaderOutputName), slot.owner.guid, out var s))
                 {
                     s.AppendLine("description.{0} = {1};", slotName, slotValue);
                 }
