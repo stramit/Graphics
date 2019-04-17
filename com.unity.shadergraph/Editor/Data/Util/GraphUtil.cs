@@ -965,7 +965,7 @@ namespace UnityEditor.ShaderGraph
             var vertexDescriptionFunction = new ShaderStringBuilder(0);
 
             var surfaceDescriptionInputStruct = new ShaderStringBuilder(0);
-            var surfaceDescriptionStruct = new ShaderStringBuilder(0);
+            var surfaceDescriptionStruct = new ShaderSnippetRegistry() { allowDuplicates = true };
             var surfaceDescriptionFunction = new ShaderSnippetRegistry() { allowDuplicates = true };
 
             var vertexInputs = new ShaderStringBuilder(0);
@@ -1086,9 +1086,9 @@ namespace UnityEditor.ShaderGraph
 
                 finalShader.AppendLines(ProcessSnippets(functionRegistry, graph, true));
 
-                finalShader.AppendLines(surfaceDescriptionStruct.ToString());
+                finalShader.AppendLines(ProcessSnippets(surfaceDescriptionStruct, graph));
                 finalShader.AppendNewLine();
-                finalShader.AppendLines(surfaceDescriptionFunction.ToString());
+                finalShader.AppendLines(ProcessSnippets(surfaceDescriptionFunction, graph));
                 finalShader.AppendNewLine();
 
                 finalShader.AppendLines(vertexInputs.ToString());
@@ -1135,6 +1135,12 @@ namespace UnityEditor.ShaderGraph
                 {
                     var snippetPrecision = node.concretePrecision;
                     snippet = snippet.Replace("$precision", snippetPrecision.ToShaderString());
+                    sb.AppendLines(snippet);
+                }
+                // Default to float
+                else
+                {
+                    snippet = snippet.Replace("$precision", ConcretePrecision.Float.ToShaderString());
                     sb.AppendLines(snippet);
                 }
 
@@ -1193,22 +1199,33 @@ namespace UnityEditor.ShaderGraph
                 sb.AppendLine($"{variableName}.{channel.GetUVName()} = IN.{channel.GetUVName()};");
         }
 
-        public static void GenerateSurfaceDescriptionStruct(ShaderStringBuilder surfaceDescriptionStruct, List<MaterialSlot> slots, string structName = "SurfaceDescription", HashSet<string> activeFields = null)
+        public static void GenerateSurfaceDescriptionStruct(ShaderSnippetRegistry surfaceDescriptionStruct, List<MaterialSlot> slots, string structName = "SurfaceDescription", HashSet<string> activeFields = null)
         {
-            surfaceDescriptionStruct.AppendLine("struct {0}", structName);
-            using (surfaceDescriptionStruct.BlockSemicolonScope())
+            using(surfaceDescriptionStruct.ProvideSnippet("SurfaceDescription_Start", Guid.Empty, out var s))
             {
-                foreach (var slot in slots)
+                s.AppendLine("struct {0}", structName);
+                s.AppendLine("{");
+                s.IncreaseIndent();
+            }
+            
+            foreach (var slot in slots)
+            {
+                string hlslName = NodeUtils.GetHLSLSafeName(slot.shaderOutputName);
+                using(surfaceDescriptionStruct.ProvideSnippet(string.Format("SurfaceDescription_{0}", hlslName), slot.owner.guid, out var s))
                 {
-                    string hlslName = NodeUtils.GetHLSLSafeName(slot.shaderOutputName);
-                    surfaceDescriptionStruct.AppendLine("{0} {1};",
-                            slot.concreteValueType.ToShaderString(), hlslName);
-
-                    if (activeFields != null)
-                    {
-                        activeFields.Add(structName + "." + hlslName);
-                    }
+                    s.AppendLine("{0} {1};", slot.concreteValueType.ToShaderString(), hlslName);
                 }
+
+                if (activeFields != null)
+                {
+                    activeFields.Add(structName + "." + hlslName);
+                }
+            }
+            
+            using(surfaceDescriptionStruct.ProvideSnippet("SurfaceDescription_End", Guid.Empty, out var s))
+            {
+                s.DecreaseIndent();
+                s.AppendLine("};");
             }
         }
 
@@ -1306,29 +1323,39 @@ namespace UnityEditor.ShaderGraph
         }
 
         const string k_VertexDescriptionStructName = "VertexDescription";
-        public static void GenerateVertexDescriptionStruct(ShaderStringBuilder builder, List<MaterialSlot> slots, string structName = k_VertexDescriptionStructName, HashSet<string> activeFields = null)
+        public static void GenerateVertexDescriptionStruct(ShaderSnippetRegistry vertexDescriptionStruct, List<MaterialSlot> slots, string structName = k_VertexDescriptionStructName, HashSet<string> activeFields = null)
         {
-            builder.AppendLine("struct {0}", structName);
-            using (builder.BlockSemicolonScope())
+            using(vertexDescriptionStruct.ProvideSnippet("VertexDescription_Start", Guid.Empty, out var s))
             {
-                foreach (var slot in slots)
+                s.AppendLine("struct {0}", structName);
+                s.AppendLine("{");
+                s.IncreaseIndent();
+            }
+            
+            foreach (var slot in slots)
+            {
+                string hlslName = NodeUtils.GetHLSLSafeName(slot.shaderOutputName);
+                using(vertexDescriptionStruct.ProvideSnippet(string.Format("VertexDescription_{0}", hlslName), slot.owner.guid, out var s))
                 {
-                    string hlslName = NodeUtils.GetHLSLSafeName(slot.shaderOutputName);
-                    builder.AppendLine("{0} {1};",
-                        slot.concreteValueType.ToShaderString(),
-                        hlslName);
-
-                    if (activeFields != null)
-                    {
-                        activeFields.Add(structName + "." + hlslName);
-                    }
+                    s.AppendLine("{0} {1};", slot.concreteValueType.ToShaderString(), hlslName);
                 }
+
+                if (activeFields != null)
+                {
+                    activeFields.Add(structName + "." + hlslName);
+                }
+            }
+            
+            using(vertexDescriptionStruct.ProvideSnippet("VertexDescription_End", Guid.Empty, out var s))
+            {
+                s.DecreaseIndent();
+                s.AppendLine("};");
             }
         }
 
         public static void GenerateVertexDescriptionFunction(
             GraphData graph,
-            ShaderStringBuilder builder,
+            ShaderSnippetRegistry vertexDescriptionRegistry,
             ShaderSnippetRegistry functionRegistry,
             PropertyCollector shaderProperties,
             GenerationMode mode,
@@ -1344,37 +1371,47 @@ namespace UnityEditor.ShaderGraph
             GraphContext graphContext = new GraphContext(graphInputStructName);
 
             graph.CollectShaderProperties(shaderProperties, mode);
-
-            builder.AppendLine("{0} {1}({2} IN)", graphOutputStructName, functionName, graphInputStructName);
-            using (builder.BlockScope())
+            
+            using(vertexDescriptionRegistry.ProvideSnippet("PopulateVertexData_Start", Guid.Empty, out var s))
             {
-                ShaderSnippetRegistry bodyCodeRegistry = new ShaderSnippetRegistry() { allowDuplicates = true };
-                builder.AppendLine("{0} description = ({0})0;", graphOutputStructName);
-                foreach (var node in nodes.OfType<AbstractMaterialNode>())
+                s.AppendLine("{0} {1}({2} IN)", graphOutputStructName, functionName, graphInputStructName);
+                s.AppendLine("{");
+                s.IncreaseIndent();
+                s.AppendLine("{0} description = ({0})0;", graphOutputStructName);
+            }
+
+            foreach (var node in nodes.OfType<AbstractMaterialNode>())
+            {
+                var generatesFunction = node as IGeneratesFunction;
+                if (generatesFunction != null)
                 {
-                    var generatesFunction = node as IGeneratesFunction;
-                    if (generatesFunction != null)
-                    {
-                        generatesFunction.GenerateNodeFunction(functionRegistry, graphContext, mode);
-                    }
-                    var generatesBodyCode = node as IGeneratesBodyCode;
-                    if (generatesBodyCode != null)
-                    {
-                        generatesBodyCode.GenerateNodeCode(bodyCodeRegistry, graphContext, mode);
-                    }
-                    node.CollectShaderProperties(shaderProperties, mode);
+                    generatesFunction.GenerateNodeFunction(functionRegistry, graphContext, mode);
                 }
-                
-                builder.AppendLines(bodyCodeRegistry.GetSnippetsAsString());
+                var generatesBodyCode = node as IGeneratesBodyCode;
+                if (generatesBodyCode != null)
+                {
+                    generatesBodyCode.GenerateNodeCode(vertexDescriptionRegistry, graphContext, mode);
+                }
+                node.CollectShaderProperties(shaderProperties, mode);
+            }
                     
-                foreach (var slot in slots)
+            foreach (var slot in slots)
+            {
+                var isSlotConnected = slot.owner.owner.GetEdges(slot.slotReference).Any();
+                var slotName = NodeUtils.GetHLSLSafeName(slot.shaderOutputName);
+                var slotValue = isSlotConnected ? ((AbstractMaterialNode)slot.owner).GetSlotValue(slot.id, mode) : slot.GetDefaultValue(mode);
+                
+                using(vertexDescriptionRegistry.ProvideSnippet(string.Format("PopulateVertexData_Remap{0}", slot.shaderOutputName), Guid.Empty, out var s))
                 {
-                    var isSlotConnected = slot.owner.owner.GetEdges(slot.slotReference).Any();
-                    var slotName = NodeUtils.GetHLSLSafeName(slot.shaderOutputName);
-                    var slotValue = isSlotConnected ? ((AbstractMaterialNode)slot.owner).GetSlotValue(slot.id, mode) : slot.GetDefaultValue(mode);
-                    builder.AppendLine("description.{0} = {1};", slotName, slotValue);
+                    s.AppendLine("description.{0} = {1};", slotName, slotValue);
                 }
-                builder.AppendLine("return description;");
+            }
+            
+            using(vertexDescriptionRegistry.ProvideSnippet("PopulateVertexData_End", Guid.Empty, out var s))
+            {
+                s.AppendLine("return description;");
+                s.DecreaseIndent();
+                s.AppendLine("}");
             }
         }
 

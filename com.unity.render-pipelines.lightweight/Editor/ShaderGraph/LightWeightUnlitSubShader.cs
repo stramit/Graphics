@@ -142,11 +142,11 @@ namespace UnityEngine.Rendering.LWRP
             var graph = new ShaderStringBuilder(0);
 
             var vertexDescriptionInputStruct = new ShaderStringBuilder(1);
-            var vertexDescriptionStruct = new ShaderStringBuilder(1);
-            var vertexDescriptionFunction = new ShaderStringBuilder(1);
+            var vertexDescriptionStruct = new ShaderSnippetRegistry() { allowDuplicates = true };
+            var vertexDescriptionFunction = new ShaderSnippetRegistry() { allowDuplicates = true };
 
             var surfaceDescriptionInputStruct = new ShaderStringBuilder(1);
-            var surfaceDescriptionStruct = new ShaderStringBuilder(1);
+            var surfaceDescriptionStruct = new ShaderSnippetRegistry() { allowDuplicates = true };
             var surfaceDescriptionFunction = new ShaderSnippetRegistry() { allowDuplicates = true };
 
             var vertexInputStruct = new ShaderStringBuilder(1);
@@ -373,10 +373,10 @@ namespace UnityEngine.Rendering.LWRP
 
             graph.AppendLine(GraphUtil.ProcessSnippets(functionRegistry, masterNode.owner, true));
 
-            graph.AppendLine(vertexDescriptionStruct.ToString());
-            graph.AppendLine(vertexDescriptionFunction.ToString());
+            graph.AppendLine(GraphUtil.ProcessSnippets(vertexDescriptionStruct, masterNode.owner));
+            graph.AppendLine(GraphUtil.ProcessSnippets(vertexDescriptionFunction, masterNode.owner));
 
-            graph.AppendLine(surfaceDescriptionStruct.ToString());
+            graph.AppendLine(GraphUtil.ProcessSnippets(surfaceDescriptionFunction, masterNode.owner));
             graph.AppendLine(GraphUtil.ProcessSnippets(surfaceDescriptionFunction, masterNode.owner));
 
             graph.AppendLine(vertexInputStruct.ToString());

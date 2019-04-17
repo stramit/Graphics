@@ -544,7 +544,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             string pixelGraphOutputStructName = "SurfaceDescription";
             string pixelGraphEvalFunctionName = "SurfaceDescriptionFunction";
             ShaderSnippetRegistry pixelGraphEvalFunction = new ShaderSnippetRegistry() { allowDuplicates = true };
-            ShaderStringBuilder pixelGraphOutputs = new ShaderStringBuilder();
+            ShaderSnippetRegistry pixelGraphOutputs = new ShaderSnippetRegistry() { allowDuplicates = true };
 
             // build initial requirements
             HDRPShaderStructs.AddActiveFieldsFromPixelGraphRequirements(activeFields, pixelRequirements);
@@ -571,8 +571,8 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             string vertexGraphInputStructName = "VertexDescriptionInputs";
             string vertexGraphOutputStructName = "VertexDescription";
             string vertexGraphEvalFunctionName = "VertexDescriptionFunction";
-            ShaderStringBuilder vertexGraphEvalFunction = new ShaderStringBuilder();
-            ShaderStringBuilder vertexGraphOutputs = new ShaderStringBuilder();
+            ShaderSnippetRegistry vertexGraphEvalFunction = new ShaderSnippetRegistry() { allowDuplicates = true };
+            ShaderSnippetRegistry vertexGraphOutputs = new ShaderSnippetRegistry() { allowDuplicates = true };
 
             // check for vertex animation -- enables HAVE_VERTEX_MODIFICATION
             if (vertexActive)
@@ -686,7 +686,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     graph.Deindent();
                     graph.AddShaderChunk("// Vertex Graph Outputs");
                     graph.Indent();
-                    graph.AddShaderChunk(vertexGraphOutputs.ToString());
+                    graph.AddShaderChunk(GraphUtil.ProcessSnippets(vertexGraphOutputs, masterNode.owner));
                     graph.Deindent();
                 }
 
@@ -696,7 +696,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 graph.Deindent();
                 graph.AddShaderChunk("// Pixel Graph Outputs");
                 graph.Indent();
-                graph.AddShaderChunk(pixelGraphOutputs.ToString());
+                graph.AddShaderChunk(GraphUtil.ProcessSnippets(pixelGraphOutputs, masterNode.owner));
                 graph.Deindent();
 
                 graph.AddShaderChunk("// Shared Graph Node Functions");
@@ -706,7 +706,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 {
                     graph.AddShaderChunk("// Vertex Graph Evaluation");
                     graph.Indent();
-                    graph.AddShaderChunk(vertexGraphEvalFunction.ToString());
+                    graph.AddShaderChunk(GraphUtil.ProcessSnippets(vertexGraphEvalFunction, masterNode.owner));
                     graph.Deindent();
                 }
 

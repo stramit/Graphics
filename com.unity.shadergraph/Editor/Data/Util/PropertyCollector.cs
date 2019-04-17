@@ -44,7 +44,7 @@ namespace UnityEditor.ShaderGraph
             var value = builder.ToString();
             // MATT: Set this per property...
             // Then remove GraphData as an argument
-            // value = value.Replace("$precision", graphData.precision.ToShaderString());
+            value = value.Replace("$precision", graphData.precision.ToShaderString());
             return value;
         }
 
