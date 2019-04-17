@@ -42,9 +42,6 @@ namespace UnityEditor.ShaderGraph
             var builder = new ShaderStringBuilder(baseIndentLevel);
             GetPropertiesDeclaration(builder, mode);
             var value = builder.ToString();
-            // MATT: Set this per property...
-            // Then remove GraphData as an argument
-            value = value.Replace("$precision", graphData.precision.ToShaderString());
             return value;
         }
 
@@ -55,7 +52,9 @@ namespace UnityEditor.ShaderGraph
             builder.IncreaseIndent();
             foreach (var prop in properties.Where(n => batchAll || (n.generatePropertyBlock && n.isBatchable)))
             {
-                builder.AppendLine(prop.GetPropertyDeclarationString());
+                string propertyDeclaration = prop.GetPropertyDeclarationString();
+                propertyDeclaration = propertyDeclaration.Replace("$precision", prop.precision.ToConcrete().ToShaderString());
+                builder.AppendLine(propertyDeclaration);
             }
             builder.DecreaseIndent();
             builder.AppendLine("CBUFFER_END");

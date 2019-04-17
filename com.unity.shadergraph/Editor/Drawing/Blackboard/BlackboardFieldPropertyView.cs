@@ -608,6 +608,17 @@ namespace UnityEditor.ShaderGraph.Drawing
 //            AddRow("Default", new TextField());
 //            AddRow("Tooltip", new TextField());
 
+            var precisionField = new EnumField((Enum)property.precision);
+            precisionField.RegisterValueChangedCallback(evt =>
+            {
+                m_Graph.owner.RegisterCompleteObjectUndo("Change Precision");
+                if (property.precision == (Precision)evt.newValue)
+                    return;
+                property.precision = (Precision)evt.newValue;
+                precisionField.MarkDirtyRepaint();
+                DirtyNodes();
+            });
+            AddRow("Precision", precisionField);
 
             AddToClassList("sgblackboardFieldPropertyView");
 

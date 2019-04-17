@@ -63,6 +63,15 @@ namespace UnityEditor.ShaderGraph
             get { return m_GeneratePropertyBlock; }
             set { m_GeneratePropertyBlock = value; }
         }
+        
+        [SerializeField]
+        private Precision m_Precision = Precision.Inherit;
+
+        public Precision precision
+        {
+            get { return m_Precision; }
+            set { m_Precision = value; }
+        }
 
         public abstract PropertyType propertyType { get; }
         
