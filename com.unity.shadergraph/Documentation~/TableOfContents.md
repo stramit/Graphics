@@ -177,7 +177,7 @@ Unity Manual ToC
         * [Rounded Rectangle](Rounded-Rectangle-Node)  
     * [Utility](Utility-Nodes)
         * [Preview](Preview-Node)  
-        * [Sub-graph](Sub-graph-Node)  
+        * [Sub-graph](Sub-Graph-Node)  
         * [All](All-Node)  
         * [And](And-Node)  
         * [Any](Any-Node)  

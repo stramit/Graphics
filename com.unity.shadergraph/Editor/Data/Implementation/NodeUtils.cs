@@ -133,7 +133,10 @@ namespace UnityEditor.Graphing
 
         public static string GetDocumentationString(AbstractMaterialNode node)
         {
-            return $"{docURL}{node.name.Replace(" ", "-")}"+"-Node.md";
+            if(node is SubGraphNode subGraphNode)
+                return $"{docURL}{SubGraphNode.kNodeName.Replace(" ", "-")}"+"-Node.md";
+            else
+                return $"{docURL}{node.name.Replace(" ", "-")}"+"-Node.md";
         }
 
         static Stack<MaterialSlot> s_SlotStack = new Stack<MaterialSlot>();

@@ -151,9 +151,11 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
+        public const string kNodeName = "Sub Graph";
+
         public SubGraphNode()
         {
-            name = "Sub Graph";
+            name = kNodeName;
         }
 
         public override bool allowedInSubGraph

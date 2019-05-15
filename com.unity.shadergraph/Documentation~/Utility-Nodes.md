@@ -1,6 +1,6 @@
 # Utility Nodes
 
-| [Preview](Preview-Node.md) | [Sub-Graph](Sub-graph-Node.md) |
+| [Preview](Preview-Node.md) | [Sub-Graph](Sub-Graph-Node.md) |
 |:-------------|:------|
 | ![Image](images/PreviewNodeThumb.png) | ![Image](images/SubgraphNodeThumb.png) |
 | Provides a preview window and passes the input value through without modification. | Provides a reference to a Sub-graph asset. |
