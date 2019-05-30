@@ -415,7 +415,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 var field = selectable as BlackboardField;
                 if (field != null && field.userData != null)
                 {
-                    var property = (AbstractShaderProperty)field.userData;
+                    var property = (ShaderProperty)field.userData;
                     graph.RemoveShaderProperty(property.guid);
                 }
             }
@@ -587,7 +587,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             var blackboardField = obj as BlackboardField;
             if (blackboardField != null)
             {
-                AbstractShaderProperty property = blackboardField.userData as AbstractShaderProperty;
+                ShaderProperty property = blackboardField.userData as ShaderProperty;
                 if (property != null)
                 {
                     graph.owner.RegisterCompleteObjectUndo("Drag Property");
@@ -615,10 +615,10 @@ namespace UnityEditor.ShaderGraph.Drawing
                 return;
 
             // Make new properties from the copied graph
-            foreach (AbstractShaderProperty property in copyGraph.inputs)
+            foreach (ShaderProperty property in copyGraph.inputs)
             {
                 string propertyName = graphView.graph.SanitizeGraphInputName(property.displayName);
-                AbstractShaderProperty copiedProperty = property.Copy();
+                ShaderProperty copiedProperty = property.Copy();
                 copiedProperty.displayName = propertyName;
                 graphView.graph.AddGraphInput(copiedProperty);
 

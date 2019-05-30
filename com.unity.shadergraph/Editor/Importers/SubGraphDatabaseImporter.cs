@@ -296,7 +296,7 @@ namespace UnityEditor.ShaderGraph
                 var arguments = new List<string>();
                 foreach (var input in subGraphData.inputs)
                 {
-                    if(input is AbstractShaderProperty prop)
+                    if(input is ShaderProperty prop)
                     {
                         prop.SetConcretePrecision(subGraphData.graphPrecision);
                         arguments.Add(string.Format("{0}", prop.GetPropertyAsArgumentString()));

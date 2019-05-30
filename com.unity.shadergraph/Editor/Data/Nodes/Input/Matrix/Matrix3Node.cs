@@ -135,7 +135,7 @@ namespace UnityEditor.ShaderGraph
             return GetVariableNameForNode();
         }
 
-        public AbstractShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
             return new Matrix3ShaderProperty
             {

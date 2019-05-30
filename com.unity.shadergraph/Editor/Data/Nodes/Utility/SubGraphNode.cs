@@ -190,7 +190,7 @@ namespace UnityEditor.ShaderGraph
             var arguments = new List<string>();
             foreach (var input in subGraphData.inputs)
             {
-                if(input is AbstractShaderProperty prop)
+                if(input is ShaderProperty prop)
                 {
                     prop.SetConcretePrecision(subGraphData.graphPrecision);
                     var inSlotId = m_PropertyIds[m_PropertyGuids.IndexOf(prop.guid.ToString())];
@@ -233,7 +233,7 @@ namespace UnityEditor.ShaderGraph
             var inputs = subGraphData.inputs;
             foreach (var input in inputs)
             {
-                var prop = input as AbstractShaderProperty;
+                var prop = input as ShaderProperty;
                 if(prop == null)
                     continue;
 

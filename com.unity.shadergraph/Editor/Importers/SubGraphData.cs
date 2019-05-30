@@ -35,7 +35,7 @@ namespace UnityEditor.ShaderGraph
         List<SerializationHelper.JSONSerializedElement> m_SerializedInputs = new List<SerializationHelper.JSONSerializedElement>();
         
         [NonSerialized]
-        public List<AbstractShaderProperty> nodeProperties = new List<AbstractShaderProperty>();
+        public List<ShaderProperty> nodeProperties = new List<ShaderProperty>();
         
         [SerializeField]
         List<SerializationHelper.JSONSerializedElement> m_SerializedProperties = new List<SerializationHelper.JSONSerializedElement>();
@@ -85,7 +85,7 @@ namespace UnityEditor.ShaderGraph
         public void OnBeforeSerialize()
         {
             m_SerializedInputs = SerializationHelper.Serialize<ShaderInput>(inputs);
-            m_SerializedProperties = SerializationHelper.Serialize<AbstractShaderProperty>(nodeProperties);
+            m_SerializedProperties = SerializationHelper.Serialize<ShaderProperty>(nodeProperties);
             m_SerializedOutputs = SerializationHelper.Serialize<MaterialSlot>(outputs);
         }
 
@@ -93,7 +93,7 @@ namespace UnityEditor.ShaderGraph
         {
             var typeSerializationInfos = GraphUtil.GetLegacyTypeRemapping();
             inputs = SerializationHelper.Deserialize<ShaderInput>(m_SerializedInputs, typeSerializationInfos);
-            nodeProperties = SerializationHelper.Deserialize<AbstractShaderProperty>(m_SerializedProperties, typeSerializationInfos);
+            nodeProperties = SerializationHelper.Deserialize<ShaderProperty>(m_SerializedProperties, typeSerializationInfos);
             outputs = SerializationHelper.Deserialize<MaterialSlot>(m_SerializedOutputs, typeSerializationInfos);
         }
     }

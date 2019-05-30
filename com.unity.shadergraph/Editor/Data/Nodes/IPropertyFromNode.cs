@@ -2,7 +2,7 @@ namespace UnityEditor.ShaderGraph
 {
     interface IPropertyFromNode
     {
-        AbstractShaderProperty AsShaderProperty();
+        ShaderProperty AsShaderProperty();
         int outputSlotId { get; }
     }
 }

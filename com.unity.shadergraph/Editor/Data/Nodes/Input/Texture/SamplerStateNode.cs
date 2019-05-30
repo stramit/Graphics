@@ -87,7 +87,7 @@ namespace UnityEditor.ShaderGraph
                 Enum.GetName(typeof(TextureSamplerState.WrapMode), wrap));
         }
 
-        public AbstractShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
             return new SamplerStateShaderProperty 
             { 

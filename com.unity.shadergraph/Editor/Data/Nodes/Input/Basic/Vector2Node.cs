@@ -49,7 +49,7 @@ namespace UnityEditor.ShaderGraph
             sb.AppendLine(s);
         }
 
-        public AbstractShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
             var slotX = FindInputSlot<Vector1MaterialSlot>(InputSlotXId);
             var slotY = FindInputSlot<Vector1MaterialSlot>(InputSlotYId);

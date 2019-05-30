@@ -2,20 +2,20 @@
 {
     enum PropertyType
     {
-        Boolean,
-        Vector1,
-        Vector2,
-        Vector3,
-        Vector4,
-        Color,
-        Matrix2,
-        Matrix3,
+        SamplerState,
         Matrix4,
+        Matrix3,
+        Matrix2,
         Texture2D,
         Texture2DArray,
         Texture3D,
         Cubemap,
-        SamplerState,
         Gradient,
+        Vector4,
+        Vector3,
+        Vector2,
+        Vector1,
+        Boolean,
+        Color
     }
 }

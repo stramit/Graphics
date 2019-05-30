@@ -14,7 +14,7 @@ namespace UnityEditor.ShaderGraph
         private SerializableTexture m_Texture = new SerializableTexture();
 
         [SerializeField]
-        private TextureShaderProperty.DefaultType m_DefaultType = TextureShaderProperty.DefaultType.White;
+        private DefaultTextureType m_DefaultType = TextureShaderProperty.DefaultType.White;
 
         public Texture texture
         {
@@ -22,7 +22,7 @@ namespace UnityEditor.ShaderGraph
             set { m_Texture.texture = value; }
         }
 
-        public TextureShaderProperty.DefaultType defaultType
+        public DefaultTextureType defaultType
         {
             get { return m_DefaultType; }
             set { m_DefaultType = value; }

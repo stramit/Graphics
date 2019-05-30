@@ -78,7 +78,7 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        public AbstractShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
             return new Vector1ShaderProperty { value = value, floatType = FloatType.Integer };
         }

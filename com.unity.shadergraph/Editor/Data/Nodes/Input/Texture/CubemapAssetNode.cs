@@ -61,7 +61,7 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        public AbstractShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
             var prop = new CubemapShaderProperty { value = m_Cubemap };
             if (cubemap != null)

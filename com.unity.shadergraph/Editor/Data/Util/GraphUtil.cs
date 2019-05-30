@@ -1217,7 +1217,7 @@ namespace UnityEditor.ShaderGraph
             GenerationMode mode,
             string functionName = "PopulateSurfaceData",
             string surfaceDescriptionName = "SurfaceDescription",
-            Vector1ShaderProperty outputIdProperty = null,
+            ShaderProperty outputIdProperty = null,
             IEnumerable<MaterialSlot> slots = null,
             string graphInputStructName = "SurfaceDescriptionInputs")
         {

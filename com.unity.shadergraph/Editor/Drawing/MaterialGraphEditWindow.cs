@@ -348,14 +348,14 @@ namespace UnityEditor.ShaderGraph.Drawing
                     edge => edge,
                     (key, edges) => new { slotRef = key, edges = edges.ToList() });
 
-            var externalInputNeedingConnection = new List<KeyValuePair<IEdge, AbstractShaderProperty>>();
+            var externalInputNeedingConnection = new List<KeyValuePair<IEdge, ShaderProperty>>();
             foreach (var group in uniqueIncomingEdges)
             {
                 var sr = group.slotRef;
                 var fromNode = graphObject.graph.GetNodeFromGuid(sr.nodeGuid);
                 var fromSlot = fromNode.FindOutputSlot<MaterialSlot>(sr.slotId);
 
-                AbstractShaderProperty prop;
+                ShaderProperty prop;
                 switch (fromSlot.concreteValueType)
                 {
                     case ConcreteSlotValueType.Texture2D:
@@ -426,7 +426,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                         subGraph.Connect(
                             new SlotReference(propNode.guid, PropertyNode.OutputSlotId),
                             new SlotReference(nodeGuidMap[edge.inputSlot.nodeGuid], edge.inputSlot.slotId));
-                        externalInputNeedingConnection.Add(new KeyValuePair<IEdge, AbstractShaderProperty>(edge, prop));
+                        externalInputNeedingConnection.Add(new KeyValuePair<IEdge, ShaderProperty>(edge, prop));
                     }
                 }
             }

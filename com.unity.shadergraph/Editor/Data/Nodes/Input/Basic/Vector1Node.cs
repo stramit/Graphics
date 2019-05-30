@@ -38,7 +38,7 @@ namespace UnityEditor.ShaderGraph
             sb.AppendLine(string.Format("$precision {0} = {1};", GetVariableNameForSlot(OutputSlotId), inputValue));
         }
 
-        public AbstractShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
             var slot = FindInputSlot<Vector1MaterialSlot>(InputSlotXId);
             return new Vector1ShaderProperty { value = slot.value };

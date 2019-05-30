@@ -75,7 +75,7 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        public AbstractShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
             return new BooleanShaderProperty { value = m_Value };
         }

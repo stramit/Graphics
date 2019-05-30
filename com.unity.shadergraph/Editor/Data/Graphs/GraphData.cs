@@ -622,12 +622,12 @@ namespace UnityEditor.ShaderGraph
         {
             foreach (var input in properties)
             {
-                if(input is AbstractShaderProperty prop)
+                if(input is ShaderProperty prop)
                 {
                     if(generationMode == GenerationMode.Preview && prop.concreteShaderValueType == ConcreteSlotValueType.Gradient)
                     {
                         GradientShaderProperty gradientProperty = prop as GradientShaderProperty;
-                        GradientUtils.GetGradientPropertiesForPreview(collector, gradientProperty.referenceName, gradientProperty.value);
+                        GradientUtil.GetGradientPropertiesForPreview(collector, gradientProperty.referenceName, gradientProperty.value);
                         continue;
                     }
 
@@ -666,8 +666,8 @@ namespace UnityEditor.ShaderGraph
 
             referenceName = Regex.Replace(referenceName, @"(?:[^A-Za-z_0-9])|(?:\s)", "_");
 
-            return GraphUtil.SanitizeName(m_Properties.Where(p => p.guid != guid).Where(p => p as AbstractShaderProperty != null)
-                .Select(p => ((AbstractShaderProperty)p).referenceName), "{0}_{1}", referenceName);
+            return GraphUtil.SanitizeName(m_Properties.Where(p => p.guid != guid).Where(p => p as ShaderProperty != null)
+                .Select(p => ((ShaderProperty)p).referenceName), "{0}_{1}", referenceName);
         }
 
         public void RemoveShaderProperty(Guid guid)

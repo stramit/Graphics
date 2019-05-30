@@ -101,7 +101,7 @@ namespace UnityEditor.ShaderGraph
             });
         }
 
-        public AbstractShaderProperty AsShaderProperty()
+        public ShaderProperty AsShaderProperty()
         {
             return new ColorShaderProperty { value = color.color, colorMode = color.mode };
         }

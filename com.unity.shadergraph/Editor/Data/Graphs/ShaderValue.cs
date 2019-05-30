@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace UnityEditor.ShaderGraph
 {
+    [Serializable]
     abstract class ShaderValue
     {
 #region Guid

@@ -29,7 +29,7 @@ namespace UnityEditor.ShaderGraph
         private void UpdateNode()
         {
             var graph = owner as GraphData;
-            var property = graph.properties.FirstOrDefault(x => x.guid == propertyGuid) as AbstractShaderProperty;
+            var property = graph.properties.FirstOrDefault(x => x.guid == propertyGuid) as ShaderProperty;
             if (property == null)
                 return;
 
@@ -113,7 +113,7 @@ namespace UnityEditor.ShaderGraph
         public void GenerateNodeCode(ShaderStringBuilder sb, GraphContext graphContext, GenerationMode generationMode)
         {
             var graph = owner as GraphData;
-            var property = graph.properties.FirstOrDefault(x => x.guid == propertyGuid) as AbstractShaderProperty;
+            var property = graph.properties.FirstOrDefault(x => x.guid == propertyGuid) as ShaderProperty;
             if (property == null)
                 return;
 
@@ -194,7 +194,7 @@ namespace UnityEditor.ShaderGraph
                 {
                     var result = string.Format("Gradient {0} = {1};"
                         , GetVariableNameForSlot(OutputSlotId) 
-                        , GradientUtils.GetGradientForPreview(property.referenceName));
+                        , GradientUtil.GetGradientForPreview(property.referenceName));
                     sb.AppendLine(result);
                 }
                 else
@@ -230,7 +230,7 @@ namespace UnityEditor.ShaderGraph
         public override string GetVariableNameForSlot(int slotId)
         {
             var graph = owner as GraphData;
-            var property = graph.properties.FirstOrDefault(x => x.guid == propertyGuid) as AbstractShaderProperty;
+            var property = graph.properties.FirstOrDefault(x => x.guid == propertyGuid) as ShaderProperty;
 
             if (!(property is TextureShaderProperty) &&
                 !(property is Texture2DArrayShaderProperty) &&
@@ -272,7 +272,7 @@ namespace UnityEditor.ShaderGraph
         public override bool ValidateConcretePrecision(ref string errorMessage)
         {
             // Get precision from Property
-            var property = owner.properties.FirstOrDefault(x => x.guid == propertyGuid) as AbstractShaderProperty;
+            var property = owner.properties.FirstOrDefault(x => x.guid == propertyGuid) as ShaderProperty;
             if (property == null)
                 return true;
 

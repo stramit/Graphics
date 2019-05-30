@@ -16,7 +16,7 @@ namespace UnityEditor.ShaderGraph.Drawing
         readonly BlackboardField m_BlackboardField;
         readonly GraphData m_Graph;
 
-        AbstractShaderProperty m_Property;
+        ShaderProperty m_Property;
         Toggle m_ExposedToogle;
         TextField m_ReferenceNameField;
 
@@ -28,7 +28,7 @@ namespace UnityEditor.ShaderGraph.Drawing
         private OnExposedToggle m_OnExposedToggle;
         int m_UndoGroup = -1;
         
-        public BlackboardFieldPropertyView(BlackboardField blackboardField, GraphData graph, AbstractShaderProperty property)
+        public BlackboardFieldPropertyView(BlackboardField blackboardField, GraphData graph, ShaderProperty property)
         {
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderGraphBlackboard"));
             m_BlackboardField = blackboardField;
@@ -624,7 +624,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             UpdateReferenceNameResetMenu();
         }
 
-        void BuildVector1PropertyView(Vector1ShaderProperty floatProperty)
+        void BuildVector1PropertyView(ShaderProperty floatProperty)
         {
             VisualElement[] rows = null;
 
