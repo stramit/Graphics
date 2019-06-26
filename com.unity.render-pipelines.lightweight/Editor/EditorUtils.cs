@@ -4,12 +4,12 @@ using UnityEngine.Rendering;
 
 namespace UnityEditor.Rendering.LWRP
 {
-    internal static class ResourceGuid
+    public static class ResourceGuid
     {
         public static readonly string rendererTemplate = "51493ed8d97d3c24b94c6cffe834630b";
     }
 
-    static class EditorUtils
+    public static class EditorUtils
     {
         // Each group is separate in the menu by a menu bar
         public const int lwrpAssetCreateMenuPriorityGroup1 = CoreUtils.assetCreateMenuPriority1;

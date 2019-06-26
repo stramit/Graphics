@@ -9,7 +9,7 @@ using Lightmapping = UnityEngine.Experimental.GlobalIllumination.Lightmapping;
 
 namespace UnityEngine.Rendering.LWRP
 {
-    public sealed partial class LightweightRenderPipeline : RenderPipeline
+    public partial class LightweightRenderPipeline : RenderPipeline
     {
         static internal class PerFrameBuffer
         {

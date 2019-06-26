@@ -188,7 +188,7 @@ namespace UnityEngine.Rendering.LWRP
             AssetDatabase.CreateAsset(instance, string.Format("Assets/{0}.asset", typeof(LightweightRenderPipelineEditorResources).Name));
         }
 
-        static T LoadResourceFile<T>() where T : ScriptableObject
+        public static T LoadResourceFile<T>() where T : ScriptableObject
         {
             T resourceAsset = null;
             var guids = AssetDatabase.FindAssets(typeof(T).Name + " t:scriptableobject", new[] { "Assets" });

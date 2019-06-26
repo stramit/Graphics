@@ -26,7 +26,7 @@ namespace UnityEngine.Rendering.LWRP
             get => m_RendererFeatures;
         }
 
-        internal ScriptableRenderer InternalCreateRenderer()
+        public ScriptableRenderer InternalCreateRenderer()
         {
             isInvalidated = false;
             return Create();

@@ -1,0 +1,11 @@
+{
+    "name": "com.unity.render-pipelines.lightweight-stylized",
+    "description": "Stylization extension for LWRP.",
+    "version": "7.0.0",
+    "unity": "2019.3",
+	"unityRelease": "0a3",
+    "displayName": "Lightweight RP Stylized",
+    "dependencies": {
+        "com.unity.render-pipelines.lightweight": "7.0.0"
+    }
+}

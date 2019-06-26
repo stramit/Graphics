@@ -122,7 +122,7 @@ namespace UnityEngine.Rendering.LWRP
         public static readonly string HighQualitySampling = "_HIGH_QUALITY_SAMPLING";
     }
 
-    public sealed partial class LightweightRenderPipeline
+    public partial class LightweightRenderPipeline
     {
         static List<Vector4> m_ShadowBiasData = new List<Vector4>();
 

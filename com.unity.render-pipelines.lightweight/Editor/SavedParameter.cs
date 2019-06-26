@@ -3,11 +3,11 @@ using UnityEngine.Assertions;
 
 namespace UnityEditor.Rendering
 {
-    class SavedParameter<T>
+    public class SavedParameter<T>
         where T : IEquatable<T>
     {
-        internal delegate void SetParameter(string key, T value);
-        internal delegate T GetParameter(string key, T defaultValue);
+        public delegate void SetParameter(string key, T value);
+        public delegate T GetParameter(string key, T defaultValue);
 
         readonly string m_Key;
         bool m_Loaded;
@@ -58,25 +58,25 @@ namespace UnityEditor.Rendering
     }
 
     // Pre-specialized class for easier use and compatibility with existing code
-    sealed class SavedBool : SavedParameter<bool>
+    public class SavedBool : SavedParameter<bool>
     {
         public SavedBool(string key, bool value)
             : base(key, value, EditorPrefs.GetBool, EditorPrefs.SetBool) { }
     }
 
-    sealed class SavedInt : SavedParameter<int>
+    public class SavedInt : SavedParameter<int>
     {
         public SavedInt(string key, int value)
             : base(key, value, EditorPrefs.GetInt, EditorPrefs.SetInt) { }
     }
 
-    sealed class SavedFloat : SavedParameter<float>
+    public class SavedFloat : SavedParameter<float>
     {
         public SavedFloat(string key, float value)
             : base(key, value, EditorPrefs.GetFloat, EditorPrefs.SetFloat) { }
     }
 
-    sealed class SavedString : SavedParameter<string>
+    public class SavedString : SavedParameter<string>
     {
         public SavedString(string key, string value)
             : base(key, value, EditorPrefs.GetString, EditorPrefs.SetString) { }
