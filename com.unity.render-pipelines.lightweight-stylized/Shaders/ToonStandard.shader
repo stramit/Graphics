@@ -11,8 +11,8 @@ Shader "ToonPipeline/Standard"
         _Shininess("Shininess", Range(0.01, 1.0)) = 0.5
         _GlossMapScale("Smoothness Factor", Range(0.0, 1.0)) = 1.0
 
-        _Glossiness("Glossiness", Range(0.0, 1.0)) = 0.5
-        [Enum(Specular Alpha,0,Albedo Alpha,1)] _SmoothnessTextureChannel("Smoothness texture channel", Float) = 0
+        _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.5
+        [Enum(Specular Alpha,0,Albedo Alpha,1)] _SmoothnessSource("Smoothness texture channel", Float) = 0
 
         [HideInInspector] _SpecSource("Specular Color Source", Float) = 0.0
         _SpecColor("Specular", Color) = (0.5, 0.5, 0.5)
@@ -214,5 +214,5 @@ Shader "ToonPipeline/Standard"
         }
     }
     Fallback "Hidden/InternalErrorShader"
-    CustomEditor "LightweightStandardSimpleLightingGUI"
+    CustomEditor "UnityEditor.Rendering.LWRP.ShaderGUI.SimpleLitShader"
 }
