@@ -2,14 +2,17 @@ Unity Manual ToC
 
 ================`
 
-* [Getting Started](Getting-Started)
-    * [Shader Graph](Shader-Graph) 
+* [Getting Started](Getting-Started)  
+    * [Custom Functions with Custom Function Node](Custom-Function-Node) 
+    * [Color Modes](Color-Modes)
+    * [Precision Modes](Precision-Modes)
+
+* [Shader Graph](Shader-Graph) 
     * [Shader Graph Window](Shader-Graph-Window)  
     * [Blackboard](Blackboard)  
     * [Master Preview](Master-Preview)  
     * [Create Node Menu](Create-Node-Menu)  
-    * [Shader Graph Asset](Shader-Graph-Asset)  
-    * [Custom Nodes with CodeFunctionNode](Custom-Nodes-With-CodeFunctionNode)  
+    * [Shader Graph Asset](Shader-Graph-Asset)
 
 * [Sub-graph](Sub-graph) 
 	* [Sub-graph Asset](Sub-graph-Asset)  
@@ -78,8 +81,7 @@ Unity Manual ToC
         * [Metal Reflectance](Metal-Reflectance-Node)  
         * [Ambient](Ambient-Node)  
         * [Camera](Camera-Node)  
-        * [Fog](Fog-Node)  
-        * [Light Probe](Light-Probe-Node)  
+        * [Fog](Fog-Node)   
         * [Object](Object-Node)  
         * [Reflection Probe](Reflection-Probe-Node) 
         * [Scene Color](Scene-Color-Node)  
