@@ -4,28 +4,8 @@ A **Shader Graph** enables you to build shaders visually. Instead of hand writin
 
 For an introduction to **Shader Graph** see [Getting Started](Getting-Started.md).
 
-## Disclaimer
-This repository and its documentation is under active development. Everything is subject to change.
+**Shader Graph** is available via the Package Manger window in Unity versions 2018.1 and higher. If you install a prebuilt [Scriptable Render Pipelines]() such as the [Universal Render Pipeline]() or the [High Definition Render Pipeline](), **Shader Graph** is automatically installed in your project. It is not recommended to install or update **Shader Graph** indepedently of the prebuilt render pipeline packages. 
 
-## Contents
-* [Getting Started](Getting-Started.md)
-   * [Custom Functions with Custom Function Node](Custom-Function-Node.md)   
-   * [Color Modes](Color-Modes.md)
-   * [Precision Modes](Precision-Modes.md)
-* [Shader Graph](Shader-Graph.md)
-   * [Shader Graph Window](Shader-Graph-Window.md)
-   * [Blackboard](Blackboard.md)
-   * [Master Preview](Master-Preview.md)
-   * [Create Node Menu](Create-Node-Menu.md)
-   * [Shader Graph Asset](Shader-Graph-Asset.md)
-* [Sub Graph](Sub-graph.md)
-   * [Sub Graph Asset](Sub-graph-Asset.md)
-* [Node](Node.md)
-   * [Port](Port.md)
-   * [Edge](Edge.md)
-   * [Master Node](Master-Node.md)
-* [Data](Data.md)
-   * [Property Types](Property-Types.md)
-   * [Data Types](Data-Types.md)
-   * [Port Bindings](Port-Bindings.md)
-* [Node Library](Node-Library.md)
+**Note:** Shader Graph builds shaders that are compatible with [Scriptable Render Pipelines](), including the prebuilt [High Definition Render Pipeline]() and [Universal Render Pipeline]() made by Unity. Shader Graph is not compatible with the built-in render. 
+
+**Note:** **Shader Graph** package versions compatible with Unity Engine 2018.1 and higher are considered *Preview* versions. Bug fixes or features will not be maintained on those versions. To work with an actively supported version, use Unity Engine 2019.1 or higher. 
