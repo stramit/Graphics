@@ -296,6 +296,16 @@ namespace UnityEditor.ShaderGraph
             base.ValidateNode();
         }
 
+        public void Reload(HashSet<string> changedFileDependencies)
+        {
+            if (changedFileDependencies.Contains(m_FunctionSource))
+            {
+                owner.ClearErrorsForNode(this);
+                ValidateNode();
+                Dirty(ModificationScope.Graph);
+            }
+        }
+
         public VisualElement CreateSettingsElement()
         {
             PropertySheet ps = new PropertySheet();

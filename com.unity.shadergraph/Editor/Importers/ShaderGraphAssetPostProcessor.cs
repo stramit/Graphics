@@ -58,12 +58,20 @@ namespace UnityEditor.ShaderGraph
                 .Distinct()
                 .ToList();
 
-            if (changedSubGraphs.Count > 0)
+            var changedIncludes =  movedAssets.Union(importedAssets)
+                .Select(AssetDatabase.AssetPathToGUID)
+                .Where(x => x.EndsWith("hlsl", StringComparison.InvariantCultureIgnoreCase))
+                .Distinct()
+                .ToList();
+
+            var changedFiles = changedSubGraphs.Union(changedIncludes).ToList();
+
+            if (changedFiles.Count > 0)
             {
                 var windows = Resources.FindObjectsOfTypeAll<MaterialGraphEditWindow>();
                 foreach (var window in windows)
                 {
-                    window.ReloadSubGraphsOnNextUpdate(changedSubGraphs);
+                    window.ReloadSubGraphsOnNextUpdate(changedFiles);
                 }
             }
         }
