@@ -39,7 +39,7 @@ namespace UnityEditor.ShaderGraph
             }
         }
         
-        readonly static string[] k_ValidExtensions = { ".hlsl", ".cginc" };
+        public static string[] s_ValidExtensions = { ".hlsl", ".cginc" };
         const string k_InvalidFileType = "Source file is not a valid file type. Valid file extensions are .hlsl and .cginc";
         const string k_MissingOutputSlot = "A Custom Function Node must have at least one output slot";
 
@@ -250,7 +250,7 @@ namespace UnityEditor.ShaderGraph
                     path = functionSource;
 
                 string extension = Path.GetExtension(path);
-                return k_ValidExtensions.Contains(extension);
+                return s_ValidExtensions.Contains(extension);
             }
         }
 
@@ -284,7 +284,7 @@ namespace UnityEditor.ShaderGraph
                     if(!string.IsNullOrEmpty(path))
                     {
                         string extension = path.Substring(path.LastIndexOf('.'));
-                        if(!k_ValidExtensions.Contains(extension))
+                        if(!s_ValidExtensions.Contains(extension))
                         {
                             owner.AddValidationError(tempId, k_InvalidFileType, ShaderCompilerMessageSeverity.Error);
                         }

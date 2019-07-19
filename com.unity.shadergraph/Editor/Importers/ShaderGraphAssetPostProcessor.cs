@@ -52,19 +52,12 @@ namespace UnityEditor.ShaderGraph
             if (anyShaders)
                 UpdateAfterAssetChange(movedAssets);
             
-            var changedSubGraphs = movedAssets.Union(importedAssets)
-                .Where(x => x.EndsWith(ShaderSubGraphImporter.Extension, StringComparison.InvariantCultureIgnoreCase))
+            var changedFiles = movedAssets.Union(importedAssets)
+                .Where(x => x.EndsWith(ShaderSubGraphImporter.Extension, StringComparison.InvariantCultureIgnoreCase)
+                || CustomFunctionNode.s_ValidExtensions.Contains(Path.GetExtension(x)))
                 .Select(AssetDatabase.AssetPathToGUID)
                 .Distinct()
                 .ToList();
-
-            var changedIncludes =  movedAssets.Union(importedAssets)
-                .Select(AssetDatabase.AssetPathToGUID)
-                .Where(x => x.EndsWith("hlsl", StringComparison.InvariantCultureIgnoreCase))
-                .Distinct()
-                .ToList();
-
-            var changedFiles = changedSubGraphs.Union(changedIncludes).ToList();
 
             if (changedFiles.Count > 0)
             {
