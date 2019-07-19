@@ -160,6 +160,17 @@ namespace UnityEditor.ShaderGraph
                         if(string.IsNullOrEmpty(path))
                             path = functionSource;
 
+                        string hash;
+                        try
+                        {
+                            hash = AssetDatabase.GetAssetDependencyHash(path).ToString();
+                        }
+                        catch
+                        {
+                            hash = "Failed to compute hash for include";
+                        }
+
+                        builder.AppendLine($"// {hash}");
                         builder.AppendLine($"#include \"{path}\"");
                     });
                     break;
