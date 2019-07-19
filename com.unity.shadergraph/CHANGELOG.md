@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - New Shader Graph windows are now docked to either existing Shader Graph windows, or to the Scene View.
 
 ### Fixed
-- Fixed various dependency tracking issues with Sub Graphs and HLSL include files from Custom Function Nodes.
+- Fixed various dependency tracking issues with Sub Graphs and HLSL files from Custom Function Nodes.
 
 ## [7.0.0] - 2019-07-10
 ### Added
