@@ -1,20 +1,18 @@
-Unity Manual ToC
-
-================`
-
 * [About Shader Graph](index)
-* [Getting Started](Getting-Started)  
+* [Getting started with Shader Graph](Getting-Started)  
+    * [Creating a new Shader Graph Asset](Create-Shader-Graph) 
+    * [My first Shader Graph](First-Shader-Graph) 
     * [Shader Graph Window](Shader-Graph-Window)  
         * [Blackboard](Blackboard)  
         * [Master Preview](Master-Preview) 
     * [Create Node Menu](Create-Node-Menu)
-    * [Sub-graph](Sub-graph)     
+    * [Sub Graph](Sub-graph)     
     * [Color Modes](Color-Modes)
     * [Precision Modes](Precision-Modes)
-    * [Custom Functions with Custom Function Node](Custom-Function-Node)
-* [Inside Shader Graph](Shader-Graph)   
+    * [Custom Function Node](Custom-Function-Node)
+* [Inside Shader Graph]  
     * [Shader Graph Asset](Shader-Graph-Asset) 
-	* [Sub-graph Asset](Sub-graph-Asset)
+	* [Sub Graph Asset](Sub-graph-Asset)
     * [Node](Node) 
         * [Port](Port)  
         * [Custom Port Menu](Custom-Port-Menu)
@@ -216,7 +214,7 @@ Unity Manual ToC
             * [Or](Or-Node)
         * [Custom Function](Custom-Function-Node)
         * [Preview](Preview-Node)  
-        * [Sub-graph](Sub-graph-Node)            
+        * [Sub Graph](Sub-graph-Node)            
     * [UV](UV-Nodes)
         * [Flipbook](Flipbook-Node)  
         * [Polar Coordinates](Polar-Coordinates-Node)  
