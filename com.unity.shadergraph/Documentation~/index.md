@@ -1,11 +1,13 @@
+# About Shader Graph
+
 ## Description
 
-A **Shader Graph** enables you to build shaders visually. Instead of hand writing code you create and connect nodes in a graph network. The graph framework gives instant feedback on the changes, and it’s simple enough that new users can become involved in shader creation.
+Shader Graph enables you to build shaders visually. Instead of writing code, you create and connect nodes in a graph framework. Shader Graph gives instant feedback that reflects your changes, and it’s simple enough for users who are new to shader creation.
 
-For an introduction to **Shader Graph** see [Getting Started](Getting-Started.md).
+For an introduction to Shader Graph, see [Getting Started](Getting-Started.md).
 
-**Shader Graph** is available via the Package Manger window in Unity versions 2018.1 and higher. If you install a prebuilt [Scriptable Render Pipelines]() such as the [Universal Render Pipeline]() or the [High Definition Render Pipeline](), **Shader Graph** is automatically installed in your project. It is not recommended to install or update **Shader Graph** indepedently of the prebuilt render pipeline packages. 
+Shader Graph is available through the Package Manger window in Unity versions 2018.1 and higher. If you install a prebuilt Scriptable Render Pipeline (SRP) such as the [Universal Render Pipeline](https://docs.unity3d.com/Packages/com.unity.render-pipelines.lightweight@latest) (URP) or the [High Definition Render Pipeline](https://docs.unity3d.com/Packages/com.unity.render-pipelines.high-definition@latest) (HDRP), Unity automatically installs Shader Graph in your project.
 
-**Note:** Shader Graph builds shaders that are compatible with [Scriptable Render Pipelines](), including the prebuilt [High Definition Render Pipeline]() and [Universal Render Pipeline]() made by Unity. Shader Graph is not compatible with the built-in render. 
+Avoid installing or updating Shader Graph independently of the prebuilt SRP packages. Shader Graph builds shaders that are compatible with the URP and HDRP, but they are not compatible with the built-in renderer.
 
-**Note:** **Shader Graph** package versions compatible with Unity Engine 2018.1 and higher are considered *Preview* versions. Bug fixes or features will not be maintained on those versions. To work with an actively supported version, use Unity Engine 2019.1 or higher. 
+Shader Graph package versions on Unity Engine 2018.x are *Preview* versions, which do not receive bug fixes and feature maintenance. To work with an actively supported version of Shader Graph, use Unity Engine 2019.1 or higher.
