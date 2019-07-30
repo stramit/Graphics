@@ -6,6 +6,7 @@ using System.Linq;
 using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Experimental.Rendering.RenderGraphModule;
+using Utilities;
 
 namespace UnityEngine.Rendering.HighDefinition
 {
@@ -1011,6 +1012,9 @@ namespace UnityEngine.Rendering.HighDefinition
         {
             if (!m_ValidAPI || cameras.Length == 0)
                 return;
+            
+            // Set the quality level for this rendering
+            asset.currentMaterialQualityLevel.SetGlobalShaderKeywords();
 
             GetOrCreateDefaultVolume();
 
