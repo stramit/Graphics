@@ -94,7 +94,7 @@ To keep exploring how to use Shader Graph to author shaders, check out these blo
 
 - [Art That Moves: Creating Animated Materials with Shader Graph](https://blogs.unity3d.com/2018/10/05/art-that-moves-creating-animated-materials-with-shader-graph/)
 - [Shader Graph Updates and Sample Project ](https://blogs.unity3d.com/2018/08/07/shader-graph-updates-and-sample-project/)
-- Custom Lighting in Shader Graph: Expanding Your Graphs in 2019
+- [Custom Lighting in Shader Graph: Expanding Your Graphs in 2019](https://blogs.unity3d.com/2019/07/31/custom-lighting-in-shader-graph-expanding-your-graphs-in-2019/)
 - [Unity 2018.3 Shader Graph Update: Lit Master Node](https://blogs.unity3d.com/2018/12/19/unity-2018-3-shader-graph-update-lit-master-node/)
 - [Creating an Interactive Vertex Effect using Shader Graph](https://blogs.unity3d.com/2019/02/12/creating-an-interactive-vertex-effect-using-shader-graph/)
 - [Introduction to Shader Graph: Build your shaders with a visual editor](https://blogs.unity3d.com/2018/02/27/introduction-to-shader-graph-build-your-shaders-with-a-visual-editor/)
