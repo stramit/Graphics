@@ -64,7 +64,7 @@ namespace UnityEditor.Rendering.Universal
         {
             Name = "DepthOnly",
             LightMode = "DepthOnly",
-            TemplateName = "universalUnlitPass.template",
+            TemplateName = "universalUnlitPassAF.template",
             MaterialName = "Unlit",
             ZWriteOverride = "ZWrite On",
             ColorMaskOverride = "ColorMask 0",
@@ -87,6 +87,10 @@ namespace UnityEditor.Rendering.Universal
                 requiresMeshUVs = new List<UVChannel>() { UVChannel.UV1 },
             },
             ExtraDefines = new List<string>(),
+            Includes = new List<string>()
+            {
+                "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/ShaderPassDepthOnly.hlsl\"",
+            },
             OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
             {
                 var masterNode = node as UnlitMasterNode;
@@ -221,8 +225,8 @@ namespace UnityEditor.Rendering.Universal
             subShader.Indent();
             {
                 //GenerateShaderPassUnlit(unlitMasterNode, m_ShadowCasterPass, mode, subShader, sourceAssetDependencyPaths);
-                //GenerateShaderPassUnlit(unlitMasterNode, m_DepthOnlyPass, mode, subShader, sourceAssetDependencyPaths);
-                GenerateShaderPassUnlit(unlitMasterNode, m_UnlitPass, mode, subShader, sourceAssetDependencyPaths);
+                GenerateShaderPassUnlit(unlitMasterNode, m_DepthOnlyPass, mode, subShader, sourceAssetDependencyPaths);
+                //GenerateShaderPassUnlit(unlitMasterNode, m_UnlitPass, mode, subShader, sourceAssetDependencyPaths);
             }
             subShader.Deindent();
             subShader.AddShaderChunk("}", true);
