@@ -43,7 +43,15 @@ namespace UnityEditor.Rendering.Universal
                 requiresViewDir = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
                 requiresMeshUVs = new List<UVChannel>() { UVChannel.UV1 },
             },
+            RequiredFields = new List<string>() 
+            {
+                "AttributesMesh.uv1",
+            },
             ExtraDefines = new List<string>(),
+            Includes = new List<string>()
+            {
+                "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/UnlitForwardPass.hlsl\"",
+            },
             UseInPreview = true,
             OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
             {
@@ -86,10 +94,12 @@ namespace UnityEditor.Rendering.Universal
                 requiresViewDir = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
                 requiresMeshUVs = new List<UVChannel>() { UVChannel.UV1 },
             },
-            ExtraDefines = new List<string>(),
+            ExtraDefines = new List<string>()
+            {
+            },
             Includes = new List<string>()
             {
-                "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/ShaderPassDepthOnly.hlsl\"",
+                "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/DepthOnlyPass.hlsl\"",
             },
             OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
             {
@@ -226,7 +236,7 @@ namespace UnityEditor.Rendering.Universal
             {
                 //GenerateShaderPassUnlit(unlitMasterNode, m_ShadowCasterPass, mode, subShader, sourceAssetDependencyPaths);
                 GenerateShaderPassUnlit(unlitMasterNode, m_DepthOnlyPass, mode, subShader, sourceAssetDependencyPaths);
-                //GenerateShaderPassUnlit(unlitMasterNode, m_UnlitPass, mode, subShader, sourceAssetDependencyPaths);
+                GenerateShaderPassUnlit(unlitMasterNode, m_UnlitPass, mode, subShader, sourceAssetDependencyPaths);
             }
             subShader.Deindent();
             subShader.AddShaderChunk("}", true);
