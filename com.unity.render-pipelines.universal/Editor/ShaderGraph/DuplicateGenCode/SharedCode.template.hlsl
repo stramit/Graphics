@@ -9,7 +9,7 @@
         output.tangentToWorld = k_identity3x3;
         output.positionSS = input.positionCS;       // input.positionCS is SV_Position
 
-        $FragInputs.positionWS:        output.positionWS = input.positionWS;
+        $FragInputs.positionWS:         output.positionWS = input.positionWS;
         $FragInputs.tangentToWorld:     output.tangentToWorld = BuildTangentToWorld(input.tangentWS, input.normalWS);
         $FragInputs.texCoord0:          output.texCoord0 = input.texCoord0;
         $FragInputs.texCoord1:          output.texCoord1 = input.texCoord1;
