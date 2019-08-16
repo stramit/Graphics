@@ -21,7 +21,7 @@ namespace UnityEditor.Rendering.Universal
         Pass m_UnlitPass = new Pass
         {
             Name = "UnlitPass",
-            LightMode = "Forward",
+            LightMode = "UniversalForward",
             TemplateName = "universalUnlitPassAF.template",
             MaterialName = "Unlit",
             PixelShaderSlots = new List<int>
@@ -234,6 +234,11 @@ namespace UnityEditor.Rendering.Universal
             subShader.AddShaderChunk("{", true);
             subShader.Indent();
             {
+                var surfaceTags = ShaderGenerator.BuildMaterialTags(unlitMasterNode.surfaceType);
+                var tagsBuilder = new ShaderStringBuilder(0);
+                surfaceTags.GetTags(tagsBuilder, "UniversalPipeline");
+                subShader.AddShaderChunk(tagsBuilder.ToString());
+                
                 //GenerateShaderPassUnlit(unlitMasterNode, m_ShadowCasterPass, mode, subShader, sourceAssetDependencyPaths);
                 GenerateShaderPassUnlit(unlitMasterNode, m_DepthOnlyPass, mode, subShader, sourceAssetDependencyPaths);
                 GenerateShaderPassUnlit(unlitMasterNode, m_UnlitPass, mode, subShader, sourceAssetDependencyPaths);
