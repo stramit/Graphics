@@ -55,12 +55,9 @@ namespace UnityEditor.Rendering.Universal
             UseInPreview = true,
             OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
             {
+                pass.ExtraDefines.Clear();
                 var masterNode = node as UnlitMasterNode;
                 GetSurfaceTagsOptions(masterNode, ref pass);
-                if (masterNode.IsSlotConnected(PBRMasterNode.AlphaThresholdSlotId))
-                    pass.ExtraDefines.Add("#define _AlphaClip 1");
-                if (masterNode.surfaceType == SurfaceType.Transparent && masterNode.alphaMode == AlphaMode.Premultiply)
-                    pass.ExtraDefines.Add("#define _ALPHAPREMULTIPLY_ON 1");
                 if (requirements.requiresDepthTexture)
                     pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
                 if (requirements.requiresCameraOpaqueTexture)
@@ -103,12 +100,9 @@ namespace UnityEditor.Rendering.Universal
             },
             OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
             {
+                pass.ExtraDefines.Clear();
                 var masterNode = node as UnlitMasterNode;
                 GetSurfaceTagsOptions(masterNode, ref pass);
-                if (masterNode.IsSlotConnected(PBRMasterNode.AlphaThresholdSlotId))
-                    pass.ExtraDefines.Add("#define _AlphaClip 1");
-                if (masterNode.surfaceType == SurfaceType.Transparent && masterNode.alphaMode == AlphaMode.Premultiply)
-                    pass.ExtraDefines.Add("#define _ALPHAPREMULTIPLY_ON 1");
                 if (requirements.requiresDepthTexture)
                     pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
                 if (requirements.requiresCameraOpaqueTexture)
@@ -120,7 +114,7 @@ namespace UnityEditor.Rendering.Universal
         {
             Name = "ShadowCaster",
             LightMode = "ShadowCaster",
-            TemplateName = "universalUnlitPass.template",
+            TemplateName = "universalUnlitPassAF.template",
             MaterialName = "Unlit",
             ZWriteOverride = "ZWrite On",
             ZTestOverride = "ZTest LEqual",
@@ -143,6 +137,10 @@ namespace UnityEditor.Rendering.Universal
                 requiresMeshUVs = new List<UVChannel>() { UVChannel.UV1 },
             },
             ExtraDefines = new List<string>(),
+            Includes = new List<string>()
+            {
+                "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/ShadowCasterPass.hlsl\"",
+            },
             OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
             {
                 var masterNode = node as UnlitMasterNode;
@@ -178,7 +176,7 @@ namespace UnityEditor.Rendering.Universal
             if (masterNode.IsSlotConnected(UnlitMasterNode.AlphaThresholdSlotId) ||
                 masterNode.GetInputSlots<Vector1MaterialSlot>().First(x => x.id == UnlitMasterNode.AlphaThresholdSlotId).value > 0.0f)
             {
-                baseActiveFields.Add("AlphaTest");
+                baseActiveFields.Add("AlphaClip");
             }
 
             // Keywords for transparent
@@ -196,6 +194,10 @@ namespace UnityEditor.Rendering.Universal
                 else if (masterNode.alphaMode == AlphaMode.Additive)
                 {
                     baseActiveFields.Add("BlendMode.Add");
+                }
+                else if (masterNode.alphaMode == AlphaMode.Premultiply)
+                {
+                    baseActiveFields.Add("BlendMode.Premultiply");
                 }
             }
             else
@@ -239,7 +241,7 @@ namespace UnityEditor.Rendering.Universal
                 surfaceTags.GetTags(tagsBuilder, "UniversalPipeline");
                 subShader.AddShaderChunk(tagsBuilder.ToString());
                 
-                //GenerateShaderPassUnlit(unlitMasterNode, m_ShadowCasterPass, mode, subShader, sourceAssetDependencyPaths);
+                GenerateShaderPassUnlit(unlitMasterNode, m_ShadowCasterPass, mode, subShader, sourceAssetDependencyPaths);
                 GenerateShaderPassUnlit(unlitMasterNode, m_DepthOnlyPass, mode, subShader, sourceAssetDependencyPaths);
                 GenerateShaderPassUnlit(unlitMasterNode, m_UnlitPass, mode, subShader, sourceAssetDependencyPaths);
             }

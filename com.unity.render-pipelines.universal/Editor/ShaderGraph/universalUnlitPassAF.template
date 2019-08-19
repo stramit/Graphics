@@ -38,7 +38,7 @@ Pass
     // Variant Definitions (active field translations to Universal defines)
     //-------------------------------------------------------------------------------------
     $SurfaceType.Transparent:            #define _SURFACE_TYPE_TRANSPARENT 1
-    $BlendMode.Alpha:                    #define _AlphaClip 1
+    $AlphaClip:                          #define _AlphaClip 1
     $BlendMode.Add:                      #define _BLENDMODE_ADD 1
     $BlendMode.Premultiply:              #define _ALPHAPREMULTIPLY_ON 1
 
@@ -108,7 +108,6 @@ $include("SharedCode.template.hlsl")
 
         // copy across graph values, if defined
         $SurfaceDescription.Color: surfaceData.albedo = surfaceDescription.Color;
-        $SurfaceDescription.Alpha: surfaceData.alpha = surfaceDescription.Alpha;
     }
 
     void GetSurfaceData(FragInputs fragInputs, float3 V, out SurfaceData surfaceData)
@@ -119,7 +118,7 @@ $include("SharedCode.template.hlsl")
         // Perform alpha test very early to save performance (a killed pixel will not sample textures)
         // TODO: split graph evaluation to grab just alpha dependencies first? tricky..
         #if _AlphaClip
-		$AlphaTest: clip(surfaceDescription.Alpha - surfaceDescription.AlphaClipThreshold);
+		$AlphaClip: clip(surfaceDescription.Alpha - surfaceDescription.AlphaClipThreshold);
         #endif
 
         BuildSurfaceData(fragInputs, surfaceDescription, V, surfaceData);
