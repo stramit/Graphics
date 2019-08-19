@@ -113,31 +113,6 @@ namespace UnityEditor.Rendering.Universal
             };
         };
 
-        [InterpolatorPack]
-        internal struct VaryingsMeshToDS
-        {
-            Vector3 positionWS;
-            Vector3 normalWS;
-            [Optional]      Vector4 tangentWS;
-            [Optional]      Vector4 texCoord0;
-            [Optional]      Vector4 texCoord1;
-            [Optional]      Vector4 texCoord2;
-            [Optional]      Vector4 texCoord3;
-            [Optional]      Vector4 color;
-            [Semantic("CUSTOM_INSTANCE_ID")] [PreprocessorIf("UNITY_ANY_INSTANCING_ENABLED")] uint instanceID;
-
-            public static Dependency[] tessellationDependencies = new Dependency[]
-            {
-                new Dependency("VaryingsMeshToDS.tangentWS",     "VaryingsMeshToPS.tangentWS"),
-                new Dependency("VaryingsMeshToDS.texCoord0",     "VaryingsMeshToPS.texCoord0"),
-                new Dependency("VaryingsMeshToDS.texCoord1",     "VaryingsMeshToPS.texCoord1"),
-                new Dependency("VaryingsMeshToDS.texCoord2",     "VaryingsMeshToPS.texCoord2"),
-                new Dependency("VaryingsMeshToDS.texCoord3",     "VaryingsMeshToPS.texCoord3"),
-                new Dependency("VaryingsMeshToDS.color",         "VaryingsMeshToPS.color"),
-                new Dependency("VaryingsMeshToDS.instanceID",    "VaryingsMeshToPS.instanceID"),
-            };
-        };
-
         internal struct FragInputs
         {
             public static Dependency[] dependencies = new Dependency[]
