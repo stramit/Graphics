@@ -2,13 +2,27 @@
 #define SG_SHADOW_PASS_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/VaryingVertMesh.hlsl"
+
+float3 _LightDirection;
 
 PackedVaryingsType vert(AttributesMesh inputMesh)
 {
-    VaryingsType varyingsType;
-    varyingsType.vmesh = VertMesh(inputMesh);
-    return PackVaryingsType(varyingsType);
+    VaryingsType output;
+    output.vmesh = VertMesh(inputMesh);
+
+    //define shadow pass specific clip position for universal 
+    float4 clipPos = TransformWorldToHClip(ApplyShadowBias(output.vmesh.positionWS, output.vmesh.normalWS, _LightDirection));
+    #if UNITY_REVERSED_Z
+        clipPos.z = min(clipPos.z, clipPos.w * UNITY_NEAR_CLIP_VALUE);
+    #else
+        clipPos.z = max(clipPos.z, clipPos.w * UNITY_NEAR_CLIP_VALUE);
+    #endif
+
+    output.vmesh.positionCS = clipPos;
+
+    return PackVaryingsType(output);
 }
 
 half4 frag(PackedVaryingsToPS packedInput) : SV_TARGET 

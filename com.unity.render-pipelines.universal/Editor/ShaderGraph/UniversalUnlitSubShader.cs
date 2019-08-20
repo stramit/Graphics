@@ -34,19 +34,6 @@ namespace UnityEditor.Rendering.Universal
             {
                 UnlitMasterNode.PositionSlotId
             },
-            Requirements = new ShaderGraphRequirements()
-            {
-                requiresNormal = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresTangent = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresBitangent = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresPosition = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresViewDir = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresMeshUVs = new List<UVChannel>() { UVChannel.UV1 },
-            },
-            RequiredFields = new List<string>() 
-            {
-                "AttributesMesh.uv1",
-            },
             ExtraDefines = new List<string>(),
             Includes = new List<string>()
             {
@@ -81,15 +68,6 @@ namespace UnityEditor.Rendering.Universal
             VertexShaderSlots = new List<int>()
             {
                 PBRMasterNode.PositionSlotId
-            },
-            Requirements = new ShaderGraphRequirements()
-            {
-                requiresNormal = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresTangent = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresBitangent = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresPosition = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresViewDir = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresMeshUVs = new List<UVChannel>() { UVChannel.UV1 },
             },
             ExtraDefines = new List<string>()
             {
@@ -127,14 +105,11 @@ namespace UnityEditor.Rendering.Universal
             {
                 PBRMasterNode.PositionSlotId
             },
-            Requirements = new ShaderGraphRequirements()
+            RequiredFields = new List<string>()
             {
-                requiresNormal = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresTangent = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresBitangent = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresPosition = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresViewDir = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresMeshUVs = new List<UVChannel>() { UVChannel.UV1 },
+                "VaryingsMeshToPS.positionWS",
+                "VaryingsMeshToPS.normalWS",
+                "VaryingsMeshToPS.tangentWS", //fields needed for shadow bias in vert function
             },
             ExtraDefines = new List<string>(),
             Includes = new List<string>()
