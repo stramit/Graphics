@@ -283,6 +283,38 @@ namespace UnityEditor.Rendering.Universal
                 GetSurfaceTagsOptions(masterNode, ref pass);
             }
         };
+        Pass m_LitMetaPass = new Pass()
+        {
+            Name = "meta",
+            LightMode = "Meta",
+            TemplateName = "universalPBRTemplateAF.template",
+            MaterialName = "PBR",
+            ZWriteOverride = "ZWrite On",
+            ZTestOverride = "ZTest LEqual",
+            PixelShaderSlots = new List<int>()
+            {
+                PBRMasterNode.AlphaSlotId,
+                PBRMasterNode.AlphaThresholdSlotId
+            },
+            VertexShaderSlots = new List<int>()
+            {
+                PBRMasterNode.PositionSlotId
+            },
+            RequiredFields = new List<string>()
+            {
+                "AttributesMesh.uv1", //needed for meta vertex position
+            },
+            ExtraDefines = new List<string>(),
+            Includes = new List<string>()
+            {
+                "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/LightingMetaPass.hlsl\"",
+            },
+            OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
+            {
+                var masterNode = node as PBRMasterNode;
+                GetSurfaceTagsOptions(masterNode, ref pass);
+            }
+        };
 
         public int GetPreviewPassIndex() { return 0; }
 
@@ -380,6 +412,7 @@ namespace UnityEditor.Rendering.Universal
                 GenerateShaderPassUnlit(pbrMasterNode, m_ShadowCasterPass, mode, subShader, sourceAssetDependencyPaths);
                 GenerateShaderPassUnlit(pbrMasterNode, m_DepthOnlyPass, mode, subShader, sourceAssetDependencyPaths);
                 GenerateShaderPassUnlit(pbrMasterNode, m_ForwardPassMetallic, mode, subShader, sourceAssetDependencyPaths);
+                //GenerateShaderPassUnlit(pbrMasterNode, m_LitMetaPass, mode, subShader, sourceAssetDependencyPaths);
             }
             subShader.Deindent();
             subShader.AddShaderChunk("}", true);
