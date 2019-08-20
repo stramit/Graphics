@@ -108,6 +108,7 @@ $include("SharedCode.template.hlsl")
 
         // copy across graph values, if defined
         $SurfaceDescription.Color: surfaceData.albedo = surfaceDescription.Color;
+        $SurfaceDescription.Alpha: surfaceData.alpha = surfaceDescription.Alpha;
     }
 
     void GetSurfaceData(FragInputs fragInputs, float3 V, out SurfaceData surfaceData)
