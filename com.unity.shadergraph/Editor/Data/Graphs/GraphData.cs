@@ -305,9 +305,25 @@ namespace UnityEditor.ShaderGraph
 
         public bool didActiveOutputNodeChange { get; set; }
 
+        [SerializeField]
+        IEnumerable<IGraphTarget> m_Targets;
+
+        public IEnumerable<IGraphTarget> targets => m_Targets;
+
         public GraphData()
         {
             m_GroupItems[Guid.Empty] = new List<IGroupItem>();
+        }
+
+        public GraphInfo GetGraphInfo()
+        {
+            // MATT: Return real GraphInfo
+            var graphInfo = new GraphInfo();
+            graphInfo.masterNodeInfo = new MasterNodeInfo()
+            {
+                type = "PBRMasterNode",
+            };
+            return graphInfo;
         }
 
         public void ClearChanges()

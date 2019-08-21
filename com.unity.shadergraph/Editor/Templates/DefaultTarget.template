@@ -1,0 +1,7 @@
+SubShader
+{
+	// Target Tags
+	${Tags}
+
+	${Passes}
+}

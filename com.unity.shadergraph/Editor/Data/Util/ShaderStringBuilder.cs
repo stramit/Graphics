@@ -31,6 +31,8 @@ namespace UnityEditor.ShaderGraph
 
         const string k_IndentationString = "    ";
 
+        public int indentationLevel => m_IndentationLevel;
+
         internal AbstractMaterialNode currentNode
         {
             get { return m_CurrentMapping.node; }
@@ -202,6 +204,11 @@ namespace UnityEditor.ShaderGraph
             }
             currentNode = other.currentNode;
             AppendLines(other.ToString(other.m_CurrentMapping.startIndex, other.length - other.m_CurrentMapping.startIndex));
+        }
+
+        public void Replace(string oldValue, string newValue)
+        {
+            m_StringBuilder.Replace(oldValue, newValue);
         }
 
         public void ReplaceInCurrentMapping(string oldValue, string newValue)

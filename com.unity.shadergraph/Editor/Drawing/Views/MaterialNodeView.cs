@@ -356,7 +356,13 @@ namespace UnityEditor.ShaderGraph.Drawing
         {
             List<PropertyCollector.TextureInfo> textureInfo;
             if (node is IMasterNode masterNode)
-                return masterNode.GetShader(mode, node.name, out textureInfo);
+            {
+                var targets = new IGraphTarget[] { new UnityEditor.Rendering.Universal.Experimental.UniversalMeshTarget() };
+                var generator = new Generator(node.owner, targets);
+                return generator.GetShaderCode();
+
+                // return masterNode.GetShader(mode, node.name, out textureInfo);
+            }
 
             return node.owner.GetShader(node, mode, node.name).shader;
         }

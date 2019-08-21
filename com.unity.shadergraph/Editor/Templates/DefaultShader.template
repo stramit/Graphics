@@ -1,0 +1,13 @@
+Shader ${Name}
+{
+	// Properties
+	${Properties}
+
+	${Targets}
+
+	// Editor
+	${Editor}
+
+	// Fallback
+	${Fallback}
+}

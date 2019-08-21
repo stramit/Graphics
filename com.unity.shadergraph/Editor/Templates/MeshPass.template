@@ -1,0 +1,43 @@
+Pass
+{
+	// Pass State
+	${Blending}
+	${Culling}
+	${ZTest}
+	${ZWrite}
+	${Stencil}
+	${ColorMask}
+
+	// Pass Tags
+	${Tags}
+
+	HLSLPROGRAM
+	#pragma vertex Vertex
+	#pragma fragment Fragment
+
+	// Pass Pragmas
+	${Pragmas}
+
+	// Pass Keywords
+	${Keywords}
+
+	// Pass Includes
+	${Includes}
+
+	// Graph Keywords
+	${GraphKeywords}
+
+	// Graph Uniforms
+	${GraphUniforms}
+
+	// Graph Packing
+	${GraphPacking}
+
+	// Graph Vertex
+	${GraphVertex}
+
+	// Graph Fragment
+	${GraphFragment}
+
+	ENDHLSL
+}
