@@ -58,7 +58,7 @@ namespace UnityEditor.Rendering.Universal
 
     static class UniversalShaderStructs
     {
-        internal struct AttributesMesh
+        internal struct Attributes
         {
             [Semantic("POSITION")]                  Vector3 positionOS;
             [Semantic("NORMAL")][Optional]          Vector3 normalOS;
@@ -72,44 +72,54 @@ namespace UnityEditor.Rendering.Universal
         };
 
         [InterpolatorPack]
-        internal struct VaryingsMeshToPS
+        internal struct Varyings
         {
-            [Semantic("SV_Position")]                                               Vector4 positionCS;
-            [Optional]                                                              Vector3 positionWS;
-            [Optional]                                                              Vector3 normalWS;
-            [Optional]                                                              Vector4 tangentWS;      // w contain mirror sign
-            [Optional]                                                              Vector4 texCoord0;
-            [Optional]                                                              Vector4 texCoord1;
-            [Optional]                                                              Vector4 texCoord2;
-            [Optional]                                                              Vector4 texCoord3;
-            [Optional]                                                              Vector4 color;
-            [Semantic("CUSTOM_INSTANCE_ID")] [PreprocessorIf("UNITY_ANY_INSTANCING_ENABLED")] uint instanceID;
-            [Semantic("FRONT_FACE_SEMANTIC")][OverrideType("FRONT_FACE_TYPE")][PreprocessorIf("defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)")] bool cullFace;
-
-            public static Dependency[] tessellationDependencies = new Dependency[]
-            {
-                new Dependency("VaryingsMeshToPS.positionWS",       "VaryingsMeshToDS.positionWS"),
-                new Dependency("VaryingsMeshToPS.normalWS",         "VaryingsMeshToDS.normalWS"),
-                new Dependency("VaryingsMeshToPS.tangentWS",        "VaryingsMeshToDS.tangentWS"),
-                new Dependency("VaryingsMeshToPS.texCoord0",        "VaryingsMeshToDS.texCoord0"),
-                new Dependency("VaryingsMeshToPS.texCoord1",        "VaryingsMeshToDS.texCoord1"),
-                new Dependency("VaryingsMeshToPS.texCoord2",        "VaryingsMeshToDS.texCoord2"),
-                new Dependency("VaryingsMeshToPS.texCoord3",        "VaryingsMeshToDS.texCoord3"),
-                new Dependency("VaryingsMeshToPS.color",            "VaryingsMeshToDS.color"),
-                new Dependency("VaryingsMeshToPS.instanceID",       "VaryingsMeshToDS.instanceID"),
-            };
+            [Semantic("SV_Position")]
+            Vector4 positionCS;
+            [Optional]
+            Vector3 positionWS;
+            [Optional]
+            Vector3 normalWS;
+            [Optional]
+            Vector4 tangentWS;
+            [Optional]
+            Vector4 texCoord0;
+            [Optional]
+            Vector4 texCoord1;
+            [Optional]
+            Vector4 texCoord2;
+            [Optional]
+            Vector4 texCoord3;
+            [Optional]
+            Vector4 color;
+            [Optional]
+            Vector3 viewDirectionWS;
+            [Optional]
+            Vector3 bitangentWS;
+            [Optional][PreprocessorIf("defined(USE_LIGHTMAP)")]
+            Vector2 lightmapUV;
+            [Optional][PreprocessorIf("defined(USE_SH)")]
+            Vector3 sh;
+            [Optional]
+            Vector4 fogFactorAndVertexLight;
+            [Optional]
+            Vector4 shadowCoord;
+            [Semantic("CUSTOM_INSTANCE_ID")] [PreprocessorIf("UNITY_ANY_INSTANCING_ENABLED")]
+            uint instanceID;
+            [Semantic("FRONT_FACE_SEMANTIC")][OverrideType("FRONT_FACE_TYPE")][PreprocessorIf("defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)")]
+            bool cullFace;
 
             public static Dependency[] standardDependencies = new Dependency[]
             {
-                new Dependency("VaryingsMeshToPS.positionWS",       "AttributesMesh.positionOS"),
-                new Dependency("VaryingsMeshToPS.normalWS",         "AttributesMesh.normalOS"),
-                new Dependency("VaryingsMeshToPS.tangentWS",        "AttributesMesh.tangentOS"),
-                new Dependency("VaryingsMeshToPS.texCoord0",        "AttributesMesh.uv0"),
-                new Dependency("VaryingsMeshToPS.texCoord1",        "AttributesMesh.uv1"),
-                new Dependency("VaryingsMeshToPS.texCoord2",        "AttributesMesh.uv2"),
-                new Dependency("VaryingsMeshToPS.texCoord3",        "AttributesMesh.uv3"),
-                new Dependency("VaryingsMeshToPS.color",            "AttributesMesh.color"),
-                new Dependency("VaryingsMeshToPS.instanceID",       "AttributesMesh.instanceID"),
+                new Dependency("Varyings.positionWS",       "Attributes.positionOS"),
+                new Dependency("Varyings.normalWS",         "Attributes.normalOS"),
+                new Dependency("Varyings.tangentWS",        "Attributes.tangentOS"),
+                new Dependency("Varyings.texCoord0",        "Attributes.uv0"),
+                new Dependency("Varyings.texCoord1",        "Attributes.uv1"),
+                new Dependency("Varyings.texCoord2",        "Attributes.uv2"),
+                new Dependency("Varyings.texCoord3",        "Attributes.uv3"),
+                new Dependency("Varyings.color",            "Attributes.color"),
+                new Dependency("Varyings.instanceID",       "Attributes.instanceID"),
             };
         };
 
@@ -117,15 +127,15 @@ namespace UnityEditor.Rendering.Universal
         {
             public static Dependency[] dependencies = new Dependency[]
             {
-                new Dependency("FragInputs.positionWS",        "VaryingsMeshToPS.positionWS"),
-                new Dependency("FragInputs.tangentToWorld",     "VaryingsMeshToPS.tangentWS"),
-                new Dependency("FragInputs.tangentToWorld",     "VaryingsMeshToPS.normalWS"),
-                new Dependency("FragInputs.texCoord0",          "VaryingsMeshToPS.texCoord0"),
-                new Dependency("FragInputs.texCoord1",          "VaryingsMeshToPS.texCoord1"),
-                new Dependency("FragInputs.texCoord2",          "VaryingsMeshToPS.texCoord2"),
-                new Dependency("FragInputs.texCoord3",          "VaryingsMeshToPS.texCoord3"),
-                new Dependency("FragInputs.color",              "VaryingsMeshToPS.color"),
-                new Dependency("FragInputs.isFrontFace",        "VaryingsMeshToPS.cullFace"),
+                new Dependency("FragInputs.positionWS",        "Varyings.positionWS"),
+                new Dependency("FragInputs.tangentToWorld",     "Varyings.tangentWS"),
+                new Dependency("FragInputs.tangentToWorld",     "Varyings.normalWS"),
+                new Dependency("FragInputs.texCoord0",          "Varyings.texCoord0"),
+                new Dependency("FragInputs.texCoord1",          "Varyings.texCoord1"),
+                new Dependency("FragInputs.texCoord2",          "Varyings.texCoord2"),
+                new Dependency("FragInputs.texCoord3",          "Varyings.texCoord3"),
+                new Dependency("FragInputs.color",              "Varyings.color"),
+                new Dependency("FragInputs.isFrontFace",        "Varyings.cullFace"),
             };
         };
 
@@ -245,22 +255,22 @@ namespace UnityEditor.Rendering.Universal
 
             public static Dependency[] dependencies = new Dependency[]
             {                                                                       // TODO: NOCHECKIN: these dependencies are not correct for vertex pass
-                new Dependency("VertexDescriptionInputs.ObjectSpaceNormal",         "AttributesMesh.normalOS"),
-                new Dependency("VertexDescriptionInputs.WorldSpaceNormal",          "AttributesMesh.normalOS"),
+                new Dependency("VertexDescriptionInputs.ObjectSpaceNormal",         "Attributes.normalOS"),
+                new Dependency("VertexDescriptionInputs.WorldSpaceNormal",          "Attributes.normalOS"),
                 new Dependency("VertexDescriptionInputs.ViewSpaceNormal",           "VertexDescriptionInputs.WorldSpaceNormal"),
 
-                new Dependency("VertexDescriptionInputs.ObjectSpaceTangent",        "AttributesMesh.tangentOS"),
-                new Dependency("VertexDescriptionInputs.WorldSpaceTangent",         "AttributesMesh.tangentOS"),
+                new Dependency("VertexDescriptionInputs.ObjectSpaceTangent",        "Attributes.tangentOS"),
+                new Dependency("VertexDescriptionInputs.WorldSpaceTangent",         "Attributes.tangentOS"),
                 new Dependency("VertexDescriptionInputs.ViewSpaceTangent",          "VertexDescriptionInputs.WorldSpaceTangent"),
 
-                new Dependency("VertexDescriptionInputs.ObjectSpaceBiTangent",      "AttributesMesh.normalOS"),
-                new Dependency("VertexDescriptionInputs.ObjectSpaceBiTangent",      "AttributesMesh.tangentOS"),
+                new Dependency("VertexDescriptionInputs.ObjectSpaceBiTangent",      "Attributes.normalOS"),
+                new Dependency("VertexDescriptionInputs.ObjectSpaceBiTangent",      "Attributes.tangentOS"),
                 new Dependency("VertexDescriptionInputs.WorldSpaceBiTangent",       "VertexDescriptionInputs.ObjectSpaceBiTangent"),
                 new Dependency("VertexDescriptionInputs.ViewSpaceBiTangent",        "VertexDescriptionInputs.WorldSpaceBiTangent"),
 
-                new Dependency("VertexDescriptionInputs.ObjectSpacePosition",       "AttributesMesh.positionOS"),
-                new Dependency("VertexDescriptionInputs.WorldSpacePosition",        "AttributesMesh.positionOS"),
-                new Dependency("VertexDescriptionInputs.AbsoluteWorldSpacePosition","AttributesMesh.positionOS"),
+                new Dependency("VertexDescriptionInputs.ObjectSpacePosition",       "Attributes.positionOS"),
+                new Dependency("VertexDescriptionInputs.WorldSpacePosition",        "Attributes.positionOS"),
+                new Dependency("VertexDescriptionInputs.AbsoluteWorldSpacePosition","Attributes.positionOS"),
                 new Dependency("VertexDescriptionInputs.ViewSpacePosition",         "VertexDescriptionInputs.WorldSpacePosition"),
 
                 new Dependency("VertexDescriptionInputs.WorldSpaceViewDirection",   "VertexDescriptionInputs.WorldSpacePosition"),
@@ -272,11 +282,11 @@ namespace UnityEditor.Rendering.Universal
                 new Dependency("VertexDescriptionInputs.TangentSpaceViewDirection", "VertexDescriptionInputs.WorldSpaceNormal"),
 
                 new Dependency("VertexDescriptionInputs.ScreenPosition",            "VertexDescriptionInputs.WorldSpacePosition"),
-                new Dependency("VertexDescriptionInputs.uv0",                       "AttributesMesh.uv0"),
-                new Dependency("VertexDescriptionInputs.uv1",                       "AttributesMesh.uv1"),
-                new Dependency("VertexDescriptionInputs.uv2",                       "AttributesMesh.uv2"),
-                new Dependency("VertexDescriptionInputs.uv3",                       "AttributesMesh.uv3"),
-                new Dependency("VertexDescriptionInputs.VertexColor",               "AttributesMesh.color"),
+                new Dependency("VertexDescriptionInputs.uv0",                       "Attributes.uv0"),
+                new Dependency("VertexDescriptionInputs.uv1",                       "Attributes.uv1"),
+                new Dependency("VertexDescriptionInputs.uv2",                       "Attributes.uv2"),
+                new Dependency("VertexDescriptionInputs.uv3",                       "Attributes.uv3"),
+                new Dependency("VertexDescriptionInputs.VertexColor",               "Attributes.color"),
             };
         };
 
@@ -909,7 +919,7 @@ namespace UnityEditor.Rendering.Universal
         static List<Dependency[]> k_Dependencies = new List<Dependency[]>()
         {
             UniversalShaderStructs.FragInputs.dependencies,
-            UniversalShaderStructs.VaryingsMeshToPS.standardDependencies,
+            UniversalShaderStructs.Varyings.standardDependencies,
             UniversalShaderStructs.SurfaceDescriptionInputs.dependencies,
             UniversalShaderStructs.VertexDescriptionInputs.dependencies
         };

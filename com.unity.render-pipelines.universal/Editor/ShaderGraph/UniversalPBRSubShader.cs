@@ -22,6 +22,7 @@ namespace UnityEditor.Rendering.Universal
             LightMode = "UniversalForward",
             TemplateName = "universalPBRTemplateAF.template",
             MaterialName = "PBR",
+            ShaderPassName = "FORWARD",
             PixelShaderSlots = new List<int>
             {
                 PBRMasterNode.AlbedoSlotId,
@@ -48,16 +49,21 @@ namespace UnityEditor.Rendering.Universal
             },
             RequiredFields = new List<string>()
             {
-                "VaryingsMeshToPS.positionWS",
-                "VaryingsMeshToPS.normalWS",
-                "VaryingsMeshToPS.tangentWS", //needed for vertex lighting
-                "VaryingsMeshToPS.texCoord1", //fog and vertex lighting, vert input is dependency
-                "VaringsMeshToPS.texCoord2", //shadow coord, vert input is dependency
+                "Varyings.positionWS",
+                "Varyings.normalWS",
+                "Varyings.tangentWS", //needed for vertex lighting
+                "Varyings.bitangentWS",
+                "Varyings.viewDirectionWS",
+                "Varyings.lightmapUV",
+                "Varyings.sh",
+                "Varyings.fogFactorAndVertexLight", //fog and vertex lighting, vert input is dependency
+                "Varyings.shadowCoord", //shadow coord, vert input is dependency
+                "features.lighting",
             },
             ExtraDefines = new List<string>(),
             Includes = new List<string>()
             {
-                "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/DepthOnlyPass.hlsl\"",
+                "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/PBRForwardPass.hlsl\"",
             },
             OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
             {
@@ -70,6 +76,8 @@ namespace UnityEditor.Rendering.Universal
                     pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
                 if (requirements.requiresCameraOpaqueTexture)
                     pass.ExtraDefines.Add("#define REQUIRE_OPAQUE_TEXTURE");
+                if (masterNode.model == PBRMasterNode.Model.Specular)
+                    pass.ExtraDefines.Add("#define _SPECULAR_SETUP");
             }
         };
 
@@ -77,6 +85,7 @@ namespace UnityEditor.Rendering.Universal
         {
             Name = "UniversalForward",
             TemplateName = "universalPBRForwardPass.template",
+            ShaderPassName = "FORWARD",
             PixelShaderSlots = new List<int>()
             {
                 PBRMasterNode.AlbedoSlotId,
@@ -221,6 +230,7 @@ namespace UnityEditor.Rendering.Universal
             MaterialName = "PBR",
             ZWriteOverride = "ZWrite On",
             ColorMaskOverride = "ColorMask 0",
+            ShaderPassName = "DEPTHONLY",
             PixelShaderSlots = new List<int>()
             {
                 PBRMasterNode.AlphaSlotId,
@@ -257,6 +267,7 @@ namespace UnityEditor.Rendering.Universal
             MaterialName = "PBR",
             ZWriteOverride = "ZWrite On",
             ZTestOverride = "ZTest LEqual",
+            ShaderPassName = "SHADOWCASTER",
             PixelShaderSlots = new List<int>()
             {
                 PBRMasterNode.AlphaSlotId,
@@ -268,9 +279,7 @@ namespace UnityEditor.Rendering.Universal
             },
             RequiredFields = new List<string>()
             {
-                "VaryingsMeshToPS.positionWS",
-                "VaryingsMeshToPS.normalWS",
-                "VaryingsMeshToPS.tangentWS", //fields needed for shadow bias in vert function
+                "Attributes.normalOS",
             },
             ExtraDefines = new List<string>(),
             Includes = new List<string>()
@@ -285,14 +294,17 @@ namespace UnityEditor.Rendering.Universal
         };
         Pass m_LitMetaPass = new Pass()
         {
-            Name = "meta",
+            Name = "Meta",
             LightMode = "Meta",
             TemplateName = "universalPBRTemplateAF.template",
             MaterialName = "PBR",
             ZWriteOverride = "ZWrite On",
             ZTestOverride = "ZTest LEqual",
+            ShaderPassName = "META",
             PixelShaderSlots = new List<int>()
             {
+                PBRMasterNode.AlbedoSlotId,
+                PBRMasterNode.EmissionSlotId,
                 PBRMasterNode.AlphaSlotId,
                 PBRMasterNode.AlphaThresholdSlotId
             },
@@ -302,7 +314,7 @@ namespace UnityEditor.Rendering.Universal
             },
             RequiredFields = new List<string>()
             {
-                "AttributesMesh.uv1", //needed for meta vertex position
+                "Attributes.uv1", //needed for meta vertex position
             },
             ExtraDefines = new List<string>(),
             Includes = new List<string>()
@@ -412,7 +424,7 @@ namespace UnityEditor.Rendering.Universal
                 GenerateShaderPassUnlit(pbrMasterNode, m_ShadowCasterPass, mode, subShader, sourceAssetDependencyPaths);
                 GenerateShaderPassUnlit(pbrMasterNode, m_DepthOnlyPass, mode, subShader, sourceAssetDependencyPaths);
                 GenerateShaderPassUnlit(pbrMasterNode, m_ForwardPassMetallic, mode, subShader, sourceAssetDependencyPaths);
-                //GenerateShaderPassUnlit(pbrMasterNode, m_LitMetaPass, mode, subShader, sourceAssetDependencyPaths);
+                GenerateShaderPassUnlit(pbrMasterNode, m_LitMetaPass, mode, subShader, sourceAssetDependencyPaths);
             }
             subShader.Deindent();
             subShader.AddShaderChunk("}", true);

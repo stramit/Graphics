@@ -26,9 +26,21 @@ Pass
 
     // -------------------------------------
     // Unity defined keywords
+     #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
+    #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+    #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+    #pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
+    #pragma multi_compile _ _SHADOWS_SOFT
+    #pragma multi_compile _ _MIXED_LIGHTING_SUBTRACTIVE
     #pragma multi_compile _ DIRLIGHTMAP_COMBINED
     #pragma multi_compile _ LIGHTMAP_ON
     #pragma multi_compile_fog
+
+    #ifdef LIGHTMAP_ON
+        #define USE_LIGHTMAP
+    #else
+        #define USE_SH
+    #endif
 
     //--------------------------------------
     // GPU Instancing
@@ -53,22 +65,25 @@ Pass
     $splice(Defines)
 
     // this translates the new dependency tracker into the old preprocessor definitions for the existing HDRP shader code
-    $AttributesMesh.normalOS:               #define ATTRIBUTES_NEED_NORMAL
-    $AttributesMesh.tangentOS:              #define ATTRIBUTES_NEED_TANGENT
-    $AttributesMesh.uv0:                    #define ATTRIBUTES_NEED_TEXCOORD0
-    $AttributesMesh.uv1:                    #define ATTRIBUTES_NEED_TEXCOORD1
-    $AttributesMesh.uv2:                    #define ATTRIBUTES_NEED_TEXCOORD2
-    $AttributesMesh.uv3:                    #define ATTRIBUTES_NEED_TEXCOORD3
-    $AttributesMesh.color:                  #define ATTRIBUTES_NEED_COLOR
-    $VaryingsMeshToPS.positionWS:           #define VARYINGS_NEED_POSITION_WS 
-    $VaryingsMeshToPS.normalWS:             #define VARYINGS_NEED_TANGENT_TO_WORLD
-    $VaryingsMeshToPS.texCoord0:            #define VARYINGS_NEED_TEXCOORD0
-    $VaryingsMeshToPS.texCoord1:            #define VARYINGS_NEED_TEXCOORD1
-    $VaryingsMeshToPS.texCoord2:            #define VARYINGS_NEED_TEXCOORD2
-    $VaryingsMeshToPS.texCoord3:            #define VARYINGS_NEED_TEXCOORD3
-    $VaryingsMeshToPS.color:                #define VARYINGS_NEED_COLOR
-    $VaryingsMeshToPS.cullFace:             #define VARYINGS_NEED_CULLFACE
-    $features.modifyMesh:                   #define HAVE_MESH_MODIFICATION
+    $Attributes.normalOS:               #define ATTRIBUTES_NEED_NORMAL
+    $Attributes.tangentOS:              #define ATTRIBUTES_NEED_TANGENT
+    $Attributes.uv0:                    #define ATTRIBUTES_NEED_TEXCOORD0
+    $Attributes.uv1:                    #define ATTRIBUTES_NEED_TEXCOORD1
+    $Attributes.uv2:                    #define ATTRIBUTES_NEED_TEXCOORD2
+    $Attributes.uv3:                    #define ATTRIBUTES_NEED_TEXCOORD3
+    $Attributes.color:                  #define ATTRIBUTES_NEED_COLOR
+    $Varyings.positionWS:               #define VARYINGS_NEED_POSITION_WS 
+    $Varyings.normalWS:                 #define VARYINGS_NEED_TANGENT_TO_WORLD
+    $Varyings.texCoord0:                #define VARYINGS_NEED_TEXCOORD0
+    $Varyings.texCoord1:                #define VARYINGS_NEED_TEXCOORD1
+    $Varyings.texCoord2:                #define VARYINGS_NEED_TEXCOORD2
+    $Varyings.texCoord3:                #define VARYINGS_NEED_TEXCOORD3
+    $Varyings.color:                    #define VARYINGS_NEED_COLOR
+    $Varyings.viewDirectionWS:          #define VARYINGS_NEED_VIEWDIRECTION_WS
+    $Varyings.bitangentWS:              #define VARYINGS_NEED_BITANGENT_WS
+    $Varyings.fogFactorAndVertexLight:  #define VARYINGS_NEED_FOG_AND_VERTEX_LIGHT
+    $Varyings.cullFace:                 #define VARYINGS_NEED_CULLFACE
+    $features.modifyMesh:               #define HAVE_MESH_MODIFICATION
 
     // Lighting include is needed because of GI
     #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -78,14 +93,12 @@ Pass
     #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
     #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
 	#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
-    #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateGenCode/FragInputs.hlsl"
 
     //-------------------------------------------------------------------------------------
     // Interpolator Packing And Struct Declarations
     //-------------------------------------------------------------------------------------
-    $buildType(AttributesMesh)
-    $buildType(VaryingsMeshToPS)
-    $buildType(VaryingsMeshToDS)
+    $buildType(Attributes)
+    $buildType(Varyings)
     //-------------------------------------------------------------------------------------
     // End Interpolator Packing And Struct Declarations
     //-------------------------------------------------------------------------------------
@@ -98,43 +111,11 @@ Pass
     // End graph generated code
     //-------------------------------------------------------------------------------------
 
-$features.modifyMesh:   $include("VertexAnimation.template.hlsl")
+$features.modifyMesh: $include("VertexAnimation.template.hlsl")
 
-$include("SharedCode.template.hlsl")
+$include("BuildSurfaceDescriptionInputs.template.hlsl")
 
-
-    void BuildSurfaceData(FragInputs fragInputs, inout SurfaceDescription surfaceDescription, float3 V, out SurfaceData surfaceData)
-    {
-        // setup defaults -- these are used if the graph doesn't output a value
-        ZERO_INITIALIZE(SurfaceData, surfaceData);
-
-        // copy across graph values, if defined
-        $SurfaceDescription.Albedo: surfaceData.albedo = surfaceDescription.Albedo;
-        $SurfaceDescription.Metallic: surfaceData.metallic = surfaceDescription.Metallic;
-        $SurfaceDescription.Specular: surfaceData.specular = surfaceDescription.Specular;
-        $SurfaceDescription.Smoothness: surfaceData.smoothness = surfaceDescription.Smoothness;
-        $SurfaceDescription.Occlusion: surfaceData.occlusion = surfaceDescription.Occlusion;
-        $SurfaceDescription.Emission: surfaceData.emission = surfaceDescription.Emission;
-        $SurfaceDescription.Alpha: surfaceData.alpha = surfaceDescription.Alpha;
-    }
-
-    void GetSurfaceData(FragInputs fragInputs, float3 V, out SurfaceData surfaceData)
-    {
-        SurfaceDescriptionInputs surfaceDescriptionInputs = FragInputsToSurfaceDescriptionInputs(fragInputs, V);
-        SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
-
-        // Perform alpha test very early to save performance (a killed pixel will not sample textures)
-        // TODO: split graph evaluation to grab just alpha dependencies first? tricky..
-        #if _AlphaClip
-		$AlphaClip: clip(surfaceDescription.Alpha - surfaceDescription.AlphaClipThreshold);
-        #endif
-
-        BuildSurfaceData(fragInputs, surfaceDescription, V, surfaceData);
-
-        // Builtin Data
-        //ZERO_INITIALIZE(BuiltinData, builtinData); // No call to InitBuiltinData as we don't have any lighting
-        //builtinData.opacity = surfaceDescription.Alpha;
-    }
+$features.lighting: $include("BuildInputData.template.hlsl")
     
     //-------------------------------------------------------------------------------------
     // Pass Includes

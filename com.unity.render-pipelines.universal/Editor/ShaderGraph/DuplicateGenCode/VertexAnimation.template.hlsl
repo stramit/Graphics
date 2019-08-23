@@ -1,5 +1,5 @@
 
-VertexDescriptionInputs AttributesMeshToVertexDescriptionInputs(AttributesMesh input)
+VertexDescriptionInputs AttributesMeshToVertexDescriptionInputs(Attributes input)
 {
     VertexDescriptionInputs output;
     ZERO_INITIALIZE(VertexDescriptionInputs, output);
@@ -36,7 +36,7 @@ VertexDescriptionInputs AttributesMeshToVertexDescriptionInputs(AttributesMesh i
     return output;
 }
 
-AttributesMesh ApplyMeshModification(AttributesMesh input, float3 timeParameters)
+AttributesMesh ApplyMeshModification(Attributes input, float3 timeParameters)
 {
     // build graph inputs
     VertexDescriptionInputs vertexDescriptionInputs = AttributesMeshToVertexDescriptionInputs(input);

@@ -1,4 +1,4 @@
-﻿struct AttributesMesh
+﻿struct Attributes
 {
     float3 positionOS   : POSITION;
 #ifdef ATTRIBUTES_NEED_NORMAL
@@ -26,7 +26,7 @@
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
-struct VaryingsMeshToPS
+struct Varyings
 {
     float4 positionCS;
 #ifdef VARYINGS_NEED_POSITION_WS
@@ -56,7 +56,7 @@ struct VaryingsMeshToPS
     UNITY_VERTEX_OUTPUT_STEREO
 };
 
-struct PackedVaryingsMeshToPS
+struct PackedVaryings
 {
     float4 positionCS : SV_Position;
 
@@ -95,9 +95,9 @@ struct PackedVaryingsMeshToPS
 };
 
 // Functions to pack data to use as few interpolator as possible, the ShaderGraph should generate these functions
-PackedVaryingsMeshToPS PackVaryingsMeshToPS(VaryingsMeshToPS input)
+PackedVaryings PackVaryings(Varyings input)
 {
-    PackedVaryingsMeshToPS output;
+    PackedVaryings output;
 
     UNITY_TRANSFER_INSTANCE_ID(input, output);
 
@@ -132,7 +132,7 @@ PackedVaryingsMeshToPS PackVaryingsMeshToPS(VaryingsMeshToPS input)
     return output;
 }
 
-FragInputs UnpackVaryingsMeshToFragInputs(PackedVaryingsMeshToPS input)
+FragInputs UnpackVaryingsMeshToFragInputs(PackedVaryings input)
 {
     FragInputs output;
     ZERO_INITIALIZE(FragInputs, output);

@@ -333,24 +333,17 @@ namespace UnityEditor.ShaderGraph
                         string fieldType = GetFieldType(field, out floatVectorCount);
                         string conditional = GetFieldConditional(field);
 
-                        if ((semanticString != null) || (conditional != null) || (floatVectorCount == 0))
+                        if (conditional != null)
                         {
-                            // not a packed value
-                            if (conditional != null)
-                            {
-                                structEnd.AddShaderChunk("#if " + conditional);
-                                packer.AddShaderChunk("#if " + conditional);
-                                unpacker.AddShaderChunk("#if " + conditional);
-                            }
+                            structEnd.AddShaderChunk("#if " + conditional);
+                            packer.AddShaderChunk("#if " + conditional);
+                            unpacker.AddShaderChunk("#if " + conditional);
+                        }
+                        if ((semanticString != null) || (floatVectorCount == 0))
+                        {
                             structEnd.AddShaderChunk(fieldType + " " + field.Name + semanticString + "; // unpacked");
                             packer.AddShaderChunk("output." + field.Name + " = input." + field.Name + ";");
                             unpacker.AddShaderChunk("output." + field.Name + " = input." + field.Name + ";");
-                            if (conditional != null)
-                            {
-                                structEnd.AddShaderChunk("#endif // " + conditional);
-                                packer.AddShaderChunk("#endif // " + conditional);
-                                unpacker.AddShaderChunk("#endif // " + conditional);
-                            }
                         }
                         else
                         {
@@ -377,6 +370,12 @@ namespace UnityEditor.ShaderGraph
                             string packedChannels = GetChannelSwizzle(firstChannel, floatVectorCount);
                             packer.AddShaderChunk(string.Format("output.interp{0:00}.{1} = input.{2};", interpIndex, packedChannels, field.Name));
                             unpacker.AddShaderChunk(string.Format("output.{0} = input.interp{1:00}.{2};", field.Name, interpIndex, packedChannels));
+                        }
+                        if (conditional != null)
+                        {
+                            structEnd.AddShaderChunk("#endif // " + conditional);
+                            packer.AddShaderChunk("#endif // " + conditional);
+                            unpacker.AddShaderChunk("#endif // " + conditional);
                         }
                     }
                 }
