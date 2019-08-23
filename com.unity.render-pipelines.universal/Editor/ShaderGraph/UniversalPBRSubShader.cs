@@ -60,6 +60,8 @@ namespace UnityEditor.Rendering.Universal
                 "Varyings.fogFactorAndVertexLight", //fog and vertex lighting, vert input is dependency
                 "Varyings.shadowCoord", //shadow coord, vert input is dependency
                 "features.lighting",
+                "features.instancing",
+                "features.3dRender",
             },
             ExtraDefines = new List<string>(),
             Includes = new List<string>()
@@ -195,6 +197,10 @@ namespace UnityEditor.Rendering.Universal
             ExtraDefines = new List<string>()
             {
             },
+            RequiredFields = new List<string>()
+            {
+                "features.instancing",
+            },
             Includes = new List<string>()
             {
                 "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/DepthOnlyPass.hlsl\"",
@@ -232,6 +238,7 @@ namespace UnityEditor.Rendering.Universal
             RequiredFields = new List<string>()
             {
                 "Attributes.normalOS",
+                "features.instancing",
             },
             ExtraDefines = new List<string>(),
             Includes = new List<string>()
@@ -372,7 +379,7 @@ namespace UnityEditor.Rendering.Universal
                 var tagsBuilder = new ShaderStringBuilder(0);
                 surfaceTags.GetTags(tagsBuilder, "UniversalPipeline");
                 subShader.AddShaderChunk(tagsBuilder.ToString());
-                
+
                 GenerateShaderPassUnlit(pbrMasterNode, m_ForwardPass, mode, subShader, sourceAssetDependencyPaths);
                 GenerateShaderPassUnlit(pbrMasterNode, m_ShadowCasterPass, mode, subShader, sourceAssetDependencyPaths);
                 GenerateShaderPassUnlit(pbrMasterNode, m_DepthOnlyPass, mode, subShader, sourceAssetDependencyPaths);

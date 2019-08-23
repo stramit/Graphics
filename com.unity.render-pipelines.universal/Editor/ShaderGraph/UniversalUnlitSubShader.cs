@@ -36,6 +36,11 @@ namespace UnityEditor.Rendering.Universal
                 UnlitMasterNode.PositionSlotId
             },
             ExtraDefines = new List<string>(),
+            RequiredFields = new List<string>()
+            {
+                "features.instancing",
+                "features.3dRender",
+            },
             Includes = new List<string>()
             {
                 "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/UnlitForwardPass.hlsl\"",
@@ -74,6 +79,10 @@ namespace UnityEditor.Rendering.Universal
             ExtraDefines = new List<string>()
             {
             },
+            RequiredFields = new List<string>()
+            {
+                "features.instancing",
+            },
             Includes = new List<string>()
             {
                 "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/DepthOnlyPass.hlsl\"",
@@ -111,6 +120,7 @@ namespace UnityEditor.Rendering.Universal
             RequiredFields = new List<string>()
             {
                 "Attributes.normalOS", 
+                "features.instancing",
             },
             ExtraDefines = new List<string>(),
             Includes = new List<string>()
