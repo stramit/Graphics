@@ -16,9 +16,9 @@ namespace UnityEditor.Rendering.Universal
     [FormerName("UnityEditor.Rendering.LWRP.LightWeightPBRSubShader")]
     class UniversalPBRSubShader : IPBRSubShader
     {
-        Pass m_ForwardPassMetallic = new Pass
+        Pass m_ForwardPass = new Pass
         {
-            Name = "Universal Forward Metallic",
+            Name = "Universal Forward",
             LightMode = "UniversalForward",
             TemplateName = "universalPBRTemplateAF.template",
             MaterialName = "PBR",
@@ -29,6 +29,7 @@ namespace UnityEditor.Rendering.Universal
                 PBRMasterNode.NormalSlotId,
                 PBRMasterNode.EmissionSlotId,
                 PBRMasterNode.MetallicSlotId,
+                PBRMasterNode.SpecularSlotId,
                 PBRMasterNode.SmoothnessSlotId,
                 PBRMasterNode.OcclusionSlotId,
                 PBRMasterNode.AlphaSlotId,
@@ -80,55 +81,6 @@ namespace UnityEditor.Rendering.Universal
                     pass.ExtraDefines.Add("#define _SPECULAR_SETUP");
             }
         };
-
-        Pass m_ForwardPassSpecular = new Pass()
-        {
-            Name = "UniversalForward",
-            TemplateName = "universalPBRForwardPass.template",
-            ShaderPassName = "FORWARD",
-            PixelShaderSlots = new List<int>()
-            {
-                PBRMasterNode.AlbedoSlotId,
-                PBRMasterNode.NormalSlotId,
-                PBRMasterNode.EmissionSlotId,
-                PBRMasterNode.SpecularSlotId,
-                PBRMasterNode.SmoothnessSlotId,
-                PBRMasterNode.OcclusionSlotId,
-                PBRMasterNode.AlphaSlotId,
-                PBRMasterNode.AlphaThresholdSlotId
-            },
-            VertexShaderSlots = new List<int>()
-            {
-                PBRMasterNode.PositionSlotId
-            },
-            Requirements = new ShaderGraphRequirements()
-            {
-                requiresNormal = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresTangent = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresBitangent = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresPosition = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresViewDir = UniversalSubShaderUtilities.k_PixelCoordinateSpace,
-                requiresMeshUVs = new List<UVChannel>() { UVChannel.UV1 },
-            },
-            ExtraDefines = new List<string>(),
-            OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
-            {
-                var masterNode = node as PBRMasterNode;
-
-                pass.ExtraDefines.Add("#define _SPECULAR_SETUP 1");
-                if (masterNode.IsSlotConnected(PBRMasterNode.NormalSlotId))
-                    pass.ExtraDefines.Add("#define _NORMALMAP 1");
-                if (masterNode.IsSlotConnected(PBRMasterNode.AlphaThresholdSlotId))
-                    pass.ExtraDefines.Add("#define _AlphaClip 1");
-                if (masterNode.surfaceType == SurfaceType.Transparent && masterNode.alphaMode == AlphaMode.Premultiply)
-                    pass.ExtraDefines.Add("#define _ALPHAPREMULTIPLY_ON 1");
-                if (requirements.requiresDepthTexture)
-                    pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
-                if (requirements.requiresCameraOpaqueTexture)
-                    pass.ExtraDefines.Add("#define REQUIRE_OPAQUE_TEXTURE");
-            }
-        };
-
         Pass m_ForwardPassMetallic2D = new Pass
         {
             Name = "Universal2D",
@@ -421,9 +373,9 @@ namespace UnityEditor.Rendering.Universal
                 surfaceTags.GetTags(tagsBuilder, "UniversalPipeline");
                 subShader.AddShaderChunk(tagsBuilder.ToString());
                 
+                GenerateShaderPassUnlit(pbrMasterNode, m_ForwardPass, mode, subShader, sourceAssetDependencyPaths);
                 GenerateShaderPassUnlit(pbrMasterNode, m_ShadowCasterPass, mode, subShader, sourceAssetDependencyPaths);
                 GenerateShaderPassUnlit(pbrMasterNode, m_DepthOnlyPass, mode, subShader, sourceAssetDependencyPaths);
-                GenerateShaderPassUnlit(pbrMasterNode, m_ForwardPassMetallic, mode, subShader, sourceAssetDependencyPaths);
                 GenerateShaderPassUnlit(pbrMasterNode, m_LitMetaPass, mode, subShader, sourceAssetDependencyPaths);
             }
             subShader.Deindent();

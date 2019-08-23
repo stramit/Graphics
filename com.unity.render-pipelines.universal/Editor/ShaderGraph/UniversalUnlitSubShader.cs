@@ -22,8 +22,9 @@ namespace UnityEditor.Rendering.Universal
         {
             Name = "UnlitPass",
             LightMode = "UniversalForward",
-            TemplateName = "universalUnlitPassAF.template",
+            TemplateName = "universalPBRTemplateAF.template",
             MaterialName = "Unlit",
+            ShaderPassName = "FORWARD_UNLIT",
             PixelShaderSlots = new List<int>
             {
                 UnlitMasterNode.ColorSlotId,
@@ -56,10 +57,11 @@ namespace UnityEditor.Rendering.Universal
         {
             Name = "DepthOnly",
             LightMode = "DepthOnly",
-            TemplateName = "universalUnlitPassAF.template",
+            TemplateName = "universalPBRTemplateAF.template",
             MaterialName = "Unlit",
             ZWriteOverride = "ZWrite On",
             ColorMaskOverride = "ColorMask 0",
+            ShaderPassName = "DEPTHONLY",
             PixelShaderSlots = new List<int>()
             {
                 PBRMasterNode.AlphaSlotId,
@@ -92,10 +94,11 @@ namespace UnityEditor.Rendering.Universal
         {
             Name = "ShadowCaster",
             LightMode = "ShadowCaster",
-            TemplateName = "universalUnlitPassAF.template",
+            TemplateName = "universalPBRTemplateAF.template",
             MaterialName = "Unlit",
             ZWriteOverride = "ZWrite On",
             ZTestOverride = "ZTest LEqual",
+            ShaderPassName = "SHADOWCASTER",
             PixelShaderSlots = new List<int>()
             {
                 PBRMasterNode.AlphaSlotId,
@@ -107,9 +110,7 @@ namespace UnityEditor.Rendering.Universal
             },
             RequiredFields = new List<string>()
             {
-                "VaryingsMeshToPS.positionWS",
-                "VaryingsMeshToPS.normalWS",
-                "VaryingsMeshToPS.tangentWS", //fields needed for shadow bias in vert function
+                "Attributes.normalOS", 
             },
             ExtraDefines = new List<string>(),
             Includes = new List<string>()

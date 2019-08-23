@@ -1,5 +1,5 @@
 
-VertexDescriptionInputs AttributesMeshToVertexDescriptionInputs(Attributes input)
+VertexDescriptionInputs AttributesToVertexDescriptionInputs(Attributes input)
 {
     VertexDescriptionInputs output;
     ZERO_INITIALIZE(VertexDescriptionInputs, output);
@@ -36,10 +36,10 @@ VertexDescriptionInputs AttributesMeshToVertexDescriptionInputs(Attributes input
     return output;
 }
 
-AttributesMesh ApplyMeshModification(Attributes input, float3 timeParameters)
+Attributes ApplyMeshModification(Attributes input, float3 timeParameters)
 {
     // build graph inputs
-    VertexDescriptionInputs vertexDescriptionInputs = AttributesMeshToVertexDescriptionInputs(input);
+    VertexDescriptionInputs vertexDescriptionInputs = AttributesToVertexDescriptionInputs(input);
     // Override time paramters with used one (This is required to correctly handle motion vector for vertex animation based on time)
     $VertexDescriptionInputs.TimeParameters: vertexDescriptionInputs.TimeParameters = timeParameters;
 

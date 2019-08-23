@@ -7,7 +7,8 @@ PackedVaryings vert(Attributes input)
 {
     Varyings output = (Varyings)0;
     output = BuildVaryings(input);
-    PackedVaryings packedOutput = PackVaryings(output);
+    PackedVaryings packedOutput = (PackedVaryings)0;
+    packedOutput = PackVaryings(output);
     return packedOutput;
 }
 
