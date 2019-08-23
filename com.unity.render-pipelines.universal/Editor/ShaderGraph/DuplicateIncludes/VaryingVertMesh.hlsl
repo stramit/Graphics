@@ -36,12 +36,15 @@ Varyings BuildVaryings(Attributes input)
     output.positionWS = positionWS;
 #endif
     
-#ifdef VARYINGS_NEED_TANGENT_TO_WORLD
+#ifdef VARYINGS_NEED_NORMAL_WS
     #if !SHADER_HINT_NICE_QUALITY
         output.normalWS = normalize(normalWS);
     #else
         output.normalWS = normalWS;
-    #endif
+    #endif    
+#endif
+
+#ifdef VARYINGS_NEED_TANGENT_WS
     output.tangentWS = normalize(tangentWS);
 #endif
 
