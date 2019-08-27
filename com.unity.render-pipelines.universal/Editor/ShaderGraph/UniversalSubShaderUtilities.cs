@@ -69,6 +69,8 @@ namespace UnityEditor.Rendering.Universal
                 new Dependency("Varyings.positionWS",       "Attributes.positionOS"),
                 new Dependency("Varyings.normalWS",         "Attributes.normalOS"),
                 new Dependency("Varyings.tangentWS",        "Attributes.tangentOS"),
+                new Dependency("Varyings.bitangentWS",      "Attributes.tangentOS"),
+                new Dependency("Varyings.bitangentWS",      "Attributes.normalOS"),
                 new Dependency("Varyings.texCoord0",        "Attributes.uv0"),
                 new Dependency("Varyings.texCoord1",        "Attributes.uv1"),
                 new Dependency("Varyings.texCoord2",        "Attributes.uv2"),
@@ -118,24 +120,24 @@ namespace UnityEditor.Rendering.Universal
 
             public static Dependency[] dependencies = new Dependency[]
             {
-                new Dependency("SurfaceDescriptionInputs.WorldSpaceNormal",          "FragInputs.tangentToWorld"),
+                new Dependency("SurfaceDescriptionInputs.WorldSpaceNormal",          "Varyings.normalWS"),
                 new Dependency("SurfaceDescriptionInputs.ObjectSpaceNormal",         "SurfaceDescriptionInputs.WorldSpaceNormal"),
                 new Dependency("SurfaceDescriptionInputs.ViewSpaceNormal",           "SurfaceDescriptionInputs.WorldSpaceNormal"),
 
-                new Dependency("SurfaceDescriptionInputs.WorldSpaceTangent",         "FragInputs.tangentToWorld"),
+                new Dependency("SurfaceDescriptionInputs.WorldSpaceTangent",         "Varyings.tangentWS"),
                 new Dependency("SurfaceDescriptionInputs.ObjectSpaceTangent",        "SurfaceDescriptionInputs.WorldSpaceTangent"),
                 new Dependency("SurfaceDescriptionInputs.ViewSpaceTangent",          "SurfaceDescriptionInputs.WorldSpaceTangent"),
 
-                new Dependency("SurfaceDescriptionInputs.WorldSpaceBiTangent",       "FragInputs.tangentToWorld"),
+                new Dependency("SurfaceDescriptionInputs.WorldSpaceBiTangent",       "Varyings.bitangentWS"),
                 new Dependency("SurfaceDescriptionInputs.ObjectSpaceBiTangent",      "SurfaceDescriptionInputs.WorldSpaceBiTangent"),
                 new Dependency("SurfaceDescriptionInputs.ViewSpaceBiTangent",        "SurfaceDescriptionInputs.WorldSpaceBiTangent"),
 
-                new Dependency("SurfaceDescriptionInputs.WorldSpacePosition",        "FragInputs.positionWS"),
-                new Dependency("SurfaceDescriptionInputs.AbsoluteWorldSpacePosition","FragInputs.positionWS"),
-                new Dependency("SurfaceDescriptionInputs.ObjectSpacePosition",       "FragInputs.positionWS"),
-                new Dependency("SurfaceDescriptionInputs.ViewSpacePosition",         "FragInputs.positionWS"),
+                new Dependency("SurfaceDescriptionInputs.WorldSpacePosition",        "Varyings.positionWS"),
+                new Dependency("SurfaceDescriptionInputs.AbsoluteWorldSpacePosition","Varyings.positionWS"),
+                new Dependency("SurfaceDescriptionInputs.ObjectSpacePosition",       "Varyings.positionWS"),
+                new Dependency("SurfaceDescriptionInputs.ViewSpacePosition",         "Varyings.positionWS"),
 
-                new Dependency("SurfaceDescriptionInputs.WorldSpaceViewDirection",   "FragInputs.positionWS"),                   // we build WorldSpaceViewDirection using FragInputs.positionWS in GetWorldSpaceNormalizeViewDir()
+                new Dependency("SurfaceDescriptionInputs.WorldSpaceViewDirection",   "Varyings.viewDirectionWS"),                   // we build WorldSpaceViewDirection using Varyings.positionWS in GetWorldSpaceNormalizeViewDir()
                 new Dependency("SurfaceDescriptionInputs.ObjectSpaceViewDirection",  "SurfaceDescriptionInputs.WorldSpaceViewDirection"),
                 new Dependency("SurfaceDescriptionInputs.ViewSpaceViewDirection",    "SurfaceDescriptionInputs.WorldSpaceViewDirection"),
                 new Dependency("SurfaceDescriptionInputs.TangentSpaceViewDirection", "SurfaceDescriptionInputs.WorldSpaceViewDirection"),
@@ -144,14 +146,14 @@ namespace UnityEditor.Rendering.Universal
                 new Dependency("SurfaceDescriptionInputs.TangentSpaceViewDirection", "SurfaceDescriptionInputs.WorldSpaceNormal"),
 
                 new Dependency("SurfaceDescriptionInputs.ScreenPosition",            "SurfaceDescriptionInputs.WorldSpacePosition"),
-                new Dependency("SurfaceDescriptionInputs.uv0",                       "FragInputs.texCoord0"),
-                new Dependency("SurfaceDescriptionInputs.uv1",                       "FragInputs.texCoord1"),
-                new Dependency("SurfaceDescriptionInputs.uv2",                       "FragInputs.texCoord2"),
-                new Dependency("SurfaceDescriptionInputs.uv3",                       "FragInputs.texCoord3"),
-                new Dependency("SurfaceDescriptionInputs.VertexColor",               "FragInputs.color"),
-                new Dependency("SurfaceDescriptionInputs.FaceSign",                  "FragInputs.isFrontFace"),
+                new Dependency("SurfaceDescriptionInputs.uv0",                       "Varyings.texCoord0"),
+                new Dependency("SurfaceDescriptionInputs.uv1",                       "Varyings.texCoord1"),
+                new Dependency("SurfaceDescriptionInputs.uv2",                       "Varyings.texCoord2"),
+                new Dependency("SurfaceDescriptionInputs.uv3",                       "Varyings.texCoord3"),
+                new Dependency("SurfaceDescriptionInputs.VertexColor",               "Varyings.color"),
+                new Dependency("SurfaceDescriptionInputs.FaceSign",                  "Varyings.isFrontFace"),
 
-                new Dependency("DepthOffset", "FragInputs.positionWS"),
+                new Dependency("DepthOffset", "Varyings.positionWS"),
             };
         };
 
