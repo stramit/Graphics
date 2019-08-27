@@ -87,6 +87,10 @@ Varyings BuildVaryings(Attributes input)
     output.bitangentWS = cross(normalWS, tangentWS.xyz) * tangentWS.w;
 #endif
 
+#ifdef VARYINGS_NEED_SCREENPOSITION
+    output.screenPosition = ComputeScreenPos(output.positionCS, _ProjectionParams.x);
+#endif
+
 #if defined(VARYINGS_NEED_LIGHTMAP_OR_SH)
     OUTPUT_LIGHTMAP_UV(input.uv1, unity_LightmapST, output.lightmapUV);
     OUTPUT_SH(normalWS, output.sh);

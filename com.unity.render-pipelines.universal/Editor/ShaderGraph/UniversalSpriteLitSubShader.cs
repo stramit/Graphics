@@ -1,137 +1,270 @@
-// using System;
-// using System.Collections.Generic;
-// using System.IO;
-// using System.Linq;
-// using UnityEditor;
-// using UnityEditor.Graphing;
-// using UnityEditor.ShaderGraph;
-// using UnityEngine.Rendering;
-// using UnityEngine.Rendering.Universal;
-// using UnityEditor.Rendering.Universal;
+using System;
+using System.Collections.Generic;
+using UnityEditor.ShaderGraph;
+using UnityEditor.ShaderGraph.Internal;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
+using UnityEditor.Rendering.Universal;
+using Data.Util;
 
-// namespace UnityEditor.Experimental.Rendering.Universal
-// {
-//     [Serializable]
-//     [FormerName("UnityEditor.Experimental.Rendering.LWRP.LightWeightSpriteLitSubShader")]
-//     class UniversalSpriteLitSubShader : ISpriteLitSubShader
-//     {
-//         Pass m_LitPass = new Pass
-//         {
-//             Name = "Lit Pass",
-//             TemplateName = "universalSpriteLitPass.template",
-//             PixelShaderSlots = new List<int>
-//             {
-//                 SpriteLitMasterNode.ColorSlotId,
-//                 SpriteLitMasterNode.MaskSlotId,
-//             },
-//             VertexShaderSlots = new List<int>()
-//             {
-//                 SpriteLitMasterNode.PositionSlotId,
-//             },
-//             Requirements = new ShaderGraphRequirements()
-//             {
-//                 requiresVertexColor = true,
-//                 requiresMeshUVs = new List<UVChannel>() { UVChannel.UV0 },
-//             },
-//             ExtraDefines = new List<string>(),
-//             OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
-//             {
-//                 var masterNode = node as SpriteUnlitMasterNode;
+namespace UnityEditor.Experimental.Rendering.Universal
+{
+    [Serializable]
+    [FormerName("UnityEditor.Experimental.Rendering.LWRP.LightWeightSpriteLitSubShader")]
+    class UniversalSpriteLitSubShader : ISpriteLitSubShader
+    {
+#region Passes
+        ShaderPass m_LitPass = new ShaderPass
+        {
+            // Definition
+            displayName = "Lit Pass",
+            referenceName = "SPRITE_LIT",
+            lightMode = "Universal2D",
+            mainInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/SpriteLitPass.hlsl",
+            useInPreview = true,
 
-//                 if (requirements.requiresDepthTexture)
-//                     pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
-//                 if (requirements.requiresCameraOpaqueTexture)
-//                     pass.ExtraDefines.Add("#define REQUIRE_OPAQUE_TEXTURE");
-//             }
-//         };
+            // Port mask
+            vertexPorts = new List<int>()
+            {
+                SpriteLitMasterNode.PositionSlotId,
+            },
+            pixelPorts = new List<int>
+            {
+                SpriteLitMasterNode.ColorSlotId,
+                SpriteLitMasterNode.MaskSlotId,
+            },
 
-//         Pass m_NormalPass = new Pass
-//         {
-//             Name = "Sprite Normal",
-//             TemplateName = "universalSpriteNormalPass.template",
-//             PixelShaderSlots = new List<int>
-//             {
-//                 SpriteLitMasterNode.ColorSlotId,
-//                 SpriteLitMasterNode.NormalSlotId
-//             },
-//             VertexShaderSlots = new List<int>()
-//             {
-//                 SpriteLitMasterNode.PositionSlotId
-//             },
-//             Requirements = new ShaderGraphRequirements()
-//             {
-//                 requiresVertexColor = true,
-//                 requiresTangent = NeededCoordinateSpace.World
-//             },
-//             ExtraDefines = new List<string>(),
-//             OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
-//             {
-//                 var masterNode = node as SpriteUnlitMasterNode;
+            // Required fields
+            requiredVaryings = new List<string>()
+            {
+                "Varyings.color",
+                "Varyings.texCoord0",
+                "Varyings.screenPosition",
+            },
+            
+            // Pass setup
+            includes = new List<string>()
+            {
+                "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl",
+                "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/LightingUtility.hlsl",
+            },
+            pragmas = new List<string>()
+            {
+                "prefer_hlslcc gles",
+                "exclude_renderers d3d11_9x",
+                "target 2.0",
+            },
+            keywords = new KeywordDescriptor[]
+            {
+                s_ETCExternalAlphaKeyword,
+                s_ShapeLightType0Keyword,
+                s_ShapeLightType1Keyword,
+                s_ShapeLightType2Keyword,
+                s_ShapeLightType3Keyword,
+            },
+        };
 
-//                 if (requirements.requiresDepthTexture)
-//                     pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
-//                 if (requirements.requiresCameraOpaqueTexture)
-//                     pass.ExtraDefines.Add("#define REQUIRE_OPAQUE_TEXTURE");
-//             }
-//         };
+        ShaderPass m_NormalPass = new ShaderPass
+        {
+            // Definition
+            displayName = "Sprite Normal",
+            referenceName = "SPRITE_NORMAL",
+            lightMode = "NormalsRendering",
+            mainInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/SpriteNormalPass.hlsl",
+            useInPreview = true,
 
-//         Pass m_ForwardPass = new Pass
-//         {
-//             Name = "Sprite Forward",
-//             TemplateName = "universalSpriteForwardPass.template",
-//             PixelShaderSlots = new List<int>
-//             {
-//                 SpriteLitMasterNode.ColorSlotId,
-//                 SpriteLitMasterNode.NormalSlotId
-//             },
-//             VertexShaderSlots = new List<int>()
-//             {
-//                 SpriteLitMasterNode.PositionSlotId
-//             },
-//             Requirements = new ShaderGraphRequirements()
-//             {
-//                 requiresVertexColor = true,
-//                 requiresMeshUVs = new List<UVChannel>() { UVChannel.UV0 }
-//             },
-//             ExtraDefines = new List<string>(),
-//             OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
-//             {
-//                 var masterNode = node as SpriteLitMasterNode;
+            // Port mask
+            vertexPorts = new List<int>()
+            {
+                SpriteLitMasterNode.PositionSlotId
+            },
+            pixelPorts = new List<int>
+            {
+                SpriteLitMasterNode.ColorSlotId,
+                SpriteLitMasterNode.NormalSlotId
+            },
 
-//                 if (requirements.requiresDepthTexture)
-//                     pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
-//                 if (requirements.requiresCameraOpaqueTexture)
-//                     pass.ExtraDefines.Add("#define REQUIRE_OPAQUE_TEXTURE");
-//             }
-//         };
+            // Required fields
+            requiredVaryings = new List<string>()
+            {
+                "Varyings.normalWS",
+                "Varyings.tangentWS",
+                "Varyings.bitangentWS",
+            },
 
-//         public int GetPreviewPassIndex() { return 0; }
+            // Pass setup
+            includes = new List<string>()
+            {
+                "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl",
+                "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/NormalsRenderingShared.hlsl"
+            },
+            pragmas = new List<string>()
+            {
+                "prefer_hlslcc gles",
+                "exclude_renderers d3d11_9x",
+                "target 2.0",
+            },
+        };
 
-//         public string GetSubshader(IMasterNode masterNode, GenerationMode mode, List<string> sourceAssetDependencyPaths = null)
-//         {
-//             if (sourceAssetDependencyPaths != null)
-//             {
-//                 // LightWeightSpriteLitSubShader.cs
-//                 sourceAssetDependencyPaths.Add(AssetDatabase.GUIDToAssetPath("62511ee827d14492a8c78ba0ef167e7f"));
-//             }
+        ShaderPass m_ForwardPass = new ShaderPass
+        {
+            // Definition
+            displayName = "Sprite Forward",
+            referenceName = "SPRITE_FORWARD",
+            lightMode = "UniversalForward",
+            mainInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/SpriteForwardPass.hlsl",
+            useInPreview = true,
 
-//             // Master Node data
-//             var litMasterNode = masterNode as SpriteLitMasterNode;
-//             var tags = ShaderGenerator.BuildMaterialTags(SurfaceType.Transparent);
-//             var options = ShaderGenerator.GetMaterialOptions(SurfaceType.Transparent, AlphaMode.Alpha, true);
+            // Port mask
+            vertexPorts = new List<int>()
+            {
+                SpriteLitMasterNode.PositionSlotId
+            },
+            pixelPorts = new List<int>
+            {
+                SpriteLitMasterNode.ColorSlotId,
+                SpriteLitMasterNode.NormalSlotId
+            },
 
-//             // Passes
-//             var passes = new Pass[] { m_LitPass, m_NormalPass, m_ForwardPass };
+            // Required fields
+            requiredVaryings = new List<string>()
+            {
+                "Varyings.color",
+                "Varyings.texCoord0",
+            },
+            
+            // Pass setup
+            includes = new List<string>()
+            {
+                "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl",
+            },
+            pragmas = new List<string>()
+            {
+                "prefer_hlslcc gles",
+                "exclude_renderers d3d11_9x",
+                "target 2.0",
+            },
+            keywords = new KeywordDescriptor[]
+            {
+                s_ETCExternalAlphaKeyword,
+            },
+        };
+#endregion
 
-//             return UniversalSubShaderUtilities.GetSubShader<SpriteLitMasterNode>(litMasterNode, tags, options, 
-//                 passes, mode, sourceAssetDependencyPaths: sourceAssetDependencyPaths);
-//         }
+#region Keywords
+        static KeywordDescriptor s_ETCExternalAlphaKeyword = new KeywordDescriptor()
+        {
+            displayName = "ETC External Alpha",
+            referenceName = "ETC1_EXTERNAL_ALPHA",
+            type = KeywordType.Boolean,
+            definition = KeywordDefinition.MultiCompile,
+            scope = KeywordScope.Global,
+        };
 
-//         public bool IsPipelineCompatible(RenderPipelineAsset renderPipelineAsset)
-//         {
-//             return renderPipelineAsset is UniversalRenderPipelineAsset;
-//         }
+        static KeywordDescriptor s_ShapeLightType0Keyword = new KeywordDescriptor()
+        {
+            displayName = "Shape Light Type 0",
+            referenceName = "USE_SHAPE_LIGHT_TYPE_0",
+            type = KeywordType.Boolean,
+            definition = KeywordDefinition.MultiCompile,
+            scope = KeywordScope.Global,
+        };
 
-//         public UniversalSpriteLitSubShader () { }
-//     }
-// }
+        static KeywordDescriptor s_ShapeLightType1Keyword = new KeywordDescriptor()
+        {
+            displayName = "Shape Light Type 1",
+            referenceName = "USE_SHAPE_LIGHT_TYPE_1",
+            type = KeywordType.Boolean,
+            definition = KeywordDefinition.MultiCompile,
+            scope = KeywordScope.Global,
+        };
+
+        static KeywordDescriptor s_ShapeLightType2Keyword = new KeywordDescriptor()
+        {
+            displayName = "Shape Light Type 2",
+            referenceName = "USE_SHAPE_LIGHT_TYPE_2",
+            type = KeywordType.Boolean,
+            definition = KeywordDefinition.MultiCompile,
+            scope = KeywordScope.Global,
+        };
+
+        static KeywordDescriptor s_ShapeLightType3Keyword = new KeywordDescriptor()
+        {
+            displayName = "Shape Light Type 3",
+            referenceName = "USE_SHAPE_LIGHT_TYPE_3",
+            type = KeywordType.Boolean,
+            definition = KeywordDefinition.MultiCompile,
+            scope = KeywordScope.Global,
+        };
+#endregion
+
+        public int GetPreviewPassIndex() { return 0; }
+
+        private static ActiveFields GetActiveFieldsFromMasterNode(SpriteLitMasterNode masterNode, ShaderPass pass)
+        {
+            var activeFields = new ActiveFields();
+            var baseActiveFields = activeFields.baseInstance;
+
+            baseActiveFields.Add("SurfaceType.Transparent");
+            baseActiveFields.Add("BlendMode.Alpha");
+
+            return activeFields;
+        }
+
+        private static bool GenerateShaderPass(SpriteLitMasterNode masterNode, ShaderPass pass, GenerationMode mode, ShaderGenerator result, List<string> sourceAssetDependencyPaths)
+        {
+            UniversalSubShaderUtilities.SetRenderState(SurfaceType.Transparent, AlphaMode.Alpha, true, ref pass);
+
+            // apply master node options to active fields
+            var activeFields = GetActiveFieldsFromMasterNode(masterNode, pass);
+
+            // use standard shader pass generation
+            return UniversalSubShaderUtilities.GenerateShaderPass(masterNode, pass, mode, activeFields, result, sourceAssetDependencyPaths);
+        }
+
+        public string GetSubshader(IMasterNode masterNode, GenerationMode mode, List<string> sourceAssetDependencyPaths = null)
+        {
+            if (sourceAssetDependencyPaths != null)
+            {
+                // LightWeightSpriteUnlitSubShader.cs
+                sourceAssetDependencyPaths.Add(AssetDatabase.GUIDToAssetPath("62511ee827d14492a8c78ba0ef167e7f"));
+            }
+
+            // Master Node data
+            var litMasterNode = masterNode as SpriteLitMasterNode;
+            var subShader = new ShaderGenerator();
+
+            subShader.AddShaderChunk("SubShader", true);
+            subShader.AddShaderChunk("{", true);
+            subShader.Indent();
+            {
+                var surfaceTags = ShaderGenerator.BuildMaterialTags(SurfaceType.Transparent);
+                var tagsBuilder = new ShaderStringBuilder(0);
+                surfaceTags.GetTags(tagsBuilder, "UniversalPipeline");
+                subShader.AddShaderChunk(tagsBuilder.ToString());
+
+                GenerateShaderPass(litMasterNode, m_LitPass, mode, subShader, sourceAssetDependencyPaths);
+            }
+            subShader.Deindent();
+            subShader.AddShaderChunk("}", true);
+
+            return subShader.GetShaderString(0);
+        }
+
+        public bool IsPipelineCompatible(RenderPipelineAsset renderPipelineAsset)
+        {
+            return renderPipelineAsset is UniversalRenderPipelineAsset;
+        }
+
+        public UniversalSpriteLitSubShader () { }
+    }
+}

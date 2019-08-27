@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Data.Util;
-using UnityEditor;
 using UnityEditor.Graphing;
 using UnityEditor.ShaderGraph;
 using UnityEditor.ShaderGraph.Internal;
@@ -19,12 +17,14 @@ namespace UnityEditor.Rendering.Universal
     [FormerName("UnityEngine.Rendering.LWRP.LightWeightUnlitSubShader")]
     class UniversalUnlitSubShader : IUnlitSubShader
     {
+#region Passes
         ShaderPass m_UnlitPass = new ShaderPass
         {
             // Definition
             displayName = "UnlitPass",
             referenceName = "FORWARD_UNLIT",
             lightMode = "UniversalForward",
+            mainInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/UnlitForwardPass.hlsl",
             useInPreview = true,
 
             // Port mask
@@ -39,20 +39,27 @@ namespace UnityEditor.Rendering.Universal
                 UnlitMasterNode.AlphaThresholdSlotId
             },
 
-            // Includes = new List<string>()
-            // {
-            //     "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/UnlitForwardPass.hlsl\"",
-            // },
-            // OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
-            // {
-            //     pass.ExtraDefines.Clear();
-            //     var masterNode = node as UnlitMasterNode;
-            //     GetSurfaceTagsOptions(masterNode, ref pass);
-            //     if (requirements.requiresDepthTexture)
-            //         pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
-            //     if (requirements.requiresCameraOpaqueTexture)
-            //         pass.ExtraDefines.Add("#define REQUIRE_OPAQUE_TEXTURE");
-            // }
+            // Pass setup
+            includes = new List<string>()
+            {
+                "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl",
+            },
+            pragmas = new List<string>()
+            {
+                "prefer_hlslcc gles",
+                "exclude_renderers d3d11_9x",
+                "target 2.0",
+                "multi_compile_instancing",
+            },
+            keywords = new KeywordDescriptor[]
+            {
+                s_LightmapKeyword,
+                s_DirectionalLightmapCombinedKeyword,
+                s_SampleGIKeyword,
+            },
         };
 
         ShaderPass m_DepthOnlyPass = new ShaderPass()
@@ -61,6 +68,8 @@ namespace UnityEditor.Rendering.Universal
             displayName = "DepthOnly",
             referenceName = "DEPTHONLY",
             lightMode = "DepthOnly",
+            mainInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/DepthOnlyPass.hlsl",
+            useInPreview = true,
 
             // Port mask
             vertexPorts = new List<int>()
@@ -77,20 +86,22 @@ namespace UnityEditor.Rendering.Universal
             ZWriteOverride = "ZWrite On",
             ColorMaskOverride = "ColorMask 0",
 
-            // Includes = new List<string>()
-            // {
-            //     "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/DepthOnlyPass.hlsl\"",
-            // },
-            // OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
-            // {
-            //     pass.ExtraDefines.Clear();
-            //     var masterNode = node as UnlitMasterNode;
-            //     GetSurfaceTagsOptions(masterNode, ref pass);
-            //     if (requirements.requiresDepthTexture)
-            //         pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
-            //     if (requirements.requiresCameraOpaqueTexture)
-            //         pass.ExtraDefines.Add("#define REQUIRE_OPAQUE_TEXTURE");
-            // }
+            // Pass setup
+            includes = new List<string>()
+            {
+                "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl",
+                "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl",
+            },
+            pragmas = new List<string>()
+            {
+                "prefer_hlslcc gles",
+                "exclude_renderers d3d11_9x",
+                "target 2.0",
+                "multi_compile_instancing",
+            },
         };
 
         ShaderPass m_ShadowCasterPass = new ShaderPass()
@@ -99,10 +110,7 @@ namespace UnityEditor.Rendering.Universal
             displayName = "ShadowCaster",
             referenceName = "SHADOWCASTER",
             lightMode = "ShadowCaster",
-
-            // Render State Overrides
-            ZWriteOverride = "ZWrite On",
-            ZTestOverride = "ZTest LEqual",
+            mainInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/ShadowCasterPass.hlsl",
             
             // Port mask
             vertexPorts = new List<int>()
@@ -120,35 +128,88 @@ namespace UnityEditor.Rendering.Universal
             {
                 "Attributes.normalOS", 
             },
-            
-            // Includes = new List<string>()
-            // {
-            //     "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/ShadowCasterPass.hlsl\"",
-            // },
-            // OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
-            // {
-            //     var masterNode = node as UnlitMasterNode;
-            //     GetSurfaceTagsOptions(masterNode, ref pass);
-            // }
+
+            // Render State Overrides
+            ZWriteOverride = "ZWrite On",
+            ZTestOverride = "ZTest LEqual",
+
+            // Pass setup
+            includes = new List<string>()
+            {
+                "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl",
+                "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl",
+                "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl",
+            },
+            pragmas = new List<string>()
+            {
+                "prefer_hlslcc gles",
+                "exclude_renderers d3d11_9x",
+                "target 2.0",
+                "multi_compile_instancing",
+            },
+            keywords = new KeywordDescriptor[]
+            {
+                s_SmoothnessChannelKeyword,
+            },
         };
+#endregion
         
+#region Keywords
+        static KeywordDescriptor s_LightmapKeyword = new KeywordDescriptor()
+        {
+            displayName = "Lightmap",
+            referenceName = "LIGHTMAP_ON",
+            type = KeywordType.Boolean,
+            definition = KeywordDefinition.MultiCompile,
+            scope = KeywordScope.Global,
+        };
+
+        static KeywordDescriptor s_DirectionalLightmapCombinedKeyword = new KeywordDescriptor()
+        {
+            displayName = "Directional Lightmap Combined",
+            referenceName = "DIRLIGHTMAP_COMBINED",
+            type = KeywordType.Boolean,
+            definition = KeywordDefinition.MultiCompile,
+            scope = KeywordScope.Global,
+        };
+
+        static KeywordDescriptor s_SampleGIKeyword = new KeywordDescriptor()
+        {
+            displayName = "Sample GI",
+            referenceName = "_SAMPLE_GI",
+            type = KeywordType.Boolean,
+            definition = KeywordDefinition.ShaderFeature,
+            scope = KeywordScope.Global,
+        };
+
+        static KeywordDescriptor s_SmoothnessChannelKeyword = new KeywordDescriptor()
+        {
+            displayName = "Smoothness Channel",
+            referenceName = "_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A",
+            type = KeywordType.Boolean,
+            definition = KeywordDefinition.ShaderFeature,
+            scope = KeywordScope.Global,
+        };
+#endregion
+
         public int GetPreviewPassIndex() { return 0; }
 
-        private static ActiveFields GetActiveFieldsFromMasterNode(AbstractMaterialNode iMasterNode, ShaderPass pass)
+        private static ActiveFields GetActiveFieldsFromMasterNode(UnlitMasterNode masterNode, ShaderPass pass)
         {
             var activeFields = new ActiveFields();
             var baseActiveFields = activeFields.baseInstance;
-
-            UnlitMasterNode masterNode = iMasterNode as UnlitMasterNode;
-            if (masterNode == null)
-            {
-                return activeFields;
-            }
 
             if (masterNode.IsSlotConnected(UnlitMasterNode.AlphaThresholdSlotId) ||
                 masterNode.GetInputSlots<Vector1MaterialSlot>().First(x => x.id == UnlitMasterNode.AlphaThresholdSlotId).value > 0.0f)
             {
                 baseActiveFields.Add("AlphaClip");
+            }
+
+            if(masterNode.IsSlotConnected(PBRMasterNode.PositionSlotId))
+            {
+                baseActiveFields.Add("features.modifyMesh");
             }
 
             // Keywords for transparent
@@ -171,10 +232,6 @@ namespace UnityEditor.Rendering.Universal
                 {
                     baseActiveFields.Add("BlendMode.Premultiply");
                 }
-            }
-            else
-            {
-                // opaque-only defines
             }
 
             return activeFields;
@@ -220,15 +277,6 @@ namespace UnityEditor.Rendering.Universal
             subShader.AddShaderChunk("}", true);
 
             return subShader.GetShaderString(0);
-
-            //var tags = ShaderGenerator.BuildMaterialTags(unlitMasterNode.surfaceType);
-            //var options = ShaderGenerator.GetMaterialOptions(unlitMasterNode.surfaceType, unlitMasterNode.alphaMode, unlitMasterNode.twoSided.isOn);
-//
-            // Passes
-            //var passes = new Pass[] { m_UnlitPass, m_DepthShadowPass };
-//
-            //return UniversalSubShaderUtilities.GetSubShader<UnlitMasterNode>(unlitMasterNode, tags, options, 
-            //    passes, mode, sourceAssetDependencyPaths: sourceAssetDependencyPaths);
         }
 
         public bool IsPipelineCompatible(RenderPipelineAsset renderPipelineAsset)

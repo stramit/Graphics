@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEditor.Graphing;
 using UnityEditor.ShaderGraph;
@@ -25,6 +24,7 @@ namespace UnityEditor.Rendering.Universal
             referenceName = "FORWARD",
             lightMode = "UniversalForward",
             mainInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/PBRForwardPass.hlsl",
+            useInPreview = true,
 
             // Port mask
             vertexPorts = new List<int>()
@@ -94,96 +94,10 @@ namespace UnityEditor.Rendering.Universal
             // },
             // OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
             // {
-            //     pass.ExtraDefines.Clear();
-            //     var masterNode = node as PBRMasterNode;
-            //     GetSurfaceTagsOptions(masterNode, ref pass);
             //     if (masterNode.IsSlotConnected(PBRMasterNode.NormalSlotId))
             //         pass.ExtraDefines.Add("#define _NORMALMAP 1");
-            //     if (requirements.requiresDepthTexture)
-            //         pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
-            //     if (requirements.requiresCameraOpaqueTexture)
-            //         pass.ExtraDefines.Add("#define REQUIRE_OPAQUE_TEXTURE");
             //     if (masterNode.model == PBRMasterNode.Model.Specular)
             //         pass.ExtraDefines.Add("#define _SPECULAR_SETUP");
-            // }
-        };
-
-        ShaderPass m_ForwardPassMetallic2D = new ShaderPass
-        {
-            // Definition
-            displayName = "Universal2D",
-
-            // Port mask
-            vertexPorts = new List<int>()
-            {
-                PBRMasterNode.PositionSlotId
-            },
-            pixelPorts = new List<int>
-            {
-                PBRMasterNode.AlbedoSlotId,
-                PBRMasterNode.NormalSlotId,
-                PBRMasterNode.EmissionSlotId,
-                PBRMasterNode.MetallicSlotId,
-                PBRMasterNode.SmoothnessSlotId,
-                PBRMasterNode.OcclusionSlotId,
-                PBRMasterNode.AlphaSlotId,
-                PBRMasterNode.AlphaThresholdSlotId
-            },
-            
-            // OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
-            // {
-            //     var masterNode = node as PBRMasterNode;
-
-            //     if (masterNode.IsSlotConnected(PBRMasterNode.NormalSlotId))
-            //         pass.ExtraDefines.Add("#define _NORMALMAP 1");
-            //     if (masterNode.IsSlotConnected(PBRMasterNode.AlphaThresholdSlotId))
-            //         pass.ExtraDefines.Add("#define _AlphaClip 1");
-            //     if (masterNode.surfaceType == SurfaceType.Transparent && masterNode.alphaMode == AlphaMode.Premultiply)
-            //         pass.ExtraDefines.Add("#define _ALPHAPREMULTIPLY_ON 1");
-            //     if (requirements.requiresDepthTexture)
-            //         pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
-            //     if (requirements.requiresCameraOpaqueTexture)
-            //         pass.ExtraDefines.Add("#define REQUIRE_OPAQUE_TEXTURE");
-            // }
-        };
-
-        ShaderPass m_ForwardPassSpecular2D = new ShaderPass()
-        {
-            // Definition
-            displayName = "Universal2D",
-            
-            // Port mask
-            vertexPorts = new List<int>()
-            {
-                PBRMasterNode.PositionSlotId
-            },
-            pixelPorts = new List<int>()
-            {
-                PBRMasterNode.AlbedoSlotId,
-                PBRMasterNode.NormalSlotId,
-                PBRMasterNode.EmissionSlotId,
-                PBRMasterNode.SpecularSlotId,
-                PBRMasterNode.SmoothnessSlotId,
-                PBRMasterNode.OcclusionSlotId,
-                PBRMasterNode.AlphaSlotId,
-                PBRMasterNode.AlphaThresholdSlotId
-            },
-
-            // OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
-            // {
-            //     var masterNode = node as PBRMasterNode;
-
-            //     pass.ExtraDefines.Add("#define _SPECULAR_SETUP 1");
-            //     if (masterNode.IsSlotConnected(PBRMasterNode.NormalSlotId))
-            //         pass.ExtraDefines.Add("#define _NORMALMAP 1");
-            //     if (masterNode.IsSlotConnected(PBRMasterNode.AlphaThresholdSlotId))
-            //         pass.ExtraDefines.Add("#define _AlphaClip 1");
-            //     if (masterNode.surfaceType == SurfaceType.Transparent && masterNode.alphaMode == AlphaMode.Premultiply)
-            //         pass.ExtraDefines.Add("#define _ALPHAPREMULTIPLY_ON 1");
-            //     if (requirements.requiresDepthTexture)
-            //         pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
-            //     if (requirements.requiresCameraOpaqueTexture)
-            //         pass.ExtraDefines.Add("#define REQUIRE_OPAQUE_TEXTURE");
             // }
         };
 
@@ -194,6 +108,7 @@ namespace UnityEditor.Rendering.Universal
             referenceName = "DEPTHONLY",
             lightMode = "DepthOnly",
             mainInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/DepthOnlyPass.hlsl",
+            useInPreview = true,
 
             // Port mask
             vertexPorts = new List<int>()
@@ -226,17 +141,6 @@ namespace UnityEditor.Rendering.Universal
                 "target 2.0",
                 "multi_compile_instancing",
             },
-            
-            // OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
-            // {
-            //     pass.ExtraDefines.Clear();
-            //     var masterNode = node as PBRMasterNode;
-            //     GetSurfaceTagsOptions(masterNode, ref pass);
-            //     if (requirements.requiresDepthTexture)
-            //         pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
-            //     if (requirements.requiresCameraOpaqueTexture)
-            //         pass.ExtraDefines.Add("#define REQUIRE_OPAQUE_TEXTURE");
-            // }
         };
 
         ShaderPass m_ShadowCasterPass = new ShaderPass()
@@ -284,16 +188,6 @@ namespace UnityEditor.Rendering.Universal
                 "target 2.0",
                 "multi_compile_instancing",
             },
-            keywords = new KeywordDescriptor[]
-            {
-                s_SmoothnessChannelKeyword,
-            },
-            
-            // OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
-            // {
-            //     var masterNode = node as PBRMasterNode;
-            //     GetSurfaceTagsOptions(masterNode, ref pass);
-            // }
         };
         ShaderPass m_LitMetaPass = new ShaderPass()
         {
@@ -340,12 +234,10 @@ namespace UnityEditor.Rendering.Universal
                 "exclude_renderers d3d11_9x",
                 "target 2.0",
             },
-            
-            // OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
-            // {
-            //     var masterNode = node as PBRMasterNode;
-            //     GetSurfaceTagsOptions(masterNode, ref pass);
-            // }
+            keywords = new KeywordDescriptor[]
+            {
+                s_SmoothnessChannelKeyword,
+            },
         };
 #endregion
 
@@ -485,10 +377,6 @@ namespace UnityEditor.Rendering.Universal
                 {
                     baseActiveFields.Add("BlendMode.Premultiply");
                 }
-            }
-            else
-            {
-                // opaque-only defines
             }
 
             return activeFields;

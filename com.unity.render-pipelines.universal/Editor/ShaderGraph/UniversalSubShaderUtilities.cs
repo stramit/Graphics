@@ -51,6 +51,8 @@ namespace UnityEditor.Rendering.Universal
             Vector3 viewDirectionWS;
             [Optional]
             Vector3 bitangentWS;
+            [Optional]
+            Vector4 screenPosition;
             [Optional][PreprocessorIf("defined(LIGHTMAP_ON)")]
             Vector2 lightmapUV;
             [Optional][PreprocessorIf("!defined(LIGHTMAP_ON)")]
@@ -848,7 +850,11 @@ namespace UnityEditor.Rendering.Universal
 
             // Main include is expected to contain vert/frag definitions for the pass
             // This must be defined after all graph code
-            spliceCommands.Add("MainInclude", $"#include \"{pass.mainInclude}\"");
+            using (var mainBuilder = new ShaderStringBuilder())
+            {
+                mainBuilder.AppendLine($"#include \"{pass.mainInclude}\"");
+                spliceCommands.Add("MainInclude", mainBuilder.ToString());
+            }
 
             // --------------------------------------------------
             // Debug

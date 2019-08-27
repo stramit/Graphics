@@ -4,7 +4,6 @@
     TEXTURE2D(_AlphaTex); SAMPLER(sampler_AlphaTex);
     float _EnableAlphaTexture;
 #endif
-    float4 _RendererColor;
 
 PackedVaryings vert(Attributes input)
 {
