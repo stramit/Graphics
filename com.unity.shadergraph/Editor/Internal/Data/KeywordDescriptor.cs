@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace UnityEditor.ShaderGraph
+namespace UnityEditor.ShaderGraph.Internal
 {
-    struct KeywordDescriptor
+    public struct KeywordDescriptor
     {
         public string displayName;
         public string referenceName;
@@ -10,6 +10,6 @@ namespace UnityEditor.ShaderGraph
         public KeywordDefinition definition;
         public KeywordScope scope;
         public int value;
-        public List<KeywordEntry> entries;
+        public IEnumerable<KeywordEntry> entries;
     }
 }

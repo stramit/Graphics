@@ -6,6 +6,7 @@ using Data.Util;
 using UnityEditor;
 using UnityEditor.Graphing;
 using UnityEditor.ShaderGraph;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
@@ -18,127 +19,122 @@ namespace UnityEditor.Rendering.Universal
     [FormerName("UnityEngine.Rendering.LWRP.LightWeightUnlitSubShader")]
     class UniversalUnlitSubShader : IUnlitSubShader
     {
-        Pass m_UnlitPass = new Pass
+        ShaderPass m_UnlitPass = new ShaderPass
         {
-            Name = "UnlitPass",
-            LightMode = "UniversalForward",
-            TemplateName = "universalPBRTemplateAF.template",
-            MaterialName = "Unlit",
-            ShaderPassName = "FORWARD_UNLIT",
-            PixelShaderSlots = new List<int>
+            // Definition
+            displayName = "UnlitPass",
+            referenceName = "FORWARD_UNLIT",
+            lightMode = "UniversalForward",
+            useInPreview = true,
+
+            // Port mask
+            vertexPorts = new List<int>()
+            {
+                UnlitMasterNode.PositionSlotId
+            },
+            pixelPorts = new List<int>
             {
                 UnlitMasterNode.ColorSlotId,
                 UnlitMasterNode.AlphaSlotId,
                 UnlitMasterNode.AlphaThresholdSlotId
             },
-            VertexShaderSlots = new List<int>()
-            {
-                UnlitMasterNode.PositionSlotId
-            },
-            ExtraDefines = new List<string>(),
-            Includes = new List<string>()
-            {
-                "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/UnlitForwardPass.hlsl\"",
-            },
-            UseInPreview = true,
-            OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
-            {
-                pass.ExtraDefines.Clear();
-                var masterNode = node as UnlitMasterNode;
-                GetSurfaceTagsOptions(masterNode, ref pass);
-                if (requirements.requiresDepthTexture)
-                    pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
-                if (requirements.requiresCameraOpaqueTexture)
-                    pass.ExtraDefines.Add("#define REQUIRE_OPAQUE_TEXTURE");
-            }
+
+            // Includes = new List<string>()
+            // {
+            //     "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/UnlitForwardPass.hlsl\"",
+            // },
+            // OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
+            // {
+            //     pass.ExtraDefines.Clear();
+            //     var masterNode = node as UnlitMasterNode;
+            //     GetSurfaceTagsOptions(masterNode, ref pass);
+            //     if (requirements.requiresDepthTexture)
+            //         pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
+            //     if (requirements.requiresCameraOpaqueTexture)
+            //         pass.ExtraDefines.Add("#define REQUIRE_OPAQUE_TEXTURE");
+            // }
         };
 
-        Pass m_DepthOnlyPass = new Pass()
+        ShaderPass m_DepthOnlyPass = new ShaderPass()
         {
-            Name = "DepthOnly",
-            LightMode = "DepthOnly",
-            TemplateName = "universalPBRTemplateAF.template",
-            MaterialName = "Unlit",
+            // Definition
+            displayName = "DepthOnly",
+            referenceName = "DEPTHONLY",
+            lightMode = "DepthOnly",
+
+            // Port mask
+            vertexPorts = new List<int>()
+            {
+                PBRMasterNode.PositionSlotId
+            },
+            pixelPorts = new List<int>()
+            {
+                PBRMasterNode.AlphaSlotId,
+                PBRMasterNode.AlphaThresholdSlotId
+            },
+
+            // Render State Overrides
             ZWriteOverride = "ZWrite On",
             ColorMaskOverride = "ColorMask 0",
-            ShaderPassName = "DEPTHONLY",
-            PixelShaderSlots = new List<int>()
-            {
-                PBRMasterNode.AlphaSlotId,
-                PBRMasterNode.AlphaThresholdSlotId
-            },
-            VertexShaderSlots = new List<int>()
-            {
-                PBRMasterNode.PositionSlotId
-            },
-            ExtraDefines = new List<string>()
-            {
-            },
-            Includes = new List<string>()
-            {
-                "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/DepthOnlyPass.hlsl\"",
-            },
-            OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
-            {
-                pass.ExtraDefines.Clear();
-                var masterNode = node as UnlitMasterNode;
-                GetSurfaceTagsOptions(masterNode, ref pass);
-                if (requirements.requiresDepthTexture)
-                    pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
-                if (requirements.requiresCameraOpaqueTexture)
-                    pass.ExtraDefines.Add("#define REQUIRE_OPAQUE_TEXTURE");
-            }
+
+            // Includes = new List<string>()
+            // {
+            //     "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/DepthOnlyPass.hlsl\"",
+            // },
+            // OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
+            // {
+            //     pass.ExtraDefines.Clear();
+            //     var masterNode = node as UnlitMasterNode;
+            //     GetSurfaceTagsOptions(masterNode, ref pass);
+            //     if (requirements.requiresDepthTexture)
+            //         pass.ExtraDefines.Add("#define REQUIRE_DEPTH_TEXTURE");
+            //     if (requirements.requiresCameraOpaqueTexture)
+            //         pass.ExtraDefines.Add("#define REQUIRE_OPAQUE_TEXTURE");
+            // }
         };
 
-        Pass m_ShadowCasterPass = new Pass()
+        ShaderPass m_ShadowCasterPass = new ShaderPass()
         {
-            Name = "ShadowCaster",
-            LightMode = "ShadowCaster",
-            TemplateName = "universalPBRTemplateAF.template",
-            MaterialName = "Unlit",
+            // Definition
+            displayName = "ShadowCaster",
+            referenceName = "SHADOWCASTER",
+            lightMode = "ShadowCaster",
+
+            // Render State Overrides
             ZWriteOverride = "ZWrite On",
             ZTestOverride = "ZTest LEqual",
-            ShaderPassName = "SHADOWCASTER",
-            PixelShaderSlots = new List<int>()
+            
+            // Port mask
+            vertexPorts = new List<int>()
+            {
+                PBRMasterNode.PositionSlotId
+            },
+            pixelPorts = new List<int>()
             {
                 PBRMasterNode.AlphaSlotId,
                 PBRMasterNode.AlphaThresholdSlotId
             },
-            VertexShaderSlots = new List<int>()
-            {
-                PBRMasterNode.PositionSlotId
-            },
-            RequiredFields = new List<string>()
+
+            // Required fields
+            requiredAttributes = new List<string>()
             {
                 "Attributes.normalOS", 
             },
-            ExtraDefines = new List<string>(),
-            Includes = new List<string>()
-            {
-                "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/ShadowCasterPass.hlsl\"",
-            },
-            OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
-            {
-                var masterNode = node as UnlitMasterNode;
-                GetSurfaceTagsOptions(masterNode, ref pass);
-            }
+            
+            // Includes = new List<string>()
+            // {
+            //     "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/ShadowCasterPass.hlsl\"",
+            // },
+            // OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
+            // {
+            //     var masterNode = node as UnlitMasterNode;
+            //     GetSurfaceTagsOptions(masterNode, ref pass);
+            // }
         };
         
         public int GetPreviewPassIndex() { return 0; }
 
-        public static void GetSurfaceTagsOptions(UnlitMasterNode masterNode, ref Pass pass)
-        {
-            pass.PassTags = ShaderGenerator.BuildMaterialTags(masterNode.surfaceType);
-            pass.PassOptions = ShaderGenerator.GetMaterialOptions(masterNode.surfaceType, masterNode.alphaMode, masterNode.twoSided.isOn);
-            
-            pass.ZWriteOverride = "ZWrite " + pass.PassOptions.zWrite.ToString();
-            pass.ZTestOverride = "ZTest " + pass.PassOptions.zTest.ToString();
-            pass.CullOverride = "Cull " + pass.PassOptions.cullMode.ToString();
-            pass.BlendOpOverride = string.Format("Blend {0} {1}, {2} {3}", pass.PassOptions.srcBlend, pass.PassOptions.dstBlend, pass.PassOptions.alphaSrcBlend, pass.PassOptions.alphaDstBlend);
-
-        }
-
-        private static ActiveFields GetActiveFieldsFromMasterNode(AbstractMaterialNode iMasterNode, Pass pass)
+        private static ActiveFields GetActiveFieldsFromMasterNode(AbstractMaterialNode iMasterNode, ShaderPass pass)
         {
             var activeFields = new ActiveFields();
             var baseActiveFields = activeFields.baseInstance;
@@ -184,16 +180,15 @@ namespace UnityEditor.Rendering.Universal
             return activeFields;
         }
 
-        private static bool GenerateShaderPassUnlit(UnlitMasterNode masterNode, Pass pass, GenerationMode mode, ShaderGenerator result, List<string> sourceAssetDependencyPaths)
+        private static bool GenerateShaderPass(UnlitMasterNode masterNode, ShaderPass pass, GenerationMode mode, ShaderGenerator result, List<string> sourceAssetDependencyPaths)
         {
-            pass.OnGeneratePass(masterNode, pass.Requirements);
+            UniversalSubShaderUtilities.SetRenderState(masterNode.surfaceType, masterNode.alphaMode, masterNode.twoSided.isOn, ref pass);
 
             // apply master node options to active fields
             var activeFields = GetActiveFieldsFromMasterNode(masterNode, pass);
 
             // use standard shader pass generation
-            bool vertexActive = masterNode.IsSlotConnected(UnlitMasterNode.PositionSlotId);
-            return UniversalSubShaderUtilities.GenerateShaderPass(masterNode, pass, mode, activeFields, result, sourceAssetDependencyPaths, vertexActive, pass.PassTags);
+            return UniversalSubShaderUtilities.GenerateShaderPass(masterNode, pass, mode, activeFields, result, sourceAssetDependencyPaths);
         }
 
         public string GetSubshader(IMasterNode masterNode, GenerationMode mode, List<string> sourceAssetDependencyPaths = null)
@@ -217,9 +212,9 @@ namespace UnityEditor.Rendering.Universal
                 surfaceTags.GetTags(tagsBuilder, "UniversalPipeline");
                 subShader.AddShaderChunk(tagsBuilder.ToString());
                 
-                GenerateShaderPassUnlit(unlitMasterNode, m_ShadowCasterPass, mode, subShader, sourceAssetDependencyPaths);
-                GenerateShaderPassUnlit(unlitMasterNode, m_DepthOnlyPass, mode, subShader, sourceAssetDependencyPaths);
-                GenerateShaderPassUnlit(unlitMasterNode, m_UnlitPass, mode, subShader, sourceAssetDependencyPaths);
+                GenerateShaderPass(unlitMasterNode, m_ShadowCasterPass, mode, subShader, sourceAssetDependencyPaths);
+                GenerateShaderPass(unlitMasterNode, m_DepthOnlyPass, mode, subShader, sourceAssetDependencyPaths);
+                GenerateShaderPass(unlitMasterNode, m_UnlitPass, mode, subShader, sourceAssetDependencyPaths);
             }
             subShader.Deindent();
             subShader.AddShaderChunk("}", true);

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEditor.ShaderGraph.Drawing;
 using UnityEngine;
+using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph
 {
@@ -22,9 +23,9 @@ namespace UnityEditor.ShaderGraph
                 value = 0,
                 entries = new List<KeywordEntry>()
                 {
-                    new KeywordEntry(1, "High", "HIGH"),
-                    new KeywordEntry(2, "Medium", "MEDIUM"),
-                    new KeywordEntry(3, "Low", "LOW"),
+                    new KeywordEntry("High", "HIGH"),
+                    new KeywordEntry("Medium", "MEDIUM"),
+                    new KeywordEntry("Low", "LOW"),
                 },
             };
         }
@@ -51,17 +52,59 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public static string ToDeclarationString(this KeywordDefinition keywordDefinition)
+        public static string ToDeclarationString(this KeywordDefinitionPrivate keywordDefinition)
         {
             switch(keywordDefinition)
             {
-                case KeywordDefinition.MultiCompile:
+                case KeywordDefinitionPrivate.MultiCompile:
                     return "multi_compile";
-                case KeywordDefinition.ShaderFeature:
+                case KeywordDefinitionPrivate.ShaderFeature:
                     return "shader_feature";
                 default:
                     return string.Empty;
             }
+        }
+
+        public static string ToDeclarationString(this KeywordDescriptor keyword)
+        {
+            // Get definition type using scope
+            string scopeString = keyword.scope == KeywordScope.Local ? "_local" : string.Empty;
+            string definitionString = $"{keyword.definition.ToPrivate().ToDeclarationString()}{scopeString}";
+
+            switch(keyword.type)
+            {
+                case KeywordType.Boolean:
+                    return $"#pragma {definitionString} _ {keyword.referenceName}";
+                case KeywordType.Enum:
+                    var enumEntryDefinitions = keyword.entries.Select(x => $"{keyword.referenceName}_{x.referenceName}");
+                    string enumEntriesString = string.Join(" ", enumEntryDefinitions);
+                    return $"#pragma {definitionString} {enumEntriesString}";
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public static KeywordDefinitionPrivate ToPrivate(this KeywordDefinition keywordDefinition)
+        {
+            switch(keywordDefinition)
+            {
+                case KeywordDefinition.MultiCompile:
+                    return KeywordDefinitionPrivate.MultiCompile;
+                case KeywordDefinition.ShaderFeature:
+                    return KeywordDefinitionPrivate.ShaderFeature;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public static List<KeywordEntryPrivate> ToPrivate(this List<KeywordEntry> keywordEntries)
+        {
+            var result = new List<KeywordEntryPrivate>();
+            for(int i = 0; i < keywordEntries.Count; i++)
+            {
+                result.Add(new KeywordEntryPrivate(i + 1, keywordEntries[i].displayName, keywordEntries[i].referenceName));
+            }
+            return result;
         }
 
         public static int GetKeywordPermutationCount(this GraphData graph)

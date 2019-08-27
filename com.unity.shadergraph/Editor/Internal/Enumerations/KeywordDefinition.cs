@@ -1,9 +1,8 @@
 ﻿namespace UnityEditor.ShaderGraph
 {
-    enum KeywordDefinition
+    public enum KeywordDefinition
     {
         ShaderFeature,
         MultiCompile,
-        Predefined
     }
 }

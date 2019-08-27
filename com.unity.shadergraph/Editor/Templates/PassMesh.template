@@ -15,18 +15,19 @@ Pass
     #pragma vertex vert
     #pragma fragment frag
 
+    // --------------------------------------------------
+    // Pass
+
     // Pragmas
-    $splice(Pragmas)
+    $splice(PassPragmas)
 
     // Includes
-    $splice(Includes)
+    $splice(PassIncludes)
 
     // Keywords
-    $splice(Keywords)
-
-    // --------------------------------------------------
-    // Active Fields
+    $splice(PassKeywords)
     
+    // Defines
     $SurfaceType.Transparent:           #define _SURFACE_TYPE_TRANSPARENT 1
     $AlphaClip:                         #define _AlphaClip 1
     $BlendMode.Add:                     #define _BLENDMODE_ADD 1
@@ -59,26 +60,33 @@ Pass
     $buildType(Varyings)
 
     // --------------------------------------------------
-    // Graph Code
+    // Graph
 
+    // Graph Defines
+    $splice(GraphDefines)
+
+    // Graph Keywords
     $splice(GraphKeywords)
 
+    // Graph Properties
     $splice(GraphProperties)
 
+    // Graph Functions
     $splice(GraphFunctions)
 
+    // Graph Vertex
     $splice(GraphVertex)
-
+    
+    // Graph Pixel
     $splice(GraphPixel)
 
     // --------------------------------------------------
-    // Includes
+    // Main
 
 $features.modifyMesh: $include("VertexAnimation.template.hlsl")
 $include("BuildSurfaceDescriptionInputs.template.hlsl")
-$features.lighting: $include("BuildInputData.template.hlsl")
 
-$splice(Includes)
+    $splice(MainInclude)
 
     ENDHLSL
 }

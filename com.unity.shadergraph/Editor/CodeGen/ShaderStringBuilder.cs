@@ -168,6 +168,9 @@ namespace UnityEditor.ShaderGraph
 
         public void Dispose()
         {
+            if(m_ScopeStack.Count == 0)
+                return;
+            
             switch (m_ScopeStack.Pop())
             {
                 case ScopeType.Indent:

@@ -5,57 +5,12 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.Graphing;
 using UnityEditor.ShaderGraph;
+using UnityEditor.ShaderGraph.Internal;
 using Data.Util;
 using UnityEngine;              // Vector3,4
 
 namespace UnityEditor.Rendering.Universal
 {
-    delegate void OnGeneratePassDelegate(IMasterNode masterNode, ref Pass pass, ref ShaderGraphRequirements requirements);
-    struct Pass
-    {
-        public string Name;
-        public string LightMode;
-        public string ShaderPassName;
-        public List<string> Includes;
-        public string TemplateName;
-        public string MaterialName;
-        public List<string> ExtraInstancingOptions;
-        public List<string> ExtraDefines;
-        public List<int> VertexShaderSlots;         // These control what slots are used by the pass vertex shader
-        public List<int> PixelShaderSlots;          // These control what slots are used by the pass pixel shader
-        public string CullOverride;
-        public string BlendOverride;
-        public string BlendOpOverride;
-        public string ZTestOverride;
-        public string ZWriteOverride;
-        public string ColorMaskOverride;
-        public string ZClipOverride;
-        public List<string> StencilOverride;
-        public ShaderGraphRequirements Requirements;
-        public List<string> RequiredFields;         // feeds into the dependency analysis
-        public bool UseInPreview;
-        public SurfaceMaterialTags PassTags;
-        public SurfaceMaterialOptions PassOptions;
-
-        // All these lists could probably be hashed to aid lookups.
-        public bool VertexShaderUsesSlot(int slotId)
-        {
-            return VertexShaderSlots.Contains(slotId);
-        }
-        public bool PixelShaderUsesSlot(int slotId)
-        {
-            return PixelShaderSlots.Contains(slotId);
-        }
-        public void OnGeneratePass(IMasterNode masterNode, ShaderGraphRequirements requirements)
-        {
-            if (OnGeneratePassImpl != null)
-            {
-                OnGeneratePassImpl(masterNode, ref this, ref requirements);
-            }
-        }      
-        public OnGeneratePassDelegate OnGeneratePassImpl;
-    }
-
     static class UniversalShaderStructs
     {
         internal struct Attributes
@@ -96,9 +51,9 @@ namespace UnityEditor.Rendering.Universal
             Vector3 viewDirectionWS;
             [Optional]
             Vector3 bitangentWS;
-            [Optional][PreprocessorIf("defined(USE_LIGHTMAP)")]
+            [Optional][PreprocessorIf("defined(LIGHTMAP_ON)")]
             Vector2 lightmapUV;
-            [Optional][PreprocessorIf("defined(USE_SH)")]
+            [Optional][PreprocessorIf("!defined(LIGHTMAP_ON)")]
             Vector3 sh;
             [Optional]
             Vector4 fogFactorAndVertexLight;
@@ -120,22 +75,6 @@ namespace UnityEditor.Rendering.Universal
                 new Dependency("Varyings.texCoord3",        "Attributes.uv3"),
                 new Dependency("Varyings.color",            "Attributes.color"),
                 new Dependency("Varyings.instanceID",       "Attributes.instanceID"),
-            };
-        };
-
-        internal struct FragInputs
-        {
-            public static Dependency[] dependencies = new Dependency[]
-            {
-                new Dependency("FragInputs.positionWS",        "Varyings.positionWS"),
-                new Dependency("FragInputs.tangentToWorld",     "Varyings.tangentWS"),
-                new Dependency("FragInputs.tangentToWorld",     "Varyings.normalWS"),
-                new Dependency("FragInputs.texCoord0",          "Varyings.texCoord0"),
-                new Dependency("FragInputs.texCoord1",          "Varyings.texCoord1"),
-                new Dependency("FragInputs.texCoord2",          "Varyings.texCoord2"),
-                new Dependency("FragInputs.texCoord3",          "Varyings.texCoord3"),
-                new Dependency("FragInputs.color",              "Varyings.color"),
-                new Dependency("FragInputs.isFrontFace",        "Varyings.cullFace"),
             };
         };
 
@@ -515,11 +454,36 @@ namespace UnityEditor.Rendering.Universal
 
     static class UniversalSubShaderUtilities
     {
-        public static readonly NeededCoordinateSpace k_PixelCoordinateSpace = NeededCoordinateSpace.World;
+        public static void SetRenderState(SurfaceType surfaceType, AlphaMode alphaMode, bool twoSided, ref ShaderPass pass)
+        {
+            // Get default render state from Master Node
+            var options = ShaderGenerator.GetMaterialOptions(surfaceType, alphaMode, twoSided);
+            
+            // Update render state on ShaderPass if there is no active override
+            if(string.IsNullOrEmpty(pass.ZWriteOverride))
+            {
+                pass.ZWriteOverride = "ZWrite " + options.zWrite.ToString();
+            }
+
+            if(string.IsNullOrEmpty(pass.ZTestOverride))
+            {
+                pass.ZTestOverride = "ZTest " + options.zTest.ToString();
+            }
+
+            if(string.IsNullOrEmpty(pass.CullOverride))
+            {
+                pass.CullOverride = "Cull " + options.cullMode.ToString();
+            }
+            
+            if(string.IsNullOrEmpty(pass.BlendOverride))
+            {
+                pass.BlendOverride = string.Format("Blend {0} {1}, {2} {3}", options.srcBlend, options.dstBlend, options.alphaSrcBlend, options.alphaDstBlend);
+            }
+        }
 
         static string GetTemplatePath(string templateName)
         {
-            var basePath = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/";
+            var basePath = "Packages/com.unity.shadergraph/Editor/Templates/";
             string templatePath = Path.Combine(basePath, templateName);
 
             if (File.Exists(templatePath))
@@ -528,485 +492,52 @@ namespace UnityEditor.Rendering.Universal
             throw new FileNotFoundException(string.Format(@"Cannot find a template with name ""{0}"".", templateName));
         }
 
-        public static string GetSubShader<T>(T masterNode, SurfaceMaterialTags tags, SurfaceMaterialOptions options, Pass[] passes, 
-            GenerationMode mode, string customEditorPath = null, List<string> sourceAssetDependencyPaths = null) where T : IMasterNode
-        {
-            if (sourceAssetDependencyPaths != null)
-            {
-                var relativePath = "Packages/com.unity.render-pipelines.universal/";
-                var fullPath = Path.GetFullPath(relativePath);
-                var shaderFiles = Directory.GetFiles(Path.Combine(fullPath, "ShaderLibrary")).Select(x => Path.Combine(relativePath, x.Substring(fullPath.Length)));
-                sourceAssetDependencyPaths.AddRange(shaderFiles);
-            }
-
-            var subShader = new ShaderStringBuilder();
-            subShader.AppendLine("SubShader");
-            using (subShader.BlockScope())
-            {
-                var tagsBuilder = new ShaderStringBuilder(0);
-                tags.GetTags(tagsBuilder, UnityEngine.Rendering.Universal.UniversalRenderPipeline.k_ShaderTagName);
-                subShader.AppendLines(tagsBuilder.ToString());
-
-                foreach(Pass pass in passes)
-                {
-                    var templatePath = GetTemplatePath(pass.TemplateName);
-                    if (!File.Exists(templatePath))
-                        continue;
-
-                    if (sourceAssetDependencyPaths != null)
-                        sourceAssetDependencyPaths.Add(templatePath);
-
-                    string template = File.ReadAllText(templatePath);
-
-                    subShader.AppendLines(GetShaderPassFromTemplate(
-                        template,
-                        masterNode,
-                        pass,
-                        mode,
-                        options));
-                }
-            }
-
-            if(!string.IsNullOrEmpty(customEditorPath))
-                subShader.Append($"CustomEditor \"{customEditorPath}\"");
-
-            return subShader.ToString();
-        }
-
-        static string GetShaderPassFromTemplate(string template, IMasterNode iMasterNode, Pass pass, GenerationMode mode, SurfaceMaterialOptions materialOptions)
-        {
-            // ----------------------------------------------------- //
-            //                         SETUP                         //
-            // ----------------------------------------------------- //
-
-            AbstractMaterialNode masterNode = iMasterNode as AbstractMaterialNode;
-
-            // -------------------------------------
-            // String builders
-
-            var shaderProperties = new PropertyCollector();
-            var shaderKeywords = new KeywordCollector();
-            var shaderPropertyUniforms = new ShaderStringBuilder(1);
-            var shaderKeywordDeclarations = new ShaderStringBuilder(1);
-
-            var functionBuilder = new ShaderStringBuilder(1);
-            var functionRegistry = new FunctionRegistry(functionBuilder);
-
-            var defines = new ShaderStringBuilder(1);
-            var graph = new ShaderStringBuilder(0);
-
-            var vertexDescriptionInputStruct = new ShaderStringBuilder(1);
-            var vertexDescriptionStruct = new ShaderStringBuilder(1);
-            var vertexDescriptionFunction = new ShaderStringBuilder(1);
-
-            var surfaceDescriptionInputStruct = new ShaderStringBuilder(1);
-            var surfaceDescriptionStruct = new ShaderStringBuilder(1);
-            var surfaceDescriptionFunction = new ShaderStringBuilder(1);
-
-            var vertexInputStruct = new ShaderStringBuilder(1);
-            var vertexOutputStruct = new ShaderStringBuilder(2);
-
-            var vertexShader = new ShaderStringBuilder(2);
-            var vertexShaderDescriptionInputs = new ShaderStringBuilder(2);
-            var vertexShaderOutputs = new ShaderStringBuilder(2);
-
-            var pixelShader = new ShaderStringBuilder(2);
-            var pixelShaderSurfaceInputs = new ShaderStringBuilder(2);
-            var pixelShaderSurfaceRemap = new ShaderStringBuilder(2);
-
-            // -------------------------------------
-            // Get Slot and Node lists per stage
-
-            var vertexSlots = pass.VertexShaderSlots.Select(masterNode.FindSlot<MaterialSlot>).ToList();
-            var vertexNodes = ListPool<AbstractMaterialNode>.Get();
-            NodeUtils.DepthFirstCollectNodesFromNode(vertexNodes, masterNode, NodeUtils.IncludeSelf.Include, pass.VertexShaderSlots);
-
-            var pixelSlots = pass.PixelShaderSlots.Select(masterNode.FindSlot<MaterialSlot>).ToList();
-            var pixelNodes = ListPool<AbstractMaterialNode>.Get();
-            NodeUtils.DepthFirstCollectNodesFromNode(pixelNodes, masterNode, NodeUtils.IncludeSelf.Include, pass.PixelShaderSlots);
-
-            // -------------------------------------
-            // Get Requirements
-
-            var vertexRequirements = ShaderGraphRequirements.FromNodes(vertexNodes, ShaderStageCapability.Vertex, false);
-            var pixelRequirements = ShaderGraphRequirements.FromNodes(pixelNodes, ShaderStageCapability.Fragment);
-            var graphRequirements = pixelRequirements.Union(vertexRequirements);
-            var surfaceRequirements = ShaderGraphRequirements.FromNodes(pixelNodes, ShaderStageCapability.Fragment, false);
-            var modelRequirements = pass.Requirements;
-
-            // ----------------------------------------------------- //
-            //                START SHADER GENERATION                //
-            // ----------------------------------------------------- //
-
-            // -------------------------------------
-            // Calculate material options
-
-            var blendingBuilder = new ShaderStringBuilder(1);
-            var cullingBuilder = new ShaderStringBuilder(1);
-            var zTestBuilder = new ShaderStringBuilder(1);
-            var zWriteBuilder = new ShaderStringBuilder(1);
-
-            materialOptions.GetBlend(blendingBuilder);
-            materialOptions.GetCull(cullingBuilder);
-            materialOptions.GetDepthTest(zTestBuilder);
-            materialOptions.GetDepthWrite(zWriteBuilder);
-
-            // -------------------------------------
-            // Generate defines
-
-            pass.OnGeneratePass(iMasterNode, graphRequirements);
-            
-            foreach(string define in pass.ExtraDefines)
-                defines.AppendLine(define);
-
-            // ----------------------------------------------------- //
-            //                         KEYWORDS                      //
-            // ----------------------------------------------------- //
-
-            // -------------------------------------
-            // Get keyword permutations
-
-            masterNode.owner.CollectShaderKeywords(shaderKeywords, mode);
-
-            // Track permutation indices for all nodes
-            List<int>[] keywordPermutationsPerVertexNode = new List<int>[vertexNodes.Count];
-            List<int>[] keywordPermutationsPerPixelNode = new List<int>[pixelNodes.Count];
-
-            // -------------------------------------
-            // Evaluate all permutations
-
-            for(int i = 0; i < shaderKeywords.permutations.Count; i++)
-            {
-                // Get active nodes for this permutation
-                var localVertexNodes = ListPool<AbstractMaterialNode>.Get();
-                var localPixelNodes = ListPool<AbstractMaterialNode>.Get();
-                NodeUtils.DepthFirstCollectNodesFromNode(localVertexNodes, masterNode, NodeUtils.IncludeSelf.Include, pass.VertexShaderSlots, shaderKeywords.permutations[i]);
-                NodeUtils.DepthFirstCollectNodesFromNode(localPixelNodes, masterNode, NodeUtils.IncludeSelf.Include, pass.PixelShaderSlots, shaderKeywords.permutations[i]);
-
-                // Track each vertex node in this permutation
-                foreach(AbstractMaterialNode vertexNode in localVertexNodes)
-                {
-                    int nodeIndex = vertexNodes.IndexOf(vertexNode);
-
-                    if(keywordPermutationsPerVertexNode[nodeIndex] == null)
-                        keywordPermutationsPerVertexNode[nodeIndex] = new List<int>();
-                    keywordPermutationsPerVertexNode[nodeIndex].Add(i);
-                }
-
-                // Track each pixel node in this permutation
-                foreach(AbstractMaterialNode pixelNode in localPixelNodes)
-                {
-                    int nodeIndex = pixelNodes.IndexOf(pixelNode);
-
-                    if(keywordPermutationsPerPixelNode[nodeIndex] == null)
-                        keywordPermutationsPerPixelNode[nodeIndex] = new List<int>();
-                    keywordPermutationsPerPixelNode[nodeIndex].Add(i);
-                }
-            }
-
-            // ----------------------------------------------------- //
-            //                START VERTEX DESCRIPTION               //
-            // ----------------------------------------------------- //
-
-            // -------------------------------------
-            // Generate Input structure for Vertex Description function
-            // TODO - Vertex Description Input requirements are needed to exclude intermediate translation spaces
-
-            vertexDescriptionInputStruct.AppendLine("struct VertexDescriptionInputs");
-            using (vertexDescriptionInputStruct.BlockSemicolonScope())
-            {
-                ShaderGenerator.GenerateSpaceTranslationSurfaceInputs(vertexRequirements.requiresNormal, InterpolatorType.Normal, vertexDescriptionInputStruct);
-                ShaderGenerator.GenerateSpaceTranslationSurfaceInputs(vertexRequirements.requiresTangent, InterpolatorType.Tangent, vertexDescriptionInputStruct);
-                ShaderGenerator.GenerateSpaceTranslationSurfaceInputs(vertexRequirements.requiresBitangent, InterpolatorType.BiTangent, vertexDescriptionInputStruct);
-                ShaderGenerator.GenerateSpaceTranslationSurfaceInputs(vertexRequirements.requiresViewDir, InterpolatorType.ViewDirection, vertexDescriptionInputStruct);
-                ShaderGenerator.GenerateSpaceTranslationSurfaceInputs(vertexRequirements.requiresPosition, InterpolatorType.Position, vertexDescriptionInputStruct);
-
-                if (vertexRequirements.requiresVertexColor)
-                    vertexDescriptionInputStruct.AppendLine("float4 {0};", ShaderGeneratorNames.VertexColor);
-
-                if (vertexRequirements.requiresScreenPosition)
-                    vertexDescriptionInputStruct.AppendLine("float4 {0};", ShaderGeneratorNames.ScreenPosition);
-
-                foreach (var channel in vertexRequirements.requiresMeshUVs.Distinct())
-                    vertexDescriptionInputStruct.AppendLine("half4 {0};", channel.GetUVName());
-
-                if (vertexRequirements.requiresTime)
-                {
-                    vertexDescriptionInputStruct.AppendLine("float3 {0};", ShaderGeneratorNames.TimeParameters);
-                }
-            }
-
-            // -------------------------------------
-            // Generate Output structure for Vertex Description function
-
-            SubShaderGenerator.GenerateVertexDescriptionStruct(vertexDescriptionStruct, vertexSlots);
-
-            // -------------------------------------
-            // Generate Vertex Description function
-
-            SubShaderGenerator.GenerateVertexDescriptionFunction(
-                masterNode.owner as GraphData,
-                vertexDescriptionFunction,
-                functionRegistry,
-                shaderProperties,
-                shaderKeywords,
-                mode,
-                masterNode,
-                vertexNodes,
-                keywordPermutationsPerVertexNode,
-                vertexSlots);
-
-            // ----------------------------------------------------- //
-            //               START SURFACE DESCRIPTION               //
-            // ----------------------------------------------------- //
-
-            // -------------------------------------
-            // Generate Input structure for Surface Description function
-            // Surface Description Input requirements are needed to exclude intermediate translation spaces
-
-            surfaceDescriptionInputStruct.AppendLine("struct SurfaceDescriptionInputs");
-            using (surfaceDescriptionInputStruct.BlockSemicolonScope())
-            {
-                ShaderGenerator.GenerateSpaceTranslationSurfaceInputs(surfaceRequirements.requiresNormal, InterpolatorType.Normal, surfaceDescriptionInputStruct);
-                ShaderGenerator.GenerateSpaceTranslationSurfaceInputs(surfaceRequirements.requiresTangent, InterpolatorType.Tangent, surfaceDescriptionInputStruct);
-                ShaderGenerator.GenerateSpaceTranslationSurfaceInputs(surfaceRequirements.requiresBitangent, InterpolatorType.BiTangent, surfaceDescriptionInputStruct);
-                ShaderGenerator.GenerateSpaceTranslationSurfaceInputs(surfaceRequirements.requiresViewDir, InterpolatorType.ViewDirection, surfaceDescriptionInputStruct);
-                ShaderGenerator.GenerateSpaceTranslationSurfaceInputs(surfaceRequirements.requiresPosition, InterpolatorType.Position, surfaceDescriptionInputStruct);
-
-                if (surfaceRequirements.requiresVertexColor)
-                    surfaceDescriptionInputStruct.AppendLine("float4 {0};", ShaderGeneratorNames.VertexColor);
-
-                if (surfaceRequirements.requiresScreenPosition)
-                    surfaceDescriptionInputStruct.AppendLine("float4 {0};", ShaderGeneratorNames.ScreenPosition);
-
-                if (surfaceRequirements.requiresFaceSign)
-                    surfaceDescriptionInputStruct.AppendLine("float {0};", ShaderGeneratorNames.FaceSign);
-
-                foreach (var channel in surfaceRequirements.requiresMeshUVs.Distinct())
-                    surfaceDescriptionInputStruct.AppendLine("half4 {0};", channel.GetUVName());
-
-                if (surfaceRequirements.requiresTime)
-                {
-                    surfaceDescriptionInputStruct.AppendLine("float3 {0};", ShaderGeneratorNames.TimeParameters);
-                }
-            }
-
-            // -------------------------------------
-            // Generate Output structure for Surface Description function
-
-            SubShaderGenerator.GenerateSurfaceDescriptionStruct(surfaceDescriptionStruct, pixelSlots);
-
-            // -------------------------------------
-            // Generate Surface Description function
-
-            SubShaderGenerator.GenerateSurfaceDescriptionFunction(
-                pixelNodes,
-                keywordPermutationsPerPixelNode,
-                masterNode,
-                masterNode.owner as GraphData,
-                surfaceDescriptionFunction,
-                functionRegistry,
-                shaderProperties,
-                shaderKeywords,
-                mode,
-                "PopulateSurfaceData",
-                "SurfaceDescription",
-                null,
-                pixelSlots);
-
-            // ----------------------------------------------------- //
-            //           GENERATE VERTEX > PIXEL PIPELINE            //
-            // ----------------------------------------------------- //
-
-            // -------------------------------------
-            // Keyword declarations
-
-            shaderKeywords.GetKeywordsDeclaration(shaderKeywordDeclarations, mode);
-
-            // -------------------------------------
-            // Property uniforms
-
-            shaderProperties.GetPropertiesDeclaration(shaderPropertyUniforms, mode, masterNode.owner.concretePrecision);
-
-            // -------------------------------------
-            // Generate Input structure for Vertex shader
-
-            SubShaderGenerator.GenerateApplicationVertexInputs(vertexRequirements.Union(pixelRequirements.Union(modelRequirements)), vertexInputStruct);
-
-            // -------------------------------------
-            // Generate standard transformations
-            // This method ensures all required transform data is available in vertex and pixel stages
-
-            ShaderGenerator.GenerateStandardTransforms(
-                3,
-                10,
-                vertexOutputStruct,
-                vertexShader,
-                vertexShaderDescriptionInputs,
-                vertexShaderOutputs,
-                pixelShader,
-                pixelShaderSurfaceInputs,
-                pixelRequirements,
-                surfaceRequirements,
-                modelRequirements,
-                vertexRequirements,
-                CoordinateSpace.World);
-
-            // -------------------------------------
-            // Generate pixel shader surface remap
-
-            foreach (var slot in pixelSlots)
-            {
-                pixelShaderSurfaceRemap.AppendLine("{0} = surf.{0};", slot.shaderOutputName);
-            }
-
-            // -------------------------------------
-            // Extra pixel shader work
-
-            var faceSign = new ShaderStringBuilder();
-
-            if (pixelRequirements.requiresFaceSign)
-                faceSign.AppendLine(", half FaceSign : VFACE");
-
-            // ----------------------------------------------------- //
-            //                      FINALIZE                         //
-            // ----------------------------------------------------- //
-
-            // -------------------------------------
-            // Combine Graph sections
-
-            graph.AppendLines(shaderKeywordDeclarations.ToString());
-            graph.AppendLines(shaderPropertyUniforms.ToString());
-
-            graph.AppendLine(vertexDescriptionInputStruct.ToString());
-            graph.AppendLine(surfaceDescriptionInputStruct.ToString());
-
-            graph.AppendLine(functionBuilder.ToString());
-
-            graph.AppendLine(vertexDescriptionStruct.ToString());
-            graph.AppendLine(vertexDescriptionFunction.ToString());
-
-            graph.AppendLine(surfaceDescriptionStruct.ToString());
-            graph.AppendLine(surfaceDescriptionFunction.ToString());
-
-            graph.AppendLine(vertexInputStruct.ToString());
-
-            // -------------------------------------
-            // Generate final subshader
-
-            var resultPass = template.Replace("${Tags}", string.Empty);
-            resultPass = resultPass.Replace("${Blending}", blendingBuilder.ToString());
-            resultPass = resultPass.Replace("${Culling}", cullingBuilder.ToString());
-            resultPass = resultPass.Replace("${ZTest}", zTestBuilder.ToString());
-            resultPass = resultPass.Replace("${ZWrite}", zWriteBuilder.ToString());
-            resultPass = resultPass.Replace("${Defines}", defines.ToString());
-
-            resultPass = resultPass.Replace("${Graph}", graph.ToString());
-            resultPass = resultPass.Replace("${VertexOutputStruct}", vertexOutputStruct.ToString());
-
-            resultPass = resultPass.Replace("${VertexShader}", vertexShader.ToString());
-            resultPass = resultPass.Replace("${VertexShaderDescriptionInputs}", vertexShaderDescriptionInputs.ToString());
-            resultPass = resultPass.Replace("${VertexShaderOutputs}", vertexShaderOutputs.ToString());
-
-            resultPass = resultPass.Replace("${FaceSign}", faceSign.ToString());
-            resultPass = resultPass.Replace("${PixelShader}", pixelShader.ToString());
-            resultPass = resultPass.Replace("${PixelShaderSurfaceInputs}", pixelShaderSurfaceInputs.ToString());
-            resultPass = resultPass.Replace("${PixelShaderSurfaceRemap}", pixelShaderSurfaceRemap.ToString());
-
-            return resultPass;
-        }
-
         static List<Dependency[]> k_Dependencies = new List<Dependency[]>()
         {
-            UniversalShaderStructs.FragInputs.dependencies,
             UniversalShaderStructs.Varyings.standardDependencies,
             UniversalShaderStructs.SurfaceDescriptionInputs.dependencies,
             UniversalShaderStructs.VertexDescriptionInputs.dependencies
         };
 
-        public static bool GenerateShaderPass(AbstractMaterialNode masterNode, Pass pass, GenerationMode mode, ActiveFields activeFields, ShaderGenerator result, List<string> sourceAssetDependencyPaths, bool vertexActive, SurfaceMaterialTags tags)
+        static void GetUpstreamNodesForShaderPass(AbstractMaterialNode masterNode, ShaderPass pass, out List<AbstractMaterialNode> vertexNodes, out List<AbstractMaterialNode> pixelNodes)
         {
-            string templateLocation = GetTemplatePath(pass.TemplateName);
-            if (!File.Exists(templateLocation))
-            {
-                // TODO: produce error here
-                Debug.LogError("Template not found: " + templateLocation);
-                return false;
-            }
+            // Traverse Graph Data
+            vertexNodes = Graphing.ListPool<AbstractMaterialNode>.Get();
+            NodeUtils.DepthFirstCollectNodesFromNode(vertexNodes, masterNode, NodeUtils.IncludeSelf.Include, pass.vertexPorts);
 
-            bool debugOutput = true;
+            pixelNodes = Graphing.ListPool<AbstractMaterialNode>.Get();
+            NodeUtils.DepthFirstCollectNodesFromNode(pixelNodes, masterNode, NodeUtils.IncludeSelf.Include, pass.pixelPorts);
+        }
 
-            // grab all of the active nodes (for pixel and vertex graphs)
-            var vertexNodes = Graphing.ListPool<AbstractMaterialNode>.Get();
-            NodeUtils.DepthFirstCollectNodesFromNode(vertexNodes, masterNode, NodeUtils.IncludeSelf.Include, pass.VertexShaderSlots);
-
-            var pixelNodes = Graphing.ListPool<AbstractMaterialNode>.Get();
-            NodeUtils.DepthFirstCollectNodesFromNode(pixelNodes, masterNode, NodeUtils.IncludeSelf.Include, pass.PixelShaderSlots);
-
-            // graph requirements describe what the graph itself requires
+        static void GetActiveFieldsAndPermutationsForNodes(AbstractMaterialNode masterNode, ShaderPass pass, 
+            KeywordCollector keywordCollector,  List<AbstractMaterialNode> vertexNodes, List<AbstractMaterialNode> pixelNodes,
+            List<int>[] vertexNodePermutations, List<int>[] pixelNodePermutations,
+            ActiveFields activeFields, out ShaderGraphRequirementsPerKeyword graphRequirements)
+        {
+            // Initialize requirements
             ShaderGraphRequirementsPerKeyword pixelRequirements = new ShaderGraphRequirementsPerKeyword();
             ShaderGraphRequirementsPerKeyword vertexRequirements = new ShaderGraphRequirementsPerKeyword();
-            ShaderGraphRequirementsPerKeyword graphRequirements = new ShaderGraphRequirementsPerKeyword();
+            graphRequirements = new ShaderGraphRequirementsPerKeyword();
 
-            // Function Registry tracks functions to remove duplicates, it wraps a string builder that stores the combined function string
-            ShaderStringBuilder graphNodeFunctions = new ShaderStringBuilder();
-            graphNodeFunctions.IncreaseIndent();
-            var functionRegistry = new FunctionRegistry(graphNodeFunctions);
-
-            // TODO: this can be a shared function for all HDRP master nodes -- From here through GraphUtil.GenerateSurfaceDescription(..)
-
-            // Build the list of active slots based on what the pass requires
-            var pixelSlots = UniversalSubShaderUtilities.FindMaterialSlotsOnNode(pass.PixelShaderSlots, masterNode);
-            var vertexSlots = UniversalSubShaderUtilities.FindMaterialSlotsOnNode(pass.VertexShaderSlots, masterNode);
-
-            // properties used by either pixel and vertex shader
-            PropertyCollector sharedProperties = new PropertyCollector();
-            KeywordCollector sharedKeywords = new KeywordCollector();
-            ShaderStringBuilder shaderPropertyUniforms = new ShaderStringBuilder(1);
-            ShaderStringBuilder shaderKeywordDeclarations = new ShaderStringBuilder(1);
-            ShaderStringBuilder shaderKeywordPermutations = new ShaderStringBuilder(1);
-
-            // build the graph outputs structure to hold the results of each active slots (and fill out activeFields to indicate they are active)
-            string pixelGraphInputStructName = "SurfaceDescriptionInputs";
-            string pixelGraphOutputStructName = "SurfaceDescription";
-            string pixelGraphEvalFunctionName = "SurfaceDescriptionFunction";
-            ShaderStringBuilder pixelGraphEvalFunction = new ShaderStringBuilder();
-            ShaderStringBuilder pixelGraphOutputs = new ShaderStringBuilder();
-
-            // ----------------------------------------------------- //
-            //                         KEYWORDS                      //
-            // ----------------------------------------------------- //
-
-            // -------------------------------------
-            // Get keyword permutations
-
-            masterNode.owner.CollectShaderKeywords(sharedKeywords, mode);
-
-            // Track permutation indices for all nodes
-            List<int>[] keywordPermutationsPerVertexNode = new List<int>[vertexNodes.Count];
-            List<int>[] keywordPermutationsPerPixelNode = new List<int>[pixelNodes.Count];
-
-            // -------------------------------------
-            // Evaluate all permutations
-
-            if (sharedKeywords.permutations.Count > 0)
+            // Evaluate all Keyword permutations
+            if (keywordCollector.permutations.Count > 0)
             {
-                for(int i = 0; i < sharedKeywords.permutations.Count; i++)
+                for(int i = 0; i < keywordCollector.permutations.Count; i++)
                 {
                     // Get active nodes for this permutation
                     var localVertexNodes = UnityEngine.Rendering.ListPool<AbstractMaterialNode>.Get();
                     var localPixelNodes = UnityEngine.Rendering.ListPool<AbstractMaterialNode>.Get();
-                    NodeUtils.DepthFirstCollectNodesFromNode(localVertexNodes, masterNode, NodeUtils.IncludeSelf.Include, pass.VertexShaderSlots, sharedKeywords.permutations[i]);
-                    NodeUtils.DepthFirstCollectNodesFromNode(localPixelNodes, masterNode, NodeUtils.IncludeSelf.Include, pass.PixelShaderSlots, sharedKeywords.permutations[i]);
+                    NodeUtils.DepthFirstCollectNodesFromNode(localVertexNodes, masterNode, NodeUtils.IncludeSelf.Include, pass.vertexPorts, keywordCollector.permutations[i]);
+                    NodeUtils.DepthFirstCollectNodesFromNode(localPixelNodes, masterNode, NodeUtils.IncludeSelf.Include, pass.pixelPorts, keywordCollector.permutations[i]);
 
                     // Track each vertex node in this permutation
                     foreach(AbstractMaterialNode vertexNode in localVertexNodes)
                     {
                         int nodeIndex = vertexNodes.IndexOf(vertexNode);
 
-                        if(keywordPermutationsPerVertexNode[nodeIndex] == null)
-                            keywordPermutationsPerVertexNode[nodeIndex] = new List<int>();
-                        keywordPermutationsPerVertexNode[nodeIndex].Add(i);
+                        if(vertexNodePermutations[nodeIndex] == null)
+                            vertexNodePermutations[nodeIndex] = new List<int>();
+                        vertexNodePermutations[nodeIndex].Add(i);
                     }
 
                     // Track each pixel node in this permutation
@@ -1014,267 +545,349 @@ namespace UnityEditor.Rendering.Universal
                     {
                         int nodeIndex = pixelNodes.IndexOf(pixelNode);
 
-                        if(keywordPermutationsPerPixelNode[nodeIndex] == null)
-                            keywordPermutationsPerPixelNode[nodeIndex] = new List<int>();
-                        keywordPermutationsPerPixelNode[nodeIndex].Add(i);
+                        if(pixelNodePermutations[nodeIndex] == null)
+                            pixelNodePermutations[nodeIndex] = new List<int>();
+                        pixelNodePermutations[nodeIndex].Add(i);
                     }
 
-                    // Get active requirements for this permutation
-                    var localVertexRequirements = ShaderGraphRequirements.FromNodes(localVertexNodes, ShaderStageCapability.Vertex, false);
-                    var localPixelRequirements = ShaderGraphRequirements.FromNodes(localPixelNodes, ShaderStageCapability.Fragment, false);
+                    // Get requirements for this permutation
+                    vertexRequirements[i].SetRequirements(ShaderGraphRequirements.FromNodes(localVertexNodes, ShaderStageCapability.Vertex, false));
+                    pixelRequirements[i].SetRequirements(ShaderGraphRequirements.FromNodes(localPixelNodes, ShaderStageCapability.Fragment, false));
 
-                    vertexRequirements[i].SetRequirements(localVertexRequirements);
-                    pixelRequirements[i].SetRequirements(localPixelRequirements);
-
-                    // build initial requirements
-                    UniversalShaderStructs.AddActiveFieldsFromPixelGraphRequirements(activeFields[i], localPixelRequirements);
-                    UniversalShaderStructs.AddActiveFieldsFromVertexGraphRequirements(activeFields[i], localVertexRequirements);
+                    // Add active fields
+                    UniversalShaderStructs.AddActiveFieldsFromVertexGraphRequirements(activeFields[i], vertexRequirements[i].requirements);
+                    UniversalShaderStructs.AddActiveFieldsFromPixelGraphRequirements(activeFields[i], pixelRequirements[i].requirements);
                 }
             }
+            // No Keywords
             else
             {
-                pixelRequirements.baseInstance.SetRequirements(ShaderGraphRequirements.FromNodes(pixelNodes, ShaderStageCapability.Fragment, false));   // TODO: is ShaderStageCapability.Fragment correct?
+                // Get requirements
                 vertexRequirements.baseInstance.SetRequirements(ShaderGraphRequirements.FromNodes(vertexNodes, ShaderStageCapability.Vertex, false));
-                UniversalShaderStructs.AddActiveFieldsFromPixelGraphRequirements(activeFields.baseInstance, pixelRequirements.baseInstance.requirements);
-                UniversalShaderStructs.AddActiveFieldsFromVertexGraphRequirements(activeFields.baseInstance, vertexRequirements.baseInstance.requirements);
-            }
+                pixelRequirements.baseInstance.SetRequirements(ShaderGraphRequirements.FromNodes(pixelNodes, ShaderStageCapability.Fragment, false));
 
+                // Add active fields
+                UniversalShaderStructs.AddActiveFieldsFromVertexGraphRequirements(activeFields.baseInstance, vertexRequirements.baseInstance.requirements);
+                UniversalShaderStructs.AddActiveFieldsFromPixelGraphRequirements(activeFields.baseInstance, pixelRequirements.baseInstance.requirements);
+            }
+            
+            // Build graph requirements
             graphRequirements.UnionWith(pixelRequirements);
             graphRequirements.UnionWith(vertexRequirements);
+        }
 
-            // build the graph outputs structure, and populate activeFields with the fields of that structure
-            SubShaderGenerator.GenerateSurfaceDescriptionStruct(pixelGraphOutputs, pixelSlots, pixelGraphOutputStructName, activeFields.baseInstance);
+        public static bool GenerateShaderPass(AbstractMaterialNode masterNode, ShaderPass pass, GenerationMode mode, ActiveFields activeFields, ShaderGenerator result, List<string> sourceAssetDependencyPaths)
+        {
+            // --------------------------------------------------
+            // Setup
 
-            // Build the graph evaluation code, to evaluate the specified slots
-            SubShaderGenerator.GenerateSurfaceDescriptionFunction(
-                pixelNodes,
-                keywordPermutationsPerPixelNode,
-                masterNode,
-                masterNode.owner as GraphData,
-                pixelGraphEvalFunction,
-                functionRegistry,
-                sharedProperties,
-                sharedKeywords,
-                mode,
-                pixelGraphEvalFunctionName,
-                pixelGraphOutputStructName,
-                null,
-                pixelSlots,
-                pixelGraphInputStructName);
+            // Initiailize Collectors
+            var propertyCollector = new PropertyCollector();
+            var keywordCollector = new KeywordCollector();
+            masterNode.owner.CollectShaderKeywords(keywordCollector, mode);
 
-            string vertexGraphInputStructName = "VertexDescriptionInputs";
-            string vertexGraphOutputStructName = "VertexDescription";
-            string vertexGraphEvalFunctionName = "VertexDescriptionFunction";
-            ShaderStringBuilder vertexGraphEvalFunction = new ShaderStringBuilder();
-            ShaderStringBuilder vertexGraphOutputs = new ShaderStringBuilder();
+            // Get upstream nodes from ShaderPass port mask
+            List<AbstractMaterialNode> vertexNodes;
+            List<AbstractMaterialNode> pixelNodes;
+            GetUpstreamNodesForShaderPass(masterNode, pass, out vertexNodes, out pixelNodes);
 
-            // check for vertex animation -- enables HAVE_VERTEX_MODIFICATION
-            if (vertexActive)
+            // Track permutation indices for all nodes
+            List<int>[] vertexNodePermutations = new List<int>[vertexNodes.Count];
+            List<int>[] pixelNodePermutations = new List<int>[pixelNodes.Count];
+
+            // Get active fields from upstream Node requirements
+            ShaderGraphRequirementsPerKeyword graphRequirements;
+            GetActiveFieldsAndPermutationsForNodes(masterNode, pass, keywordCollector, vertexNodes, pixelNodes,
+                vertexNodePermutations, pixelNodePermutations, activeFields, out graphRequirements);
+
+            // GET CUSTOM ACTIVE FIELDS HERE!
+
+            // Get active fields from ShaderPass
+            UniversalShaderStructs.AddRequiredFields(pass.requiredAttributes, activeFields.baseInstance);
+            UniversalShaderStructs.AddRequiredFields(pass.requiredVaryings, activeFields.baseInstance);
+
+            // Get Port references from ShaderPass
+            var pixelSlots = UniversalSubShaderUtilities.FindMaterialSlotsOnNode(pass.pixelPorts, masterNode);
+            var vertexSlots = UniversalSubShaderUtilities.FindMaterialSlotsOnNode(pass.vertexPorts, masterNode);                     
+
+            // Function Registry
+            var functionBuilder = new ShaderStringBuilder(1);
+            var functionRegistry = new FunctionRegistry(functionBuilder);
+
+            // Hash table of named $splice(name) commands
+            // Key: splice token
+            // Value: string to splice
+            Dictionary<string, string> spliceCommands = new Dictionary<string, string>();
+
+            // --------------------------------------------------
+            // Pass Setup
+
+            spliceCommands.Add("PassName", pass.displayName);
+            spliceCommands.Add("LightMode", pass.lightMode);
+            UniversalSubShaderUtilities.BuildRenderStatesFromPass(pass, ref spliceCommands);
+
+            // --------------------------------------------------
+            // Pass Code
+
+            // Pragmas
+            using (var passPragmaBuilder = new ShaderStringBuilder())
             {
-                vertexActive = true;
-                activeFields.baseInstance.Add("features.modifyMesh");
+                if(pass.pragmas != null)
+                {
+                    foreach(string pragma in pass.pragmas)
+                    {
+                        passPragmaBuilder.AppendLine($"#pragma {pragma}");
+                    }
+                }
+                spliceCommands.Add("PassPragmas", passPragmaBuilder.ToString());
+            }
 
-                // -------------------------------------
-                // Generate Output structure for Vertex Description function
-                SubShaderGenerator.GenerateVertexDescriptionStruct(vertexGraphOutputs, vertexSlots, vertexGraphOutputStructName, activeFields.baseInstance);
+            // Includes
+            using (var passIncludeBuilder = new ShaderStringBuilder())
+            {
+                if(pass.includes != null)
+                {
+                    foreach(string include in pass.includes)
+                    {
+                        passIncludeBuilder.AppendLine($"#include \"{include}\"");
+                    }
+                }
+                spliceCommands.Add("PassIncludes", passIncludeBuilder.ToString());
+            }
 
-                // -------------------------------------
-                // Generate Vertex Description function
+            // Keywords
+            using (var passKeywordBuilder = new ShaderStringBuilder())
+            {
+                if(pass.keywords != null)
+                {
+                    foreach(KeywordDescriptor keyword in pass.keywords)
+                    {
+                        passKeywordBuilder.AppendLine(keyword.ToDeclarationString());
+                    }
+                }
+                spliceCommands.Add("PassKeywords", passKeywordBuilder.ToString());
+            }
+
+            // --------------------------------------------------
+            // Graph Vertex
+
+            var vertexBuilder = new ShaderStringBuilder();
+
+            // If vertex modification enabled
+            if (activeFields.baseInstance.Contains("features.modifyMesh"))
+            {
+                // Setup
+                string vertexGraphInputName = "VertexDescriptionInputs";
+                string vertexGraphOutputName = "VertexDescription";
+                string vertexGraphFunctionName = "VertexDescriptionFunction";
+                var vertexGraphInputGenerator = new ShaderGenerator();
+                var vertexGraphFunctionBuilder = new ShaderStringBuilder();
+                var vertexGraphOutputBuilder = new ShaderStringBuilder();
+
+                // Build vertex graph inputs
+                ShaderSpliceUtil.BuildType(typeof(UniversalShaderStructs.VertexDescriptionInputs), activeFields, vertexGraphInputGenerator);
+
+                // Build vertex graph outputs
+                // Add struct fields to active fields
+                SubShaderGenerator.GenerateVertexDescriptionStruct(vertexGraphOutputBuilder, vertexSlots, vertexGraphOutputName, activeFields.baseInstance);
+
+                // Build vertex graph functions from ShaderPass vertex port mask
                 SubShaderGenerator.GenerateVertexDescriptionFunction(
                     masterNode.owner as GraphData,
-                    vertexGraphEvalFunction,
+                    vertexGraphFunctionBuilder,
                     functionRegistry,
-                    sharedProperties,
-                    sharedKeywords,
+                    propertyCollector,
+                    keywordCollector,
                     mode,
                     masterNode,
                     vertexNodes,
-                    keywordPermutationsPerVertexNode,
+                    vertexNodePermutations,
                     vertexSlots,
-                    vertexGraphInputStructName,
-                    vertexGraphEvalFunctionName,
-                    vertexGraphOutputStructName);
+                    vertexGraphInputName,
+                    vertexGraphFunctionName,
+                    vertexGraphOutputName);
+
+                // Generate final shader strings
+                vertexBuilder.AppendLines(vertexGraphInputGenerator.GetShaderString(0, false));
+                vertexBuilder.AppendNewLine();
+                vertexBuilder.AppendLines(vertexGraphOutputBuilder.ToString());
+                vertexBuilder.AppendNewLine();
+                vertexBuilder.AppendLines(vertexGraphFunctionBuilder.ToString());
+                vertexBuilder.AppendNewLine();
             }
 
-            var blendCode = new ShaderStringBuilder();
-            var cullCode = new ShaderStringBuilder();
-            var zTestCode = new ShaderStringBuilder();
-            var zWriteCode = new ShaderStringBuilder();
-            var zClipCode = new ShaderStringBuilder();
-            var stencilCode = new ShaderStringBuilder();
-            var colorMaskCode = new ShaderStringBuilder();
-            UniversalSubShaderUtilities.BuildRenderStatesFromPass(pass, blendCode, cullCode, zTestCode, zWriteCode, zClipCode, stencilCode, colorMaskCode);
+            // Add to splice commands
+            spliceCommands.Add("GraphVertex", vertexBuilder.ToString());
 
-            UniversalShaderStructs.AddRequiredFields(pass.RequiredFields, activeFields.baseInstance);
+            // --------------------------------------------------
+            // Graph Pixel
 
-            // Get keyword declarations
-            sharedKeywords.GetKeywordsDeclaration(shaderKeywordDeclarations, mode);
+            // Setup
+            string pixelGraphInputName = "SurfaceDescriptionInputs";
+            string pixelGraphOutputName = "SurfaceDescription";
+            string pixelGraphFunctionName = "SurfaceDescriptionFunction";
+            var pixelGraphInputGenerator = new ShaderGenerator();
+            var pixelGraphOutputBuilder = new ShaderStringBuilder();
+            var pixelGraphFunctionBuilder = new ShaderStringBuilder();
 
-            // Get property declarations
-            sharedProperties.GetPropertiesDeclaration(shaderPropertyUniforms, mode, masterNode.owner.concretePrecision);
+            // Build pixel graph inputs
+            ShaderSpliceUtil.BuildType(typeof(UniversalShaderStructs.SurfaceDescriptionInputs), activeFields, pixelGraphInputGenerator);
 
-            // propagate active field requirements using dependencies
-            foreach (var instance in activeFields.all.instances)
-                ShaderSpliceUtil.ApplyDependencies(instance, k_Dependencies);
+            // Build pixel graph outputs
+            // Add struct fields to active fields
+            SubShaderGenerator.GenerateSurfaceDescriptionStruct(pixelGraphOutputBuilder, pixelSlots, pixelGraphOutputName, activeFields.baseInstance);
 
-            // debug output all active fields
-            var interpolatorDefines = new ShaderGenerator();
-            if (debugOutput)
+            // Build pixel graph functions from ShaderPass pixel port mask
+            SubShaderGenerator.GenerateSurfaceDescriptionFunction(
+                pixelNodes,
+                pixelNodePermutations,
+                masterNode,
+                masterNode.owner as GraphData,
+                pixelGraphFunctionBuilder,
+                functionRegistry,
+                propertyCollector,
+                keywordCollector,
+                mode,
+                pixelGraphFunctionName,
+                pixelGraphOutputName,
+                null,
+                pixelSlots,
+                pixelGraphInputName);
+
+            using (var pixelBuilder = new ShaderStringBuilder())
             {
-                interpolatorDefines.AddShaderChunk("// ACTIVE FIELDS:");
-                foreach (string f in activeFields.baseInstance.fields)
-                {
-                    interpolatorDefines.AddShaderChunk("//   " + f);
-                }
+                // Generate final shader strings
+                pixelBuilder.AppendLines(pixelGraphInputGenerator.GetShaderString(0, false));
+                pixelBuilder.AppendNewLine();
+                pixelBuilder.AppendLines(pixelGraphOutputBuilder.ToString());
+                pixelBuilder.AppendNewLine();
+                pixelBuilder.AppendLines(pixelGraphFunctionBuilder.ToString());
+                pixelBuilder.AppendNewLine();
+                
+                // Add to splice commands
+                spliceCommands.Add("GraphPixel", pixelBuilder.ToString());
             }
 
-            // build graph inputs structures
-            ShaderGenerator pixelGraphInputs = new ShaderGenerator();
-            ShaderSpliceUtil.BuildType(typeof(UniversalShaderStructs.SurfaceDescriptionInputs), activeFields, pixelGraphInputs);
-            ShaderGenerator vertexGraphInputs = new ShaderGenerator();
-            ShaderSpliceUtil.BuildType(typeof(UniversalShaderStructs.VertexDescriptionInputs), activeFields, vertexGraphInputs);
+            // --------------------------------------------------
+            // Graph Functions
 
-            ShaderGenerator instancingOptions = new ShaderGenerator();
+            spliceCommands.Add("GraphFunctions", functionBuilder.ToString());
+
+            // --------------------------------------------------
+            // Graph Keywords
+
+            using (var keywordBuilder = new ShaderStringBuilder())
             {
-                instancingOptions.AddShaderChunk("#pragma multi_compile_instancing", true);
-                if (pass.ExtraInstancingOptions != null)
-                {
-                    foreach (var instancingOption in pass.ExtraInstancingOptions)
-                        instancingOptions.AddShaderChunk(instancingOption);
-                }
+                keywordCollector.GetKeywordsDeclaration(keywordBuilder, mode);
+                spliceCommands.Add("GraphKeywords", keywordBuilder.ToString());
             }
 
-            ShaderGenerator defines = new ShaderGenerator();
+            // --------------------------------------------------
+            // Graph Properties
+
+            using (var propertyBuilder = new ShaderStringBuilder())
             {
-                defines.AddShaderChunk(string.Format("#define SHADERPASS {0}", pass.ShaderPassName), true);
-                if (pass.ExtraDefines != null)
-                {
-                    foreach (var define in pass.ExtraDefines)
-                        defines.AddShaderChunk(define);
-                }
+                propertyCollector.GetPropertiesDeclaration(propertyBuilder, mode, masterNode.owner.concretePrecision);
+                spliceCommands.Add("GraphProperties", propertyBuilder.ToString());
+            }
+
+            // --------------------------------------------------
+            // Graph Defines
+
+            using (var graphDefines = new ShaderStringBuilder())
+            {
+                graphDefines.AppendLine("#define SHADERPASS {0}", pass.referenceName);
 
                 if (graphRequirements.permutationCount > 0)
                 {
+                    List<int> activePermutationIndices;
+
+                    // Depth Texture
+                    activePermutationIndices = graphRequirements.allPermutations.instances
+                        .Where(p => p.requirements.requiresDepthTexture)
+                        .Select(p => p.permutationIndex)
+                        .ToList();
+                    if (activePermutationIndices.Count > 0)
                     {
-                        var activePermutationIndices = graphRequirements.allPermutations.instances
-                            .Where(p => p.requirements.requiresDepthTexture)
-                            .Select(p => p.permutationIndex)
-                            .ToList();
-                        if (activePermutationIndices.Count > 0)
-                        {
-                            defines.AddShaderChunk(KeywordUtil.GetKeywordPermutationSetConditional(activePermutationIndices));
-                            defines.AddShaderChunk("#define REQUIRE_DEPTH_TEXTURE");
-                            defines.AddShaderChunk("#endif");
-                        }
+                        graphDefines.AppendLine(KeywordUtil.GetKeywordPermutationSetConditional(activePermutationIndices));
+                        graphDefines.AppendLine("#define REQUIRE_DEPTH_TEXTURE");
+                        graphDefines.AppendLine("#endif");
                     }
 
+                    // Opaque Texture
+                    activePermutationIndices = graphRequirements.allPermutations.instances
+                        .Where(p => p.requirements.requiresCameraOpaqueTexture)
+                        .Select(p => p.permutationIndex)
+                        .ToList();
+                    if (activePermutationIndices.Count > 0)
                     {
-                        var activePermutationIndices = graphRequirements.allPermutations.instances
-                            .Where(p => p.requirements.requiresCameraOpaqueTexture)
-                            .Select(p => p.permutationIndex)
-                            .ToList();
-                        if (activePermutationIndices.Count > 0)
-                        {
-                            defines.AddShaderChunk(KeywordUtil.GetKeywordPermutationSetConditional(activePermutationIndices));
-                            defines.AddShaderChunk("#define REQUIRE_OPAQUE_TEXTURE");
-                            defines.AddShaderChunk("#endif");
-                        }
+                        graphDefines.AppendLine(KeywordUtil.GetKeywordPermutationSetConditional(activePermutationIndices));
+                        graphDefines.AppendLine("#define REQUIRE_OPAQUE_TEXTURE");
+                        graphDefines.AppendLine("#endif");
                     }
                 }
                 else
                 {
+                    // Depth Texture
                     if (graphRequirements.baseInstance.requirements.requiresDepthTexture)
-                        defines.AddShaderChunk("#define REQUIRE_DEPTH_TEXTURE");
+                        graphDefines.AppendLine("#define REQUIRE_DEPTH_TEXTURE");
+
+                    // Opaque Texture
                     if (graphRequirements.baseInstance.requirements.requiresCameraOpaqueTexture)
-                        defines.AddShaderChunk("#define REQUIRE_OPAQUE_TEXTURE");
+                        graphDefines.AppendLine("#define REQUIRE_OPAQUE_TEXTURE");
                 }
 
-                defines.AddGenerator(interpolatorDefines);
+                // Add to splice commands
+                spliceCommands.Add("GraphDefines", graphDefines.ToString());
             }
 
-            var shaderPassIncludes = new ShaderGenerator();
-            if (pass.Includes != null)
-            {
-                foreach (var include in pass.Includes)
-                    shaderPassIncludes.AddShaderChunk(include);
-            }
+            // --------------------------------------------------
+            // Main
 
-            defines.AddShaderChunk("// Shared Graph Keywords");
-            defines.AddShaderChunk(shaderKeywordDeclarations.ToString());
-            defines.AddShaderChunk(shaderKeywordPermutations.ToString());
+            // Main include is expected to contain vert/frag definitions for the pass
+            // This must be defined after all graph code
+            spliceCommands.Add("MainInclude", $"#include \"{pass.mainInclude}\"");
 
-            // build graph code
-            var graph = new ShaderGenerator();
-            {
-                graph.AddShaderChunk("// Shared Graph Properties (uniform inputs)");
-                graph.AddShaderChunk(shaderPropertyUniforms.ToString());
+            // --------------------------------------------------
+            // Debug
 
-                if (vertexActive)
-                {
-                    graph.AddShaderChunk("// Vertex Graph Inputs");
-                    graph.Indent();
-                    graph.AddGenerator(vertexGraphInputs);
-                    graph.Deindent();
-                    graph.AddShaderChunk("// Vertex Graph Outputs");
-                    graph.Indent();
-                    graph.AddShaderChunk(vertexGraphOutputs.ToString());
-                    graph.Deindent();
-                }
+            bool debugOutput = false;
+            // // debug output all active fields
+            // var interpolatorDefines = new ShaderGenerator();
+            // 
+            // if (debugOutput)
+            // {
+            //     interpolatorDefines.AddShaderChunk("// ACTIVE FIELDS:");
+            //     foreach (string f in activeFields.baseInstance.fields)
+            //     {
+            //         interpolatorDefines.AddShaderChunk("//   " + f);
+            //     }
+            // }
 
-                graph.AddShaderChunk("// Pixel Graph Inputs");
-                graph.Indent();
-                graph.AddGenerator(pixelGraphInputs);
-                graph.Deindent();
-                graph.AddShaderChunk("// Pixel Graph Outputs");
-                graph.Indent();
-                graph.AddShaderChunk(pixelGraphOutputs.ToString());
-                graph.Deindent();
+            // --------------------------------------------------
+            // Finalize
 
-                graph.AddShaderChunk("// Shared Graph Node Functions");
-                graph.AddShaderChunk(graphNodeFunctions.ToString());
+            // Propagate active field requirements using dependencies
+            foreach (var instance in activeFields.all.instances)
+                ShaderSpliceUtil.ApplyDependencies(instance, k_Dependencies);
 
-                if (vertexActive)
-                {
-                    graph.AddShaderChunk("// Vertex Graph Evaluation");
-                    graph.Indent();
-                    graph.AddShaderChunk(vertexGraphEvalFunction.ToString());
-                    graph.Deindent();
-                }
+            // Get Template
+            string templateLocation = GetTemplatePath("PassMesh.template");
 
-                graph.AddShaderChunk("// Pixel Graph Evaluation");
-                graph.Indent();
-                graph.AddShaderChunk(pixelGraphEvalFunction.ToString());
-                graph.Deindent();
-            }
+            if (!File.Exists(templateLocation))
+                return false;
 
-            // build the hash table of all named fragments      TODO: could make this Dictionary<string, ShaderGenerator / string>  ?
-            Dictionary<string, string> namedFragments = new Dictionary<string, string>();
-            namedFragments.Add("InstancingOptions", instancingOptions.GetShaderString(0, false));
-            namedFragments.Add("Defines", defines.GetShaderString(2, false));
-            namedFragments.Add("Graph", graph.GetShaderString(2, false));
-            namedFragments.Add("LightMode", pass.LightMode);
-            namedFragments.Add("PassName", pass.Name);
-            namedFragments.Add("Includes", shaderPassIncludes.GetShaderString(2, false));
-            namedFragments.Add("Blending", blendCode.ToString());
-            namedFragments.Add("Culling", cullCode.ToString());
-            namedFragments.Add("ZTest", zTestCode.ToString());
-            namedFragments.Add("ZWrite", zWriteCode.ToString());
-            namedFragments.Add("ZClip", zClipCode.ToString());
-            namedFragments.Add("Stencil", stencilCode.ToString());
-            namedFragments.Add("ColorMask", colorMaskCode.ToString());
-
-            // this is the format string for building the 'C# qualified assembly type names' for $buildType() commands
+            // Format string for building 'C# qualified assembly type names' for $buildType() commands
             string buildTypeAssemblyNameFormat = "UnityEditor.Rendering.Universal.UniversalShaderStructs+{0}, " + typeof(UniversalSubShaderUtilities).Assembly.FullName.ToString();
 
+            // Get Template preprocessor
             string sharedTemplatePath = Path.Combine(Path.Combine("Packages/com.unity.render-pipelines.universal", "Editor"), "ShaderGraph/DuplicateGenCode");
-            // process the template to generate the shader code for this pass
-            ShaderSpliceUtil.TemplatePreprocessor templatePreprocessor =
-                new ShaderSpliceUtil.TemplatePreprocessor(activeFields, namedFragments, debugOutput, sharedTemplatePath, sourceAssetDependencyPaths, buildTypeAssemblyNameFormat);
-
+            var templatePreprocessor = new ShaderSpliceUtil.TemplatePreprocessor(activeFields, spliceCommands, 
+                debugOutput, sharedTemplatePath, sourceAssetDependencyPaths, buildTypeAssemblyNameFormat);
+            
+            // Process Template
             templatePreprocessor.ProcessTemplateFile(templateLocation);
-
             result.AddShaderChunk(templatePreprocessor.GetShaderCode().ToString(), false);
-
             return true;
         }
 
@@ -1295,41 +908,24 @@ namespace UnityEditor.Rendering.Universal
             return activeSlots;
         }
 
-        public static void BuildRenderStatesFromPass(
-            Pass pass,
-            ShaderStringBuilder blendCode,
-            ShaderStringBuilder cullCode,
-            ShaderStringBuilder zTestCode,
-            ShaderStringBuilder zWriteCode,
-            ShaderStringBuilder zClipCode,
-            ShaderStringBuilder stencilCode,
-            ShaderStringBuilder colorMaskCode)
+        public static void BuildRenderStatesFromPass(ShaderPass pass, ref Dictionary<string, string> spliceCommands)
         {
-            if (pass.BlendOverride != null)
-                blendCode.AppendLine(pass.BlendOverride);
+            spliceCommands.Add("Blending", pass.BlendOverride != null ? pass.BlendOverride : string.Empty);
+            spliceCommands.Add("Culling", pass.CullOverride != null ? pass.CullOverride : string.Empty);
+            spliceCommands.Add("ZTest", pass.ZTestOverride != null ? pass.ZTestOverride : string.Empty);
+            spliceCommands.Add("ZWrite", pass.ZWriteOverride != null ? pass.ZWriteOverride : string.Empty);
+            spliceCommands.Add("ZClip", pass.ZClipOverride != null ? pass.ZClipOverride : string.Empty);
+            spliceCommands.Add("ColorMask", pass.ColorMaskOverride != null ? pass.ColorMaskOverride : string.Empty);
 
-            if (pass.BlendOpOverride != null)
-                blendCode.AppendLine(pass.BlendOpOverride);
-
-            if (pass.CullOverride != null)
-                cullCode.AppendLine(pass.CullOverride);
-
-            if (pass.ZTestOverride != null)
-                zTestCode.AppendLine(pass.ZTestOverride);
-
-            if (pass.ZWriteOverride != null)
-                zWriteCode.AppendLine(pass.ZWriteOverride);
-
-            if (pass.ColorMaskOverride != null)
-                colorMaskCode.AppendLine(pass.ColorMaskOverride);
-
-            if (pass.ZClipOverride != null)
-                zClipCode.AppendLine(pass.ZClipOverride);
-
-            if (pass.StencilOverride != null)
+            using(var stencilBuilder = new ShaderStringBuilder())
             {
-                foreach (var str in pass.StencilOverride)
-                    stencilCode.AppendLine(str);
+                if (pass.StencilOverride != null)
+                {
+                    foreach (var str in pass.StencilOverride)
+                        stencilBuilder.AppendLine(str);
+                }
+                
+                spliceCommands.Add("Stencil", stencilBuilder.ToString());
             }
         }
     }
