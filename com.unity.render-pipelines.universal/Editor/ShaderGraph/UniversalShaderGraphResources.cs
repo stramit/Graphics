@@ -76,7 +76,7 @@ namespace UnityEditor.Rendering.Universal
             Vector4 shadowCoord;
             [Semantic("CUSTOM_INSTANCE_ID")] [PreprocessorIf("UNITY_ANY_INSTANCING_ENABLED")]
             uint instanceID;
-            [Semantic("FRONT_FACE_SEMANTIC")][OverrideType("FRONT_FACE_TYPE")][PreprocessorIf("defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)")]
+            [Semantic("FRONT_FACE_SEMANTIC")][SystemGenerated][OverrideType("FRONT_FACE_TYPE")][PreprocessorIf("defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)")]
             bool cullFace;
         };
 
@@ -151,8 +151,8 @@ namespace UnityEditor.Rendering.Universal
             [Optional] Vector4 uv2;
             [Optional] Vector4 uv3;
             [Optional] Vector4 VertexColor;
-            [Optional] float FaceSign;
             [Optional] Vector3 TimeParameters;
+            [Optional] float FaceSign;
         };
 
         public static List<Dependency[]> s_Dependencies = new List<Dependency[]>()
@@ -242,7 +242,7 @@ namespace UnityEditor.Rendering.Universal
                 new Dependency("SurfaceDescriptionInputs.uv2",                       "Varyings.texCoord2"),
                 new Dependency("SurfaceDescriptionInputs.uv3",                       "Varyings.texCoord3"),
                 new Dependency("SurfaceDescriptionInputs.VertexColor",               "Varyings.color"),
-                new Dependency("SurfaceDescriptionInputs.FaceSign",                  "Varyings.isFrontFace"),
+                new Dependency("SurfaceDescriptionInputs.FaceSign",                  "Varyings.cullFace"),
 
                 new Dependency("DepthOffset", "Varyings.positionWS"),
             },

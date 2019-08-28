@@ -77,6 +77,15 @@ namespace UnityEditor.ShaderGraph
         }
     }
 
+    // attribute used to force system generated fields to bottom of structs
+    [System.AttributeUsage(System.AttributeTargets.Field)]
+    class SystemGenerated : System.Attribute
+    {
+        public SystemGenerated()
+        {
+        }
+    }
+
     // attribute used to disable a field using a preprocessor #if
     [System.AttributeUsage(System.AttributeTargets.Field)]
     class PreprocessorIf : System.Attribute

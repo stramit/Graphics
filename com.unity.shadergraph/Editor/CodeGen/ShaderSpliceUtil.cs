@@ -292,6 +292,7 @@ namespace UnityEditor.ShaderGraph
             ShaderGenerator packingStruct = new ShaderGenerator();
             ShaderGenerator packer = new ShaderGenerator();
             ShaderGenerator unpacker = new ShaderGenerator();
+            ShaderGenerator systemGenerated = new ShaderGenerator();
 
             string unpackedStruct = unpacked.Name.ToString();
             string packedStruct = "Packed" + unpacked.Name;
@@ -339,15 +340,32 @@ namespace UnityEditor.ShaderGraph
                         string fieldType = GetFieldType(field, out floatVectorCount);
                         string conditional = GetFieldConditional(field);
 
+                        // System generated fields must appear last in struct definitions
+                        bool isSystemGenerated = field.IsDefined(typeof(SystemGenerated), false);
+
                         if (conditional != null)
                         {
-                            packingStruct.AddShaderChunk("#if " + conditional);
+                            if(isSystemGenerated)
+                            {
+                                systemGenerated.AddShaderChunk("#if " + conditional);
+                            }
+                            else
+                            {
+                                packingStruct.AddShaderChunk("#if " + conditional);
+                            }
                             packer.AddShaderChunk("#if " + conditional);
                             unpacker.AddShaderChunk("#if " + conditional);
                         }
                         if ((semanticString != null) || (floatVectorCount == 0))
                         {
-                            packingStruct.AddShaderChunk(fieldType + " " + field.Name + semanticString + ";" + (isDebug ? " // unpacked" : string.Empty));
+                            if(isSystemGenerated)
+                            {
+                                systemGenerated.AddShaderChunk(fieldType + " " + field.Name + semanticString + ";" + (isDebug ? " // unpacked" : string.Empty));
+                            }
+                            else
+                            {
+                                packingStruct.AddShaderChunk(fieldType + " " + field.Name + semanticString + ";" + (isDebug ? " // unpacked" : string.Empty));
+                            }
                             packer.AddShaderChunk("output." + field.Name + " = input." + field.Name + ";");
                             unpacker.AddShaderChunk("output." + field.Name + " = input." + field.Name + ";");
                         }
@@ -379,7 +397,14 @@ namespace UnityEditor.ShaderGraph
                         }
                         if (conditional != null)
                         {
-                            packingStruct.AddShaderChunk("#endif" + (isDebug ? $" // conditional" : string.Empty));
+                            if(isSystemGenerated)
+                            {
+                                systemGenerated.AddShaderChunk("#endif" + (isDebug ? $" // conditional" : string.Empty));
+                            }
+                            else
+                            {
+                                packingStruct.AddShaderChunk("#endif" + (isDebug ? $" // conditional" : string.Empty));
+                            }
                             packer.AddShaderChunk("#endif" + (isDebug ? $" // conditional" : string.Empty));
                             unpacker.AddShaderChunk("#endif" + (isDebug ? $" // conditional" : string.Empty));
                         }
@@ -392,6 +417,12 @@ namespace UnityEditor.ShaderGraph
             {
                 int count = packedCounts[index];
                 packingStruct.AddShaderChunk(string.Format("{0} interp{1:00} : TEXCOORD{1};" + (isDebug ? " // auto-packed" : string.Empty), vectorTypeNames[count], index));
+            }
+
+            // Add system generated fields at the end
+            if(systemGenerated.numberOfChunks > 0)
+            {
+                packingStruct.AddGenerator(systemGenerated);
             }
 
             // close declarations
