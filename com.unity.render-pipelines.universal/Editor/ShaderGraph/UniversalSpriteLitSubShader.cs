@@ -214,6 +214,15 @@ namespace UnityEditor.Experimental.Rendering.Universal
             var activeFields = new ActiveFields();
             var baseActiveFields = activeFields.baseInstance;
 
+            // Graph Vertex
+            if(masterNode.IsSlotConnected(PBRMasterNode.PositionSlotId))
+            {
+                baseActiveFields.Add("features.graphVertex");
+            }
+
+            // Graph Pixel (always enabled)
+            baseActiveFields.Add("features.graphPixel");
+
             baseActiveFields.Add("SurfaceType.Transparent");
             baseActiveFields.Add("BlendMode.Alpha");
 

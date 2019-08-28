@@ -36,7 +36,6 @@ namespace UnityEditor.ShaderGraph
                 builder.AppendLine(prop.GetPropertyDeclarationString());
             }
             builder.AppendLine("CBUFFER_END");
-            builder.AppendNewLine();
 
             if (batchAll)
                 return;

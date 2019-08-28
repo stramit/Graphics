@@ -1,7 +1,10 @@
 Pass
 {
     Name "$splice(PassName)"
-    Tags { "LightMode" = "$splice(LightMode)" }
+    Tags 
+    { 
+        "LightMode" = "$splice(LightMode)"
+    }
    
     // Render State
     $splice(Blending)
@@ -11,7 +14,6 @@ Pass
     $splice(ColorMask)
 
     HLSLPROGRAM
-
     #pragma vertex vert
     #pragma fragment frag
 
@@ -52,14 +54,7 @@ Pass
     $Varyings.screenPosition:           #define VARYINGS_NEED_SCREENPOSITION
     $Varyings.fogFactorAndVertexLight:  #define VARYINGS_NEED_FOG_AND_VERTEX_LIGHT
     $Varyings.cullFace:                 #define VARYINGS_NEED_CULLFACE
-    $features.modifyMesh:               #define HAVE_MESH_MODIFICATION
-
-    // --------------------------------------------------
-    // Structs and Packing
-
-    $buildType(Attributes)
-
-    $buildType(Varyings)
+    $features.graphVertex:              #define FEATURES_GRAPH_VERTEX
 
     // --------------------------------------------------
     // Graph
@@ -83,10 +78,20 @@ Pass
     $splice(GraphPixel)
 
     // --------------------------------------------------
-    // Main
+    // Structs and Packing
 
-$features.modifyMesh: $include("VertexAnimation.template.hlsl")
-$include("BuildSurfaceDescriptionInputs.template.hlsl")
+    $buildType(Attributes)
+
+    $buildType(Varyings)
+
+    // --------------------------------------------------
+    // Build Graph Inputs
+
+    $features.graphVertex:  $include("BuildVertexDescriptionInputs.template.hlsl")
+    $features.graphPixel:   $include("BuildSurfaceDescriptionInputs.template.hlsl")
+
+    // --------------------------------------------------
+    // Main
 
     $splice(MainInclude)
 

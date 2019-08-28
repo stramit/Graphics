@@ -615,7 +615,7 @@ namespace UnityEditor.Rendering.Universal
             var vertexSlots = UniversalSubShaderUtilities.FindMaterialSlotsOnNode(pass.vertexPorts, masterNode);                     
 
             // Function Registry
-            var functionBuilder = new ShaderStringBuilder(1);
+            var functionBuilder = new ShaderStringBuilder();
             var functionRegistry = new FunctionRegistry(functionBuilder);
 
             // Hash table of named $splice(name) commands
@@ -643,7 +643,9 @@ namespace UnityEditor.Rendering.Universal
                         passPragmaBuilder.AppendLine($"#pragma {pragma}");
                     }
                 }
-                spliceCommands.Add("PassPragmas", passPragmaBuilder.ToString());
+                if(passPragmaBuilder.length == 0)
+                    passPragmaBuilder.AppendLine("// PassPragmas: <None>");
+                spliceCommands.Add("PassPragmas", passPragmaBuilder.ToCodeBlack());
             }
 
             // Includes
@@ -656,7 +658,9 @@ namespace UnityEditor.Rendering.Universal
                         passIncludeBuilder.AppendLine($"#include \"{include}\"");
                     }
                 }
-                spliceCommands.Add("PassIncludes", passIncludeBuilder.ToString());
+                if(passIncludeBuilder.length == 0)
+                    passIncludeBuilder.AppendLine("// PassIncludes: <None>");
+                spliceCommands.Add("PassIncludes", passIncludeBuilder.ToCodeBlack());
             }
 
             // Keywords
@@ -669,7 +673,9 @@ namespace UnityEditor.Rendering.Universal
                         passKeywordBuilder.AppendLine(keyword.ToDeclarationString());
                     }
                 }
-                spliceCommands.Add("PassKeywords", passKeywordBuilder.ToString());
+                if(passKeywordBuilder.length == 0)
+                    passKeywordBuilder.AppendLine("// PassKeywords: <None>");
+                spliceCommands.Add("PassKeywords", passKeywordBuilder.ToCodeBlack());
             }
 
             // --------------------------------------------------
@@ -678,7 +684,7 @@ namespace UnityEditor.Rendering.Universal
             var vertexBuilder = new ShaderStringBuilder();
 
             // If vertex modification enabled
-            if (activeFields.baseInstance.Contains("features.modifyMesh"))
+            if (activeFields.baseInstance.Contains("features.graphVertex"))
             {
                 // Setup
                 string vertexGraphInputName = "VertexDescriptionInputs";
@@ -717,11 +723,12 @@ namespace UnityEditor.Rendering.Universal
                 vertexBuilder.AppendLines(vertexGraphOutputBuilder.ToString());
                 vertexBuilder.AppendNewLine();
                 vertexBuilder.AppendLines(vertexGraphFunctionBuilder.ToString());
-                vertexBuilder.AppendNewLine();
             }
 
             // Add to splice commands
-            spliceCommands.Add("GraphVertex", vertexBuilder.ToString());
+            if(vertexBuilder.length == 0)
+                vertexBuilder.AppendLine("// GraphVertex: <None>");
+            spliceCommands.Add("GraphVertex", vertexBuilder.ToCodeBlack());
 
             // --------------------------------------------------
             // Graph Pixel
@@ -766,16 +773,19 @@ namespace UnityEditor.Rendering.Universal
                 pixelBuilder.AppendLines(pixelGraphOutputBuilder.ToString());
                 pixelBuilder.AppendNewLine();
                 pixelBuilder.AppendLines(pixelGraphFunctionBuilder.ToString());
-                pixelBuilder.AppendNewLine();
                 
                 // Add to splice commands
-                spliceCommands.Add("GraphPixel", pixelBuilder.ToString());
+                if(pixelBuilder.length == 0)
+                    pixelBuilder.AppendLine("// GraphPixel: <None>");
+                spliceCommands.Add("GraphPixel", pixelBuilder.ToCodeBlack());
             }
 
             // --------------------------------------------------
             // Graph Functions
 
-            spliceCommands.Add("GraphFunctions", functionBuilder.ToString());
+            if(functionBuilder.length == 0)
+                functionBuilder.AppendLine("// GraphFunctions: <None>");
+            spliceCommands.Add("GraphFunctions", functionBuilder.ToCodeBlack());
 
             // --------------------------------------------------
             // Graph Keywords
@@ -783,7 +793,9 @@ namespace UnityEditor.Rendering.Universal
             using (var keywordBuilder = new ShaderStringBuilder())
             {
                 keywordCollector.GetKeywordsDeclaration(keywordBuilder, mode);
-                spliceCommands.Add("GraphKeywords", keywordBuilder.ToString());
+                if(keywordBuilder.length == 0)
+                    keywordBuilder.AppendLine("// GraphKeywords: <None>");
+                spliceCommands.Add("GraphKeywords", keywordBuilder.ToCodeBlack());
             }
 
             // --------------------------------------------------
@@ -792,7 +804,9 @@ namespace UnityEditor.Rendering.Universal
             using (var propertyBuilder = new ShaderStringBuilder())
             {
                 propertyCollector.GetPropertiesDeclaration(propertyBuilder, mode, masterNode.owner.concretePrecision);
-                spliceCommands.Add("GraphProperties", propertyBuilder.ToString());
+                if(propertyBuilder.length == 0)
+                    propertyBuilder.AppendLine("// GraphProperties: <None>");
+                spliceCommands.Add("GraphProperties", propertyBuilder.ToCodeBlack());
             }
 
             // --------------------------------------------------
@@ -842,7 +856,7 @@ namespace UnityEditor.Rendering.Universal
                 }
 
                 // Add to splice commands
-                spliceCommands.Add("GraphDefines", graphDefines.ToString());
+                spliceCommands.Add("GraphDefines", graphDefines.ToCodeBlack());
             }
 
             // --------------------------------------------------
@@ -853,7 +867,7 @@ namespace UnityEditor.Rendering.Universal
             using (var mainBuilder = new ShaderStringBuilder())
             {
                 mainBuilder.AppendLine($"#include \"{pass.mainInclude}\"");
-                spliceCommands.Add("MainInclude", mainBuilder.ToString());
+                spliceCommands.Add("MainInclude", mainBuilder.ToCodeBlack());
             }
 
             // --------------------------------------------------
@@ -918,12 +932,12 @@ namespace UnityEditor.Rendering.Universal
 
         public static void BuildRenderStatesFromPass(ShaderPass pass, ref Dictionary<string, string> spliceCommands)
         {
-            spliceCommands.Add("Blending", pass.BlendOverride != null ? pass.BlendOverride : string.Empty);
-            spliceCommands.Add("Culling", pass.CullOverride != null ? pass.CullOverride : string.Empty);
-            spliceCommands.Add("ZTest", pass.ZTestOverride != null ? pass.ZTestOverride : string.Empty);
-            spliceCommands.Add("ZWrite", pass.ZWriteOverride != null ? pass.ZWriteOverride : string.Empty);
-            spliceCommands.Add("ZClip", pass.ZClipOverride != null ? pass.ZClipOverride : string.Empty);
-            spliceCommands.Add("ColorMask", pass.ColorMaskOverride != null ? pass.ColorMaskOverride : string.Empty);
+            spliceCommands.Add("Blending", pass.BlendOverride != null ? pass.BlendOverride : "// Blending: <None>");
+            spliceCommands.Add("Culling", pass.CullOverride != null ? pass.CullOverride : "// Culling: <None>");
+            spliceCommands.Add("ZTest", pass.ZTestOverride != null ? pass.ZTestOverride : "// ZTest: <None>");
+            spliceCommands.Add("ZWrite", pass.ZWriteOverride != null ? pass.ZWriteOverride : "// ZWrite: <None>");
+            spliceCommands.Add("ZClip", pass.ZClipOverride != null ? pass.ZClipOverride : "// ZClip: <None>");
+            spliceCommands.Add("ColorMask", pass.ColorMaskOverride != null ? pass.ColorMaskOverride : "// ColorMask: <None>");
 
             using(var stencilBuilder = new ShaderStringBuilder())
             {
@@ -933,7 +947,7 @@ namespace UnityEditor.Rendering.Universal
                         stencilBuilder.AppendLine(str);
                 }
                 
-                spliceCommands.Add("Stencil", stencilBuilder.ToString());
+                spliceCommands.Add("Stencil", stencilBuilder.ToCodeBlack());
             }
         }
     }

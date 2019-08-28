@@ -9,25 +9,31 @@ Varyings BuildVaryings(Attributes input)
     UNITY_SETUP_INSTANCE_ID(input);
     UNITY_TRANSFER_INSTANCE_ID(input, output);
 
-#if defined(HAVE_MESH_MODIFICATION)
-    input = ApplyMeshModification(input, _TimeParameters.xyz);
+#if defined(FEATURES_GRAPH_VERTEX)
+    // Evaluate Vertex Graph
+    VertexDescriptionInputs vertexDescriptionInputs = BuildVertexDescriptionInputs(input);
+    VertexDescription vertexDescription = VertexDescriptionFunction(vertexDescriptionInputs);
+    
+    // Assign modified vertex attributes
+    input.positionOS = vertexDescription.Position;
 #endif
 
-    // This return the camera relative position (if enable)
+    // Returns the camera relative position (if enabled)
     float3 positionWS = TransformObjectToWorld(input.positionOS);
 
 #ifdef ATTRIBUTES_NEED_NORMAL
     float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
 #else
-    float3 normalWS = float3(0.0, 0.0, 0.0); // We need this case to be able to compile ApplyVertexModification that doesn't use normal.
+    // Required to compile ApplyVertexModification that doesn't use normal.
+    float3 normalWS = float3(0.0, 0.0, 0.0);
 #endif
 
 #ifdef ATTRIBUTES_NEED_TANGENT
     float4 tangentWS = float4(TransformObjectToWorldDir(input.tangentOS.xyz), input.tangentOS.w);
 #endif
 
-    //TODO: change to inline ifdef
-     // Do vertex modification in camera relative space (if enable)
+    // TODO: Change to inline ifdef
+    // Do vertex modification in camera relative space (if enabled)
 #if defined(HAVE_VERTEX_MODIFICATION)
     ApplyVertexModification(input, normalWS, positionWS, _TimeParameters.xyz);
 #endif
@@ -49,8 +55,8 @@ Varyings BuildVaryings(Attributes input)
 #endif
 
 #if SHADERPASS == SHADOWCASTER
-    //define shadow pass specific clip position for universal 
-     output.positionCS = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, _LightDirection));
+    // Define shadow pass specific clip position for Universal
+    output.positionCS = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, _LightDirection));
     #if UNITY_REVERSED_Z
         output.positionCS.z = min(output.positionCS.z, output.positionCS.w * UNITY_NEAR_CLIP_VALUE);
     #else
@@ -103,11 +109,10 @@ Varyings BuildVaryings(Attributes input)
 #endif
 
 #ifdef _MAIN_LIGHT_SHADOWS
-    //TODO: delete vertex position inputs
+    // TODO: Avoid path via VertexPositionInputs (Universal)
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
     output.shadowCoord = GetShadowCoord(vertexInput);
 #endif
-
 
     return output;
 }

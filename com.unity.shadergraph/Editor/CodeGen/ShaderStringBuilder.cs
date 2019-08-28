@@ -208,6 +208,18 @@ namespace UnityEditor.ShaderGraph
             m_StringBuilder.Replace(oldValue, newValue, start, end );
         }
 
+        public string ToCodeBlack()
+        {
+            // Remove new line
+            if(m_StringBuilder.Length > 0)
+                m_StringBuilder.Length = m_StringBuilder.Length - 1;
+
+            // Set indentations
+            m_StringBuilder.Replace(Environment.NewLine, Environment.NewLine + k_IndentationString);
+
+            return m_StringBuilder.ToString();
+        }
+
         public override string ToString()
         {
             return m_StringBuilder.ToString();

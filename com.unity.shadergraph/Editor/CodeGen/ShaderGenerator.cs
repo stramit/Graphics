@@ -47,6 +47,11 @@ namespace UnityEditor.ShaderGraph
             return m_Pragma;
         }
 
+        public void AddNewLine()
+        {
+            m_ShaderChunks.Add(new ShaderChunk(m_IndentLevel, ""));
+        }
+
         public void AddShaderChunk(string s, bool unique = false)
         {
             if (string.IsNullOrEmpty(s))
