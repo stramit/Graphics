@@ -436,7 +436,8 @@ namespace UnityEditor.ShaderGraph
             Dictionary<string, string> namedFragments;
             string templatePath;
             bool debugOutput;
-            string buildTypeAssemblyNameFormat;
+            string assemblyName;
+            string resourceClassName;
 
             // intermediates
             HashSet<string> includedFiles;
@@ -445,14 +446,15 @@ namespace UnityEditor.ShaderGraph
             ShaderStringBuilder result;
             List<string> sourceAssetDependencyPaths;
 
-            public TemplatePreprocessor(ActiveFields activeFields, Dictionary<string, string> namedFragments, bool debugOutput, string templatePath, List<string> sourceAssetDependencyPaths, string buildTypeAssemblyNameFormat, ShaderStringBuilder outShaderCodeResult = null)
+            public TemplatePreprocessor(ActiveFields activeFields, Dictionary<string, string> namedFragments, bool debugOutput, string templatePath, List<string> sourceAssetDependencyPaths, string assemblyName, string resourceClassName, ShaderStringBuilder outShaderCodeResult = null)
             {
                 this.activeFields = activeFields;
                 this.namedFragments = namedFragments;
                 this.debugOutput = debugOutput;
                 this.templatePath = templatePath;
                 this.sourceAssetDependencyPaths = sourceAssetDependencyPaths;
-                this.buildTypeAssemblyNameFormat = buildTypeAssemblyNameFormat;
+                this.assemblyName = assemblyName;
+                this.resourceClassName = resourceClassName;
                 this.result = outShaderCodeResult ?? new ShaderStringBuilder();
                 includedFiles = new HashSet<string>();
             }
@@ -689,8 +691,7 @@ namespace UnityEditor.ShaderGraph
                     else
                     {
                         string typeName = param.GetString();
-                        string assemblyQualifiedTypeName = string.Format(buildTypeAssemblyNameFormat, typeName);
-                        Type type = Type.GetType(assemblyQualifiedTypeName);
+                        Type type = GenerationUtils.GetTypeForStruct(typeName, resourceClassName, assemblyName);
                         if (type == null)
                         {
                             Error("ERROR: buildType could not find type : " + typeName, command.s, param.start);
