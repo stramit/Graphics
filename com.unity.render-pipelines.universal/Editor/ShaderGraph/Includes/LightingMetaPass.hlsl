@@ -1,10 +1,6 @@
 ﻿#ifndef SG_LIT_META_INCLUDED
 #define SG_LIT_META_INCLUDED
 
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/MetaInput.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/VaryingVertMesh.hlsl"
-
 PackedVaryings vert(Attributes input)
 {
     Varyings output = (Varyings)0;

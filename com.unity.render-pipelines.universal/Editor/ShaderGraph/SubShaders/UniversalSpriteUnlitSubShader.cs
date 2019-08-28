@@ -20,7 +20,8 @@ namespace UnityEditor.Experimental.Rendering.Universal
             displayName = "UnlitPass",
             referenceName = "SPRITE_UNLIT",
             lightMode = "UniversalForward",
-            mainInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/SpriteUnlitPass.hlsl",
+            passInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/SpriteUnlitPass.hlsl",
+            varyingsInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl",
             useInPreview = true,
 
             // Port mask

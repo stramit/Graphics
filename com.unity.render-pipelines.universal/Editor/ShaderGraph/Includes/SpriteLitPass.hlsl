@@ -1,8 +1,22 @@
-﻿#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/VaryingVertMesh.hlsl"
-
-#if ETC1_EXTERNAL_ALPHA
+﻿#if ETC1_EXTERNAL_ALPHA
     TEXTURE2D(_AlphaTex); SAMPLER(sampler_AlphaTex);
     float _EnableAlphaTexture;
+#endif
+
+#if USE_SHAPE_LIGHT_TYPE_0
+SHAPE_LIGHT(0)
+#endif
+
+#if USE_SHAPE_LIGHT_TYPE_1
+SHAPE_LIGHT(1)
+#endif
+
+#if USE_SHAPE_LIGHT_TYPE_2
+SHAPE_LIGHT(2)
+#endif
+
+#if USE_SHAPE_LIGHT_TYPE_3
+SHAPE_LIGHT(3)
 #endif
 
 PackedVaryings vert(Attributes input)
@@ -29,5 +43,5 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
 
     surfaceDescription.Color *= unpacked.color;
 
-    return surfaceDescription.Color;
+    return CombinedShapeLightShared(surfaceDescription.Color, surfaceDescription.Mask, unpacked.screenPosition.xy);
 }

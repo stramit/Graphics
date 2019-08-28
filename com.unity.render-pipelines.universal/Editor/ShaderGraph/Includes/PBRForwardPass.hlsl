@@ -1,9 +1,4 @@
-﻿#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/VaryingVertMesh.hlsl"
-
-void BuildInputData(Varyings input, float3 normal, out InputData inputData)
+﻿void BuildInputData(Varyings input, float3 normal, out InputData inputData)
 {
     inputData.positionWS = input.positionWS;
 

@@ -8,7 +8,8 @@ namespace UnityEditor.ShaderGraph.Internal
         public string displayName;
         public string referenceName;
         public string lightMode;
-        public string mainInclude;
+        public string passInclude;
+        public string varyingsInclude;
         public bool useInPreview;
 
         // Setup

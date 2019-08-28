@@ -1,6 +1,4 @@
-﻿#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/VaryingVertMesh.hlsl"
-
-PackedVaryings vert(Attributes input)
+﻿PackedVaryings vert(Attributes input)
 {
     Varyings output = (Varyings)0;
     output = BuildVaryings(input);

@@ -866,7 +866,8 @@ namespace UnityEditor.Rendering.Universal
             // This must be defined after all graph code
             using (var mainBuilder = new ShaderStringBuilder())
             {
-                mainBuilder.AppendLine($"#include \"{pass.mainInclude}\"");
+                mainBuilder.AppendLine($"#include \"{pass.varyingsInclude}\"");
+                mainBuilder.AppendLine($"#include \"{pass.passInclude}\"");
                 spliceCommands.Add("MainInclude", mainBuilder.ToCodeBlack());
             }
 
@@ -903,9 +904,9 @@ namespace UnityEditor.Rendering.Universal
             string buildTypeAssemblyNameFormat = "UnityEditor.Rendering.Universal.UniversalShaderStructs+{0}, " + typeof(UniversalSubShaderUtilities).Assembly.FullName.ToString();
 
             // Get Template preprocessor
-            string sharedTemplatePath = Path.Combine(Path.Combine("Packages/com.unity.render-pipelines.universal", "Editor"), "ShaderGraph/DuplicateGenCode");
+            string templatePath = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Templates";
             var templatePreprocessor = new ShaderSpliceUtil.TemplatePreprocessor(activeFields, spliceCommands, 
-                debugOutput, sharedTemplatePath, sourceAssetDependencyPaths, buildTypeAssemblyNameFormat);
+                debugOutput, templatePath, sourceAssetDependencyPaths, buildTypeAssemblyNameFormat);
             
             // Process Template
             templatePreprocessor.ProcessTemplateFile(templateLocation);

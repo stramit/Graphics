@@ -1,6 +1,4 @@
-﻿#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/VaryingVertMesh.hlsl"
-
-#if ETC1_EXTERNAL_ALPHA
+﻿#if ETC1_EXTERNAL_ALPHA
     TEXTURE2D(_AlphaTex); SAMPLER(sampler_AlphaTex);
     float _EnableAlphaTexture;
 #endif

@@ -1,9 +1,6 @@
 ﻿#ifndef SG_SHADOW_PASS_INCLUDED
 #define SG_SHADOW_PASS_INCLUDED
 
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/VaryingVertMesh.hlsl"
-
 PackedVaryings vert(Attributes input)
 {
     Varyings output = (Varyings)0;

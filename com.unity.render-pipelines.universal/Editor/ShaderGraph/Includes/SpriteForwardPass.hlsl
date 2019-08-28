@@ -1,5 +1,7 @@
-﻿#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/VaryingVertMesh.hlsl"
+﻿#if ETC1_EXTERNAL_ALPHA
+    TEXTURE2D(_AlphaTex); SAMPLER(sampler_AlphaTex);
+    float _EnableAlphaTexture;
+#endif
 
 PackedVaryings vert(Attributes input)
 {
@@ -18,13 +20,12 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
     SurfaceDescriptionInputs surfaceDescriptionInputs = BuildSurfaceDescriptionInputs(unpacked);
     SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
 
-#if _AlphaClip
-    clip(surfaceDescription.Alpha - surfaceDescription.AlphaClipThreshold);
+#if ETC1_EXTERNAL_ALPHA
+    float4 alpha = SAMPLE_TEXTURE2D(_AlphaTex, sampler_AlphaTex, unpacked.uv0.xy);
+    surfaceDescription.Color.a = lerp (surfaceDescription.Color.a, alpha.r, _EnableAlphaTexture);
 #endif
 
-#ifdef _ALPHAPREMULTIPLY_ON
-    surfaceDescription.Color *= surfaceDescription.Alpha;
-#endif
+    surfaceDescription.Color *= unpacked.color;
 
-    return half4(surfaceDescription.Color, surfaceDescription.Alpha);
+    return surfaceDescription.Color;
 }

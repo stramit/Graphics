@@ -20,7 +20,8 @@ namespace UnityEditor.Experimental.Rendering.Universal
             displayName = "Lit Pass",
             referenceName = "SPRITE_LIT",
             lightMode = "Universal2D",
-            mainInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/SpriteLitPass.hlsl",
+            passInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/SpriteLitPass.hlsl",
+            varyingsInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl",
             useInPreview = true,
 
             // Port mask
@@ -50,6 +51,7 @@ namespace UnityEditor.Experimental.Rendering.Universal
                 "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl",
                 "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl",
                 "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/LightingUtility.hlsl",
+                "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/CombinedShapeLightShared.hlsl",
             },
             pragmas = new List<string>()
             {
@@ -73,7 +75,8 @@ namespace UnityEditor.Experimental.Rendering.Universal
             displayName = "Sprite Normal",
             referenceName = "SPRITE_NORMAL",
             lightMode = "NormalsRendering",
-            mainInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/SpriteNormalPass.hlsl",
+            passInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/SpriteNormalPass.hlsl",
+            varyingsInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl",
             useInPreview = true,
 
             // Port mask
@@ -118,7 +121,8 @@ namespace UnityEditor.Experimental.Rendering.Universal
             displayName = "Sprite Forward",
             referenceName = "SPRITE_FORWARD",
             lightMode = "UniversalForward",
-            mainInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/SpriteForwardPass.hlsl",
+            passInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/SpriteForwardPass.hlsl",
+            varyingsInclude = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl",
             useInPreview = true,
 
             // Port mask
