@@ -71,6 +71,14 @@ namespace UnityEditor.ShaderGraph
             Dictionary<string, string> spliceCommands = new Dictionary<string, string>();
 
             // --------------------------------------------------
+            // Dependencies
+
+            // Propagate active field requirements using dependencies
+            // Must be executed before types are built
+            foreach (var instance in activeFields.all.instances)
+                ShaderSpliceUtil.ApplyDependencies(instance, dependencies);
+
+            // --------------------------------------------------
             // Pass Setup
 
             spliceCommands.Add("PassName", pass.displayName);
@@ -345,10 +353,6 @@ namespace UnityEditor.ShaderGraph
 
             // --------------------------------------------------
             // Finalize
-
-            // Propagate active field requirements using dependencies
-            foreach (var instance in activeFields.all.instances)
-                ShaderSpliceUtil.ApplyDependencies(instance, dependencies);
 
             // Get Template
             string templateLocation = GetTemplatePath("PassMesh.template");
