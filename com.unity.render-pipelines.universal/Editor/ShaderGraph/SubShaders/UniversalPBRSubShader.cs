@@ -89,18 +89,6 @@ namespace UnityEditor.Rendering.Universal
                 s_ShadowsSoftKeyword,
                 s_MixedLightingSubtractiveKeyword,
             },
-
-            // Includes = new List<string>()
-            // {
-            //     "#include \"Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/DuplicateIncludes/PBRForwardPass.hlsl\"",
-            // },
-            // OnGeneratePassImpl = (IMasterNode node, ref Pass pass, ref ShaderGraphRequirements requirements) =>
-            // {
-            //     if (masterNode.IsSlotConnected(PBRMasterNode.NormalSlotId))
-            //         pass.ExtraDefines.Add("#define _NORMALMAP 1");
-            //     if (masterNode.model == PBRMasterNode.Model.Specular)
-            //         pass.ExtraDefines.Add("#define _SPECULAR_SETUP");
-            // }
         };
 
         ShaderPass m_DepthOnlyPass = new ShaderPass()
@@ -367,6 +355,11 @@ namespace UnityEditor.Rendering.Universal
             {
                 baseActiveFields.Add("AlphaClip");
             }
+
+            if (masterNode.IsSlotConnected(PBRMasterNode.NormalSlotId))
+                baseActiveFields.Add("NormalMap");
+            if (masterNode.model == PBRMasterNode.Model.Specular)
+                baseActiveFields.Add("SpecularSetup");
 
             // Keywords for transparent
             // #pragma shader_feature _SURFACE_TYPE_TRANSPARENT

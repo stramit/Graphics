@@ -26,15 +26,14 @@ Pass
     // Pragmas
     $splice(PassPragmas)
 
-    // Includes
-    $splice(PassIncludes)
-
     // Keywords
     $splice(PassKeywords)
     
     // Defines
     $SurfaceType.Transparent:           #define _SURFACE_TYPE_TRANSPARENT 1
     $AlphaClip:                         #define _AlphaClip 1
+    $NormalMap:                         #define _NORMALMAP 1
+    $SpecularSetup:                     #define _SPECULAR_SETUP
     $BlendMode.Add:                     #define _BLENDMODE_ADD 1
     $BlendMode.Premultiply:             #define _ALPHAPREMULTIPLY_ON 1
     $Attributes.normalOS:               #define ATTRIBUTES_NEED_NORMAL
@@ -58,6 +57,9 @@ Pass
     $Varyings.fogFactorAndVertexLight:  #define VARYINGS_NEED_FOG_AND_VERTEX_LIGHT
     $Varyings.cullFace:                 #define VARYINGS_NEED_CULLFACE
     $features.graphVertex:              #define FEATURES_GRAPH_VERTEX
+
+    // Includes
+    $splice(PassIncludes)
 
     // --------------------------------------------------
     // Graph
