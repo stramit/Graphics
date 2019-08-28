@@ -17,6 +17,9 @@ Pass
     #pragma vertex vert
     #pragma fragment frag
 
+    // Debug
+    $splice(Debug)
+
     // --------------------------------------------------
     // Pass
 

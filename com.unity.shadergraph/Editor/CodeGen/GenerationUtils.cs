@@ -14,10 +14,21 @@ namespace UnityEditor.ShaderGraph
 {
     static class GenerationUtils
     {
+        const string kDebugSymbol = "SHADERGRAPH_DEBUG";
+
         public static bool GenerateShaderPass(AbstractMaterialNode masterNode, ShaderPass pass, GenerationMode mode, 
             ActiveFields activeFields, ShaderGenerator result, List<string> sourceAssetDependencyPaths,
             List<Dependency[]> dependencies, string resourceClassName, string assemblyName)
         {
+            // --------------------------------------------------
+            // Debug
+
+            // Get scripting symbols
+            BuildTargetGroup buildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
+            string defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTargetGroup);
+
+            bool isDebug = defines.Contains(kDebugSymbol);
+
             // --------------------------------------------------
             // Setup
 
@@ -131,7 +142,7 @@ namespace UnityEditor.ShaderGraph
                 var vertexGraphOutputBuilder = new ShaderStringBuilder();
 
                 // Build vertex graph inputs
-                ShaderSpliceUtil.BuildType(GetTypeForStruct("VertexDescriptionInputs", resourceClassName, assemblyName), activeFields, vertexGraphInputGenerator);
+                ShaderSpliceUtil.BuildType(GetTypeForStruct("VertexDescriptionInputs", resourceClassName, assemblyName), activeFields, vertexGraphInputGenerator, isDebug);
 
                 // Build vertex graph outputs
                 // Add struct fields to active fields
@@ -178,7 +189,7 @@ namespace UnityEditor.ShaderGraph
             var pixelGraphFunctionBuilder = new ShaderStringBuilder();
 
             // Build pixel graph inputs
-            ShaderSpliceUtil.BuildType(GetTypeForStruct("SurfaceDescriptionInputs", resourceClassName, assemblyName), activeFields, pixelGraphInputGenerator);
+            ShaderSpliceUtil.BuildType(GetTypeForStruct("SurfaceDescriptionInputs", resourceClassName, assemblyName), activeFields, pixelGraphInputGenerator, isDebug);
 
             // Build pixel graph outputs
             // Add struct fields to active fields
@@ -304,24 +315,33 @@ namespace UnityEditor.ShaderGraph
             {
                 mainBuilder.AppendLine($"#include \"{pass.varyingsInclude}\"");
                 mainBuilder.AppendLine($"#include \"{pass.passInclude}\"");
+
+                // Add to splice commands
                 spliceCommands.Add("MainInclude", mainBuilder.ToCodeBlack());
             }
 
             // --------------------------------------------------
             // Debug
 
-            bool debugOutput = false;
-            // // debug output all active fields
-            // var interpolatorDefines = new ShaderGenerator();
-            // 
-            // if (debugOutput)
-            // {
-            //     interpolatorDefines.AddShaderChunk("// ACTIVE FIELDS:");
-            //     foreach (string f in activeFields.baseInstance.fields)
-            //     {
-            //         interpolatorDefines.AddShaderChunk("//   " + f);
-            //     }
-            // }
+            // Debug output all active fields
+            
+            using(var debugBuilder = new ShaderStringBuilder())
+            {
+                if (isDebug)
+                {
+                    // Active fields
+                    debugBuilder.AppendLine("// ACTIVE FIELDS:");
+                    foreach (string field in activeFields.baseInstance.fields)
+                    {
+                        debugBuilder.AppendLine("// " + field);
+                    }
+                }
+                if(debugBuilder.length == 0)
+                    debugBuilder.AppendLine("// <None>");
+                
+                // Add to splice commands
+                spliceCommands.Add("Debug", debugBuilder.ToCodeBlack());
+            }
 
             // --------------------------------------------------
             // Finalize
@@ -339,7 +359,7 @@ namespace UnityEditor.ShaderGraph
             // Get Template preprocessor
             string templatePath = "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Templates";
             var templatePreprocessor = new ShaderSpliceUtil.TemplatePreprocessor(activeFields, spliceCommands, 
-                debugOutput, templatePath, sourceAssetDependencyPaths, assemblyName, resourceClassName);
+                isDebug, templatePath, sourceAssetDependencyPaths, assemblyName, resourceClassName);
             
             // Process Template
             templatePreprocessor.ProcessTemplateFile(templateLocation);
