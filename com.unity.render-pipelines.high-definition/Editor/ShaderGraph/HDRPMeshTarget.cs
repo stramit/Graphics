@@ -96,6 +96,18 @@ namespace UnityEditor.Rendering.HighDefinition
                     "only_renderers d3d11 ps4 xboxone vulkan metal switch",
                     "multi_compile_instancing"
                 },
+                includes = new List<string>()
+                {
+                    "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/FragInputs.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPass.cs.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Material.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Unlit/Unlit.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/BuiltinUtilities.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/MaterialUtilities.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderGraphFunctions.hlsl",
+                },
 
                 // Custom template
                 passTemplatePath = $"{HDUtils.GetHDRenderPipelinePath()}Editor/Material/Unlit/ShaderGraph/UnlitPass.template",
@@ -135,6 +147,18 @@ namespace UnityEditor.Rendering.HighDefinition
                     "only_renderers d3d11 ps4 xboxone vulkan metal switch",
                     "multi_compile_instancing"
                 },
+                includes = new List<string>()
+                {
+                    "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/FragInputs.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPass.cs.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Material.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Unlit/Unlit.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/BuiltinUtilities.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/MaterialUtilities.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderGraphFunctions.hlsl",
+                },
 
                 // Custom template
                 passTemplatePath = $"{HDUtils.GetHDRenderPipelinePath()}Editor/Material/Unlit/ShaderGraph/UnlitPass.template",
@@ -173,6 +197,18 @@ namespace UnityEditor.Rendering.HighDefinition
                     "only_renderers d3d11 ps4 xboxone vulkan metal switch",
                     "multi_compile_instancing",
                     "editor_sync_compilation"
+                },
+                includes = new List<string>()
+                {
+                    "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/FragInputs.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPass.cs.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Material.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Unlit/Unlit.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/BuiltinUtilities.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/MaterialUtilities.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderGraphFunctions.hlsl",
                 },
                 defines = new List<string>()
                 {
@@ -219,6 +255,18 @@ namespace UnityEditor.Rendering.HighDefinition
                     "#pragma target 4.5",
                     "only_renderers d3d11 ps4 xboxone vulkan metal switch",
                     "multi_compile_instancing"
+                },
+                includes = new List<string>()
+                {
+                    "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/FragInputs.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPass.cs.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Material.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Unlit/Unlit.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/BuiltinUtilities.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/MaterialUtilities.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderGraphFunctions.hlsl",
                 },
                 keywords = new List<KeywordDescriptor>()
                 {
@@ -283,6 +331,18 @@ namespace UnityEditor.Rendering.HighDefinition
                     "only_renderers d3d11 ps4 xboxone vulkan metal switch",
                     "multi_compile_instancing"
                 },
+                includes = new List<string>()
+                {
+                    "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/FragInputs.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPass.cs.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Material.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Unlit/Unlit.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/BuiltinUtilities.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/MaterialUtilities.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderGraphFunctions.hlsl",
+                },
                 keywords = new List<KeywordDescriptor>()
                 {
                     // Note we don't need to define WRITE_NORMAL_BUFFER
@@ -336,6 +396,18 @@ namespace UnityEditor.Rendering.HighDefinition
                     "#pragma target 4.5",
                     "only_renderers d3d11 ps4 xboxone vulkan metal switch",
                     "multi_compile_instancing"
+                },
+                includes = new List<string>()
+                {
+                    "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/FragInputs.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPass.cs.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Material.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Unlit/Unlit.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/BuiltinUtilities.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/MaterialUtilities.hlsl",
+                    "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderGraphFunctions.hlsl",
                 },
                 keywords = new List<KeywordDescriptor>()
                 {
