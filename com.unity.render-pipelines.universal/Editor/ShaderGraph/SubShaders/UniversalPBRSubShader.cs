@@ -71,14 +71,14 @@ namespace UnityEditor.Rendering.Universal
             return activeFields;
         }
 
-        bool GenerateShaderPass(PBRMasterNode masterNode, ShaderPass pass, GenerationMode mode, ShaderGenerator result, List<string> sourceAssetDependencyPaths)
+        bool GenerateShaderPass(PBRMasterNode masterNode, ITarget target, ShaderPass pass, GenerationMode mode, ShaderGenerator result, List<string> sourceAssetDependencyPaths)
         {
             UniversalShaderGraphUtilities.SetRenderState(masterNode.surfaceType, masterNode.alphaMode, masterNode.twoSided.isOn, ref pass);
 
             // apply master node options to active fields
             var activeFields = GetActiveFieldsFromMasterNode(masterNode, pass);
 
-            return ShaderGraph.GenerationUtils.GenerateShaderPass(masterNode, pass, mode, activeFields, result, sourceAssetDependencyPaths,
+            return ShaderGraph.GenerationUtils.GenerateShaderPass(masterNode, target, pass, mode, activeFields, result, sourceAssetDependencyPaths,
                 UniversalShaderGraphResources.s_Dependencies, UniversalShaderGraphResources.s_ResourceClassName, UniversalShaderGraphResources.s_AssemblyName);
         }
 
@@ -104,11 +104,11 @@ namespace UnityEditor.Rendering.Universal
                 surfaceTags.GetTags(tagsBuilder, "UniversalPipeline");
                 subShader.AddShaderChunk(tagsBuilder.ToString());
                 
-                GenerateShaderPass(pbrMasterNode, UniversalMeshTarget.Passes.Forward, mode, subShader, sourceAssetDependencyPaths);
-                GenerateShaderPass(pbrMasterNode, UniversalMeshTarget.Passes.ShadowCaster, mode, subShader, sourceAssetDependencyPaths);
-                GenerateShaderPass(pbrMasterNode, UniversalMeshTarget.Passes.DepthOnly, mode, subShader, sourceAssetDependencyPaths);
-                GenerateShaderPass(pbrMasterNode, UniversalMeshTarget.Passes.Meta, mode, subShader, sourceAssetDependencyPaths);
-                GenerateShaderPass(pbrMasterNode, UniversalMeshTarget.Passes._2D, mode, subShader, sourceAssetDependencyPaths);
+                GenerateShaderPass(pbrMasterNode, target, UniversalMeshTarget.Passes.Forward, mode, subShader, sourceAssetDependencyPaths);
+                GenerateShaderPass(pbrMasterNode, target, UniversalMeshTarget.Passes.ShadowCaster, mode, subShader, sourceAssetDependencyPaths);
+                GenerateShaderPass(pbrMasterNode, target, UniversalMeshTarget.Passes.DepthOnly, mode, subShader, sourceAssetDependencyPaths);
+                GenerateShaderPass(pbrMasterNode, target, UniversalMeshTarget.Passes.Meta, mode, subShader, sourceAssetDependencyPaths);
+                GenerateShaderPass(pbrMasterNode, target, UniversalMeshTarget.Passes._2D, mode, subShader, sourceAssetDependencyPaths);
             }
             subShader.Deindent();
             subShader.AddShaderChunk("}", true);

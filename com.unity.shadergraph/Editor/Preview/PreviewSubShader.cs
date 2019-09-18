@@ -28,6 +28,10 @@ namespace UnityEditor.ShaderGraph
                 "Packages/com.unity.shadergraph/ShaderGraphLibrary/ShaderVariablesFunctions.hlsl",
                 "Packages/com.unity.shadergraph/ShaderGraphLibrary/Functions.hlsl",
             },
+            defines = new List<string>()
+            {
+                "SHADERGRAPH_PREVIEW 1",
+            }
         };
 #endregion
         private static ActiveFields GetActiveFields(ShaderPass pass)
@@ -36,7 +40,6 @@ namespace UnityEditor.ShaderGraph
             var baseActiveFields = activeFields.baseInstance;
             
             baseActiveFields.Add("features.graphPixel");
-            baseActiveFields.Add("features.preview");
 
             return activeFields;
         }
@@ -57,7 +60,7 @@ namespace UnityEditor.ShaderGraph
 
                 // use standard shader pass generation
                 ShaderGenerator result = new ShaderGenerator();
-                ShaderGraph.GenerationUtils.GenerateShaderPass(outputNode, m_PreviewPass, mode, activeFields, result, sourceAssetDependencyPaths,
+                ShaderGraph.GenerationUtils.GenerateShaderPass(outputNode, target, m_PreviewPass, mode, activeFields, result, sourceAssetDependencyPaths,
                     PreviewSubShaderResources.s_Dependencies, PreviewSubShaderResources.s_ResourceClassName, PreviewSubShaderResources.s_AssemblyName); 
                 subShader.AppendLines(result.GetShaderString(0));
             }

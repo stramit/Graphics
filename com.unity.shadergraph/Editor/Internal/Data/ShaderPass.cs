@@ -15,7 +15,9 @@ namespace UnityEditor.ShaderGraph.Internal
         // Setup
         public IEnumerable<string> pragmas;
         public IEnumerable<string> includes;
+        public IEnumerable<string> defines;
         public IEnumerable<KeywordDescriptor> keywords;
+        public IEnumerable<string> defaultDotsInstancingOptions;
 
         // Port mask
         public List<int> vertexPorts;
@@ -33,5 +35,15 @@ namespace UnityEditor.ShaderGraph.Internal
         public string ColorMaskOverride;
         public string ZClipOverride;
         public List<string> StencilOverride;
+
+        // Custom Template
+        public string passTemplatePath;
+        public string sharedTemplateDirectory;
+        
+        // Methods
+        public bool Equals(ShaderPass other)
+        {
+            return referenceName == other.referenceName;
+        }
     }
 }
