@@ -62,6 +62,11 @@ namespace UnityEditor.Rendering.Universal
                 s_DirectionalLightmapCombinedKeyword,
                 s_SampleGIKeyword,
             },
+            structs = new StructDescriptor[]
+            {
+                Attributes,
+                Varyings,
+            }
         };
 
         ShaderPass m_DepthOnlyPass = new ShaderPass()
@@ -107,6 +112,11 @@ namespace UnityEditor.Rendering.Universal
                 "target 2.0",
                 "multi_compile_instancing",
             },
+            structs = new StructDescriptor[]
+            {
+                Attributes,
+                Varyings,
+            }
         };
 
         ShaderPass m_ShadowCasterPass = new ShaderPass()
@@ -162,6 +172,11 @@ namespace UnityEditor.Rendering.Universal
             {
                 s_SmoothnessChannelKeyword,
             },
+            structs = new StructDescriptor[]
+            {
+                Attributes,
+                Varyings,
+            }
         };
 #endregion
         
@@ -200,6 +215,42 @@ namespace UnityEditor.Rendering.Universal
             type = KeywordType.Boolean,
             definition = KeywordDefinition.ShaderFeature,
             scope = KeywordScope.Global,
+        };
+#endregion
+
+#region Struct Descriptor Test
+        public static StructDescriptor Attributes = new StructDescriptor()
+        {
+            name = "Attributes",
+            interpolatorPack = false,
+            subscripts = new SubscriptDescriptor[]
+            {
+                new SubscriptDescriptor(Attributes.name, "positionOS", "ATTRIBUTES_NEED_POSITIONOS", ShaderValueType.float3,
+                    "POSITION"),
+                new SubscriptDescriptor(Attributes.name, "normalOS", "ATTRIBUTES_NEED_NORMALOS", ShaderValueType.float3,
+                    "NORMAL"),
+                new SubscriptDescriptor(Attributes.name, "tangentOS", "ATTRIBUTES_NEED_TANGENTOS", ShaderValueType.float4,
+                    "TANGENT"),
+                new SubscriptDescriptor(Attributes.name, "cullFace", "ATTRIBUTES_NEED_CULLFACE", "FRONT_FACE_TYPE",
+                    "FRONT_FACE_SEMANTIC", "defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)", 
+                    SubscriptDescriptor.SubscriptOptions.Generated & SubscriptDescriptor.SubscriptOptions.Optional),
+
+            }
+        };
+
+        public static StructDescriptor Varyings = new StructDescriptor()
+        {
+            name = "Varyings",
+            interpolatorPack = true,
+            subscripts = new SubscriptDescriptor[]
+            {
+                new SubscriptDescriptor(Attributes.name, "positionCS", "VARYINGS_NEED_POSITIONCS", ShaderValueType.float3,
+                    "SV_POSITION"),
+                new SubscriptDescriptor(Attributes.name, "cullFace", "ATTRIBUTES_NEED_CULLFACE", "FRONT_FACE_TYPE",
+                    "FRONT_FACE_SEMANTIC", "defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)", 
+                    SubscriptDescriptor.SubscriptOptions.Generated & SubscriptDescriptor.SubscriptOptions.Optional),
+
+            }
         };
 #endregion
 

@@ -82,8 +82,7 @@ Pass
 
     // --------------------------------------------------
     // Structs and Packing
-
-    $buildType(Attributes)
+    $splice(PassStructs)
 
     $buildType(Varyings)
 
