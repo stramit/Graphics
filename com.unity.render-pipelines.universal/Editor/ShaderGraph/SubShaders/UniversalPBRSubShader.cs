@@ -96,7 +96,7 @@ namespace UnityEditor.Rendering.Universal
                 s_AdditionalLightShadowsKeyword,
                 s_ShadowsSoftKeyword,
                 s_MixedLightingSubtractiveKeyword,
-            },
+            }
         };
 
         ShaderPass m_DepthOnlyPass = new ShaderPass()
@@ -397,7 +397,7 @@ namespace UnityEditor.Rendering.Universal
             var activeFields = GenerationUtils.GetActiveFieldsFromConditionals(masterNode.GetConditionalFields(pass));
 
             return ShaderGraph.GenerationUtils.GenerateShaderPass(masterNode, target, pass, mode, activeFields, result, sourceAssetDependencyPaths,
-                UniversalShaderGraphResources.s_Dependencies, UniversalShaderGraphResources.s_ResourceClassName, UniversalShaderGraphResources.s_AssemblyName);
+                UniversalShaderGraphResources.s_Dependencies, UniversalMeshTarget.fieldDependencies, UniversalShaderGraphResources.s_ResourceClassName, UniversalShaderGraphResources.s_AssemblyName);
         }
 
         public string GetSubshader(AbstractMaterialNode outputNode, ITarget target, GenerationMode mode, List<string> sourceAssetDependencyPaths = null)

@@ -64,9 +64,9 @@ namespace UnityEditor.Rendering.Universal
             },
             structs = new StructDescriptor[]
             {
-                Attributes,
-                Varyings,
-            }
+                UniversalMeshTarget.Attributes,
+                UniversalMeshTarget.Varyings,
+            },
         };
 
         ShaderPass m_DepthOnlyPass = new ShaderPass()
@@ -114,9 +114,9 @@ namespace UnityEditor.Rendering.Universal
             },
             structs = new StructDescriptor[]
             {
-                Attributes,
-                Varyings,
-            }
+                UniversalMeshTarget.Attributes,
+                UniversalMeshTarget.Varyings,
+            },
         };
 
         ShaderPass m_ShadowCasterPass = new ShaderPass()
@@ -144,7 +144,7 @@ namespace UnityEditor.Rendering.Universal
             // Required fields
             requiredAttributes = new List<string>()
             {
-                "Attributes.normalOS", 
+                "Attributes.normalOS",
             },
 
             // Render State Overrides
@@ -174,9 +174,9 @@ namespace UnityEditor.Rendering.Universal
             },
             structs = new StructDescriptor[]
             {
-                Attributes,
-                Varyings,
-            }
+                UniversalMeshTarget.Attributes,
+                UniversalMeshTarget.Varyings,
+            },
         };
 #endregion
         
@@ -263,7 +263,7 @@ namespace UnityEditor.Rendering.Universal
 
             // use standard shader pass generation
             return ShaderGraph.GenerationUtils.GenerateShaderPass(masterNode, target, pass, mode, activeFields, result, sourceAssetDependencyPaths,
-                UniversalShaderGraphResources.s_Dependencies, UniversalShaderGraphResources.s_ResourceClassName, UniversalShaderGraphResources.s_AssemblyName);
+                UniversalShaderGraphResources.s_Dependencies, UniversalMeshTarget.fieldDependencies, UniversalShaderGraphResources.s_ResourceClassName, UniversalShaderGraphResources.s_AssemblyName);
         }
 
         public string GetSubshader(AbstractMaterialNode outputNode, ITarget target, GenerationMode mode, List<string> sourceAssetDependencyPaths = null)
