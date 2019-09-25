@@ -84,7 +84,7 @@ Pass
     // Structs and Packing
     $splice(PassStructs)
 
-    $buildType(Varyings)
+    $splice(InterpolatorPack)
 
     // --------------------------------------------------
     // Build Graph Inputs

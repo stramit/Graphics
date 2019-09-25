@@ -37,7 +37,7 @@ namespace UnityEditor.ShaderGraph
 
         public static bool GenerateShaderPass(AbstractMaterialNode outputNode, ITarget target, ShaderPass pass, GenerationMode mode, 
             ActiveFields activeFields, ShaderGenerator result, List<string> sourceAssetDependencyPaths,
-            List<Dependency[]> dependencies, string resourceClassName, string assemblyName)
+            List<Dependency[]> dependencies, List<FieldDependency[]> fieldDependencies, string resourceClassName, string assemblyName)
         {
             //TODO: implement proper field passing to check active fields
             List<IField> fields = new List<IField>();
@@ -111,7 +111,10 @@ namespace UnityEditor.ShaderGraph
             // Propagate active field requirements using dependencies
             // Must be executed before types are built
             foreach (var instance in activeFields.all.instances)
+            {
                 ShaderSpliceUtil.ApplyDependencies(instance, dependencies);
+                ApplyFieldDependencies(instance, fieldDependencies);
+            }                
 
             // --------------------------------------------------
             // Pass Setup
@@ -723,6 +726,38 @@ namespace UnityEditor.ShaderGraph
                 foreach (var requiredField in passRequiredFields)
                 {
                     activeFields.AddAll(requiredField);
+                }
+            }
+        }
+
+        static void ApplyFieldDependencies(IActiveFields activeFields, List<FieldDependency[]> dependsList)
+        {
+            // add active fields to queue
+            Queue<string> fieldsToPropagate = new Queue<string>();
+            foreach (var f in activeFields.fields)
+            {
+                fieldsToPropagate.Enqueue(f);
+            }
+
+            // foreach field in queue:
+            while (fieldsToPropagate.Count > 0)
+            {
+                string field = fieldsToPropagate.Dequeue();
+                if (activeFields.Contains(field))           // this should always be true
+                {
+                    if(dependsList == null)
+                        return;
+                        
+                    // find all dependencies of field that are not already active
+                    foreach (FieldDependency[] dependArray in dependsList)
+                    {
+                        foreach (FieldDependency d in dependArray.Where(d => ($"{d.field.tag}.{d.field.name}" == field) && !activeFields.Contains($"{d.dependsOn.tag}.{d.dependsOn.name}")))
+                        {
+                            // activate them and add them to the queue
+                            activeFields.Add($"{d.dependsOn.tag}.{d.dependsOn.name}");
+                            fieldsToPropagate.Enqueue($"{d.dependsOn.tag}.{d.dependsOn.name}");
+                        }
+                    }
                 }
             }
         }
