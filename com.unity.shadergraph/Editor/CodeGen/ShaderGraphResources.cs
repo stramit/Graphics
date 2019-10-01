@@ -4,18 +4,17 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Graphing;
-using UnityEditor.ShaderGraph;
 using UnityEditor.ShaderGraph.Internal;
 using Data.Util;
 using UnityEngine;
 
-namespace UnityEditor.Rendering.Universal
+namespace UnityEditor.ShaderGraph
 {
-    static class UniversalShaderGraphResources
+    static class ShaderGraphResources
     {
-        public static string s_ResourceClassName => typeof(UniversalShaderGraphResources).FullName;
+        public static string s_ResourceClassName => typeof(ShaderGraphResources).FullName;
 
-        public static string s_AssemblyName => typeof(UniversalShaderGraphResources).Assembly.FullName.ToString();
+        public static string s_AssemblyName => typeof(ShaderGraphResources).Assembly.FullName.ToString();
         
         internal struct Attributes
         {

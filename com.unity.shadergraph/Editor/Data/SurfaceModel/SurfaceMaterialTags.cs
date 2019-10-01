@@ -3,26 +3,28 @@ using UnityEngine;
 
 namespace UnityEditor.ShaderGraph
 {
+    public enum RenderType
+    {
+        Opaque,
+        Transparent,
+        TransparentCutout,
+        Background,
+        Overlay
+    }
+
+    public enum RenderQueue
+    {
+        Background,
+        Geometry,
+        Transparent,
+        Overlay,
+        AlphaTest
+    }
+
     [Serializable]
     class SurfaceMaterialTags
     {
-        public enum RenderType
-        {
-            Opaque,
-            Transparent,
-            TransparentCutout,
-            Background,
-            Overlay
-        }
-
-        public enum RenderQueue
-        {
-            Background,
-            Geometry,
-            Transparent,
-            Overlay,
-            AlphaTest
-        }
+        
 
         [SerializeField]
         private RenderType m_RenderType = RenderType.Opaque;

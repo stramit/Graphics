@@ -1367,7 +1367,7 @@ namespace UnityEditor.ShaderGraph
                             var target = (ITarget)Activator.CreateInstance(type);
                             var masterNode = GetNodeFromGuid(m_ActiveOutputNodeGuid) as IMasterNode;
                             ISubShader subShader;
-                            if(target.TryGetSubShader(masterNode, out subShader))
+                            if(target.Validate(masterNode))
                             {
                                 m_Targets.Add(target);
                             }

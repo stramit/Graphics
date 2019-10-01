@@ -228,13 +228,13 @@ namespace UnityEditor.ShaderGraph
 
             if (surfaceType == SurfaceType.Opaque)
             {
-                materialTags.renderQueue = SurfaceMaterialTags.RenderQueue.Geometry;
-                materialTags.renderType = SurfaceMaterialTags.RenderType.Opaque;
+                materialTags.renderQueue = RenderQueue.Geometry;
+                materialTags.renderType = RenderType.Opaque;
             }
             else
             {
-                materialTags.renderQueue = SurfaceMaterialTags.RenderQueue.Transparent;
-                materialTags.renderType = SurfaceMaterialTags.RenderType.Transparent;
+                materialTags.renderQueue = RenderQueue.Transparent;
+                materialTags.renderType = RenderType.Transparent;
             }
 
             return materialTags;

@@ -147,6 +147,10 @@ namespace UnityEditor.ShaderGraph
             return new SettingsView(this);
         }
 
+        public string renderQueueTag => null;
+
+        public string renderTypeTag => null;
+
         public ConditionalField[] GetConditionalFields(ShaderPass pass)
         {
             return null;

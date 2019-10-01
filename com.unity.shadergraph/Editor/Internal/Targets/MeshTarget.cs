@@ -9,15 +9,14 @@ namespace UnityEditor.ShaderGraph.Internal
         public string passTemplatePath => GenerationUtils.GetDefaultTemplatePath("PassMesh.template");
         public string sharedTemplateDirectory => GenerationUtils.GetDefaultSharedTemplateDirectory();
 
-        public bool Validate(RenderPipelineAsset pipelineAsset)
+        public bool Validate(IMasterNode masterNode)
         {
             return false;
         }
 
-        public bool TryGetSubShader(IMasterNode masterNode, out ISubShader subShader)
+        public void SetupTarget(ref TargetSetupContext context)
         {
-            subShader = null;
-            return false;
+
         }
     }
 }
