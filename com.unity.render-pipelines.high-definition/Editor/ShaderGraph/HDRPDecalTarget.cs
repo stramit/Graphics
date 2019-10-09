@@ -62,7 +62,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_DBufferProjector3RT],
                 referenceName = "SHADERPASS_DBUFFER_PROJECTOR",
                 lightMode = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_DBufferProjector3RT],
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDecal.hlsl",
                 useInPreview = false,
 
                 // Port mask
@@ -76,7 +75,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.Projector3RT,
                 pragmas = Pragmas.Instanced,
                 defines = Defines.Decals3RT,
-                includes = Includes.Default,
+                preGraphIncludes = PreGraphIncludes.Default,
+                postGraphIncludes = PostGraphIncludes.Default,
             };
 
             public static ShaderPass Projector4RT = new ShaderPass()
@@ -85,7 +85,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_DBufferProjector4RT],
                 referenceName = "SHADERPASS_DBUFFER_PROJECTOR",
                 lightMode = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_DBufferProjector4RT],
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDecal.hlsl",
                 useInPreview = false,
 
                 // Port mask
@@ -99,7 +98,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.Projector4RT,
                 pragmas = Pragmas.Instanced,
                 defines = Defines.Decals4RT,
-                includes = Includes.Default,
+                preGraphIncludes = PreGraphIncludes.Default,
+                postGraphIncludes = PostGraphIncludes.Default,
             };
 
             public static ShaderPass ProjectorEmissive = new ShaderPass()
@@ -108,7 +108,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_ProjectorEmissive],
                 referenceName = "SHADERPASS_FORWARD_EMISSIVE_PROJECTOR",
                 lightMode = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_ProjectorEmissive],
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDecal.hlsl",
                 useInPreview = false,
 
                 // Port mask
@@ -121,7 +120,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 // Conditional State
                 renderStates = RenderStates.ProjectorEmissive,
                 pragmas = Pragmas.Instanced,
-                includes = Includes.Default,
+                preGraphIncludes = PreGraphIncludes.Default,
+                postGraphIncludes = PostGraphIncludes.Default,
             };
 
             public static ShaderPass Mesh3RT = new ShaderPass()
@@ -130,7 +130,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_DBufferMesh3RT],
                 referenceName = "SHADERPASS_DBUFFER_MESH",
                 lightMode = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_DBufferMesh3RT],
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDecal.hlsl",
                 useInPreview = false,
 
                 // Port mask
@@ -145,7 +144,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.Mesh3RT,
                 pragmas = Pragmas.Instanced,
                 defines = Defines.Decals3RT,
-                includes = Includes.Default,
+                preGraphIncludes = PreGraphIncludes.Default,
+                postGraphIncludes = PostGraphIncludes.Default,
             };
 
             public static ShaderPass Mesh4RT = new ShaderPass()
@@ -154,7 +154,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_DBufferMesh4RT],
                 referenceName = "SHADERPASS_DBUFFER_MESH",
                 lightMode = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_DBufferMesh4RT],
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDecal.hlsl",
                 useInPreview = false,
 
                 // Port mask
@@ -169,7 +168,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.Mesh4RT,
                 pragmas = Pragmas.Instanced,
                 defines = Defines.Decals4RT,
-                includes = Includes.Default,
+                preGraphIncludes = PreGraphIncludes.Default,
+                postGraphIncludes = PostGraphIncludes.Default,
             };
 
             public static ShaderPass MeshEmissive = new ShaderPass()
@@ -178,7 +178,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_MeshEmissive],
                 referenceName = "SHADERPASS_FORWARD_EMISSIVE_MESH",
                 lightMode = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_MeshEmissive],
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDecal.hlsl",
                 useInPreview = false,
 
                 // Port mask
@@ -192,7 +191,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 // Conditional State
                 renderStates = RenderStates.MeshEmissive, 
                 pragmas = Pragmas.Instanced,
-                includes = Includes.Default,
+                preGraphIncludes = PreGraphIncludes.Default,
+                postGraphIncludes = PostGraphIncludes.Default,
             };
 
             public static ShaderPass Preview = new ShaderPass()
@@ -201,7 +201,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "ForwardOnly",
                 referenceName = "SHADERPASS_FORWARD_PREVIEW",
                 lightMode = "ForwardOnly",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDecal.hlsl",
                 useInPreview = true,
 
                 // Port mask
@@ -215,7 +214,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 // Render state overrides
                 renderStates = RenderStates.Preview,
                 pragmas = Pragmas.Instanced,
-                includes = Includes.Default,
+                preGraphIncludes = PreGraphIncludes.Default,
+                postGraphIncludes = PostGraphIncludes.Default,
             };
         }
 #endregion
@@ -476,7 +476,7 @@ namespace UnityEditor.Rendering.HighDefinition
 #endregion
 
 #region Includes
-        static class Includes
+        static class PreGraphIncludes
         {
             public static ConditionalInclude[] Default = new ConditionalInclude[]
             {
@@ -489,6 +489,13 @@ namespace UnityEditor.Rendering.HighDefinition
                 new ConditionalInclude(Include.File("Packages/com.unity.render-pipelines.high-definition/Runtime/Material/MaterialUtilities.hlsl")),
                 new ConditionalInclude(Include.File("Packages/com.unity.shadergraph/ShaderGraphLibrary/Functions.hlsl")),
                 new ConditionalInclude(Include.File("Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Decal/Decal.hlsl")),
+            };
+        }
+        public class PostGraphIncludes
+        {
+            public static ConditionalInclude[] Default = new ConditionalInclude[]
+            {
+                new ConditionalInclude(Include.File("Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDecal.hlsl")),
             };
         }
 #endregion

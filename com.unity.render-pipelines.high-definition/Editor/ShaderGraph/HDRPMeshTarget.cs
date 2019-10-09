@@ -195,7 +195,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "META",
                 referenceName = "SHADERPASS_LIGHT_TRANSPORT",
                 lightMode = "META",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassLightTransport.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -209,7 +208,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 // Conditional State
                 renderStates = RenderStates.Meta,
                 pragmas = Pragmas.Instanced,
-                includes = Includes.Unlit,
+                preGraphIncludes = PreGraphIncludes.Unlit,
+                postGraphIncludes = PostGraphIncludes.LightTransport,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Unlit"),
@@ -221,7 +221,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "ShadowCaster",
                 referenceName = "SHADERPASS_SHADOWS",
                 lightMode = "ShadowCaster",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -235,7 +234,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 // Conditional State
                 renderStates = RenderStates.ShadowCasterUnlit,
                 pragmas = Pragmas.Instanced,
-                includes = Includes.Unlit,
+                preGraphIncludes = PreGraphIncludes.Unlit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Unlit"),
@@ -247,7 +247,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "SceneSelectionPass",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "SceneSelectionPass",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -262,7 +261,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.SceneSelection,
                 pragmas = Pragmas.InstancedEditorSync,
                 defines = Defines.SceneSelection,
-                includes = Includes.Unlit,
+                preGraphIncludes = PreGraphIncludes.Unlit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Unlit"),
@@ -274,7 +274,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "DepthForwardOnly",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "DepthForwardOnly",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -289,7 +288,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.DepthForwardOnly,
                 pragmas = Pragmas.Instanced,
                 keywords = Keywords.WriteMsaaDepth,
-                includes = Includes.Unlit,
+                preGraphIncludes = PreGraphIncludes.Unlit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Unlit"),
@@ -301,7 +301,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "MotionVectors",
                 referenceName = "SHADERPASS_MOTION_VECTORS",
                 lightMode = "MotionVectors",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassMotionVectors.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -317,7 +316,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.UnlitMotionVectors,
                 pragmas = Pragmas.Instanced,
                 keywords = Keywords.WriteMsaaDepth,
-                includes = Includes.Unlit,
+                preGraphIncludes = PreGraphIncludes.Unlit,
+                postGraphIncludes = PostGraphIncludes.MotionVectors,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Unlit"),
@@ -329,7 +329,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "ForwardOnly",
                 referenceName = "SHADERPASS_FORWARD_UNLIT",
                 lightMode = "ForwardOnly",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassForwardUnlit.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -344,7 +343,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.UnlitForward,
                 pragmas = Pragmas.Instanced,
                 keywords = Keywords.DebugDisplay,
-                includes = Includes.Unlit,
+                preGraphIncludes = PreGraphIncludes.Unlit,
+                postGraphIncludes = PostGraphIncludes.ForwardUnlit,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Unlit"),
@@ -361,7 +361,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "GBuffer",
                 referenceName = "SHADERPASS_GBUFFER",
                 lightMode = "GBuffer",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassGBuffer.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -377,7 +376,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.PBRGBuffer,
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 keywords = Keywords.GBuffer,
-                includes = Includes.Lit,
+                preGraphIncludes = PreGraphIncludes.Lit,
+                postGraphIncludes = PostGraphIncludes.GBuffer,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("PBR"),
@@ -389,7 +389,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "META",
                 referenceName = "SHADERPASS_LIGHT_TRANSPORT",
                 lightMode = "META",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassLightTransport.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -404,7 +403,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.Meta,
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 keywords = Keywords.LodFadeCrossfade,
-                includes = Includes.Lit,
+                preGraphIncludes = PreGraphIncludes.Lit,
+                postGraphIncludes = PostGraphIncludes.LightTransport,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("PBR"),
@@ -416,7 +416,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "ShadowCaster",
                 referenceName = "SHADERPASS_SHADOWS",
                 lightMode = "ShadowCaster",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -430,7 +429,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 // Conditional State
                 renderStates = RenderStates.ShadowCasterPBR,
                 pragmas = Pragmas.InstancedRenderingPlayer,
-                includes = Includes.Lit,
+                preGraphIncludes = PreGraphIncludes.Lit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
                 keywords = Keywords.LodFadeCrossfade,
 
                 // Custom Template
@@ -443,7 +443,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "SceneSelectionPass",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "SceneSelectionPass",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -459,7 +458,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayerEditorSync,
                 defines = Defines.SceneSelection,
                 keywords = Keywords.LodFadeCrossfade,
-                includes = Includes.Lit,
+                preGraphIncludes = PreGraphIncludes.Lit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("PBR"),
@@ -471,7 +471,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "DepthOnly",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "DepthOnly",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -488,7 +487,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.ShaderGraphRaytracingHigh,
                 keywords = Keywords.DepthMotionVectors,
-                includes = Includes.Lit,
+                preGraphIncludes = PreGraphIncludes.Lit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("PBR"),
@@ -500,7 +500,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "MotionVectors",
                 referenceName = "SHADERPASS_MOTION_VECTORS",
                 lightMode = "MotionVectors",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassMotionVectors.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -517,7 +516,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.ShaderGraphRaytracingHigh,
                 keywords = Keywords.DepthMotionVectors,
-                includes = Includes.Lit,
+                preGraphIncludes = PreGraphIncludes.Lit,
+                postGraphIncludes = PostGraphIncludes.MotionVectors,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("PBR"),
@@ -529,7 +529,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "Forward",
                 referenceName = "SHADERPASS_FORWARD",
                 lightMode = "Forward",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassForward.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -546,7 +545,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.Forward,
                 keywords = Keywords.Forward,
-                includes = Includes.LitForward,
+                preGraphIncludes = PreGraphIncludes.LitForward,
+                postGraphIncludes = PostGraphIncludes.Forward,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("PBR"),
@@ -563,7 +563,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "META",
                 referenceName = "SHADERPASS_LIGHT_TRANSPORT",
                 lightMode = "META",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassLightTransport.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -578,7 +577,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.Meta,
                 pragmas = Pragmas.Instanced,
                 keywords = Keywords.TransparentBlend,
-                includes = Includes.Unlit,
+                preGraphIncludes = PreGraphIncludes.Unlit,
+                postGraphIncludes = PostGraphIncludes.LightTransport,
 
                 // Custom Template
                 passTemplatePath = $"{HDUtils.GetHDRenderPipelinePath()}Editor/Material/Unlit/ShaderGraph/HDUnlitPass.template",
@@ -590,7 +590,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "ShadowCaster",
                 referenceName = "SHADERPASS_SHADOWS",
                 lightMode = "ShadowCaster",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -605,7 +604,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.HDShadowCaster,
                 pragmas = Pragmas.Instanced,
                 keywords = Keywords.TransparentBlend,
-                includes = Includes.Unlit,
+                preGraphIncludes = PreGraphIncludes.Unlit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = $"{HDUtils.GetHDRenderPipelinePath()}Editor/Material/Unlit/ShaderGraph/HDUnlitPass.template",
@@ -617,7 +617,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "SceneSelectionPass",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "SceneSelectionPass",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -633,7 +632,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedEditorSync,
                 defines = Defines.SceneSelection,
                 keywords = Keywords.TransparentBlend,
-                includes = Includes.Unlit,
+                preGraphIncludes = PreGraphIncludes.Unlit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = $"{HDUtils.GetHDRenderPipelinePath()}Editor/Material/Unlit/ShaderGraph/HDUnlitPass.template",
@@ -645,7 +645,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "DepthForwardOnly",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "DepthForwardOnly",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -660,7 +659,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.HDDepthForwardOnly,
                 pragmas = Pragmas.Instanced,
                 keywords = Keywords.HDDepthMotionVectors,
-                includes = Includes.Unlit,
+                preGraphIncludes = PreGraphIncludes.Unlit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = $"{HDUtils.GetHDRenderPipelinePath()}Editor/Material/Unlit/ShaderGraph/HDUnlitPass.template",
@@ -672,7 +672,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "MotionVectors",
                 referenceName = "SHADERPASS_MOTION_VECTORS",
                 lightMode = "MotionVectors",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassMotionVectors.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -688,7 +687,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.HDUnlitMotionVectors,
                 pragmas = Pragmas.Instanced,
                 keywords = Keywords.HDDepthMotionVectors,
-                includes = Includes.Unlit,
+                preGraphIncludes = PreGraphIncludes.Unlit,
+                postGraphIncludes = PostGraphIncludes.MotionVectors,
 
                 // Custom Template
                 passTemplatePath = $"{HDUtils.GetHDRenderPipelinePath()}Editor/Material/Unlit/ShaderGraph/HDUnlitPass.template",
@@ -700,7 +700,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "DistortionVectors",
                 referenceName = "SHADERPASS_DISTORTION",
                 lightMode = "DistortionVectors",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDistortion.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -715,7 +714,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.HDUnlitDistortion,
                 pragmas = Pragmas.Instanced,
                 keywords = Keywords.TransparentBlend,
-                includes = Includes.Unlit,
+                preGraphIncludes = PreGraphIncludes.Unlit,
+                postGraphIncludes = PostGraphIncludes.Distortion,
 
                 // Custom Template
                 passTemplatePath = $"{HDUtils.GetHDRenderPipelinePath()}Editor/Material/Unlit/ShaderGraph/HDUnlitPass.template",
@@ -727,7 +727,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "ForwardOnly",
                 referenceName = "SHADERPASS_FORWARD_UNLIT",
                 lightMode = "ForwardOnly",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassForwardUnlit.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -742,7 +741,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.HDUnlitForward,
                 pragmas = Pragmas.Instanced,
                 keywords = Keywords.HDUnlitForward,
-                includes = Includes.Unlit,
+                preGraphIncludes = PreGraphIncludes.Unlit,
+                postGraphIncludes = PostGraphIncludes.ForwardUnlit,
 
                 // Custom Template
                 passTemplatePath = $"{HDUtils.GetHDRenderPipelinePath()}Editor/Material/Unlit/ShaderGraph/HDUnlitPass.template",
@@ -759,7 +759,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "GBuffer",
                 referenceName = "SHADERPASS_GBUFFER",
                 lightMode = "GBuffer",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassGBuffer.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -776,7 +775,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.DotsInstanced,
                 defines = Defines.ShaderGraphRaytracingHigh,
                 keywords = Keywords.HDGBuffer,
-                includes = Includes.Lit,
+                preGraphIncludes = PreGraphIncludes.Lit,
+                postGraphIncludes = PostGraphIncludes.GBuffer,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Lit"),
@@ -788,7 +788,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "META",
                 referenceName = "SHADERPASS_LIGHT_TRANSPORT",
                 lightMode = "META",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassLightTransport.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -804,7 +803,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.DotsInstanced,
                 defines = Defines.ShaderGraphRaytracingHigh,
                 keywords = Keywords.HDBase,
-                includes = Includes.Lit,
+                preGraphIncludes = PreGraphIncludes.Lit,
+                postGraphIncludes = PostGraphIncludes.LightTransport,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Lit"),
@@ -816,7 +816,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "ShadowCaster",
                 referenceName = "SHADERPASS_SHADOWS",
                 lightMode = "ShadowCaster",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -832,7 +831,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.DotsInstanced,
                 defines = Defines.ShaderGraphRaytracingHigh,
                 keywords = Keywords.HDBase,
-                includes = Includes.Lit,
+                preGraphIncludes = PreGraphIncludes.Lit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
                 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Lit"),
@@ -844,7 +844,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "SceneSelectionPass",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "SceneSelectionPass",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -860,7 +859,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.DotsInstancedEditorSync,
                 defines = Defines.SceneSelection,
                 keywords = Keywords.HDBase,
-                includes = Includes.Lit,
+                preGraphIncludes = PreGraphIncludes.Lit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Lit"),
@@ -872,7 +872,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "DepthOnly",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "DepthOnly",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -889,7 +888,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.DotsInstanced,
                 defines = Defines.ShaderGraphRaytracingHigh,
                 keywords = Keywords.HDLitDepthMotionVectors,
-                includes = Includes.Lit,
+                preGraphIncludes = PreGraphIncludes.Lit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Lit"),
@@ -901,7 +901,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "MotionVectors",
                 referenceName = "SHADERPASS_MOTION_VECTORS",
                 lightMode = "MotionVectors",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassMotionVectors.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -918,7 +917,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.DotsInstanced,
                 defines = Defines.ShaderGraphRaytracingHigh,
                 keywords = Keywords.HDLitDepthMotionVectors,
-                includes = Includes.Lit,
+                preGraphIncludes = PreGraphIncludes.Lit,
+                postGraphIncludes = PostGraphIncludes.MotionVectors,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Lit"),
@@ -930,7 +930,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "DistortionVectors",
                 referenceName = "SHADERPASS_DISTORTION",
                 lightMode = "DistortionVectors",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDistortion.hlsl",
                 useInPreview = true,
 
                 // Port mask
@@ -946,7 +945,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.DotsInstanced,
                 defines = Defines.ShaderGraphRaytracingHigh,
                 keywords = Keywords.HDBase,
-                includes = Includes.Lit,
+                preGraphIncludes = PreGraphIncludes.Lit,
+                postGraphIncludes = PostGraphIncludes.Distortion,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Lit"),
@@ -958,7 +958,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "TransparentDepthPrepass",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "TransparentDepthPrepass",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -974,7 +973,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.DotsInstanced,
                 defines = Defines.TransparentDepthPrepass,
                 keywords = Keywords.HDBase,
-                includes = Includes.Lit,
+                preGraphIncludes = PreGraphIncludes.Lit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Lit"),
@@ -986,7 +986,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "TransparentBackface",
                 referenceName = "SHADERPASS_FORWARD",
                 lightMode = "TransparentBackface",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassForward.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -1002,7 +1001,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.DotsInstanced,
                 defines = Defines.Forward,
                 keywords = Keywords.HDForward,
-                includes = Includes.LitForward,
+                preGraphIncludes = PreGraphIncludes.LitForward,
+                postGraphIncludes = PostGraphIncludes.Forward,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Lit"),
@@ -1014,7 +1014,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "Forward",
                 referenceName = "SHADERPASS_FORWARD",
                 lightMode = "Forward",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassForward.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -1031,7 +1030,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.DotsInstanced,
                 defines = Defines.Forward,
                 keywords = Keywords.HDForward,
-                includes = Includes.LitForward,
+                preGraphIncludes = PreGraphIncludes.LitForward,
+                postGraphIncludes = PostGraphIncludes.Forward,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Lit"),
@@ -1043,7 +1043,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "TransparentDepthPostpass",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "TransparentDepthPostpass",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -1059,7 +1058,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.DotsInstanced,
                 defines = Defines.TransparentDepthPostpass,
                 keywords = Keywords.HDBase,
-                includes = Includes.Lit,
+                preGraphIncludes = PreGraphIncludes.Lit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Lit"),
@@ -1076,7 +1076,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "META",
                 referenceName = "SHADERPASS_LIGHT_TRANSPORT",
                 lightMode = "META",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassLightTransport.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -1091,7 +1090,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.Meta,
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 keywords = Keywords.HDBase,
-                includes = Includes.Eye,
+                preGraphIncludes = PreGraphIncludes.Eye,
+                postGraphIncludes = PostGraphIncludes.LightTransport,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Eye"),
@@ -1103,7 +1103,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "ShadowCaster",
                 referenceName = "SHADERPASS_SHADOWS",
                 lightMode = "ShadowCaster",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -1118,7 +1117,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.HDBlendShadowCaster,
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 keywords = Keywords.HDBase,
-                includes = Includes.Eye,
+                preGraphIncludes = PreGraphIncludes.Eye,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Eye"),
@@ -1130,7 +1130,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "SceneSelectionPass",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "SceneSelectionPass",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -1146,7 +1145,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayerEditorSync,
                 defines = Defines.SceneSelection,
                 keywords = Keywords.HDBase,
-                includes = Includes.Eye,
+                preGraphIncludes = PreGraphIncludes.Eye,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Eye"),
@@ -1158,7 +1158,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "DepthForwardOnly",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "DepthForwardOnly",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -1175,7 +1174,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.DepthMotionVectors,
                 keywords = Keywords.HDDepthMotionVectorsNoNormal,
-                includes = Includes.Eye,
+                preGraphIncludes = PreGraphIncludes.Eye,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Eye"),
@@ -1187,7 +1187,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "MotionVectors",
                 referenceName = "SHADERPASS_MOTION_VECTORS",
                 lightMode = "MotionVectors",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassMotionVectors.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -1204,7 +1203,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.DepthMotionVectors,
                 keywords = Keywords.HDDepthMotionVectorsNoNormal,
-                includes = Includes.Eye,
+                preGraphIncludes = PreGraphIncludes.Eye,
+                postGraphIncludes = PostGraphIncludes.MotionVectors,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Eye"),
@@ -1216,7 +1216,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "ForwardOnly",
                 referenceName = "SHADERPASS_FORWARD",
                 lightMode = "ForwardOnly",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassForward.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -1232,7 +1231,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.HDForward,
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.Forward,
-                includes = Includes.EyeForward,
+                preGraphIncludes = PreGraphIncludes.EyeForward,
+                postGraphIncludes = PostGraphIncludes.Forward,
                 keywords = Keywords.HDForward,
 
                 // Custom Template
@@ -1250,7 +1250,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "META",
                 referenceName = "SHADERPASS_LIGHT_TRANSPORT",
                 lightMode = "META",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassLightTransport.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -1265,7 +1264,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.Meta,
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 keywords = Keywords.HDBase,
-                includes = Includes.Fabric,
+                preGraphIncludes = PreGraphIncludes.Fabric,
+                postGraphIncludes = PostGraphIncludes.LightTransport,
                 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Fabric"),
@@ -1277,7 +1277,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "ShadowCaster",
                 referenceName = "SHADERPASS_SHADOWS",
                 lightMode = "ShadowCaster",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -1292,7 +1291,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.HDBlendShadowCaster,
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 keywords = Keywords.HDBase,
-                includes = Includes.Fabric,
+                preGraphIncludes = PreGraphIncludes.Fabric,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Fabric"),
@@ -1304,7 +1304,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "SceneSelectionPass",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "SceneSelectionPass",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -1320,7 +1319,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayerEditorSync,
                 defines = Defines.SceneSelection,
                 keywords = Keywords.HDBase,
-                includes = Includes.Fabric,
+                preGraphIncludes = PreGraphIncludes.Fabric,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Fabric"),
@@ -1332,7 +1332,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "DepthForwardOnly",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "DepthForwardOnly",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -1349,7 +1348,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.DepthMotionVectors,
                 keywords = Keywords.HDDepthMotionVectorsNoNormal,
-                includes = Includes.Fabric,
+                preGraphIncludes = PreGraphIncludes.Fabric,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Fabric"),
@@ -1361,7 +1361,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "MotionVectors",
                 referenceName = "SHADERPASS_MOTION_VECTORS",
                 lightMode = "MotionVectors",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassMotionVectors.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -1378,7 +1377,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.DepthMotionVectors,
                 keywords = Keywords.HDDepthMotionVectorsNoNormal,
-                includes = Includes.Fabric,
+                preGraphIncludes = PreGraphIncludes.Fabric,
+                postGraphIncludes = PostGraphIncludes.MotionVectors,
                 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Fabric"),
@@ -1390,7 +1390,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "ForwardOnly",
                 referenceName = "SHADERPASS_FORWARD",
                 lightMode = "ForwardOnly",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassForward.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -1407,7 +1406,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.Forward,
                 keywords = Keywords.HDForward,
-                includes = Includes.FabricForward,
+                preGraphIncludes = PreGraphIncludes.FabricForward,
+                postGraphIncludes = PostGraphIncludes.Forward,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Fabric"),
@@ -1424,7 +1424,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "META",
                 referenceName = "SHADERPASS_LIGHT_TRANSPORT",
                 lightMode = "META",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassLightTransport.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -1439,7 +1438,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.Meta,
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 keywords = Keywords.HDBase,
-                includes = Includes.Hair,
+                preGraphIncludes = PreGraphIncludes.Hair,
+                postGraphIncludes = PostGraphIncludes.LightTransport,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Hair"),
@@ -1451,7 +1451,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "ShadowCaster",
                 referenceName = "SHADERPASS_SHADOWS",
                 lightMode = "ShadowCaster",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -1466,7 +1465,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.HDBlendShadowCaster,
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 keywords = Keywords.HDBase,
-                includes = Includes.Hair,
+                preGraphIncludes = PreGraphIncludes.Hair,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Hair"),
@@ -1478,7 +1478,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "SceneSelectionPass",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "SceneSelectionPass",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -1494,7 +1493,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayerEditorSync,
                 defines = Defines.SceneSelection,
                 keywords = Keywords.HDBase,
-                includes = Includes.Hair,
+                preGraphIncludes = PreGraphIncludes.Hair,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Hair"),
@@ -1506,7 +1506,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "DepthForwardOnly",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "DepthForwardOnly",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -1523,7 +1522,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.DepthMotionVectors,
                 keywords = Keywords.HDDepthMotionVectorsNoNormal,
-                includes = Includes.Hair,
+                preGraphIncludes = PreGraphIncludes.Hair,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Hair"),
@@ -1535,7 +1535,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "MotionVectors",
                 referenceName = "SHADERPASS_MOTION_VECTORS",
                 lightMode = "MotionVectors",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassMotionVectors.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -1552,7 +1551,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.DepthMotionVectors,
                 keywords = Keywords.HDDepthMotionVectorsNoNormal,
-                includes = Includes.Hair,
+                preGraphIncludes = PreGraphIncludes.Hair,
+                postGraphIncludes = PostGraphIncludes.MotionVectors,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Hair"),
@@ -1564,7 +1564,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "TransparentDepthPrepass",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "TransparentDepthPrepass",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -1580,7 +1579,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.TransparentDepthPrepass,
                 keywords = Keywords.HDBase,
-                includes = Includes.Hair,
+                preGraphIncludes = PreGraphIncludes.Hair,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Hair"),
@@ -1592,7 +1592,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "TransparentBackface",
                 referenceName = "SHADERPASS_FORWARD",
                 lightMode = "TransparentBackface",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassForward.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -1609,7 +1608,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.Forward,
                 keywords = Keywords.HDForward,
-                includes = Includes.HairForward,
+                preGraphIncludes = PreGraphIncludes.HairForward,
+                postGraphIncludes = PostGraphIncludes.Forward,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Hair"),
@@ -1621,7 +1621,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "ForwardOnly",
                 referenceName = "SHADERPASS_FORWARD",
                 lightMode = "ForwardOnly",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassForward.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -1637,7 +1636,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.HDForwardColorMask,
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.Forward,
-                includes = Includes.HairForward,
+                preGraphIncludes = PreGraphIncludes.HairForward,
+                postGraphIncludes = PostGraphIncludes.Forward,
                 keywords = Keywords.HDForward,
 
                 // Custom Template
@@ -1650,7 +1650,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "TransparentDepthPostpass",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "TransparentDepthPostpass",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -1666,7 +1665,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.TransparentDepthPostpass,
                 keywords = Keywords.HDBase,
-                includes = Includes.Hair,
+                preGraphIncludes = PreGraphIncludes.Hair,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("Hair"),
@@ -1683,7 +1683,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "META",
                 referenceName = "SHADERPASS_LIGHT_TRANSPORT",
                 lightMode = "META",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassLightTransport.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -1698,7 +1697,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.Meta,
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 keywords = Keywords.HDBase,
-                includes = Includes.StackLit,
+                preGraphIncludes = PreGraphIncludes.StackLit,
+                postGraphIncludes = PostGraphIncludes.LightTransport,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("StackLit"),
@@ -1710,7 +1710,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "ShadowCaster",
                 referenceName = "SHADERPASS_SHADOWS",
                 lightMode = "ShadowCaster",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -1725,7 +1724,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.StackLitShadowCaster,
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 keywords = Keywords.HDBase,
-                includes = Includes.StackLit,
+                preGraphIncludes = PreGraphIncludes.StackLit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("StackLit"),
@@ -1737,7 +1737,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "SceneSelectionPass",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "SceneSelectionPass",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -1753,7 +1752,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayerEditorSync,
                 defines = Defines.SceneSelection,
                 keywords = Keywords.HDBase,
-                includes = Includes.StackLit,
+                preGraphIncludes = PreGraphIncludes.StackLit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("StackLit"),
@@ -1772,7 +1772,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "DepthForwardOnly",
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "DepthForwardOnly",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -1789,7 +1788,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.DepthMotionVectors,
                 keywords = Keywords.HDDepthMotionVectorsNoNormal,
-                includes = Includes.StackLit,
+                preGraphIncludes = PreGraphIncludes.StackLit,
+                postGraphIncludes = PostGraphIncludes.DepthOnly,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("StackLit"),
@@ -1801,7 +1801,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "MotionVectors",
                 referenceName = "SHADERPASS_MOTION_VECTORS",
                 lightMode = "MotionVectors",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassMotionVectors.hlsl",
                 useInPreview = false,
 
                 // Port Mask
@@ -1818,7 +1817,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.DepthMotionVectors,
                 keywords = Keywords.HDDepthMotionVectorsNoNormal,
-                includes = Includes.StackLit,
+                preGraphIncludes = PreGraphIncludes.StackLit,
+                postGraphIncludes = PostGraphIncludes.MotionVectors,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("StackLit"),
@@ -1830,7 +1830,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "DistortionVectors",
                 referenceName = "SHADERPASS_DISTORTION",
                 lightMode = "DistortionVectors",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDistortion.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -1845,7 +1844,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 renderStates = RenderStates.StackLitDistortion,
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 keywords = Keywords.HDBase,
-                includes = Includes.StackLit,
+                preGraphIncludes = PreGraphIncludes.StackLit,
+                postGraphIncludes = PostGraphIncludes.Distortion,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("StackLit"),
@@ -1857,7 +1857,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 displayName = "ForwardOnly",
                 referenceName = "SHADERPASS_FORWARD",
                 lightMode = "ForwardOnly",
-                passInclude = "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassForward.hlsl",
                 useInPreview = true,
 
                 // Port Mask
@@ -1874,7 +1873,8 @@ namespace UnityEditor.Rendering.HighDefinition
                 pragmas = Pragmas.InstancedRenderingPlayer,
                 defines = Defines.Forward,
                 keywords = Keywords.HDForward,
-                includes = Includes.StackLitForward,
+                preGraphIncludes = PreGraphIncludes.StackLitForward,
+                postGraphIncludes = PostGraphIncludes.Forward,
 
                 // Custom Template
                 passTemplatePath = GetPassTemplatePath("StackLit"),
@@ -3339,7 +3339,7 @@ namespace UnityEditor.Rendering.HighDefinition
 #endregion
 
 #region Includes
-        static class Includes
+        static class PreGraphIncludes
         {
             public static ConditionalInclude[] Unlit = new ConditionalInclude[]
             {
@@ -3523,6 +3523,37 @@ namespace UnityEditor.Rendering.HighDefinition
                 new ConditionalInclude(Include.File("Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Decal/DecalUtilities.hlsl")),
                 new ConditionalInclude(Include.File("Packages/com.unity.render-pipelines.high-definition/Runtime/Material/StackLit/StackLitDecalData.hlsl")),
                 new ConditionalInclude(Include.File("Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderGraphFunctions.hlsl")),
+            };
+        }
+        static class PostGraphIncludes
+        {
+            public static ConditionalInclude[] DepthOnly = new ConditionalInclude[]
+            {
+                new ConditionalInclude(Include.File("Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl")),
+            };
+            public static ConditionalInclude[] Distortion = new ConditionalInclude[]
+            {
+                new ConditionalInclude(Include.File("Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDistortion.hlsl")),
+            };
+            public static ConditionalInclude[] Forward = new ConditionalInclude[]
+            {
+                new ConditionalInclude(Include.File("Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassForward.hlsl")),
+            };
+            public static ConditionalInclude[] ForwardUnlit = new ConditionalInclude[]
+            {
+                new ConditionalInclude(Include.File("Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassForwardUnlit.hlsl")),
+            };
+            public static ConditionalInclude[] GBuffer = new ConditionalInclude[]
+            {
+                new ConditionalInclude(Include.File("Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassGBuffer.hlsl")),
+            };
+            public static ConditionalInclude[] LightTransport = new ConditionalInclude[]
+            {
+                new ConditionalInclude(Include.File("Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassLightTransport.hlsl")),
+            };
+            public static ConditionalInclude[] MotionVectors = new ConditionalInclude[]
+            {
+                new ConditionalInclude(Include.File("Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassMotionVectors.hlsl")),
             };
         }
 #endregion
