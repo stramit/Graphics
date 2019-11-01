@@ -713,7 +713,7 @@ namespace UnityEditor.ShaderGraph
                     finalShader.AppendLines(previewSubShader.GetSubshader(node, mode, sourceAssetDependencyPaths));
                 }
 
-                finalShader.AppendLine(@"FallBack ""Hidden/InternalErrorShader""");
+                finalShader.AppendLine(@"FallBack ""Hidden/Shader Graph/FallbackError""");
             }
             configuredTextures = shaderProperties.GetConfiguredTexutres();
             return finalShader.ToString();
