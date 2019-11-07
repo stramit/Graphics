@@ -351,7 +351,7 @@ namespace UnityEditor.ShaderGraph.Serialization
                             m_SerializedObjects[index] = serializedObject;
                             if (!typeMap.ContainsKey(serializedObject.type))
                             {
-                                throw new InvalidOperationException($"Invalid type {serializedObject.type}");
+                                Debug.LogError($"Invalid type {serializedObject.type}");
                             }
                             var type = typeMap[serializedObject.type];
                             var instance = (JsonObject)Activator.CreateInstance(type);

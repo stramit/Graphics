@@ -17,7 +17,7 @@ namespace UnityEditor.ShaderGraph
     [FormerName("UnityEditor.ShaderGraph.MaterialGraph")]
     [FormerName("UnityEditor.ShaderGraph.SubGraph")]
     [FormerName("UnityEditor.ShaderGraph.AbstractMaterialGraph")]
-    sealed class GraphData : JsonObject, ISerializationCallbackReceiver
+    sealed class GraphData : JsonObject
     {
         JsonStore m_Owner;
 
@@ -189,7 +189,7 @@ namespace UnityEditor.ShaderGraph
         List<ITarget> m_ValidTargets = new List<ITarget>();
 
         public List<ITarget> validTargets => m_ValidTargets;
-        
+
         [SerializeField]
         int m_ActiveTargetIndex;
 
@@ -220,7 +220,7 @@ namespace UnityEditor.ShaderGraph
             get
             {
                 // Return a list of all valid TargetImplementations enabled in the bitmask
-                return m_ValidImplementations.Where(s => ((1 << m_ValidImplementations.IndexOf(s)) & 
+                return m_ValidImplementations.Where(s => ((1 << m_ValidImplementations.IndexOf(s)) &
                     m_ActiveTargetImplementationBitmask) == (1 << m_ValidImplementations.IndexOf(s))).ToList();
             }
         }
@@ -379,7 +379,7 @@ namespace UnityEditor.ShaderGraph
             }
 
             node.owner = this;
-                m_Nodes.Add(node);
+            m_Nodes.Add(node);
             m_GroupItems[node.group ?? m_NullGroup].Add(node);
         }
 
@@ -529,9 +529,9 @@ namespace UnityEditor.ShaderGraph
         public bool ContainsNode(AbstractMaterialNode node)
         {
             if (node == null)
-        {
+            {
                 return false;
-        }
+            }
 
             return m_Nodes.Contains(node);
         }
@@ -553,8 +553,8 @@ namespace UnityEditor.ShaderGraph
                 if ((slot.isInputSlot ? edge.inputSlot : edge.outputSlot) == slot)
                 {
                     foundEdges.Add(edge);
+                }
             }
-        }
         }
 
         public IEnumerable<Edge> GetEdges(MaterialSlot s)
@@ -1069,9 +1069,9 @@ namespace UnityEditor.ShaderGraph
                 var nodeV0 = JsonUtility.FromJson<LegacyNode>(nodeJsonList[i]);
                 var node = m_Nodes[i];
                 if (!string.IsNullOrEmpty(nodeV0.groupGuid) && legacyGroupMap.TryGetValue(nodeV0.groupGuid, out var groupData))
-            {
+                {
                     node.group = groupData;
-            }
+                }
 
                 if (!string.IsNullOrEmpty(graphDataV0.activeOutputNodeGuid) &&
                     nodeV0.guid == graphDataV0.activeOutputNodeGuid)
@@ -1101,7 +1101,7 @@ namespace UnityEditor.ShaderGraph
 
                 if (node is KeywordNode keywordNode && !string.IsNullOrEmpty(nodeV0.keywordGuid) &&
                     legacyKeywordMap.TryGetValue(nodeV0.keywordGuid, out var keyword))
-            {
+                {
                     keywordNode.InternalSetKeyword(keyword);
                 }
             }
@@ -1140,27 +1140,27 @@ namespace UnityEditor.ShaderGraph
         }
 
         internal override void OnStoreDeserialized(string json)
-            {
+        {
             foreach (var group in groups)
-                {
+            {
                 m_GroupItems.Add(group, new List<IGroupItem>());
             }
 
             foreach (var node in nodes)
-                    {
+            {
                 node.owner = this;
                 m_NodeEdges[node] = new List<Edge>();
                 m_GroupItems[node.group ?? m_NullGroup].Add(node);
                 foreach (var slot in node.InternalGetSlots())
                 {
                     slot.owner = node;
-                    }
                 }
+            }
 
             foreach (var stickyNote in stickyNotes)
-                {
+            {
                 m_GroupItems[stickyNote.group ?? m_NullGroup].Add(stickyNote);
-                }
+            }
 
             if (outputNode == null)
             {
@@ -1191,6 +1191,99 @@ namespace UnityEditor.ShaderGraph
         public void OnDisable()
         {
             ShaderGraphPreferences.onVariantLimitChanged -= OnKeywordChanged;
+        }
+
+        public void UpdateTargets()
+        {
+            // First get all valid TargetImplementations that are valid with the current graph
+            List<ITargetImplementation> foundImplementations = new List<ITargetImplementation>();
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())//
+            {
+                foreach (var type in assembly.GetTypesOrNothing())
+                {
+                    var isImplementation = !type.IsAbstract && !type.IsGenericType && type.IsClass && typeof(ITargetImplementation).IsAssignableFrom(type);
+                    //for subgraph output nodes, preview target is the only valid target
+                    if (outputNode is SubGraphOutputNode && isImplementation && typeof(DefaultPreviewTarget).IsAssignableFrom(type))
+                    {
+                        var implementation = (DefaultPreviewTarget)Activator.CreateInstance(type);
+                        foundImplementations.Add(implementation);
+                    }
+                    else if (isImplementation && !foundImplementations.Any(s => s.GetType() == type))
+                    {
+                        var masterNode = outputNode as IMasterNode;
+                        var implementation = (ITargetImplementation)Activator.CreateInstance(type);
+                        if(implementation.IsValid(masterNode))
+                        {
+                            foundImplementations.Add(implementation);
+                        }
+                    }
+                }
+            }
+
+            // Next we get all Targets that have valid TargetImplementations
+            List<ITarget> foundTargets = new List<ITarget>();
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (var type in assembly.GetTypesOrNothing())
+                {
+                    var isTarget = !type.IsAbstract && !type.IsGenericType && type.IsClass && typeof(ITarget).IsAssignableFrom(type);
+                    if (isTarget && !foundTargets.Any(s => s.GetType() == type))
+                    {
+                        var target = (ITarget)Activator.CreateInstance(type);
+                        if(foundImplementations.Where(s => s.targetType == type).Any())
+                            foundTargets.Add(target);
+                    }
+                }
+            }
+
+            // Assembly reload, just rebuild the non-serialized lists
+            if(m_ValidTargets.Count == 0)
+            {
+                m_ValidTargets = foundTargets;
+                m_ValidImplementations = foundImplementations.Where(s => s.targetType == foundTargets[0].GetType()).ToList();
+            }
+
+            // Active Target is no longer valid
+            // Reset all Target selections and return
+            if(!foundTargets.Select(s => s.GetType()).Contains(m_ValidTargets[m_ActiveTargetIndex].GetType()))
+            {
+                m_ActiveTargetIndex = 0; // Default
+                m_ActiveTargetImplementationBitmask = -1; // Everything
+                m_ValidTargets = foundTargets;
+                m_ValidImplementations = foundImplementations.Where(s => s.targetType == foundTargets[0].GetType()).ToList();
+                return;
+            }
+
+            // Active Target index has changed
+            // Still need to validate TargetImplementation bitmask
+            if(foundTargets[m_ActiveTargetIndex].GetType() != activeTarget.GetType())
+            {
+                var activeTargetInFoundList = foundTargets.Where(s => s.GetType() == activeTarget.GetType()).FirstOrDefault();
+                m_ActiveTargetIndex = foundTargets.IndexOf(activeTargetInFoundList);
+            }
+
+            // Update valid Targets and TargetImplementations
+            m_ValidTargets = foundTargets;
+            m_ValidImplementations = foundImplementations.Where(s => s.targetType == activeTarget.GetType()).ToList();
+
+            // Nothing or Everything. No need to update bitmask.
+            if(m_ActiveTargetImplementationBitmask == 0 || m_ActiveTargetImplementationBitmask == -1)
+                return;
+
+            // Current ITargetImplementation bitmask is set to Mixed...
+            // We need to build a new bitmask from the indicies in the new Implementation list
+            int newBitmask = 0;
+            foreach(ITargetImplementation implementation in activeTargetImplementations)
+            {
+                var implementationInFound = foundImplementations.Where(s => s.GetType() == implementation.GetType()).FirstOrDefault();
+                if(implementationInFound != null)
+                {
+                    // If the new Implementation list contains this Implementation
+                    // add its new index to the bitmask
+                    newBitmask = newBitmask | (1 << foundImplementations.IndexOf(implementationInFound));
+                }
+            }
+            m_ActiveTargetImplementationBitmask = newBitmask;
         }
     }
 

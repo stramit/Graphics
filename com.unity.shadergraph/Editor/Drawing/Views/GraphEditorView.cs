@@ -186,15 +186,15 @@ namespace UnityEditor.ShaderGraph.Drawing
 
                     EditorGUI.BeginChangeCheck();
                     GUILayout.Label("Target");
-                    graph.activeTargetIndex = EditorGUILayout.Popup(graph.activeTargetIndex, 
-                        graph.validTargets.Select(x => x.displayName).ToArray(), GUILayout.Width(100f));
+                    m_Graph.activeTargetIndex = EditorGUILayout.Popup(m_Graph.activeTargetIndex,
+                        m_Graph.validTargets.Select(x => x.displayName).ToArray(), GUILayout.Width(100f));
                     GUILayout.Label("Implementations");
-                    graph.activeTargetImplementationBitmask = EditorGUILayout.MaskField(graph.activeTargetImplementationBitmask, 
-                        graph.validImplementations.Select(x => x.displayName).ToArray(), GUILayout.Width(100f));
+                    m_Graph.activeTargetImplementationBitmask = EditorGUILayout.MaskField(m_Graph.activeTargetImplementationBitmask,
+                        m_Graph.validImplementations.Select(x => x.displayName).ToArray(), GUILayout.Width(100f));
                     if (EditorGUI.EndChangeCheck())
                     {
-                        graph.UpdateTargets();
-                        foreach (var node in graph.GetNodes<AbstractMaterialNode>())
+                        m_Graph.UpdateTargets();
+                        foreach (var node in m_Graph.GetNodes<AbstractMaterialNode>())
                         {
                             node.Dirty(ModificationScope.Graph);
                         }
