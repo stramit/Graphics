@@ -223,7 +223,7 @@ namespace UnityEditor.ShaderGraph
             if (edges.Any())
             {
                 var slot = edges[0].outputSlot;
-                return ShaderGenerator.AdaptNodeOutput(slot.owner, slot.id, port.concreteValueType);
+                return GenerationUtils.AdaptNodeOutput(slot.owner, slot.id, port.concreteValueType);
             }
 
             return port.GetDefaultValue(generationMode);

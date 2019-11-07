@@ -135,7 +135,7 @@ namespace UnityEditor.ShaderGraph
 
         public virtual bool allowedInSubGraph
         {
-            get { return true; }
+            get { return !(this is IMasterNode); }
         }
 
         public virtual bool allowedInMainGraph
@@ -257,7 +257,7 @@ namespace UnityEditor.ShaderGraph
             {
                 var fromSlot = edges[0].outputSlot;
                 var fromNode = fromSlot.owner;
-                return ShaderGenerator.AdaptNodeOutput(fromNode, fromSlot.id, inputSlot.concreteValueType);
+                return GenerationUtils.AdaptNodeOutput(fromNode, fromSlot.id, inputSlot.concreteValueType);
             }
 
             return inputSlot.GetDefaultValue(generationMode);

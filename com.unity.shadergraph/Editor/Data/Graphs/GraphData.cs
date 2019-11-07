@@ -177,8 +177,54 @@ namespace UnityEditor.ShaderGraph
         public AbstractMaterialNode outputNode
         {
             get => m_OutputNode;
-            set => m_OutputNode = value;
+            set
+            {
+                m_OutputNode = value;
+                UpdateTargets();
+            }
         }
+
+        #region Targets
+        [NonSerialized]
+        List<ITarget> m_ValidTargets = new List<ITarget>();
+
+        public List<ITarget> validTargets => m_ValidTargets;
+        
+        [SerializeField]
+        int m_ActiveTargetIndex;
+
+        public int activeTargetIndex
+        {
+            get => m_ActiveTargetIndex;
+            set => m_ActiveTargetIndex = value;
+        }
+
+        public ITarget activeTarget => m_ValidTargets[m_ActiveTargetIndex];
+
+        [NonSerialized]
+        List<ITargetImplementation> m_ValidImplementations = new List<ITargetImplementation>();
+
+        public List<ITargetImplementation> validImplementations => m_ValidImplementations;
+
+        [SerializeField]
+        int m_ActiveTargetImplementationBitmask = -1;
+
+        public int activeTargetImplementationBitmask
+        {
+            get => m_ActiveTargetImplementationBitmask;
+            set => m_ActiveTargetImplementationBitmask = value;
+        }
+
+        public List<ITargetImplementation> activeTargetImplementations
+        {
+            get
+            {
+                // Return a list of all valid TargetImplementations enabled in the bitmask
+                return m_ValidImplementations.Where(s => ((1 << m_ValidImplementations.IndexOf(s)) & 
+                    m_ActiveTargetImplementationBitmask) == (1 << m_ValidImplementations.IndexOf(s))).ToList();
+            }
+        }
+        #endregion
 
         internal delegate void SaveGraphDelegate(Shader shader);
 
@@ -333,7 +379,7 @@ namespace UnityEditor.ShaderGraph
             }
 
             node.owner = this;
-            m_Nodes.Add(node);
+                m_Nodes.Add(node);
             m_GroupItems[node.group ?? m_NullGroup].Add(node);
         }
 
@@ -483,9 +529,9 @@ namespace UnityEditor.ShaderGraph
         public bool ContainsNode(AbstractMaterialNode node)
         {
             if (node == null)
-            {
+        {
                 return false;
-            }
+        }
 
             return m_Nodes.Contains(node);
         }
@@ -507,8 +553,8 @@ namespace UnityEditor.ShaderGraph
                 if ((slot.isInputSlot ? edge.inputSlot : edge.outputSlot) == slot)
                 {
                     foundEdges.Add(edge);
-                }
             }
+        }
         }
 
         public IEnumerable<Edge> GetEdges(MaterialSlot s)
@@ -1023,9 +1069,9 @@ namespace UnityEditor.ShaderGraph
                 var nodeV0 = JsonUtility.FromJson<LegacyNode>(nodeJsonList[i]);
                 var node = m_Nodes[i];
                 if (!string.IsNullOrEmpty(nodeV0.groupGuid) && legacyGroupMap.TryGetValue(nodeV0.groupGuid, out var groupData))
-                {
+            {
                     node.group = groupData;
-                }
+            }
 
                 if (!string.IsNullOrEmpty(graphDataV0.activeOutputNodeGuid) &&
                     nodeV0.guid == graphDataV0.activeOutputNodeGuid)
@@ -1055,7 +1101,7 @@ namespace UnityEditor.ShaderGraph
 
                 if (node is KeywordNode keywordNode && !string.IsNullOrEmpty(nodeV0.keywordGuid) &&
                     legacyKeywordMap.TryGetValue(nodeV0.keywordGuid, out var keyword))
-                {
+            {
                     keywordNode.InternalSetKeyword(keyword);
                 }
             }
@@ -1094,27 +1140,27 @@ namespace UnityEditor.ShaderGraph
         }
 
         internal override void OnStoreDeserialized(string json)
-        {
-            foreach (var group in groups)
             {
+            foreach (var group in groups)
+                {
                 m_GroupItems.Add(group, new List<IGroupItem>());
             }
 
             foreach (var node in nodes)
-            {
+                    {
                 node.owner = this;
                 m_NodeEdges[node] = new List<Edge>();
                 m_GroupItems[node.group ?? m_NullGroup].Add(node);
                 foreach (var slot in node.InternalGetSlots())
                 {
                     slot.owner = node;
+                    }
                 }
-            }
 
             foreach (var stickyNote in stickyNotes)
-            {
+                {
                 m_GroupItems[stickyNote.group ?? m_NullGroup].Add(stickyNote);
-            }
+                }
 
             if (outputNode == null)
             {
@@ -1137,6 +1183,8 @@ namespace UnityEditor.ShaderGraph
                 node.OnEnable();
             }
 
+            UpdateTargets();
+
             ShaderGraphPreferences.onVariantLimitChanged += OnKeywordChanged;
         }
 
@@ -1144,10 +1192,6 @@ namespace UnityEditor.ShaderGraph
         {
             ShaderGraphPreferences.onVariantLimitChanged -= OnKeywordChanged;
         }
-
-        public void OnBeforeSerialize() { }
-
-        public void OnAfterDeserialize() { }
     }
 
     [Serializable]

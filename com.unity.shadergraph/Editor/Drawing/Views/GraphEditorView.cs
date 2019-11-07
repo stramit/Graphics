@@ -172,7 +172,6 @@ namespace UnityEditor.ShaderGraph.Drawing
                     EditorGUI.BeginChangeCheck();
                     GUILayout.Label("Precision");
                     m_Graph.concretePrecision = (ConcretePrecision)EditorGUILayout.EnumPopup(m_Graph.concretePrecision, GUILayout.Width(100f));
-                    GUILayout.Space(4);
                     if (EditorGUI.EndChangeCheck())
                     {
                         var nodeList = m_GraphView.Query<MaterialNodeView>().ToList();
@@ -180,6 +179,22 @@ namespace UnityEditor.ShaderGraph.Drawing
                         m_Graph.ValidateGraph();
                         m_ColorManager.UpdateNodeViews(nodeList);
                         foreach (var node in m_Graph.GetNodes<AbstractMaterialNode>())
+                        {
+                            node.Dirty(ModificationScope.Graph);
+                        }
+                    }
+
+                    EditorGUI.BeginChangeCheck();
+                    GUILayout.Label("Target");
+                    graph.activeTargetIndex = EditorGUILayout.Popup(graph.activeTargetIndex, 
+                        graph.validTargets.Select(x => x.displayName).ToArray(), GUILayout.Width(100f));
+                    GUILayout.Label("Implementations");
+                    graph.activeTargetImplementationBitmask = EditorGUILayout.MaskField(graph.activeTargetImplementationBitmask, 
+                        graph.validImplementations.Select(x => x.displayName).ToArray(), GUILayout.Width(100f));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        graph.UpdateTargets();
+                        foreach (var node in graph.GetNodes<AbstractMaterialNode>())
                         {
                             node.Dirty(ModificationScope.Graph);
                         }
