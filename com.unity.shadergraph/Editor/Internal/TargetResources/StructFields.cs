@@ -2,7 +2,7 @@
 {
     public static class StructFields
     {
-        [InitializeOnLoad]
+        [Fields]
         public static class Attributes
         {
             public static string name = "Attributes";
@@ -29,7 +29,7 @@
                 "INSTANCEID_SEMANTIC", "UNITY_ANY_INSTANCING_ENABLED");
         }
 
-        [InitializeOnLoad]
+        [Fields]
         public static class Varyings
         {
             public static string name = "Varyings";
@@ -62,7 +62,7 @@
                 "FRONT_FACE_SEMANTIC", "defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)", StructFieldOptions.Generated & StructFieldOptions.Optional);
         }
 
-        [InitializeOnLoad]
+        [Fields]
         public static class VertexDescriptionInputs
         {
             public static string name = "VertexDescriptionInputs";
@@ -135,7 +135,7 @@
                 subscriptOptions : StructFieldOptions.Optional);
         }
 
-        [InitializeOnLoad]
+        [Fields]
         public static class SurfaceDescriptionInputs
         {
             public static string name = "SurfaceDescriptionInputs";

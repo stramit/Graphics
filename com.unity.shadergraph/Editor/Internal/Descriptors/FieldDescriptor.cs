@@ -34,10 +34,6 @@
             this.semantic = semantic;
             this.preprocessor = preprocessor;
             this.subscriptOptions = subscriptOptions;
-            if ((subscriptOptions & StructFieldOptions.Hidden) == 0)
-            {
-                FieldRegistry.instance.Add(this);
-            }
         }
 
         public FieldDescriptor(string tag, string name, string define, string type,
@@ -51,10 +47,6 @@
             this.semantic = semantic;
             this.preprocessor = preprocessor;
             this.subscriptOptions = subscriptOptions;
-            if ((subscriptOptions & StructFieldOptions.Hidden) == 0)
-            {
-                FieldRegistry.instance.Add(this);
-            }
         }
     }
 }
