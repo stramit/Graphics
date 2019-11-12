@@ -30,6 +30,15 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         int m_Version = 1;
 
+        #region Contexts
+
+        [SerializeField]
+        JsonList<ContextData> m_Contexts = new JsonList<ContextData>();
+
+        public List<ContextData> contexts => m_Contexts;
+
+        #endregion
+
         #region Input data
 
         [SerializeField]
@@ -1174,6 +1183,7 @@ namespace UnityEditor.ShaderGraph
             }
 
             ValidateGraph();
+            UpdateTargets();
         }
 
         public void OnEnable()

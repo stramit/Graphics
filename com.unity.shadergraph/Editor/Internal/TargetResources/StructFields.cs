@@ -2,7 +2,8 @@
 {
     public static class StructFields
     {
-        public struct Attributes
+        [InitializeOnLoad]
+        public static class Attributes
         {
             public static string name = "Attributes";
             public static FieldDescriptor positionOS = new FieldDescriptor(Attributes.name, "positionOS", "", ShaderValueType.Float3, "POSITION");
@@ -28,7 +29,8 @@
                 "INSTANCEID_SEMANTIC", "UNITY_ANY_INSTANCING_ENABLED");
         }
 
-        public struct Varyings
+        [InitializeOnLoad]
+        public static class Varyings
         {
             public static string name = "Varyings";
             public static FieldDescriptor positionCS = new FieldDescriptor(Varyings.name, "positionCS", "", ShaderValueType.Float4, "Sv_Position");
@@ -60,7 +62,8 @@
                 "FRONT_FACE_SEMANTIC", "defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)", StructFieldOptions.Generated & StructFieldOptions.Optional);
         }
 
-        public struct VertexDescriptionInputs
+        [InitializeOnLoad]
+        public static class VertexDescriptionInputs
         {
             public static string name = "VertexDescriptionInputs";
             public static FieldDescriptor ObjectSpaceNormal = new FieldDescriptor(VertexDescriptionInputs.name, "ObjectSpaceNormal", "", ShaderValueType.Float3,
@@ -71,7 +74,7 @@
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor TangentSpaceNormal = new FieldDescriptor(VertexDescriptionInputs.name, "TangentSpaceNormal", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
-            
+
             public static FieldDescriptor ObjectSpaceTangent = new FieldDescriptor(VertexDescriptionInputs.name, "ObjectSpaceTangent", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor ViewSpaceTangent = new FieldDescriptor(VertexDescriptionInputs.name, "ViewSpaceTangent", "", ShaderValueType.Float3,
@@ -80,7 +83,7 @@
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor TangentSpaceTangent = new FieldDescriptor(VertexDescriptionInputs.name, "TangentSpaceTangent", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
-            
+
             public static FieldDescriptor ObjectSpaceBiTangent = new FieldDescriptor(VertexDescriptionInputs.name, "ObjectSpaceBiTangent", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor ViewSpaceBiTangent = new FieldDescriptor(VertexDescriptionInputs.name, "ViewSpaceBiTangent", "", ShaderValueType.Float3,
@@ -89,7 +92,7 @@
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor TangentSpaceBiTangent = new FieldDescriptor(VertexDescriptionInputs.name, "TangentSpaceBiTangent", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
-            
+
             public static FieldDescriptor ObjectSpaceViewDirection = new FieldDescriptor(VertexDescriptionInputs.name, "ObjectSpaceViewDirection", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor ViewSpaceViewDirection = new FieldDescriptor(VertexDescriptionInputs.name, "ViewSpaceViewDirection", "", ShaderValueType.Float3,
@@ -98,7 +101,7 @@
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor TangentSpaceViewDirection = new FieldDescriptor(VertexDescriptionInputs.name, "TangentSpaceViewDirection", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
-            
+
             public static FieldDescriptor ObjectSpacePosition = new FieldDescriptor(VertexDescriptionInputs.name, "ObjectSpacePosition", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor ViewSpacePosition = new FieldDescriptor(VertexDescriptionInputs.name, "ViewSpacePosition", "", ShaderValueType.Float3,
@@ -109,7 +112,7 @@
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor AbsoluteWorldSpacePosition = new FieldDescriptor(VertexDescriptionInputs.name, "AbsoluteWorldSpacePosition", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
-            
+
             public static FieldDescriptor ScreenPosition = new FieldDescriptor(VertexDescriptionInputs.name, "ScreenPosition", "", ShaderValueType.Float4,
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor uv0 = new FieldDescriptor(VertexDescriptionInputs.name, "uv0", "", ShaderValueType.Float4,
@@ -132,7 +135,8 @@
                 subscriptOptions : StructFieldOptions.Optional);
         }
 
-        public struct SurfaceDescriptionInputs
+        [InitializeOnLoad]
+        public static class SurfaceDescriptionInputs
         {
             public static string name = "SurfaceDescriptionInputs";
             public static FieldDescriptor ObjectSpaceNormal = new FieldDescriptor(SurfaceDescriptionInputs.name, "ObjectSpaceNormal", "", ShaderValueType.Float3,
@@ -143,7 +147,7 @@
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor TangentSpaceNormal = new FieldDescriptor(SurfaceDescriptionInputs.name, "TangentSpaceNormal", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
-            
+
             public static FieldDescriptor ObjectSpaceTangent = new FieldDescriptor(SurfaceDescriptionInputs.name, "ObjectSpaceTangent", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor ViewSpaceTangent = new FieldDescriptor(SurfaceDescriptionInputs.name, "ViewSpaceTangent", "", ShaderValueType.Float3,
@@ -152,7 +156,7 @@
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor TangentSpaceTangent = new FieldDescriptor(SurfaceDescriptionInputs.name, "TangentSpaceTangent", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
-            
+
             public static FieldDescriptor ObjectSpaceBiTangent = new FieldDescriptor(SurfaceDescriptionInputs.name, "ObjectSpaceBiTangent", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor ViewSpaceBiTangent = new FieldDescriptor(SurfaceDescriptionInputs.name, "ViewSpaceBiTangent", "", ShaderValueType.Float3,
@@ -161,7 +165,7 @@
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor TangentSpaceBiTangent = new FieldDescriptor(SurfaceDescriptionInputs.name, "TangentSpaceBiTangent", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
-            
+
             public static FieldDescriptor ObjectSpaceViewDirection = new FieldDescriptor(SurfaceDescriptionInputs.name, "ObjectSpaceViewDirection", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor ViewSpaceViewDirection = new FieldDescriptor(SurfaceDescriptionInputs.name, "ViewSpaceViewDirection", "", ShaderValueType.Float3,
@@ -170,7 +174,7 @@
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor TangentSpaceViewDirection = new FieldDescriptor(SurfaceDescriptionInputs.name, "TangentSpaceViewDirection", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
-            
+
             public static FieldDescriptor ObjectSpacePosition = new FieldDescriptor(SurfaceDescriptionInputs.name, "ObjectSpacePosition", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor ViewSpacePosition = new FieldDescriptor(SurfaceDescriptionInputs.name, "ViewSpacePosition", "", ShaderValueType.Float3,
@@ -181,7 +185,7 @@
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor AbsoluteWorldSpacePosition = new FieldDescriptor(SurfaceDescriptionInputs.name, "AbsoluteWorldSpacePosition", "", ShaderValueType.Float3,
                 subscriptOptions : StructFieldOptions.Optional);
-            
+
             public static FieldDescriptor ScreenPosition = new FieldDescriptor(SurfaceDescriptionInputs.name, "ScreenPosition", "", ShaderValueType.Float4,
                 subscriptOptions : StructFieldOptions.Optional);
             public static FieldDescriptor uv0 = new FieldDescriptor(SurfaceDescriptionInputs.name, "uv0", "", ShaderValueType.Float4,

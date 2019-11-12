@@ -163,7 +163,7 @@ namespace UnityEditor.ShaderGraph
                             packedCounts[interpIndex] += vectorCount;
                         }
                         var packedSubscript = new FieldDescriptor(packStruct.name, "interp" + interpIndex, "", subscript.type,
-                            "TEXCOORD" + interpIndex, subscript.preprocessor, StructFieldOptions.Static);
+                            "TEXCOORD" + interpIndex, subscript.preprocessor, StructFieldOptions.Static & StructFieldOptions.Hidden);
                         packedSubscripts.Add(packedSubscript);
                     }
                 }

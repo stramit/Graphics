@@ -1,12 +1,12 @@
 ﻿namespace UnityEditor.ShaderGraph.Internal
 {
-    public class FieldDescriptor
+    public sealed class FieldDescriptor
     {
         // Default
         public string tag { get; }
         public string name { get; }
         public string define { get; }
-        
+
         // StructField
         public string type { get; }
         public int vectorCount { get; }
@@ -19,6 +19,8 @@
             this.tag = tag;
             this.name = name;
             this.define = define;
+            // TODO: Statically define master node slots
+//            FieldRegistry.instance.Add(this);
         }
 
         public FieldDescriptor(string tag, string name, string define, ShaderValueType type,
@@ -32,6 +34,10 @@
             this.semantic = semantic;
             this.preprocessor = preprocessor;
             this.subscriptOptions = subscriptOptions;
+            if ((subscriptOptions & StructFieldOptions.Hidden) == 0)
+            {
+                FieldRegistry.instance.Add(this);
+            }
         }
 
         public FieldDescriptor(string tag, string name, string define, string type,
@@ -42,9 +48,13 @@
             this.define = define;
             this.type = type;
             this.vectorCount = 0;
-            this.semantic = semantic;            
+            this.semantic = semantic;
             this.preprocessor = preprocessor;
             this.subscriptOptions = subscriptOptions;
+            if ((subscriptOptions & StructFieldOptions.Hidden) == 0)
+            {
+                FieldRegistry.instance.Add(this);
+            }
         }
     }
 }

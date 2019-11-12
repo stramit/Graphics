@@ -18,7 +18,7 @@ namespace UnityEditor.ShaderGraph.Drawing
 {
     sealed class MaterialGraphView : GraphView
     {
-        public MaterialGraphView()
+        MaterialGraphView()
         {
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/MaterialGraphView"));
             serializeGraphElements = SerializeGraphElementsImplementation;
@@ -37,9 +37,17 @@ namespace UnityEditor.ShaderGraph.Drawing
         public MaterialGraphView(GraphData graph) : this()
         {
             this.graph = graph;
+            ChangeDispatcher.Connect(this, graph, OnChange);
         }
 
-        public GraphData graph { get; private set; }
+        void OnChange()
+        {
+            graphElements.ToList().Synchronize(graph.contexts,
+                (context) => AddElement(new ContextView(context)),
+                (e) => RemoveElement((GraphElement)e));
+        }
+
+        public GraphData graph { get; }
         public Action onConvertToSubgraphClick { get; set; }
 
         public override List<Port> GetCompatiblePorts(Port startAnchor, NodeAdapter nodeAdapter)
@@ -81,6 +89,9 @@ namespace UnityEditor.ShaderGraph.Drawing
             if(evt.target is GraphView)
             {
                 evt.menu.InsertAction(1, "Create Sticky Note", (e) => { AddStickyNote(mousePosition); });
+
+                evt.menu.AppendAction("Create Fragment Context", (e) => AddContext(ShaderStage.Fragment, mousePosition));
+                evt.menu.AppendAction("Create Vertex Context", (e) => AddContext(ShaderStage.Vertex, mousePosition));
 
                 foreach (AbstractMaterialNode node in graph.GetNodes<AbstractMaterialNode>())
                 {
@@ -346,6 +357,17 @@ namespace UnityEditor.ShaderGraph.Drawing
                     graph.SetGroup(groupItem, groupData);
                 }
             }
+        }
+
+        void AddContext(ShaderStage stage, Vector2 mousePosition)
+        {
+            graph.owner.RegisterCompleteObjectUndo($"Add {stage} Context");
+            var position = contentViewContainer.WorldToLocal(mousePosition);
+            graph.contexts.Add(new ContextData
+            {
+                stage = stage,
+                position = position
+            });
         }
 
         public void AddStickyNote(Vector2 position)
@@ -623,6 +645,11 @@ namespace UnityEditor.ShaderGraph.Drawing
                 selection.OfType<UIEdge>().Select(x => x.userData).OfType<Edge>().ToArray(),
                 selection.OfType<ShaderGroup>().Select(x => x.userData).ToArray(),
                 selection.OfType<StickyNote>().Select(x => x.userData).ToArray());
+
+            foreach (var contextView in selection.OfType<ContextView>())
+            {
+                graph.contexts.Remove(contextView.data);
+            }
 
             foreach (var selectable in selection)
             {
