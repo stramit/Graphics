@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEditor.UIElements;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
+using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph.Drawing
 {
@@ -17,11 +18,19 @@ namespace UnityEditor.ShaderGraph.Drawing
         GraphData m_Graph;
         GraphView m_GraphView;
         Texture2D m_Icon;
+        VisualElement m_Target;
+
         public ShaderPort connectedPort { get; set; }
         public bool nodeNeedsRepositioning { get; set; }
         public MaterialSlot targetSlot { get; private set; }
         public Vector2 targetPosition { get; private set; }
         private const string k_HiddenFolderName = "Hidden";
+        
+        public VisualElement target
+        {
+            get => m_Target;
+            set => m_Target = value;
+        }
 
         public void Initialize(EditorWindow editorWindow, GraphData graph, GraphView graphView)
         {
@@ -56,6 +65,46 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
         {
+            // Context Create Menu
+            // Currently a duplicate of the regular Create Node menu
+            // Comments removed for smaller diff
+            if(target is ContextView contextView)
+            {
+                var stackTree = new List<SearchTreeEntry>
+                {
+                    new SearchTreeGroupEntry(new GUIContent("Create Block"), 0)
+                };
+
+                var stackGroups = new List<string>();
+                foreach (var item in FieldRegistry.instance.descriptors)
+                {
+                    var createIndex = int.MaxValue;
+                    for (var i = 0; i < 1; i++)
+                    {
+                        var group = item.tag;
+                        if (i >= stackGroups.Count)
+                        {
+                            createIndex = i;
+                            break;
+                        }
+                        if (stackGroups[i] != group)
+                        {
+                            stackGroups.RemoveRange(i, stackGroups.Count - i);
+                            createIndex = i;
+                            break;
+                        }
+                    }
+                    for (var i = createIndex; i < 1; i++)
+                    {
+                        var group = item.tag;
+                        stackGroups.Add(group);
+                        stackTree.Add(new SearchTreeGroupEntry(new GUIContent(group)) { level = i + 1 });
+                    }
+                    stackTree.Add(new SearchTreeEntry(new GUIContent(item.name, m_Icon)) { level = 2, userData = item });
+                }
+                return stackTree;
+            }
+
             // First build up temporary data structure containing group & title as an array of strings (the last one is the actual title) and associated node type.
             var nodeEntries = new List<NodeEntry>();
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
@@ -254,6 +303,17 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         public bool OnSelectEntry(SearchTreeEntry entry, SearchWindowContext context)
         {
+            // BlockFieldData
+            if(entry.userData is FieldDescriptor field)
+            {
+                if(!(target is ContextView contextView))
+                    return false;
+
+                m_Graph.owner.RegisterCompleteObjectUndo("Add " + field.name + " Block");
+                contextView.data.blocks.Add(new FieldBlockData(field));
+                return true;
+            }
+
             var nodeEntry = (NodeEntry)entry.userData;
             var node = nodeEntry.node;
             var drawState = node.drawState;

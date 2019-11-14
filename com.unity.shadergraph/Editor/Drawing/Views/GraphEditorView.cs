@@ -279,6 +279,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             m_GraphView.nodeCreationRequest = (c) =>
             {
                 m_SearchWindowProvider.connectedPort = null;
+                m_SearchWindowProvider.target = c.target;
                 SearchWindow.Open(new SearchWindowContext(c.screenMousePosition), m_SearchWindowProvider);
             };
 

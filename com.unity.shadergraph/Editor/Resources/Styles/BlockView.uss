@@ -1,0 +1,15 @@
+BlockView.fieldBlock #title 
+{
+    width: 0;
+    height: 0;
+}
+
+BlockView #input
+{
+    flex-shrink: 1;
+}
+
+BlockView #output
+{
+    flex-shrink: 1;
+}

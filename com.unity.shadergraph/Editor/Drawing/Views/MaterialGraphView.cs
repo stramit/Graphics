@@ -53,6 +53,34 @@ namespace UnityEditor.ShaderGraph.Drawing
         public override List<Port> GetCompatiblePorts(Port startAnchor, NodeAdapter nodeAdapter)
         {
             var compatibleAnchors = new List<Port>();
+            
+            // Currently only Ports that are Orientation.Vertical use the new PortData path
+            // This will need to be revisited when handling BlockData Ports
+            if(startAnchor.orientation == Orientation.Vertical)
+            {
+                // Iterate all ports
+                foreach(var candidateAnchor in ports.ToList())
+                {
+                    // Not vertical
+                    if(candidateAnchor.orientation != Orientation.Vertical)
+                        continue;
+                    
+                    // Matching directions
+                    if(candidateAnchor.direction == startAnchor.direction)
+                        continue;
+
+                    // Not new Port definitions
+                    if(!(candidateAnchor.userData is PortData candidateData) || !(startAnchor.userData is PortData startData))
+                        continue;
+
+                    if(candidateData.valueType.type == startData.valueType.type)
+                        compatibleAnchors.Add(candidateAnchor);
+                }
+
+                return compatibleAnchors;    
+            }
+            
+            // MaterialSlot (Legacy path)
             var startSlot = startAnchor.GetSlot();
             if (startSlot == null)
                 return compatibleAnchors;
@@ -79,6 +107,7 @@ namespace UnityEditor.ShaderGraph.Drawing
 
                 compatibleAnchors.Add(candidateAnchor);
             }
+
             return compatibleAnchors;
         }
 
@@ -90,9 +119,13 @@ namespace UnityEditor.ShaderGraph.Drawing
             {
                 evt.menu.InsertAction(1, "Create Sticky Note", (e) => { AddStickyNote(mousePosition); });
 
-                evt.menu.AppendAction("Create Fragment Context", (e) => AddContext(ShaderStage.Fragment, mousePosition));
-                evt.menu.AppendAction("Create Vertex Context", (e) => AddContext(ShaderStage.Vertex, mousePosition));
-
+                TypeCache.TypeCollection contextCollection = TypeCache.GetTypesDerivedFrom<IContext>();
+                foreach(var type in contextCollection)
+                {
+                    var typeRef = new TypeRef<IContext>(type);
+                    evt.menu.AppendAction($"Create {typeRef.instance.name} Context", (e) => AddContext(typeRef, mousePosition));
+                }
+                
                 foreach (AbstractMaterialNode node in graph.GetNodes<AbstractMaterialNode>())
                 {
                     if (node.hasPreview && node.previewExpanded == true)
@@ -359,14 +392,17 @@ namespace UnityEditor.ShaderGraph.Drawing
             }
         }
 
-        void AddContext(ShaderStage stage, Vector2 mousePosition)
+        void AddContext(TypeRef<IContext> contextType, Vector2 mousePosition)
         {
-            graph.owner.RegisterCompleteObjectUndo($"Add {stage} Context");
+            graph.owner.RegisterCompleteObjectUndo($"Add {contextType.instance.name} Context");
             var position = contentViewContainer.WorldToLocal(mousePosition);
             graph.contexts.Add(new ContextData
             {
-                stage = stage,
-                position = position
+                displayName = contextType.instance.name,
+                contextType = contextType,
+                inputPorts = contextType.instance.inputPorts,
+                outputPorts = contextType.instance.outputPorts,
+                position = position,
             });
         }
 

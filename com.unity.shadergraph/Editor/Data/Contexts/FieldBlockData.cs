@@ -1,6 +1,6 @@
 using System;
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
+using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph
 {
@@ -8,12 +8,15 @@ namespace UnityEditor.ShaderGraph
     sealed class FieldBlockData : BlockData
     {
         [SerializeField]
-        FieldRef m_Field;
+        readonly FieldRef m_Field;
 
-        public FieldDescriptor field
+        public FieldBlockData(FieldDescriptor descriptor)
         {
-            get => m_Field.value;
-            set => m_Field = new FieldRef(value);
+            m_Field = new FieldRef(descriptor);
+            
+            inputPorts.Add(new PortData(descriptor.fullName, typeof(TestType), PortData.Orientation.Horizontal, PortData.Direction.Input));
         }
+
+        public FieldDescriptor field => m_Field.value;
     }
 }

@@ -30,6 +30,8 @@ namespace UnityEditor.ShaderGraph
 
         Dictionary<(string, string), FieldDescriptor> m_Descriptors = new Dictionary<(string, string), FieldDescriptor>();
 
+        public IEnumerable<FieldDescriptor> descriptors => m_Descriptors.Values;
+
         public FieldDescriptor Get(string tag, string name) => m_Descriptors[(tag, name)];
     }
 }

@@ -14,6 +14,8 @@
         public string preprocessor { get; }
         public StructFieldOptions subscriptOptions { get; }
 
+        public string fullName => $"{tag}.{name}";
+
         public FieldDescriptor(string tag, string name, string define)
         {
             this.tag = tag;
