@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEditor.ShaderGraph.Serialization;
+using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph
 {
@@ -23,7 +24,7 @@ namespace UnityEditor.ShaderGraph
         readonly string m_DisplayName;
 
         [SerializeField]
-        readonly TypeRef<IValueType> m_ValueType;
+        readonly HlslTypeRef m_ShaderType;
 
         [SerializeField]
         readonly Orientation m_Orientation;
@@ -31,17 +32,17 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         readonly Direction m_Direction;
 
-        public PortData(string displayName, Type type, Orientation orientation, Direction direction)
+        public PortData(string displayName, HlslTypeDescriptor type, Orientation orientation, Direction direction)
         {
             m_DisplayName = displayName;
-            m_ValueType = new TypeRef<IValueType>(type);
+            m_ShaderType = new HlslTypeRef(type);
             m_Orientation = orientation;
             m_Direction = direction;
         }
 
         public string displayName => m_DisplayName;
 
-        public TypeRef<IValueType> valueType => m_ValueType;
+        public HlslTypeRef shaderType => m_ShaderType;
 
         public Orientation orientation => m_Orientation;
 

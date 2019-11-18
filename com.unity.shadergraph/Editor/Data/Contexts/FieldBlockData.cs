@@ -13,8 +13,8 @@ namespace UnityEditor.ShaderGraph
         public FieldBlockData(FieldDescriptor descriptor)
         {
             m_Field = new FieldRef(descriptor);
-            
-            inputPorts.Add(new PortData(descriptor.fullName, typeof(TestType), PortData.Orientation.Horizontal, PortData.Direction.Input));
+
+            inputPorts.Add(new PortData(descriptor.fullName, ShaderTypes.Primitives.@float, PortData.Orientation.Horizontal, PortData.Direction.Input));
         }
 
         public FieldDescriptor field => m_Field.value;

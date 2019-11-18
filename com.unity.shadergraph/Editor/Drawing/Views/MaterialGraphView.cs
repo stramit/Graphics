@@ -73,7 +73,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                     if(!(candidateAnchor.userData is PortData candidateData) || !(startAnchor.userData is PortData startData))
                         continue;
 
-                    if(candidateData.valueType.type == startData.valueType.type)
+                    if(candidateData.shaderType.value == startData.shaderType.value)
                         compatibleAnchors.Add(candidateAnchor);
                 }
 
@@ -118,13 +118,6 @@ namespace UnityEditor.ShaderGraph.Drawing
             if(evt.target is GraphView)
             {
                 evt.menu.InsertAction(1, "Create Sticky Note", (e) => { AddStickyNote(mousePosition); });
-
-                TypeCache.TypeCollection contextCollection = TypeCache.GetTypesDerivedFrom<IContext>();
-                foreach(var type in contextCollection)
-                {
-                    var typeRef = new TypeRef<IContext>(type);
-                    evt.menu.AppendAction($"Create {typeRef.instance.name} Context", (e) => AddContext(typeRef, mousePosition));
-                }
                 
                 foreach (AbstractMaterialNode node in graph.GetNodes<AbstractMaterialNode>())
                 {

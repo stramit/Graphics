@@ -1,4 +1,5 @@
 ﻿using UnityEditor.ShaderGraph.Serialization;
+using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph
 {
@@ -15,7 +16,7 @@ namespace UnityEditor.ShaderGraph
         public JsonList<PortData> inputPorts => new JsonList<PortData>();
         public JsonList<PortData> outputPorts => new JsonList<PortData>()
         {
-            new PortData(string.Empty, typeof(Varyings), PortData.Orientation.Vertical, PortData.Direction.Output),
+            new PortData(string.Empty, ShaderTypes.Structs.Varyings.descriptor, PortData.Orientation.Vertical, PortData.Direction.Output),
         };
     }
 
@@ -24,11 +25,11 @@ namespace UnityEditor.ShaderGraph
         public string name => "Fragment";
         public JsonList<PortData> inputPorts => new JsonList<PortData>()
         { 
-            new PortData(string.Empty, typeof(Varyings), PortData.Orientation.Vertical, PortData.Direction.Input),
+            new PortData(string.Empty, ShaderTypes.Structs.Varyings.descriptor, PortData.Orientation.Vertical, PortData.Direction.Input),
         };
         public JsonList<PortData> outputPorts => new JsonList<PortData>()
         {
-            new PortData(string.Empty, typeof(Surface), PortData.Orientation.Vertical, PortData.Direction.Output),
+            new PortData(string.Empty, ShaderTypes.Structs.Output.descriptor, PortData.Orientation.Vertical, PortData.Direction.Output),
         };
     }
 
@@ -37,7 +38,7 @@ namespace UnityEditor.ShaderGraph
         public string name => "Output";
         public JsonList<PortData> inputPorts => new JsonList<PortData>()
         { 
-            new PortData(string.Empty, typeof(Surface), PortData.Orientation.Vertical, PortData.Direction.Input),
+            new PortData(string.Empty, ShaderTypes.Structs.Output.descriptor, PortData.Orientation.Vertical, PortData.Direction.Input),
         };
         public JsonList<PortData> outputPorts => new JsonList<PortData>();
     }

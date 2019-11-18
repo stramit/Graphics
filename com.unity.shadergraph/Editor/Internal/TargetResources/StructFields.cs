@@ -62,7 +62,6 @@
                 "FRONT_FACE_SEMANTIC", "defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)", StructFieldOptions.Generated & StructFieldOptions.Optional);
         }
 
-        [Fields]
         public static class VertexDescriptionInputs
         {
             public static string name = "VertexDescriptionInputs";
@@ -135,7 +134,6 @@
                 subscriptOptions : StructFieldOptions.Optional);
         }
 
-        [Fields]
         public static class SurfaceDescriptionInputs
         {
             public static string name = "SurfaceDescriptionInputs";

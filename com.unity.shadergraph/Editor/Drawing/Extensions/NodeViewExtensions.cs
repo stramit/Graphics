@@ -11,7 +11,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             var capacity = direction == Direction.Input ? Port.Capacity.Single : Port.Capacity.Multi;
             var container = direction == Direction.Input ? node.inputContainer : node.outputContainer;
 
-            var port = Port.Create<UnityEditor.Experimental.GraphView.Edge>(orientation, direction, capacity, portData.valueType.type);
+            var port = Port.Create<UnityEditor.Experimental.GraphView.Edge>(orientation, direction, capacity, null);
             port.userData = portData;
             port.portName = portData.displayName;
             container.Add(port);

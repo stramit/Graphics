@@ -53,60 +53,44 @@ namespace UnityEditor.ShaderGraph.Drawing
             }
         }
 
-        struct NodeEntry
+        struct CreateEntry
         {
             public string[] title;
-            public AbstractMaterialNode node;
+            public object obj;
             public int compatibleSlotId;
         }
 
         List<int> m_Ids;
         List<MaterialSlot> m_Slots = new List<MaterialSlot>();
 
-        public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
+        List<CreateEntry> GetEntryList()
         {
-            // Context Create Menu
-            // Currently a duplicate of the regular Create Node menu
-            // Comments removed for smaller diff
+            var entries = new List<CreateEntry>();
+
             if(target is ContextView contextView)
             {
-                var stackTree = new List<SearchTreeEntry>
-                {
-                    new SearchTreeGroupEntry(new GUIContent("Create Block"), 0)
-                };
-
-                var stackGroups = new List<string>();
                 foreach (var item in FieldRegistry.instance.descriptors)
                 {
-                    var createIndex = int.MaxValue;
-                    for (var i = 0; i < 1; i++)
+                    entries.Add(new CreateEntry()
                     {
-                        var group = item.tag;
-                        if (i >= stackGroups.Count)
-                        {
-                            createIndex = i;
-                            break;
-                        }
-                        if (stackGroups[i] != group)
-                        {
-                            stackGroups.RemoveRange(i, stackGroups.Count - i);
-                            createIndex = i;
-                            break;
-                        }
-                    }
-                    for (var i = createIndex; i < 1; i++)
-                    {
-                        var group = item.tag;
-                        stackGroups.Add(group);
-                        stackTree.Add(new SearchTreeGroupEntry(new GUIContent(group)) { level = i + 1 });
-                    }
-                    stackTree.Add(new SearchTreeEntry(new GUIContent(item.name, m_Icon)) { level = 2, userData = item });
+                        title = new string[] { "Field Block", item.tag, item.name },
+                        obj = item,
+                    });
                 }
-                return stackTree;
+                return entries;
+            }
+            
+            TypeCache.TypeCollection contextCollection = TypeCache.GetTypesDerivedFrom<IContext>();
+            foreach(var type in contextCollection)
+            {
+                var typeRef = new TypeRef<IContext>(type);
+                entries.Add(new CreateEntry()
+                {
+                    title = new string[] { "Context", typeRef.instance.name },
+                    obj = typeRef,
+                });
             }
 
-            // First build up temporary data structure containing group & title as an array of strings (the last one is the actual title) and associated node type.
-            var nodeEntries = new List<NodeEntry>();
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (var type in assembly.GetTypesOrNothing())
@@ -120,7 +104,8 @@ namespace UnityEditor.ShaderGraph.Drawing
                         if (attrs != null && attrs.Length > 0)
                         {
                             var node = (AbstractMaterialNode)Activator.CreateInstance(type);
-                            AddEntries(node, attrs[0].title, nodeEntries);
+                            var path = new string[]{"Node"}.Concat(attrs[0].title).ToArray();
+                            AddEntries(node, path, entries);
                         }
                     }
                 }
@@ -139,13 +124,13 @@ namespace UnityEditor.ShaderGraph.Drawing
 
                 if (string.IsNullOrEmpty(asset.path))
                 {
-                    AddEntries(node, new string[1] { asset.name }, nodeEntries);
+                    AddEntries(node, new string[] { "Node", asset.name }, entries);
                 }
 
                 else if (title[0] != k_HiddenFolderName)
                 {
                     title.Add(asset.name);
-                    AddEntries(node, title.ToArray(), nodeEntries);
+                    AddEntries(node, new string[] {"Node"}.Concat(title).ToArray(), entries);
                 }
             }
 
@@ -155,7 +140,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 node.owner = m_Graph;
                 node.property = property;
                 node.owner = null;
-                AddEntries(node, new[] { "Properties", "Property: " + property.displayName }, nodeEntries);
+                AddEntries(node, new[] {"Node", "Properties", "Property: " + property.displayName }, entries);
             }
             foreach (var keyword in m_Graph.keywords)
             {
@@ -163,15 +148,22 @@ namespace UnityEditor.ShaderGraph.Drawing
                 node.owner = m_Graph;
                 node.keyword = keyword;
                 node.owner = null;
-                AddEntries(node, new[] { "Keywords", "Keyword: " + keyword.displayName }, nodeEntries);
+                AddEntries(node, new[] {"Node", "Keywords", "Keyword: " + keyword.displayName }, entries);
             }
+
+            return entries;
+        }
+
+        public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
+        {
+            var createEntries = GetEntryList();
 
             // Sort the entries lexicographically by group then title with the requirement that items always comes before sub-groups in the same group.
             // Example result:
             // - Art/BlendMode
             // - Art/Adjustments/ColorBalance
             // - Art/Adjustments/Contrast
-            nodeEntries.Sort((entry1, entry2) =>
+            createEntries.Sort((entry1, entry2) =>
                 {
                     for (var i = 0; i < entry1.title.Length; i++)
                     {
@@ -197,10 +189,10 @@ namespace UnityEditor.ShaderGraph.Drawing
             // First item in the tree is the title of the window.
             var tree = new List<SearchTreeEntry>
             {
-                new SearchTreeGroupEntry(new GUIContent("Create Node"), 0),
+                new SearchTreeGroupEntry(new GUIContent("Create"), 0),
             };
 
-            foreach (var nodeEntry in nodeEntries)
+            foreach (var nodeEntry in createEntries)
             {
                 // `createIndex` represents from where we should add new group entries from the current entry's group path.
                 var createIndex = int.MaxValue;
@@ -243,7 +235,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             return tree;
         }
 
-        void AddEntries(AbstractMaterialNode node, string[] title, List<NodeEntry> nodeEntries)
+        void AddEntries(AbstractMaterialNode node, string[] title, List<CreateEntry> nodeEntries)
         {
             if (m_Graph.isSubGraph && !node.allowedInSubGraph)
                 return;
@@ -251,9 +243,9 @@ namespace UnityEditor.ShaderGraph.Drawing
                 return;
             if (connectedPort == null)
             {
-                nodeEntries.Add(new NodeEntry
+                nodeEntries.Add(new CreateEntry
                 {
-                    node = node,
+                    obj = node,
                     title = title,
                     compatibleSlotId = -1
                 });
@@ -278,9 +270,9 @@ namespace UnityEditor.ShaderGraph.Drawing
 
             if (hasSingleSlot && m_Slots.Count == 1)
             {
-                nodeEntries.Add(new NodeEntry
+                nodeEntries.Add(new CreateEntry
                 {
-                    node = node,
+                    obj = node,
                     title = title,
                     compatibleSlotId = m_Slots.First().id
                 });
@@ -292,10 +284,10 @@ namespace UnityEditor.ShaderGraph.Drawing
                 var entryTitle = new string[title.Length];
                 title.CopyTo(entryTitle, 0);
                 entryTitle[entryTitle.Length - 1] += ": " + slot.displayName;
-                nodeEntries.Add(new NodeEntry
+                nodeEntries.Add(new CreateEntry
                 {
                     title = entryTitle,
-                    node = node,
+                    obj = node,
                     compatibleSlotId = slot.id
                 });
             }
@@ -303,8 +295,15 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         public bool OnSelectEntry(SearchTreeEntry entry, SearchWindowContext context)
         {
+            var createEntry = (CreateEntry)entry.userData;
+
+            // Get Mouse Position
+            var windowRoot = m_EditorWindow.rootVisualElement;
+            var windowMousePosition = windowRoot.ChangeCoordinatesTo(windowRoot.parent, context.screenMousePosition - m_EditorWindow.position.position);
+            var graphMousePosition = m_GraphView.contentViewContainer.WorldToLocal(windowMousePosition);
+
             // BlockFieldData
-            if(entry.userData is FieldDescriptor field)
+            if(createEntry.obj is FieldDescriptor field)
             {
                 if(!(target is ContextView contextView))
                     return false;
@@ -314,30 +313,44 @@ namespace UnityEditor.ShaderGraph.Drawing
                 return true;
             }
 
-            var nodeEntry = (NodeEntry)entry.userData;
-            var node = nodeEntry.node;
-            var drawState = node.drawState;
-            var windowRoot = m_EditorWindow.rootVisualElement;
-            var windowMousePosition = windowRoot.ChangeCoordinatesTo(windowRoot.parent, context.screenMousePosition - m_EditorWindow.position.position);
-            var graphMousePosition = m_GraphView.contentViewContainer.WorldToLocal(windowMousePosition);
-            drawState.position = new Rect(graphMousePosition, Vector2.zero);
-            node.drawState = drawState;
-
-            m_Graph.owner.RegisterCompleteObjectUndo("Add " + node.name);
-            m_Graph.AddNode(node);
-
-            if (connectedPort != null)
+            // Context
+            else if(createEntry.obj is TypeRef<IContext> contextType)
             {
-                var connectedSlot = connectedPort.slot;
-                var compatibleSlot = node.FindSlot(nodeEntry.compatibleSlotId);
+                m_Graph.owner.RegisterCompleteObjectUndo($"Add {contextType.instance.name} Context");
+                m_Graph.contexts.Add(new ContextData
+                {
+                    displayName = contextType.instance.name,
+                    contextType = contextType,
+                    inputPorts = contextType.instance.inputPorts,
+                    outputPorts = contextType.instance.outputPorts,
+                    position = graphMousePosition,
+                });
+                return true;
+            }
 
-                var from = connectedSlot.isOutputSlot ? connectedSlot : compatibleSlot;
-                var to = connectedSlot.isOutputSlot ? compatibleSlot : connectedSlot;
-                m_Graph.Connect(from, to);
+            // AbstractMaterialNode
+            else if(createEntry.obj is AbstractMaterialNode node)
+            {
+                var drawState = node.drawState;
+                drawState.position = new Rect(graphMousePosition, Vector2.zero);
+                node.drawState = drawState;
 
-                nodeNeedsRepositioning = true;
-                targetSlot = compatibleSlot;
-                targetPosition = graphMousePosition;
+                m_Graph.owner.RegisterCompleteObjectUndo("Add " + node.name);
+                m_Graph.AddNode(node);
+
+                if (connectedPort != null)
+                {
+                    var connectedSlot = connectedPort.slot;
+                    var compatibleSlot = node.FindSlot(createEntry.compatibleSlotId);
+
+                    var from = connectedSlot.isOutputSlot ? connectedSlot : compatibleSlot;
+                    var to = connectedSlot.isOutputSlot ? compatibleSlot : connectedSlot;
+                    m_Graph.Connect(from, to);
+
+                    nodeNeedsRepositioning = true;
+                    targetSlot = compatibleSlot;
+                    targetPosition = graphMousePosition;
+                }
             }
 
             return true;
