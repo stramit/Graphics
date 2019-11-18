@@ -612,6 +612,9 @@ namespace UnityEditor.Rendering.HighDefinition
             if (masterNode.depthOffset.isOn && pass.PixelShaderUsesSlot(HairMasterNode.DepthOffsetSlotId))
                 baseActiveFields.Add("DepthOffset");
 
+            if (masterNode.supportLodCrossFade.isOn)
+                baseActiveFields.AddAll("LodCrossFade");
+
             return activeFields;
         }
 
