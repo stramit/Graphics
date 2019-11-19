@@ -279,6 +279,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             m_GraphView.nodeCreationRequest = (c) =>
                 {
                     m_SearchWindowProvider.connectedPort = null;
+                    m_SearchWindowProvider.target = c.target;
                     SearchWindow.Open(new SearchWindowContext(c.screenMousePosition), m_SearchWindowProvider);
                 };
 
@@ -417,6 +418,11 @@ namespace UnityEditor.ShaderGraph.Drawing
                     if (element is StickyNote stickyNote)
                     {
                         SetStickyNotePosition(stickyNote);
+                    }
+
+                    if (element.userData is ContextData contextData)
+                    {
+                        contextData.position = element.parent.ChangeCoordinatesTo(m_GraphView.contentViewContainer, element.GetPosition()).position;
                     }
                 }
             }
