@@ -68,20 +68,16 @@ namespace UnityEditor.ShaderGraph.Drawing
 
             if(target is ContextView contextView)
             {
-                // Implement Block search here...
-                // Current OnSelectEntry implementation assumes entry.obj is BlockData
-
-                // Temporary Entry (Remove)
-                entries.Add(new CreateEntry()
+                TypeCache.TypeCollection blockCollection = TypeCache.GetTypesDerivedFrom<BlockData>();
+                foreach(var type in blockCollection)
                 {
-                    title = new [] { "Group", "Test Block" },
-                    obj = new BlockData() { displayName = "Test" },
-                });
-                entries.Add(new CreateEntry()
-                {
-                    title = new [] { "Group", "Test Block 2" },
-                    obj = new BlockData() { displayName = "Test2" },
-                });
+                    var attrs = type.GetCustomAttributes(typeof(TitleAttribute), false) as TitleAttribute[];
+                    if (attrs != null && attrs.Length > 0)
+                    {
+                        var node = (BlockData)Activator.CreateInstance(type);
+                        AddEntries(node, attrs[0].title, entries);
+                    }
+                }
 
                 return entries;
             }
@@ -93,7 +89,8 @@ namespace UnityEditor.ShaderGraph.Drawing
                     if (type.IsClass && !type.IsAbstract && (type.IsSubclassOf(typeof(AbstractMaterialNode)))
                         && type != typeof(PropertyNode)
                         && type != typeof(KeywordNode)
-                        && type != typeof(SubGraphNode))
+                        && type != typeof(SubGraphNode)
+                        && !type.IsSubclassOf(typeof(BlockData)))
                     {
                         var attrs = type.GetCustomAttributes(typeof(TitleAttribute), false) as TitleAttribute[];
                         if (attrs != null && attrs.Length > 0)
@@ -296,8 +293,9 @@ namespace UnityEditor.ShaderGraph.Drawing
                 if(!(target is ContextView contextView))
                     return false;
                 
-                m_Graph.owner.RegisterCompleteObjectUndo("Add " + blockData.displayName + " Block");
+                m_Graph.owner.RegisterCompleteObjectUndo("Add " + blockData.name + " Block");
                 int index = contextView.GetInsertionIndex(context.screenMousePosition);
+                blockData.owner = m_Graph;
                 contextView.data.blocks.Insert(index, blockData);
                 return true;
             }

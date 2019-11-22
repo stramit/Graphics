@@ -227,8 +227,10 @@ namespace UnityEditor.ShaderGraph.Drawing
                     m_ChangedFileDependencies.Clear();
                 }
 
-                graphEditorView.HandleGraphChanges();
+                // Changes must be dispatched before handling graph changes
+                // This is because Node views must be up to date before Edges are connected
                 graphEditorView.changeDispatcher.Dispatch();
+                graphEditorView.HandleGraphChanges();
                 graphData.ClearChanges();
             }
             catch (Exception e)

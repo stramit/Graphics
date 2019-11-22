@@ -274,6 +274,14 @@ namespace UnityEditor.ShaderGraph.Drawing
                 }
             }
 
+            Add(content);
+
+            // This must be called after the GraphView is added to the GraphEditorView
+            // because it creates Contexts which in turn create Blocks, these Blocks need
+            // to use the VisualElement hierarchy to get back to the GraphEditorView.
+            // See ContextView.AddElement for more information.
+            m_GraphView.OnChange();
+
             m_SearchWindowProvider = ScriptableObject.CreateInstance<SearchWindowProvider>();
             m_SearchWindowProvider.Initialize(editorWindow, m_Graph, m_GraphView);
             m_GraphView.nodeCreationRequest = (c) =>
@@ -300,8 +308,6 @@ namespace UnityEditor.ShaderGraph.Drawing
 
             foreach (var edge in m_Graph.edges)
                 AddEdge(edge);
-
-            Add(content);
         }
 
         Action<Group, string> m_GraphViewGroupTitleChanged;
@@ -804,6 +810,21 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         List<GraphElement> m_GraphElementsTemp = new List<GraphElement>();
 
+        public MaterialNodeView AddBlockNode(ContextView contextView, BlockData blockData)
+        {
+            var materialNodeView = new MaterialNodeView { userData = blockData };
+            contextView.AddElement(materialNodeView);
+            blockData.RegisterCallback(OnNodeChanged);
+
+            // We should not need to add Nodes (Blocks or otherwise) via GraphEditorView
+            // Rewrite so we can hook up Preview and Color Managers without this roundtrip
+            materialNodeView.Initialize(blockData, m_PreviewManager, m_EdgeConnectorListener, m_GraphView);
+            m_ColorManager.UpdateNodeView(materialNodeView);
+            
+            materialNodeView.MarkDirtyRepaint();
+            return materialNodeView;
+        }
+
         void AddNode(AbstractMaterialNode node)
         {
             var materialNode = (AbstractMaterialNode)node;
@@ -940,8 +961,21 @@ namespace UnityEditor.ShaderGraph.Drawing
             if (sourceNodeView != null)
             {
                 var sourceAnchor = sourceNodeView.gvNode.outputContainer.Children().OfType<ShaderPort>().First(x => x.slot.Equals(sourceSlot));
+                var targetNodeView = m_GraphView.nodes.ToList().OfType<IShaderNodeView>().FirstOrDefault(x => x.node == targetNode);
 
-                var targetNodeView = m_GraphView.nodes.ToList().OfType<IShaderNodeView>().First(x => x.node == targetNode);
+                // Target node is a BlockNode
+                // These are not accessed by m_GraphView.nodes as this is a query to the main container
+                // Instead we have to manually iterate the QueryState for nodes per Context
+                if(targetNodeView == null)
+                {
+                    foreach(ContextView contextView in graphView.contexts.ToList())
+                    {
+                        targetNodeView = contextView.blocks.ToList().OfType<IShaderNodeView>().FirstOrDefault(x => x.node == targetNode);
+                        if(targetNodeView != null)
+                            break;
+                    }
+                }
+
                 var targetAnchor = targetNodeView.gvNode.inputContainer.Children().OfType<ShaderPort>().First(x => x.slot.Equals(targetSlot));
 
                 var edgeView = new EdgeView

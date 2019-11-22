@@ -1,19 +1,13 @@
 ﻿using System;
-using UnityEditor.ShaderGraph.Serialization;
-using UnityEngine;
 
 namespace UnityEditor.ShaderGraph
 {
     [Serializable]
-    class BlockData : JsonObject
+    abstract class BlockData : AbstractMaterialNode
     {
-        [SerializeField]
-        string m_DisplayName;
-
-        public string displayName
+        public override bool hasPreview
         {
-            get => m_DisplayName;
-            set => m_DisplayName = value;
+            get { return false; }
         }
     }
 }

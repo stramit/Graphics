@@ -13,6 +13,7 @@ namespace UnityEditor.ShaderGraph.Drawing
         readonly Label m_HeaderLabel;
 
         public ContextData data => m_Data;
+        public UQueryState<Node> blocks { get; private set; }
 
         public ContextView(ContextData data)
         {
@@ -27,12 +28,31 @@ namespace UnityEditor.ShaderGraph.Drawing
             ChangeDispatcher.Connect(this, data, OnChange);
         }
 
-        void OnChange()
+        public void OnChange()
         {
             SetPosition(new Rect(m_Data.position, Vector2.zero));
             m_HeaderLabel.text = data.displayName;
 
-            this.Synchronize(data.blocks, e => AddElement(new BlockView(e)), e => RemoveElement((GraphElement)e));
+            this.Synchronize(data.blocks, AddElement, RemoveElement);
+
+            // Rebuild Blocks query
+            blocks = contentContainer.Query<Node>().Build();
+        }
+
+        void AddElement(BlockData blockData)
+        {
+            // Need to add Blocks via GraphEditorView because it needs to hook into
+            // Preview and Color Managers etc. This needs to be rewritten.
+            var graphEditorView = GetFirstAncestorOfType<GraphEditorView>();
+            var nodeView = graphEditorView.AddBlockNode(this, blockData);
+        }
+
+        void RemoveElement(VisualElement element)
+        {
+            if(element is MaterialNodeView nodeView)
+            {
+                Remove(nodeView);
+            }
         }
 
         protected override bool AcceptsElement(GraphElement element, ref int proposedIndex, int maxIndex)

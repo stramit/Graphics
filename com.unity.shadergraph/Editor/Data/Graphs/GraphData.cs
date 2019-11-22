@@ -411,6 +411,13 @@ namespace UnityEditor.ShaderGraph
             }
 
             node.owner = null;
+            
+            if(node is BlockData blockData)
+            {
+                foreach(var context in contexts)
+                    context.blocks.Remove(blockData);
+            }
+            
             m_Nodes.Remove(node);
             messageManager?.RemoveNode(node);
 
@@ -542,7 +549,18 @@ namespace UnityEditor.ShaderGraph
                 return false;
             }
 
-            return m_Nodes.Contains(node);
+            if(m_Nodes.Contains(node))
+                return true;
+            
+            // Now also needs to check Blocks in Contexts as all 
+            // our lookup code for Edges depends on this function.
+            foreach(ContextData context in contexts)
+            {
+                if(context.blocks.Contains(node))
+                    return true;
+            }
+
+            return false;
         }
 
         public void GetEdges(MaterialSlot slot, List<Edge> foundEdges)
@@ -1169,6 +1187,19 @@ namespace UnityEditor.ShaderGraph
             foreach (var stickyNote in stickyNotes)
             {
                 m_GroupItems[stickyNote.group ?? m_NullGroup].Add(stickyNote);
+            }
+
+            // Now set owner through all Blocks and their Slots
+            foreach (var context in contexts)
+            {
+                foreach(var block in context.blocks)
+                {
+                    block.owner = this;
+                    foreach(var slot in block.InternalGetSlots())
+                    {
+                        slot.owner = block;
+                    }
+                }
             }
 
             if (outputNode == null)

@@ -41,6 +41,8 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         GraphView m_GraphView;
 
+        bool isBlockNodeView => node is BlockData blockData;
+
         public void Initialize(AbstractMaterialNode inNode, PreviewManager previewManager, IEdgeConnectorListener connectorListener, GraphView graphView)
         {
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/MaterialNodeView"));
@@ -149,7 +151,8 @@ namespace UnityEditor.ShaderGraph.Drawing
             RefreshExpandedState(); //This should not be needed. GraphView needs to improve the extension api here
             UpdatePortInputVisibilities();
 
-            SetPosition(new Rect(node.drawState.position.x, node.drawState.position.y, 0, 0));
+            if(!isBlockNodeView)
+                SetPosition(new Rect(node.drawState.position.x, node.drawState.position.y, 0, 0));
 
             if (node is SubGraphNode)
             {
@@ -518,7 +521,9 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         void OnChange()
         {
-            SetPosition(new Rect(node.drawState.position.x, node.drawState.position.y, 0, 0));
+            if(!isBlockNodeView)
+                SetPosition(new Rect(node.drawState.position.x, node.drawState.position.y, 0, 0));
+            
             OnModified(ModificationScope.Topological);
         }
 

@@ -41,11 +41,12 @@ namespace UnityEditor.ShaderGraph.Drawing
             ChangeDispatcher.Connect(this, graph, OnChange);
         }
 
-        void OnChange()
+        public void OnChange()
         {
-            graphElements.ToList().Synchronize(graph.contexts,
-                (context) => AddElement(new ContextView(context)),
-                (e) => RemoveElement((GraphElement)e));
+            graphElements.ToList().Synchronize(graph.contexts, AddContext, RemoveContext);
+
+            // Rebuild Contexts query
+            contexts = contentViewContainer.Query<ContextView>().Build();
         }
 
         void ElementsInsertedToStackNode(StackNode stackNode, int insertIndex, IEnumerable<GraphElement> elements)
@@ -56,6 +57,27 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         public GraphData graph { get; private set; }
         public Action onConvertToSubgraphClick { get; set; }
+
+        public UQueryState<ContextView> contexts { get; private set; }
+
+        void AddContext(ContextData contextData)
+        {
+            var contextView = new ContextView(contextData);
+            AddElement(contextView);
+
+            // This must be called after the ContextView is added to the GraphView.
+            // because it creates Blocks, these Blocks need to use the VisualElement hierarchy 
+            // to get back to the GraphEditorView. See ContextView.AddElement for more information
+            contextView.OnChange();
+        }
+
+        void RemoveContext(VisualElement element)
+        {
+            if(element is ContextView contextView)
+            {
+                RemoveElement(contextView);
+            }
+        }
 
         public override List<Port> GetCompatiblePorts(Port startAnchor, NodeAdapter nodeAdapter)
         {
@@ -638,6 +660,7 @@ namespace UnityEditor.ShaderGraph.Drawing
 
             // Add keyword nodes dependent on deleted keywords
             nodesToDelete = nodesToDelete.Union(keywordNodes);
+            var blah = nodesToDelete.ToList();
 
             // If deleting a Sub Graph node whose asset contains Keywords test variant limit
             foreach(SubGraphNode subGraphNode in nodesToDelete.OfType<SubGraphNode>())
