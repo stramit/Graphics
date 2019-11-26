@@ -37,6 +37,13 @@ namespace UnityEditor.ShaderGraph
             return container;
         }
 
+        protected virtual VisualElement CreateCommonSettingsElement()
+        {
+            return null;
+        }
+
+        public virtual object saveContext => null;
+
         public virtual void ProcessPreviewMaterial(Material Material) {}
 
         protected virtual VisualElement CreateCommonSettingsElement()
