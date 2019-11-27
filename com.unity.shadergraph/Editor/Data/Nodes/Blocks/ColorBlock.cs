@@ -1,5 +1,6 @@
 using UnityEditor.Graphing;
 using UnityEngine;
+using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph
 {
@@ -11,14 +12,19 @@ namespace UnityEditor.ShaderGraph
             name = "Color";
             UpdateNodeAfterDeserialization();
         }
-
-        const int InputSlotId = 0;
-        const string kInputSlotName = "Color";
+        
+        const int kColorId = 0;
+        const string kColorName = "Color";
 
         public sealed override void UpdateNodeAfterDeserialization()
         {
-            AddSlot(new DynamicVectorMaterialSlot(InputSlotId, kInputSlotName, kInputSlotName, SlotType.Input, Vector4.zero));
-            RemoveSlotsNameNotMatching(new[] { InputSlotId });
+            AddSlot(new DynamicVectorMaterialSlot(kColorId, kColorName, kColorName, SlotType.Input, Vector4.zero));
+            RemoveSlotsNameNotMatching(new[] { kColorId });
+        }
+
+        public override ConditionalField[] GetConditionalFields(PassDescriptor pass)
+        {
+            return null;
         }
     }
 }
