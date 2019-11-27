@@ -74,8 +74,11 @@ namespace UnityEditor.ShaderGraph.Drawing
                     var attrs = type.GetCustomAttributes(typeof(TitleAttribute), false) as TitleAttribute[];
                     if (attrs != null && attrs.Length > 0)
                     {
-                        var node = (BlockData)Activator.CreateInstance(type);
-                        AddEntries(node, attrs[0].title, entries);
+                        if (attrs[0].title[0] != k_HiddenFolderName)
+                        {
+                            var node = (BlockData)Activator.CreateInstance(type);
+                            AddEntries(node, attrs[0].title, entries);
+                        }
                     }
                 }
 
