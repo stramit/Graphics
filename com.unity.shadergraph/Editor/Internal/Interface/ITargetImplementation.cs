@@ -9,7 +9,6 @@ namespace UnityEditor.ShaderGraph.Internal
         string passTemplatePath { get; }
         string sharedTemplateDirectory { get; }
 
-        bool IsValid(IMasterNode masterNode);
         void SetupTarget(ref TargetSetupContext context);
     }
 }

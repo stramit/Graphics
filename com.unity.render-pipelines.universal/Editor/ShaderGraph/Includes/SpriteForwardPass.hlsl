@@ -20,12 +20,23 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
     SurfaceDescriptionInputs surfaceDescriptionInputs = BuildSurfaceDescriptionInputs(unpacked);
     SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
 
-#if ETC1_EXTERNAL_ALPHA
-    float4 alpha = SAMPLE_TEXTURE2D(_AlphaTex, sampler_AlphaTex, unpacked.texCoord0.xy);
-    surfaceDescription.Color.a = lerp (surfaceDescription.Color.a, alpha.r, _EnableAlphaTexture);
+    half3 color = half3(0.5, 0.5, 0.5);
+    half alpha = 1;
+
+#ifdef OUTPUT_SURFACEDESCRIPTION_COLOR
+    color = surfaceDescription.Color;
+#endif
+#ifdef OUTPUT_SURFACEDESCRIPTION_ALPHA
+    alpha = surfaceDescription.Alpha;
 #endif
 
-    surfaceDescription.Color *= unpacked.color;
+#if ETC1_EXTERNAL_ALPHA
+    float4 alphaTex = SAMPLE_TEXTURE2D(_AlphaTex, sampler_AlphaTex, unpacked.texCoord0.xy);
+    alpha = lerp (alpha, alphaTex.r, _EnableAlphaTexture);
+#endif
 
-    return surfaceDescription.Color;
+    half4 result = half4(color, alpha);
+    result *= unpacked.color;
+
+    return result;
 }

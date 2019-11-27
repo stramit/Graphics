@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEditor.ShaderGraph;
 
 namespace UnityEditor.ShaderGraph.Internal
 {
@@ -9,11 +8,6 @@ namespace UnityEditor.ShaderGraph.Internal
         public string displayName => "Default";
         public string passTemplatePath => null;
         public string sharedTemplateDirectory => null;
-
-        public bool IsValid(IMasterNode masterNode)
-        {
-            return masterNode is VfxMasterNode;
-        }
 
         public void SetupTarget(ref TargetSetupContext context)
         {

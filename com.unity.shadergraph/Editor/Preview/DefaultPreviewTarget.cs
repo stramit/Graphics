@@ -10,11 +10,6 @@ namespace UnityEditor.ShaderGraph
         public string passTemplatePath => GenerationUtils.GetDefaultTemplatePath("PassMesh.template");
         public string sharedTemplateDirectory => GenerationUtils.GetDefaultSharedTemplateDirectory();
 
-        public bool IsValid(IMasterNode masterNode)
-        {
-            return false;
-        }
-
         public void SetupTarget(ref TargetSetupContext context)
         {
             context.AddAssetDependencyPath("7464b9fcde08e5645a16b9b8ae1e573c"); // PreviewTarget
