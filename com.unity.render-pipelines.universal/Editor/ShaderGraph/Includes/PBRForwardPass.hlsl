@@ -33,31 +33,57 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
     SurfaceDescriptionInputs surfaceDescriptionInputs = BuildSurfaceDescriptionInputs(unpacked);
     SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
 
-    #if _AlphaClip
-        clip(surfaceDescription.Alpha - surfaceDescription.AlphaClipThreshold);
-    #endif
+    half3 color = half3(0.5, 0.5, 0.5);
+    half alpha = 1;
+    half3 normal = half3(0.5, 0.5, 1);
+    half smoothness = 0.5;
+    half occlusion = 1;
+    half3 emission = half3(0, 0, 0);
+
+#ifdef OUTPUT_SURFACEDESCRIPTION_COLOR
+    color = surfaceDescription.Color;
+#endif
+#ifdef OUTPUT_SURFACEDESCRIPTION_ALPHA
+    alpha = surfaceDescription.Alpha;
+#endif
+#ifdef OUTPUT_SURFACEDESCRIPTION_NORMAL
+    normal = surfaceDescription.Normal;
+#endif
+#ifdef OUTPUT_SURFACEDESCRIPTION_SMOOTHNESS
+    smoothness = surfaceDescription.Smoothness;
+#endif
+#ifdef OUTPUT_SURFACEDESCRIPTION_OCCLUSION
+    occlusion = surfaceDescription.Occlusion;
+#endif
+#ifdef OUTPUT_SURFACEDESCRIPTION_EMISSION
+    emission = surfaceDescription.Emission;
+#endif
+
+#if _AlphaClip
+    clip(alpha - surfaceDescription.AlphaClipThreshold);
+#endif
 
     InputData inputData;
-    BuildInputData(unpacked, surfaceDescription.Normal, inputData);
+    BuildInputData(unpacked, normal, inputData);
 
-    #ifdef _SPECULAR_SETUP
-        float3 specular = surfaceDescription.Specular;
-        float metallic = 1;
-    #else   
-        float3 specular = 0;
-        float metallic = surfaceDescription.Metallic;
-    #endif
+#ifdef _SPECULAR_SETUP
+    float3 specular = surfaceDescription.Specular;
+    float metallic = 1;
+#else   
+    float3 specular = 0;
+    float metallic = surfaceDescription.Metallic;
+#endif
 
-    half4 color = UniversalFragmentPBR(
+    half4 result = UniversalFragmentPBR(
 			inputData,
-			surfaceDescription.Albedo,
+			color,
 			metallic,
 			specular,
-			surfaceDescription.Smoothness,
-			surfaceDescription.Occlusion,
-			surfaceDescription.Emission,
-			surfaceDescription.Alpha); 
+			smoothness,
+			occlusion,
+			emission,
+			alpha); 
 
-    color.rgb = MixFog(color.rgb, inputData.fogCoord); 
-    return color;
+    result.rgb = MixFog(result.rgb, inputData.fogCoord); 
+    return result;
 }

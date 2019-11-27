@@ -19,13 +19,27 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
     SurfaceDescriptionInputs surfaceDescriptionInputs = BuildSurfaceDescriptionInputs(unpacked);
     SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
 
-    #if _AlphaClip
-        clip(surfaceDescription.Alpha - surfaceDescription.AlphaClipThreshold);
-    #endif
+    half3 color = half3(0.5, 0.5, 0.5);
+    half alpha = 1;
+    half3 emission = half3(0, 0, 0);
+
+#ifdef OUTPUT_SURFACEDESCRIPTION_COLOR
+    color = surfaceDescription.Color;
+#endif
+#ifdef OUTPUT_SURFACEDESCRIPTION_ALPHA
+    alpha = surfaceDescription.Alpha;
+#endif
+#ifdef OUTPUT_SURFACEDESCRIPTION_EMISSION
+    emission = surfaceDescription.Emission;
+#endif
+
+#if _AlphaClip
+    clip(alpha - surfaceDescription.AlphaClipThreshold);
+#endif
 
     MetaInput metaInput = (MetaInput)0;
-    metaInput.Albedo = surfaceDescription.Albedo;
-    metaInput.Emission = surfaceDescription.Emission;
+    metaInput.Albedo = color;
+    metaInput.Emission = emission;
 
     return MetaFragment(metaInput);
 }

@@ -52,6 +52,19 @@ Pass
     $Varyings.fogFactorAndVertexLight:  #define VARYINGS_NEED_FOG_AND_VERTEX_LIGHT
     $Varyings.cullFace:                 #define VARYINGS_NEED_CULLFACE
     $features.graphVertex:              #define FEATURES_GRAPH_VERTEX
+    $VertexDescription.Position:        #define OUTPUT_VERTEXDESCRIPTION_POSITION
+    $VertexDescription.Normal:          #define OUTPUT_VERTEXDESCRIPTION_NORMAL
+    $VertexDescription.Tangent:         #define OUTPUT_VERTEXDESCRIPTION_TANGENT
+    $SurfaceDescription.Color:          #define OUTPUT_SURFACEDESCRIPTION_COLOR
+    $SurfaceDescription.Alpha:          #define OUTPUT_SURFACEDESCRIPTION_ALPHA
+    $SurfaceDescription.AlphaClipThreshold: #define OUTPUT_SURFACEDESCRIPTION_ALPHACLIPTHRESHOLD
+    $SurfaceDescription.Normal:         #define OUTPUT_SURFACEDESCRIPTION_NORMAL
+    $SurfaceDescription.Metallic:       #define OUTPUT_SURFACEDESCRIPTION_METALLIC
+    $SurfaceDescription.SpecularColor:  #define OUTPUT_SURFACEDESCRIPTION_SPECULARCOLOR
+    $SurfaceDescription.Smoothness:     #define OUTPUT_SURFACEDESCRIPTION_SMOOTHNESS
+    $SurfaceDescription.Emission:       #define OUTPUT_SURFACEDESCRIPTION_EMISSION
+    $SurfaceDescription.Occlusion:      #define OUTPUT_SURFACEDESCRIPTION_OCCLUSION
+    
     $splice(GraphDefines)
 
     // Includes
