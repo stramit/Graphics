@@ -72,7 +72,7 @@ namespace UnityEditor.ShaderGraph
 
         public virtual bool canDeleteNode
         {
-            get { return owner != null && this != owner.outputNode; }
+            get { return owner != null; }
         }
 
         public DrawState drawState
@@ -135,7 +135,7 @@ namespace UnityEditor.ShaderGraph
 
         public virtual bool allowedInSubGraph
         {
-            get { return !(this is IMasterNode); }
+            get { return true; }
         }
 
         public virtual bool allowedInMainGraph

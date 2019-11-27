@@ -18,7 +18,7 @@ namespace UnityEditor.ShaderGraph
 
         public sealed override void UpdateNodeAfterDeserialization()
         {
-            AddSlot(new DynamicVectorMaterialSlot(kColorId, kColorName, kColorName, SlotType.Input, Vector4.zero));
+            AddSlot(new ColorRGBMaterialSlot(kColorId, kColorName, kColorName, SlotType.Input, Color.gray, ColorMode.Default));
             RemoveSlotsNameNotMatching(new[] { kColorId });
         }
 

@@ -66,10 +66,7 @@ namespace UnityEditor.ShaderGraph.Drawing.Controls
         void UpdateTargets()
         {
             m_Node.owner.UpdateTargets();
-            foreach (var node in m_Node.owner.GetNodes<AbstractMaterialNode>())
-            {
-                node.Dirty(ModificationScope.Graph);
-            }
+            m_Node.owner.targetBlock.Dirty(ModificationScope.Graph);
         }
 
         public void OnNodeModified(ModificationScope scope)

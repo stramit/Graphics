@@ -4,7 +4,7 @@ namespace UnityEditor.ShaderGraph.Internal
 {
     public class TargetSetupContext
     {
-        public IMasterNode masterNode { get; private set; }
+        internal BlockData[] blockDatas { get; private set; }
         public SubShaderDescriptor descriptor { get; private set; }
         public List<string> assetDependencyPaths { get; private set; }
 
@@ -13,9 +13,9 @@ namespace UnityEditor.ShaderGraph.Internal
             assetDependencyPaths = new List<string>();
         }
 
-        public void SetMasterNode(IMasterNode masterNode)
+        internal void SetBlockDatas(BlockData[] blockDatas)
         {
-            this.masterNode = masterNode;
+            this.blockDatas = blockDatas;
         }
 
         public void SetupSubShader(SubShaderDescriptor descriptor)

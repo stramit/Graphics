@@ -23,10 +23,6 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
             lightMode = "UniversalForward",
             useInPreview = true,
 
-            // Port Mask
-            vertexPorts = UniversalPortMasks.Vertex.PBR,
-            pixelPorts = UniversalPortMasks.Pixel.PBR,
-
             // Fields
             structs = UniversalStructCollections.Default,
             requiredFields = UniversalRequiredFields.PBRForward,
@@ -47,10 +43,6 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
             lightMode = "DepthOnly",
             useInPreview = true,
 
-            // Port Mask
-            vertexPorts = UniversalPortMasks.Vertex.PBR,
-            pixelPorts = UniversalPortMasks.Pixel.PBRAlphaOnly,
-
             // Fields
             structs = UniversalStructCollections.Default,
             fieldDependencies = FieldDependencies.Default,
@@ -67,10 +59,6 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
             displayName = "ShadowCaster",
             referenceName = "SHADERPASS_SHADOWCASTER",
             lightMode = "ShadowCaster",
-            
-            // Port Mask
-            vertexPorts = UniversalPortMasks.Vertex.PBR,
-            pixelPorts = UniversalPortMasks.Pixel.PBRAlphaOnly,
 
             // Fields
             structs = UniversalStructCollections.Default,
@@ -90,10 +78,6 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
             referenceName = "SHADERPASS_META",
             lightMode = "Meta",
 
-            // Port Mask
-            vertexPorts = UniversalPortMasks.Vertex.PBR,
-            pixelPorts = UniversalPortMasks.Pixel.PBRMeta,
-
             // Fields
             structs = UniversalStructCollections.Default,
             requiredFields = UniversalRequiredFields.PBRMeta,
@@ -112,10 +96,6 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
             referenceName = "SHADERPASS_2D",
             lightMode = "Universal2D",
 
-            // Port Mask
-            vertexPorts = UniversalPortMasks.Vertex.PBR,
-            pixelPorts = UniversalPortMasks.Pixel.PBR2D,
-
             // Fields
             structs = UniversalStructCollections.Default,
             fieldDependencies = FieldDependencies.Default,
@@ -132,10 +112,6 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
             displayName = "Pass",
             referenceName = "SHADERPASS_UNLIT",
             useInPreview = true,
-
-            // Port Mask
-            vertexPorts = UniversalPortMasks.Vertex.Unlit,
-            pixelPorts = UniversalPortMasks.Pixel.Unlit,
 
             // Fields
             structs = UniversalStructCollections.Default,
@@ -155,10 +131,6 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
             referenceName = "SHADERPASS_SPRITELIT",
             lightMode = "Universal2D",
             useInPreview = true,
-
-            // Port Mask
-            vertexPorts = UniversalPortMasks.Vertex.SpriteLit,
-            pixelPorts = UniversalPortMasks.Pixel.SpriteLit,
 
             // Fields
             structs = UniversalStructCollections.Default,
@@ -180,10 +152,6 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
             lightMode = "NormalsRendering",
             useInPreview = true,
 
-            // Port Mask
-            vertexPorts = UniversalPortMasks.Vertex.SpriteLit,
-            pixelPorts = UniversalPortMasks.Pixel.SpriteNormal,
-
             // Fields
             structs = UniversalStructCollections.Default,
             requiredFields = UniversalRequiredFields.SpriteNormal,
@@ -203,10 +171,6 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
             lightMode = "UniversalForward",
             useInPreview = true,
 
-            // Port Mask
-            vertexPorts = UniversalPortMasks.Vertex.SpriteLit,
-            pixelPorts = UniversalPortMasks.Pixel.SpriteNormal,
-
             // Fields
             structs = UniversalStructCollections.Default,
             requiredFields = UniversalRequiredFields.SpriteForward,
@@ -224,10 +188,6 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
             // Definition
             referenceName = "SHADERPASS_SPRITEUNLIT",
             useInPreview = true,
-
-            // Port Mask
-            vertexPorts = UniversalPortMasks.Vertex.SpriteUnlit,
-            pixelPorts = UniversalPortMasks.Pixel.SpriteUnlit,
 
             // Fields
             structs = UniversalStructCollections.Default,

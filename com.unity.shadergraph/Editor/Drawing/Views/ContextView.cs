@@ -34,9 +34,16 @@ namespace UnityEditor.ShaderGraph.Drawing
             m_HeaderLabel.text = data.displayName;
 
             this.Synchronize(data.blocks, AddElement, RemoveElement);
+            inputContainer.Synchronize(data.inputPorts, e => AddPort(e), e => RemovePort((Port)e));
+            outputContainer.Synchronize(data.outputPorts, e => AddPort(e), e => RemovePort((Port)e));
 
             // Rebuild Blocks query
             blocks = contentContainer.Query<Node>().Build();
+
+            // TODO: This is bad
+            // Use "owner" concept to access up to GraphData?
+            var graphEditorView = GetFirstAncestorOfType<GraphEditorView>();
+            graphEditorView.graphView.graph.targetBlock.Dirty(Graphing.ModificationScope.Graph);
         }
 
         void AddElement(BlockData blockData)
@@ -53,6 +60,25 @@ namespace UnityEditor.ShaderGraph.Drawing
             {
                 Remove(nodeView);
             }
+        }
+
+        void AddPort(PortData portData)
+        {
+            var orientation = portData.orientation == PortData.Orientation.Horizontal ? Orientation.Horizontal : Orientation.Vertical;
+            var direction = portData.direction == PortData.Direction.Input ? Direction.Input : Direction.Output;
+            var capacity = direction == Direction.Input ? Port.Capacity.Single : Port.Capacity.Multi;
+            var container = direction == Direction.Input ? inputContainer : outputContainer;
+
+            var port = Port.Create<UnityEditor.Experimental.GraphView.Edge>(orientation, direction, capacity, portData.valueType.type);
+            port.userData = portData;
+            port.portName = portData.displayName;
+            container.Add(port);
+        }
+
+        void RemovePort(Port port)
+        {
+            var container = port.direction == Direction.Input ? inputContainer : outputContainer;
+            container.Remove(port);
         }
 
         protected override bool AcceptsElement(GraphElement element, ref int proposedIndex, int maxIndex)

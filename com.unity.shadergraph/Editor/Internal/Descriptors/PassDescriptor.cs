@@ -8,10 +8,6 @@
         public string lightMode;
         public bool useInPreview;
 
-        // Port mask
-        public int[] vertexPorts;
-        public int[] pixelPorts;
-
         // Collections
         public StructCollection structs;
         public FieldDescriptor[] requiredFields;

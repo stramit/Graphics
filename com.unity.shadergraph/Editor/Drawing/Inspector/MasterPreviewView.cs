@@ -29,8 +29,6 @@ namespace UnityEditor.ShaderGraph.Drawing.Inspector
 
         Vector2 m_PreviewScrollPosition;
         ObjectField m_PreviewMeshPicker;
-
-        IMasterNode m_MasterNode;
         Mesh m_PreviousMesh;
 
         bool m_Expanded = true;
@@ -143,7 +141,7 @@ namespace UnityEditor.ShaderGraph.Drawing.Inspector
 
         void DirtyMasterNode(ModificationScope scope)
         {
-            m_Graph?.outputNode?.Dirty(scope);
+            m_Graph?.targetBlock?.Dirty(scope);
         }
 
         void OnPreviewChanged()

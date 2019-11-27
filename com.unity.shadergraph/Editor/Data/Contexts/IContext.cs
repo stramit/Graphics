@@ -1,12 +1,11 @@
-﻿namespace UnityEditor.ShaderGraph
+﻿using UnityEditor.ShaderGraph.Serialization;
+
+namespace UnityEditor.ShaderGraph
 {
     interface IContext
     {
         string name { get; }
-    }
-
-    class TestContext : IContext
-    {
-        public string name => "Test";
+        JsonList<PortData> inputPorts { get; }
+        JsonList<PortData> outputPorts { get; }
     }
 }
