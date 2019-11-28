@@ -1,10 +1,11 @@
+using System;
 using UnityEngine;
 using UnityEditor.Graphing;
 using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph
 {
-    [Title("Basic", "Emission")]
+    [Title("SurfaceData", "Emission")]
     class EmissionBlock : BlockData
     {
         public EmissionBlock()
@@ -13,13 +14,13 @@ namespace UnityEditor.ShaderGraph
             UpdateNodeAfterDeserialization();
         }
 
-        const int kEmissionId = 0;
-        const string kEmissionName = "Emission";
+        public override Type contextType => typeof(FragmentContext);
+        public override Type[] requireBlocks => null;
 
         public sealed override void UpdateNodeAfterDeserialization()
         {
-            AddSlot(new ColorRGBMaterialSlot(kEmissionId, kEmissionName, kEmissionName, SlotType.Input, Color.black, ColorMode.HDR));
-            RemoveSlotsNameNotMatching(new[] { kEmissionId });
+            AddSlot(new ColorRGBMaterialSlot(0, "Emission", "Emission", SlotType.Input, Color.black, ColorMode.HDR));
+            RemoveSlotsNameNotMatching(new[] { 0 });
         }
 
         public override ConditionalField[] GetConditionalFields(PassDescriptor pass)

@@ -9,6 +9,8 @@ namespace UnityEditor.ShaderGraph.Internal
         public string passTemplatePath => null;
         public string sharedTemplateDirectory => null;
 
+        public Type[] requireBlocks => null;
+
         public void SetupTarget(ref TargetSetupContext context)
         {
         }

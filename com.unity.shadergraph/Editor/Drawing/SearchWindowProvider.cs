@@ -77,7 +77,8 @@ namespace UnityEditor.ShaderGraph.Drawing
                         if (attrs[0].title[0] != k_HiddenFolderName)
                         {
                             var node = (BlockData)Activator.CreateInstance(type);
-                            AddEntries(node, attrs[0].title, entries);
+                            if(node.contextType == contextView.data.contextType.type)
+                                AddEntries(node, attrs[0].title, entries);
                         }
                     }
                 }
@@ -295,11 +296,17 @@ namespace UnityEditor.ShaderGraph.Drawing
             {
                 if(!(target is ContextView contextView))
                     return false;
+
+                if(contextView.data.blocks.Any(x => x.GetType() == blockData.GetType()))
+                    return false;
                 
                 m_Graph.owner.RegisterCompleteObjectUndo("Add " + blockData.name + " Block");
                 int index = contextView.GetInsertionIndex(context.screenMousePosition);
                 blockData.owner = m_Graph;
                 contextView.data.blocks.Insert(index, blockData);
+
+                m_Graph.AddRequiredBlocks(blockData.requireBlocks);
+
                 return true;
             }
 

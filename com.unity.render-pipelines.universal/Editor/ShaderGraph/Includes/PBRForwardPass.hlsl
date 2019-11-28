@@ -34,20 +34,26 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
     SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
 
     half3 color = half3(0.5, 0.5, 0.5);
-    half alpha = 1;
     half3 normal = half3(0.5, 0.5, 1);
+    half metallic = 0;
+    half3 specular = half3(0, 0, 0);
     half smoothness = 0.5;
     half occlusion = 1;
     half3 emission = half3(0, 0, 0);
+    half alpha = 1;
+    half clipThreshold = 0.5;
 
 #ifdef OUTPUT_SURFACEDESCRIPTION_COLOR
     color = surfaceDescription.Color;
 #endif
-#ifdef OUTPUT_SURFACEDESCRIPTION_ALPHA
-    alpha = surfaceDescription.Alpha;
-#endif
 #ifdef OUTPUT_SURFACEDESCRIPTION_NORMAL
     normal = surfaceDescription.Normal;
+#endif
+#ifdef OUTPUT_SURFACEDESCRIPTION_METALLIC
+    metallic = surfaceDescription.Metallic;
+#endif
+#ifdef OUTPUT_SURFACEDESCRIPTION_SPECULAR
+    specular = surfaceDescription.Specular;
 #endif
 #ifdef OUTPUT_SURFACEDESCRIPTION_SMOOTHNESS
     smoothness = surfaceDescription.Smoothness;
@@ -58,20 +64,24 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
 #ifdef OUTPUT_SURFACEDESCRIPTION_EMISSION
     emission = surfaceDescription.Emission;
 #endif
+#ifdef OUTPUT_SURFACEDESCRIPTION_ALPHA
+    alpha = surfaceDescription.Alpha;
+#endif
+#ifdef OUTPUT_SURFACEDESCRIPTION_ALPHACLIPTHRESHOLD
+    clipThreshold = surfaceDescription.AlphaClipThreshold;
+#endif
 
 #if _AlphaClip
-    clip(alpha - surfaceDescription.AlphaClipThreshold);
+    clip(alpha - clipThreshold);
 #endif
 
     InputData inputData;
     BuildInputData(unpacked, normal, inputData);
 
 #ifdef _SPECULAR_SETUP
-    float3 specular = surfaceDescription.Specular;
-    float metallic = 1;
+    metallic = 1;
 #else   
-    float3 specular = 0;
-    float metallic = surfaceDescription.Metallic;
+    specular = 0;
 #endif
 
     half4 result = UniversalFragmentPBR(

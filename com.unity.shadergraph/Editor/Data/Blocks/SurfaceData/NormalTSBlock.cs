@@ -1,25 +1,26 @@
+using System;
 using System.Linq;
-using System.Collections.Generic;
 using UnityEditor.ShaderGraph.Internal;
+using System.Collections.Generic;
 
 namespace UnityEditor.ShaderGraph
 {
-    [Title("Normal Map", "Normal (Tangent Space)")]
+    [Title("SurfaceData", "Normal (Tangent)")]
     class NormalTSBlock : BlockData, IMayRequireNormal
     {
         public NormalTSBlock()
         {
-            name = "Normal (Tangent Space)";
+            name = "Normal (Tangent)";
             UpdateNodeAfterDeserialization();
         }
 
-        const int kNormalId = 0;
-        const string kNormalName = "Normal";
+        public override Type contextType => typeof(FragmentContext);
+        public override Type[] requireBlocks => null;
 
         public sealed override void UpdateNodeAfterDeserialization()
         {
-            AddSlot(new NormalMaterialSlot(kNormalId, kNormalName, kNormalName, CoordinateSpace.Tangent));
-            RemoveSlotsNameNotMatching(new[] { kNormalId });
+            AddSlot(new NormalMaterialSlot(0, "Normal (Tangent)", "Normal", CoordinateSpace.Tangent));
+            RemoveSlotsNameNotMatching(new[] { 0 });
         }
 
         public override ConditionalField[] GetConditionalFields(PassDescriptor pass)

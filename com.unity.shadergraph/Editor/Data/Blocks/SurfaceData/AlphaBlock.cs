@@ -1,25 +1,25 @@
-using UnityEngine;
+using System;
 using UnityEditor.Graphing;
 using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph
 {
-    [Title("Lighting", "Lit Sprite")]
-    class LitSpriteBlock : BlockData
+    [Title("SurfaceData", "Alpha")]
+    class AlphaBlock : BlockData
     {
-        public LitSpriteBlock()
+        public AlphaBlock()
         {
-            name = "Lit Sprite";
+            name = "Alpha";
             UpdateNodeAfterDeserialization();
         }
 
-        const int kMaskId = 0;
-        const string kMaskName = "Mask";
+        public override Type contextType => typeof(FragmentContext);
+        public override Type[] requireBlocks => null;
 
         public sealed override void UpdateNodeAfterDeserialization()
         {
-            AddSlot(new ColorRGBAMaterialSlot(kMaskId, kMaskName, kMaskName, SlotType.Input, Color.white));
-            RemoveSlotsNameNotMatching(new[] { kMaskId });
+            AddSlot(new Vector1MaterialSlot(0, "Alpha", "Alpha", SlotType.Input, 1));
+            RemoveSlotsNameNotMatching(new[] { 0 });
         }
 
         public override ConditionalField[] GetConditionalFields(PassDescriptor pass)

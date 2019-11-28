@@ -17,6 +17,7 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
 
     half3 color = half3(0.5, 0.5, 0.5);
     half alpha = 1;
+    half clipThreshold = 0.5;
 
 #ifdef OUTPUT_SURFACEDESCRIPTION_COLOR
     color = surfaceDescription.Color;
@@ -24,9 +25,12 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
 #ifdef OUTPUT_SURFACEDESCRIPTION_ALPHA
     alpha = surfaceDescription.Alpha;
 #endif
+#ifdef OUTPUT_SURFACEDESCRIPTION_ALPHACLIPTHRESHOLD
+    clipThreshold = surfaceDescription.AlphaClipThreshold;
+#endif
 
 #if _AlphaClip
-    clip(alpha - surfaceDescription.AlphaClipThreshold);
+    clip(alpha - clipThreshold);
 #endif
 
 #ifdef _ALPHAPREMULTIPLY_ON

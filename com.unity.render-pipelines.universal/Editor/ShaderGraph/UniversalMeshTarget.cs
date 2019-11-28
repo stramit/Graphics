@@ -12,12 +12,14 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
         public string passTemplatePath => GenerationUtils.GetDefaultTemplatePath("PassMesh.template");
         public string sharedTemplateDirectory => GenerationUtils.GetDefaultSharedTemplateDirectory();
 
+        public Type[] requireBlocks => new Type[] { typeof(UniversalMeshOptionsBlock )};
+
         public void SetupTarget(ref TargetSetupContext context)
         {
             context.AddAssetDependencyPath(AssetDatabase.GUIDToAssetPath("7395c9320da217b42b9059744ceb1de6")); // MeshTarget
             context.AddAssetDependencyPath(AssetDatabase.GUIDToAssetPath("ac9e1a400a9ce404c8f26b9c1238417e")); // UniversalMeshTarget
 
-            if(context.blockDatas.Where(x => x is LitMetallicBlock metallicBlock).Any())
+            if(context.blockDatas.Any(x => x is UniversalMeshOptionsBlock optionsBlock && optionsBlock.materialType == UniversalMeshOptionsBlock.MaterialType.Lit))
             {
                 context.SetupSubShader(UniversalSubShaders.PBR);
             }

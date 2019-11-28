@@ -1,9 +1,10 @@
+using System;
 using UnityEditor.Graphing;
 using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph
 {
-    [Title("Basic", "Ambient Occlusion")]
+    [Title("SurfaceData", "Ambient Occlusion")]
     class AmbientOcclusionBlock : BlockData
     {
         public AmbientOcclusionBlock()
@@ -12,13 +13,13 @@ namespace UnityEditor.ShaderGraph
             UpdateNodeAfterDeserialization();
         }
         
-        const int kOcclusionId = 0;
-        const string kOcclusionName = "Occlusion";
+        public override Type contextType => typeof(FragmentContext);
+        public override Type[] requireBlocks => null;
 
         public sealed override void UpdateNodeAfterDeserialization()
         {
-            AddSlot(new Vector1MaterialSlot(kOcclusionId, kOcclusionName, kOcclusionName, SlotType.Input, 1));
-            RemoveSlotsNameNotMatching(new[] { kOcclusionId });
+            AddSlot(new Vector1MaterialSlot(0, "Ambient Occlusion", "Occlusion", SlotType.Input, 1));
+            RemoveSlotsNameNotMatching(new[] { 0 });
         }
 
         public override ConditionalField[] GetConditionalFields(PassDescriptor pass)

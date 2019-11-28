@@ -1,3 +1,4 @@
+using System;
 using UnityEditor.ShaderGraph.Internal;
 using UnityEditor.ShaderGraph.Drawing.Controls;
 
@@ -20,6 +21,9 @@ namespace UnityEditor.ShaderGraph
             get => m_Target;
             set => m_Target = value;
         }
+
+        public override Type contextType => typeof(OutputContext);
+        public override Type[] requireBlocks => null;
 
         public override bool canDeleteNode => false;
 

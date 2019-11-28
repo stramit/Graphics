@@ -20,13 +20,17 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
     SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
 
     half alpha = 1;
+    half clipThreshold = 0.5;
 
 #ifdef OUTPUT_SURFACEDESCRIPTION_ALPHA
     alpha = surfaceDescription.Alpha;
 #endif
+#ifdef OUTPUT_SURFACEDESCRIPTION_ALPHACLIPTHRESHOLD
+    clipThreshold = surfaceDescription.AlphaClipThreshold;
+#endif
 
 #if _AlphaClip
-    clip(alpha - surfaceDescription.AlphaClipThreshold);
+    clip(alpha - clipThreshold);
 #endif
 
     return 0;

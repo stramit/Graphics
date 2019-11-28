@@ -113,6 +113,10 @@ MaterialNodeView > #resize {
     cursor: resize-up-left;
 }
 
+MaterialNodeView.blockData > #portInputContainer {
+    top: 6px;
+}
+
 MaterialNodeView > #portInputContainer {
     position: absolute;
     width: 232px;

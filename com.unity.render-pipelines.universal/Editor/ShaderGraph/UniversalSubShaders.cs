@@ -33,6 +33,8 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
         public static SubShaderDescriptor SpriteLit = new SubShaderDescriptor()
         {
             pipelineTag = kPipelineTag,
+            renderTypeOverride = "Transparent",
+            renderQueueOverride = "Transparent",
             passes = new PassCollection
             {
                 { UniversalPasses.SpriteLit },
@@ -44,6 +46,8 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
         public static SubShaderDescriptor SpriteUnlit = new SubShaderDescriptor()
         {
             pipelineTag = kPipelineTag,
+            renderTypeOverride = "Transparent",
+            renderQueueOverride = "Transparent",
             passes = new PassCollection
             {
                 { UniversalPasses.SpriteUnlit },

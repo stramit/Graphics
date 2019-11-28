@@ -1,25 +1,26 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph
 {
-    [Title("Attributes", "Normal (Object Space)")]
+    [Title("VertexData", "Normal (Object)")]
     class VertexNormalBlock : BlockData, IMayRequireNormal
     {
         public VertexNormalBlock()
         {
-            name = "Normal (Object Space)";
+            name = "Normal (Object)";
             UpdateNodeAfterDeserialization();
         }
 
-        const int kNormalId = 0;
-        const string kNormalName = "Normal";
+        public override Type contextType => typeof(VertexContext);
+        public override Type[] requireBlocks => null;
 
         public sealed override void UpdateNodeAfterDeserialization()
         {
-            AddSlot(new NormalMaterialSlot(kNormalId, kNormalName, kNormalName, CoordinateSpace.Object, ShaderStageCapability.Vertex));
-            RemoveSlotsNameNotMatching(new[] { kNormalId });
+            AddSlot(new NormalMaterialSlot(0, "Normal (Object)", "Normal", CoordinateSpace.Object, ShaderStageCapability.Vertex));
+            RemoveSlotsNameNotMatching(new[] { 0 });
         }
 
         public override ConditionalField[] GetConditionalFields(PassDescriptor pass)

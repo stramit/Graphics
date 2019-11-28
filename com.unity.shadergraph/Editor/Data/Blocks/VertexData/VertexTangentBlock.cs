@@ -1,25 +1,26 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph
 {
-    [Title("Attributes", "Position (Object Space)")]
-    class VertexPositionBlock : BlockData, IMayRequirePosition
+    [Title("VertexData", "Tangent (Object)")]
+    class VertexTangentBlock : BlockData, IMayRequireTangent
     {
-        public VertexPositionBlock()
+        public VertexTangentBlock()
         {
-            name = "Position (Object Space)";
+            name = "Tangent (Object)";
             UpdateNodeAfterDeserialization();
         }
 
-        const int kPositionId = 0;
-        const string kPositionName = "Position";
+        public override Type contextType => typeof(VertexContext);
+        public override Type[] requireBlocks => null;
 
         public sealed override void UpdateNodeAfterDeserialization()
         {
-            AddSlot(new PositionMaterialSlot(kPositionId, kPositionName, kPositionName, CoordinateSpace.Object, ShaderStageCapability.Vertex));
-            RemoveSlotsNameNotMatching(new[] { kPositionId });
+            AddSlot(new TangentMaterialSlot(0, "Tangent (Object)", "Tangent", CoordinateSpace.Object, ShaderStageCapability.Vertex));
+            RemoveSlotsNameNotMatching(new[] { 0 });
         }
 
         public override ConditionalField[] GetConditionalFields(PassDescriptor pass)
@@ -27,7 +28,7 @@ namespace UnityEditor.ShaderGraph
             return null;
         }
 
-        public NeededCoordinateSpace RequiresPosition(ShaderStageCapability stageCapability)
+        public NeededCoordinateSpace RequiresTangent(ShaderStageCapability stageCapability)
         {
             List<MaterialSlot> slots = new List<MaterialSlot>();
             GetSlots(slots);
@@ -40,7 +41,7 @@ namespace UnityEditor.ShaderGraph
 
                 validSlots.Add(slots[i]);
             }
-            return validSlots.OfType<IMayRequirePosition>().Aggregate(NeededCoordinateSpace.None, (mask, node) => mask | node.RequiresPosition(stageCapability));
+            return validSlots.OfType<IMayRequireTangent>().Aggregate(NeededCoordinateSpace.None, (mask, node) => mask | node.RequiresTangent(stageCapability));
         }
     }
 }

@@ -20,7 +20,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/ContextView"));
 
             // Create UI scaffold
-            m_HeaderLabel = new Label();
+            m_HeaderLabel = new Label() { name = "headerLabel" };
             headerContainer.Add(m_HeaderLabel);
 
             // Hook up data
@@ -83,7 +83,7 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         protected override bool AcceptsElement(GraphElement element, ref int proposedIndex, int maxIndex)
         {
-            return element.userData is BlockData;
+            return element.userData is BlockData blockData && blockData.contextType == data.contextType.type;
         }
 
         public void InsertElements(int insertIndex, IEnumerable<GraphElement> elements)
