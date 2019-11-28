@@ -1,5 +1,3 @@
-using System;
-
 namespace UnityEditor.ShaderGraph
 {
     enum EmissionGIMode
