@@ -102,11 +102,11 @@ namespace UnityEditor.ShaderGraph
 
     class NewGraphAction : EndNameEditAction
     {
-        AbstractMaterialNode m_Node;
-        public AbstractMaterialNode node
+        Type m_TargetType;
+        public Type targetType
         {
-            get { return m_Node; }
-            set { m_Node = value; }
+            get => m_TargetType;
+            set => m_TargetType = value;
         }
 
         public override void Action(int instanceId, string pathName, string resourceFile)
@@ -114,7 +114,25 @@ namespace UnityEditor.ShaderGraph
             var jsonStore = CreateInstance<JsonStore>();
             var graph = new GraphData();
             jsonStore.root = graph;
-            graph.AddNode(node);
+
+            // Create Contexts
+            var outputContext = ContextData.Create<OutputContext>(Vector2.zero);
+            var FragmentContext = ContextData.Create<FragmentContext>(new Vector2(0, -300));
+            graph.contexts.Add(outputContext);            
+            graph.contexts.Add(FragmentContext);
+
+            // Add Blocks
+            outputContext.blocks.Add(new TargetBlock());
+
+            // Update Targets
+            graph.UpdateTargets();
+            if(targetType != null && typeof(ITarget).IsAssignableFrom(targetType))
+            {
+                graph.SetTarget(targetType);
+                graph.UpdateTargets();
+                graph.AddRequiredBlocksForImplementations();
+            }
+
             graph.path = "Shader Graphs";
             FileUtilities.WriteToDisk(pathName, jsonStore.Serialize(true));
             AssetDatabase.Refresh();
@@ -144,41 +162,12 @@ namespace UnityEditor.ShaderGraph
             return newText.ToString();
         }
 
-        public static void CreateNewGraph(AbstractMaterialNode node)
+        public static void CreateNewGraph(Type targetType)
         {
             var graphItem = ScriptableObject.CreateInstance<NewGraphAction>();
-            graphItem.node = node;
+            graphItem.targetType = targetType;
             ProjectWindowUtil.StartNameEditingIfProjectWindowExists(0, graphItem,
                 string.Format("New Shader Graph.{0}", ShaderGraphImporter.Extension), null, null);
-        }
-
-        public static Type GetOutputNodeType(string path)
-        {
-            ShaderGraphMetadata metadata = null;
-            foreach (var asset in AssetDatabase.LoadAllAssetsAtPath(path))
-            {
-                if (asset is ShaderGraphMetadata metadataAsset)
-                {
-                    metadata = metadataAsset;
-                    break;
-                }
-            }
-
-            if (metadata == null)
-            {
-                return null;
-            }
-
-            var outputNodeTypeName = metadata.outputNodeTypeName;
-            foreach (var type in TypeCache.GetTypesDerivedFrom<IMasterNode>())
-            {
-                if (type.FullName == outputNodeTypeName)
-                {
-                    return type;
-                }
-            }
-
-            return null;
         }
 
         public static bool IsShaderGraph(this Shader shader)

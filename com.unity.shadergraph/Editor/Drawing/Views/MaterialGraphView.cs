@@ -82,6 +82,33 @@ namespace UnityEditor.ShaderGraph.Drawing
         public override List<Port> GetCompatiblePorts(Port startAnchor, NodeAdapter nodeAdapter)
         {
             var compatibleAnchors = new List<Port>();
+
+            // Currently only Ports that are Orientation.Vertical use the new PortData path
+            if(startAnchor.orientation == Orientation.Vertical)
+            {
+                // Iterate all ports
+                foreach(var candidateAnchor in ports.ToList())
+                {
+                    // Not vertical
+                    if(candidateAnchor.orientation != Orientation.Vertical)
+                        continue;
+
+                    // Matching directions
+                    if(candidateAnchor.direction == startAnchor.direction)
+                        continue;
+
+                    // Not new Port definitions
+                    if(!(candidateAnchor.userData is PortData candidateData) || !(startAnchor.userData is PortData startData))
+                        continue;
+
+                    if(candidateData.valueType.type == startData.valueType.type)
+                        compatibleAnchors.Add(candidateAnchor);
+                }
+
+                return compatibleAnchors;    
+            }
+
+            // MaterialSlot (Legacy path)
             var startSlot = startAnchor.GetSlot();
             if (startSlot == null)
                 return compatibleAnchors;
@@ -400,6 +427,8 @@ namespace UnityEditor.ShaderGraph.Drawing
             {
                 displayName = contextType.instance.name,
                 contextType = contextType,
+                inputPorts = contextType.instance.inputPorts,
+                outputPorts = contextType.instance.outputPorts,
                 position = position,
             });
         }
@@ -681,7 +710,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 selection.OfType<ShaderGroup>().Select(x => x.userData).ToArray(),
                 selection.OfType<StickyNote>().Select(x => x.userData).ToArray());
 
-            foreach (var contextView in selection.OfType<ContextView>())
+            foreach (var contextView in selection.OfType<ContextView>().Where(x => x.data.contextType.type != typeof(OutputContext)))
             {
                 graph.contexts.Remove(contextView.data);
             }

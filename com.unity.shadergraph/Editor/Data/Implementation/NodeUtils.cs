@@ -82,7 +82,7 @@ namespace UnityEditor.Graphing
         }
 
         public static void DepthFirstCollectNodesFromNode(List<AbstractMaterialNode> nodeList, AbstractMaterialNode node,
-            IncludeSelf includeSelf = IncludeSelf.Include, IEnumerable<int> slotIds = null, List<KeyValuePair<ShaderKeyword, int>> keywordPermutation = null)
+            IncludeSelf includeSelf = IncludeSelf.Include, List<KeyValuePair<ShaderKeyword, int>> keywordPermutation = null)
         {
             // no where to start
             if (node == null)
@@ -101,13 +101,9 @@ namespace UnityEditor.Graphing
                 var valueInPermutation = keywordPermutation.FirstOrDefault(x => x.Key == keywordNode.keyword);
                 ids = new int[] { keywordNode.GetSlotIdForPermutation(valueInPermutation) };
             }
-            else if (slotIds == null)
-            {
-                ids = node.GetInputSlots<MaterialSlot>().Select(x => x.id);
-            }
             else
             {
-                ids = node.GetInputSlots<MaterialSlot>().Where(x => slotIds.Contains(x.id)).Select(x => x.id);
+                ids = node.GetInputSlots<MaterialSlot>().Select(x => x.id);
             }
 
             foreach (var slot in ids)

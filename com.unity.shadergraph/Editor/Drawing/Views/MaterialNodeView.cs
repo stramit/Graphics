@@ -151,8 +151,14 @@ namespace UnityEditor.ShaderGraph.Drawing
             RefreshExpandedState(); //This should not be needed. GraphView needs to improve the extension api here
             UpdatePortInputVisibilities();
 
-            if(!isBlockNodeView)
+            if(isBlockNodeView)
+            {
+                AddToClassList("blockData");
+            }
+            else
+            {
                 SetPosition(new Rect(node.drawState.position.x, node.drawState.position.y, 0, 0));
+            }
 
             if (node is SubGraphNode)
             {
@@ -163,14 +169,9 @@ namespace UnityEditor.ShaderGraph.Drawing
 
             m_TitleContainer = this.Q("title");
 
-            var masterNode = node as IMasterNode;
-            if (masterNode != null)
+            if (node is TargetBlock targetBlock && !node.owner.activeTargetImplementations.Any())
             {
-                AddToClassList("master");
-                if(!node.owner.activeTargetImplementations.Any())
-                {
-                    AttachMessage("There are no active Target Implementations. Either enable Implementations from the toolbar or select a Render Pipeline that is compatible with this Master Node.", ShaderCompilerMessageSeverity.Error);
-                }
+                AttachMessage("There are no active Target Implementations. Either enable Implementations from the toolbar or select a Render Pipeline that is compatible with this Master Node.", ShaderCompilerMessageSeverity.Error);
             }
 
             m_NodeSettingsView = new NodeSettingsView();
@@ -201,6 +202,12 @@ namespace UnityEditor.ShaderGraph.Drawing
                 m_ButtonContainer.Add(m_SettingsButton);
                 m_ButtonContainer.Add(m_CollapseButton);
                 m_TitleContainer.Add(m_ButtonContainer);
+            }
+            
+            // This should be based on BlockData type (data only)
+            if(node is BlockData blockData && blockData.contextType != typeof(OutputContext))
+            {
+                m_TitleContainer.RemoveFromHierarchy();
             }
 
             // Register OnMouseHover callbacks for node highlighting
@@ -308,15 +315,7 @@ namespace UnityEditor.ShaderGraph.Drawing
         {
             if (evt.target is Node)
             {
-                var isMaster = node is IMasterNode;
-                var isActive = node == node.owner.outputNode;
-                if (isMaster)
-                {
-                    evt.menu.AppendAction("Set Active", SetMasterAsActive,
-                        _ => isActive ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
-                }
-
-                var canViewShader = node.hasPreview || node is IMasterNode || node is SubGraphOutputNode;
+                var canViewShader = node.hasPreview || node is TargetBlock || node is SubGraphOutputNode;
                 evt.menu.AppendAction("Copy Shader", CopyToClipboard,
                     _ => canViewShader ? DropdownMenuAction.Status.Normal : DropdownMenuAction.Status.Hidden,
                     GenerationMode.ForReals);
@@ -333,12 +332,6 @@ namespace UnityEditor.ShaderGraph.Drawing
             }
 
             base.BuildContextualMenu(evt);
-        }
-
-        void SetMasterAsActive(DropdownMenuAction action)
-        {
-            node.owner.owner.RegisterCompleteObjectUndo("Set Active Master Node");
-            node.owner.outputNode = node;
         }
 
         void CopyToClipboard(DropdownMenuAction action)

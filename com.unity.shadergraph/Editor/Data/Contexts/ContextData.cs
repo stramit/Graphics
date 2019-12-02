@@ -26,6 +26,19 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         Vector2 m_Position;
 
+        public static ContextData Create<T>(Vector2 position) where T : IContext
+        {
+            var contextType = new TypeRef<IContext>(typeof(T));
+            return new ContextData()
+            {
+                displayName = contextType.instance.name,
+                contextType = contextType,
+                inputPorts = contextType.instance.inputPorts,
+                outputPorts = contextType.instance.outputPorts,
+                position = position,
+            };
+        }
+
         public string displayName
         {
             get => m_DisplayName;

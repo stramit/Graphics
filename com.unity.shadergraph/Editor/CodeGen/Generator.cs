@@ -43,7 +43,7 @@ namespace UnityEditor.ShaderGraph
 
         void GetTargetImplementations()
         {
-            if(m_OutputNode is IMasterNode masterNode)
+            if(m_OutputNode is TargetBlock targetBlock)
             {
                 m_TargetImplementations = m_GraphData.activeTargetImplementations.ToArray();
             }
@@ -61,14 +61,17 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public static ActiveFields GatherActiveFieldsFromNode(AbstractMaterialNode outputNode, PassDescriptor pass)
+        public static ActiveFields GatherActiveFieldsFromStack(AbstractMaterialNode outputNode, List<BlockData> blocks, PassDescriptor pass)
         {
             var activeFields = new ActiveFields();
-            if(outputNode is IMasterNode masterNode)
+            if(outputNode is TargetBlock targetBlock)
             {
-                var fields = GenerationUtils.GetActiveFieldsFromConditionals(masterNode.GetConditionalFields(pass));
-                foreach(FieldDescriptor field in fields)
-                    activeFields.baseInstance.Add(field);
+                foreach(var block in blocks)
+                {
+                    var fields = GenerationUtils.GetActiveFieldsFromConditionals(block.GetConditionalFields(pass));
+                    foreach(FieldDescriptor field in fields)
+                        activeFields.baseInstance.Add(field);
+                }
             }
             // Preview shader
             else
@@ -81,7 +84,8 @@ namespace UnityEditor.ShaderGraph
         void BuildShader()
         {
             var activeNodeList = ListPool<AbstractMaterialNode>.Get();
-            NodeUtils.DepthFirstCollectNodesFromNode(activeNodeList, m_OutputNode);
+            foreach(BlockData block in m_GraphData.allBlocks)
+                NodeUtils.DepthFirstCollectNodesFromNode(activeNodeList, block);
 
             var shaderProperties = new PropertyCollector();
             var shaderKeywords = new KeywordCollector();
@@ -98,6 +102,8 @@ namespace UnityEditor.ShaderGraph
 
             GetTargetImplementations();
 
+            foreach(BlockData block in m_GraphData.allBlocks)
+                block.CollectShaderProperties(shaderProperties, m_Mode);
             foreach (var activeNode in activeNodeList.OfType<AbstractMaterialNode>())
                 activeNode.CollectShaderProperties(shaderProperties, m_Mode);
 
@@ -109,7 +115,7 @@ namespace UnityEditor.ShaderGraph
                 for(int i = 0; i < m_TargetImplementations.Length; i++)
                 {
                     TargetSetupContext context = new TargetSetupContext();
-                    context.SetMasterNode(m_OutputNode as IMasterNode);
+                    context.SetBlockDatas(m_GraphData.allBlocks.ToArray());
                     m_TargetImplementations[i].SetupTarget(ref context);
                     GetAssetDependencyPaths(context);
                     GenerateSubShader(i, context.descriptor);
@@ -129,11 +135,14 @@ namespace UnityEditor.ShaderGraph
             m_Builder.AppendLine("SubShader");
             using(m_Builder.BlockScope())
             {
-                GenerationUtils.GenerateSubShaderTags(m_OutputNode as IMasterNode, descriptor, m_Builder);
+                // Need to generate active fields up front to generate sub shader tags
+                // Consider splitting active fields into sub shader/pass based
+                var activeFields = GatherActiveFieldsFromStack(m_OutputNode, m_GraphData.allBlocks, new PassDescriptor());
+                GenerationUtils.GenerateSubShaderTags(activeFields, descriptor, m_Builder);
 
                 foreach(PassCollection.Item pass in descriptor.passes)
                 {
-                    var activeFields = GatherActiveFieldsFromNode(m_OutputNode, pass.descriptor);
+                    activeFields = GatherActiveFieldsFromStack(m_OutputNode, m_GraphData.allBlocks, pass.descriptor);
 
                     // TODO: cleanup this preview check, needed for HD decal preview pass
                     if(m_Mode == GenerationMode.Preview)
@@ -169,12 +178,43 @@ namespace UnityEditor.ShaderGraph
             // Initiailize Collectors
             var propertyCollector = new PropertyCollector();
             var keywordCollector = new KeywordCollector();
-            m_OutputNode.owner.CollectShaderKeywords(keywordCollector, m_Mode);
+            m_GraphData.CollectShaderKeywords(keywordCollector, m_Mode);
 
-            // Get upstream nodes from ShaderPass port mask
-            List<AbstractMaterialNode> vertexNodes;
-            List<AbstractMaterialNode> pixelNodes;
-            GenerationUtils.GetUpstreamNodesForShaderPass(m_OutputNode, pass, out vertexNodes, out pixelNodes);
+            // Traverse Graph Data
+            TargetBlock targetBlock = m_OutputNode as TargetBlock;
+            List<AbstractMaterialNode> vertexNodes = Graphing.ListPool<AbstractMaterialNode>.Get();
+            if(m_Mode == GenerationMode.ForReals || targetBlock != null)
+            {
+                if(m_GraphData.vertexContext != null)
+                {
+                    foreach(BlockData block in m_GraphData.vertexContext.blocks)
+                        NodeUtils.DepthFirstCollectNodesFromNode(vertexNodes, block);
+                }
+            }
+            else
+            {
+                NodeUtils.DepthFirstCollectNodesFromNode(vertexNodes, m_OutputNode);
+            }
+
+            List<AbstractMaterialNode> pixelNodes = Graphing.ListPool<AbstractMaterialNode>.Get();
+            if(m_Mode == GenerationMode.ForReals || targetBlock != null)
+            {
+                if(m_GraphData.fragmentContext != null)
+                {
+                    foreach(BlockData block in m_GraphData.fragmentContext.blocks)
+                        NodeUtils.DepthFirstCollectNodesFromNode(pixelNodes, block);
+                }
+            }
+            else
+            {
+                NodeUtils.DepthFirstCollectNodesFromNode(pixelNodes, m_OutputNode);
+            }
+
+            if(m_GraphData.vertexContext != null)
+                activeFields.baseInstance.Add(Fields.GraphVertex);
+
+            if(m_GraphData.fragmentContext != null)
+                activeFields.baseInstance.Add(Fields.GraphPixel);
 
             // Track permutation indices for all nodes
             List<int>[] vertexNodePermutations = new List<int>[vertexNodes.Count];
@@ -191,12 +231,28 @@ namespace UnityEditor.ShaderGraph
             GenerationUtils.AddRequiredFields(pass.requiredFields, activeFields.baseInstance);
 
             // Get Port references from ShaderPass
-            List<MaterialSlot> pixelSlots;
-            List<MaterialSlot> vertexSlots;
-            if(m_OutputNode is IMasterNode || m_OutputNode is SubGraphOutputNode)
+            List<MaterialSlot> pixelSlots = new List<MaterialSlot>();
+            List<MaterialSlot> vertexSlots = new List<MaterialSlot>();
+            if(m_OutputNode is TargetBlock || m_OutputNode is SubGraphOutputNode)
             {
-                pixelSlots = GenerationUtils.FindMaterialSlotsOnNode(pass.pixelPorts, m_OutputNode);
-                vertexSlots = GenerationUtils.FindMaterialSlotsOnNode(pass.vertexPorts, m_OutputNode);
+                if(m_GraphData.fragmentContext != null)
+                {
+                    foreach(BlockData block in m_GraphData.fragmentContext.blocks)
+                    {
+                        List<MaterialSlot> blockSlots = new List<MaterialSlot>();
+                        block.GetSlots(blockSlots);
+                        pixelSlots.AddRange(blockSlots);
+                    }
+                }
+                if(m_GraphData.vertexContext != null)
+                {
+                    foreach(BlockData block in m_GraphData.vertexContext.blocks)
+                    {
+                        List<MaterialSlot> blockSlots = new List<MaterialSlot>();
+                        block.GetSlots(blockSlots);
+                        vertexSlots.AddRange(blockSlots);
+                    }
+                }
             }
             else
             {

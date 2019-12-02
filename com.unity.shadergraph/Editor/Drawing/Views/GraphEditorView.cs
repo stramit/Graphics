@@ -82,7 +82,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             get { return m_GraphView; }
         }
 
-        PreviewManager previewManager
+        public PreviewManager previewManager
         {
             get { return m_PreviewManager; }
             set { m_PreviewManager = value; }
@@ -116,7 +116,6 @@ namespace UnityEditor.ShaderGraph.Drawing
             m_MessageManager = messageManager;
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/GraphEditorView"));
             previewManager = new PreviewManager(jsonStore, messageManager);
-            previewManager.onPrimaryMasterChanged = OnPrimaryMasterChanged;
 
             var serializedSettings = EditorUserSettings.GetConfigValue(k_UserViewSettings);
             m_UserViewSettings = JsonUtility.FromJson<UserViewSettings>(serializedSettings) ?? new UserViewSettings();
@@ -178,22 +177,6 @@ namespace UnityEditor.ShaderGraph.Drawing
                         m_ColorManager.SetNodesDirty(nodeList);
                         m_Graph.ValidateGraph();
                         m_ColorManager.UpdateNodeViews(nodeList);
-                        foreach (var node in m_Graph.GetNodes<AbstractMaterialNode>())
-                        {
-                            node.Dirty(ModificationScope.Graph);
-                        }
-                    }
-
-                    EditorGUI.BeginChangeCheck();
-                    GUILayout.Label("Target");
-                    m_Graph.activeTargetIndex = EditorGUILayout.Popup(m_Graph.activeTargetIndex,
-                        m_Graph.validTargets.Select(x => x.displayName).ToArray(), GUILayout.Width(100f));
-                    GUILayout.Label("Implementations");
-                    m_Graph.activeTargetImplementationBitmask = EditorGUILayout.MaskField(m_Graph.activeTargetImplementationBitmask,
-                        m_Graph.validImplementations.Select(x => x.displayName).ToArray(), GUILayout.Width(100f));
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        m_Graph.UpdateTargets();
                         foreach (var node in m_Graph.GetNodes<AbstractMaterialNode>())
                         {
                             node.Dirty(ModificationScope.Graph);
@@ -465,6 +448,8 @@ namespace UnityEditor.ShaderGraph.Drawing
                     materialNodeView.OnModified(ModificationScope.Topological);
                 }
             }
+
+            m_Graph.targetBlock.Dirty(ModificationScope.Graph);
 
             UpdateEdgeColors(nodesToUpdate);
             return graphViewChange;
@@ -815,6 +800,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             var materialNodeView = new MaterialNodeView { userData = blockData };
             contextView.AddElement(materialNodeView);
             blockData.RegisterCallback(OnNodeChanged);
+            blockData.RegisterCallback(previewManager.OnNodeModified);
 
             // We should not need to add Nodes (Blocks or otherwise) via GraphEditorView
             // Rewrite so we can hook up Preview and Color Managers without this roundtrip
@@ -1045,13 +1031,6 @@ namespace UnityEditor.ShaderGraph.Drawing
                     }
                 }
             }
-        }
-
-        void OnPrimaryMasterChanged()
-        {
-            m_MasterPreviewView?.RemoveFromHierarchy();
-            CreateMasterPreview();
-            ApplyMasterPreviewLayout();
         }
 
         void HandleEditorViewChanged(GeometryChangedEvent evt)

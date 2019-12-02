@@ -16,8 +16,6 @@ using Object = UnityEngine.Object;
 
 namespace UnityEditor.ShaderGraph.Drawing
 {
-    delegate void OnPrimaryMasterChanged();
-
     class PreviewManager : IDisposable
     {
         JsonStore m_JsonStore;
@@ -51,9 +49,9 @@ namespace UnityEditor.ShaderGraph.Drawing
 
             foreach (var node in m_Graph.GetNodes<AbstractMaterialNode>())
                 AddPreview(node);
-        }
 
-        public OnPrimaryMasterChanged onPrimaryMasterChanged;
+            AddPreview(m_Graph.targetBlock);
+        }
 
         static Texture2D GenerateFourSquare(Color c1, Color c2)
         {
@@ -106,9 +104,9 @@ namespace UnityEditor.ShaderGraph.Drawing
 
             var isMaster = false;
 
-            if (node is IMasterNode || node is SubGraphOutputNode)
+            if (node is TargetBlock || node is SubGraphOutputNode)
             {
-                if (masterRenderData != null || (node is IMasterNode && node != m_Graph.outputNode))
+                if (masterRenderData != null)
                 {
                     return;
                 }
@@ -153,15 +151,10 @@ namespace UnityEditor.ShaderGraph.Drawing
                 m_RefreshTimedNodes = true;
             }
 
-            if (m_MasterRenderData == renderData && onPrimaryMasterChanged != null)
-            {
-                onPrimaryMasterChanged();
-            }
-
             m_NodesToUpdate.Add(node);
         }
 
-        void OnNodeModified(AbstractMaterialNode node, ModificationScope scope)
+        public void OnNodeModified(AbstractMaterialNode node, ModificationScope scope)
         {
             if (scope == ModificationScope.Topological ||
                 scope == ModificationScope.Graph)
@@ -238,16 +231,29 @@ namespace UnityEditor.ShaderGraph.Drawing
             ListPool<MaterialSlot>.Release(slots);
         }
 
+        int[] stackEdgesHashCode;
+
         public bool HandleGraphChanges()
         {
             if (m_Version != m_Graph.changeVersion)
             {
-                if (m_Graph.outputNode != masterRenderData.shaderData.node)
-            {
-                    DestroyPreview(masterRenderData.shaderData.node);
-            }
+                var blocks = m_Graph.allBlocks;
+                var stackHashNew = new int[blocks.Count];
+                for(int i = 0; i < blocks.Count; i++)
+                {
+                    stackHashNew[i] = ComputeEdgesHashCode(blocks[i]);
+                }
+
+                if(stackEdgesHashCode == null ||
+                    blocks.Count != stackEdgesHashCode.Length ||
+                    stackHashNew != stackEdgesHashCode)
+                {
+                    stackEdgesHashCode = stackHashNew;
+                    UpdateMasterNodeShader();
+                }
 
                 var nodes = new HashSet<AbstractMaterialNode>(m_Graph.GetNodes<AbstractMaterialNode>());
+                nodes.Add(m_Graph.targetBlock);
                 var removedNodes = new List<AbstractMaterialNode>();
                 foreach (var renderData in m_RenderDatas)
                 {
@@ -301,6 +307,28 @@ namespace UnityEditor.ShaderGraph.Drawing
             m_PropertyNodes.Clear();
 
             m_PropertyNodes.Add(node);
+            PropagateNodeList(m_PropertyNodes, PropagationDirection.Upstream);
+
+            foreach (var propNode in m_PropertyNodes)
+            {
+                propNode.CollectPreviewMaterialProperties(m_PreviewProperties);
+            }
+
+            foreach (var prop in m_Graph.properties)
+                m_PreviewProperties.Add(prop.GetPreviewMaterialProperty());
+
+            foreach (var previewProperty in m_PreviewProperties)
+                renderData.shaderData.mat.SetPreviewProperty(previewProperty);
+        }
+
+        void CollectShaderProperties(List<BlockData> blocks, PreviewRenderData renderData)
+        {
+            m_PreviewProperties.Clear();
+            m_PropertyNodes.Clear();
+
+            foreach(BlockData block in blocks)
+                m_PropertyNodes.Add(block);
+            
             PropagateNodeList(m_PropertyNodes, PropagationDirection.Upstream);
 
             foreach (var propNode in m_PropertyNodes)
@@ -382,10 +410,10 @@ namespace UnityEditor.ShaderGraph.Drawing
             foreach (var renderData in m_RenderList3D)
                 RenderPreview(renderData, m_SceneResources.sphere, Matrix4x4.identity);
 
-            var renderMasterPreview = masterRenderData != null && m_NodesToDraw.Contains(masterRenderData.shaderData.node);
+            var renderMasterPreview = masterRenderData != null && m_NodesToDraw.Select(x => x as BlockData).Any();
             if (renderMasterPreview)
             {
-                CollectShaderProperties(masterRenderData.shaderData.node, masterRenderData);
+                CollectShaderProperties(m_Graph.allBlocks, masterRenderData);
 
                 if (m_NewMasterPreviewSize.HasValue)
                 {
@@ -454,8 +482,9 @@ namespace UnityEditor.ShaderGraph.Drawing
                     CheckForErrors(renderData.shaderData);
                     m_NodesToDraw.Add(renderData.shaderData.node);
 
-                    var masterNode = renderData.shaderData.node as IMasterNode;
-                    masterNode?.ProcessPreviewMaterial(renderData.shaderData.mat);
+                    var masterNode = renderData.shaderData.node as TargetBlock;
+                    // TODO: Move this to the Target
+                    // masterNode?.ProcessPreviewMaterial(renderData.shaderData.mat);
                 }
             }
 
@@ -468,15 +497,19 @@ namespace UnityEditor.ShaderGraph.Drawing
             var wasAsyncAllowed = ShaderUtil.allowAsyncCompilation;
             ShaderUtil.allowAsyncCompilation = true;
 
+            if(m_NodesToUpdate.Select(x => x as BlockData).Any())
+            {
+                UpdateMasterNodeShader();
+            }
+
             foreach (var node in m_NodesToUpdate)
             {
-                if (node is IMasterNode && node == masterRenderData.shaderData.node && !(node is VfxMasterNode))
+                if (node is TargetBlock && node == masterRenderData.shaderData.node)
                 {
-                    UpdateMasterNodeShader();
                     continue;
                 }
 
-                if (!node.hasPreview && !(node is SubGraphOutputNode || node is VfxMasterNode))
+                if (!node.hasPreview && !(node is SubGraphOutputNode))
                     continue;
 
                 if (!m_RenderDatas.TryGetValue(node, out var renderData))
@@ -562,7 +595,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             var previousAsync = ShaderUtil.allowAsyncCompilation;
             ShaderUtil.allowAsyncCompilation = true;
             var previousUseSRP = Unsupported.useScriptableRenderPipeline;
-            Unsupported.useScriptableRenderPipeline = renderData.shaderData.node is IMasterNode;
+            Unsupported.useScriptableRenderPipeline = renderData.shaderData.node is TargetBlock;
             m_SceneResources.camera.Render();
             Unsupported.useScriptableRenderPipeline = previousUseSRP;
             ShaderUtil.allowAsyncCompilation = previousAsync;
@@ -590,9 +623,7 @@ namespace UnityEditor.ShaderGraph.Drawing
         void UpdateMasterNodeShader()
         {
             var shaderData = masterRenderData?.shaderData;
-            var masterNode = shaderData?.node as IMasterNode;
-
-            if (masterNode == null)
+            if(!(shaderData?.node is TargetBlock targetBlock))
                 return;
             
             var generator = new Generator(m_Graph, shaderData?.node, GenerationMode.Preview, shaderData?.node.name);
@@ -644,19 +675,6 @@ namespace UnityEditor.ShaderGraph.Drawing
             DestroyRenderData(renderData);
 
             m_RenderDatas.Remove(node);
-
-            // Check if we're destroying the shader data used by the master preview
-            if (masterRenderData == renderData)
-            {
-                m_MasterRenderData = null;
-                if (!m_Graph.isSubGraph && renderData.shaderData.node != m_Graph.outputNode)
-                {
-                    AddPreview(m_Graph.outputNode);
-                }
-
-                if (onPrimaryMasterChanged != null)
-                    onPrimaryMasterChanged();
-            }
         }
 
         void ReleaseUnmanagedResources()

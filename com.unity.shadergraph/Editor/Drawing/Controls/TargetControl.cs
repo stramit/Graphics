@@ -42,24 +42,34 @@ namespace UnityEditor.ShaderGraph.Drawing.Controls
         void TargetOnGUIHandler()
         {
             GUILayout.BeginHorizontal();
-            EditorGUI.BeginChangeCheck();
             GUILayout.Label("Target");
-            m_Node.owner.activeTargetIndex = EditorGUILayout.Popup(m_Node.owner.activeTargetIndex,
-                m_Node.owner.validTargets.Select(x => x.displayName).ToArray(), GUILayout.Width(100f));
-            if (EditorGUI.EndChangeCheck())
-                UpdateTargets();
+            using (var changeCheckScope = new EditorGUI.ChangeCheckScope())
+            {
+                m_Node.owner.activeTargetIndex = EditorGUILayout.Popup(m_Node.owner.activeTargetIndex,
+                    m_Node.owner.validTargets.Select(x => x.displayName).ToArray(), GUILayout.Width(100f));
+
+                if (changeCheckScope.changed)
+                {
+                    UpdateTargets();
+                }
+            }
             GUILayout.EndHorizontal();
         }
 
         void VariantOnGUIHandler()
         {
             GUILayout.BeginHorizontal();
-            EditorGUI.BeginChangeCheck();
             GUILayout.Label("Variants");
-            m_Node.owner.activeTargetImplementationBitmask = EditorGUILayout.MaskField(m_Node.owner.activeTargetImplementationBitmask,
-                m_Node.owner.validImplementations.Select(x => x.displayName).ToArray(), GUILayout.Width(100f));
-            if (EditorGUI.EndChangeCheck())
-                UpdateTargets();
+            using (var changeCheckScope = new EditorGUI.ChangeCheckScope())
+            {
+                m_Node.owner.activeTargetImplementationBitmask = EditorGUILayout.MaskField(m_Node.owner.activeTargetImplementationBitmask,
+                    m_Node.owner.validImplementations.Select(x => x.displayName).ToArray(), GUILayout.Width(100f));
+
+                if (changeCheckScope.changed)
+                {
+                    UpdateTargets();
+                }
+            }
             GUILayout.EndHorizontal();
         }
 

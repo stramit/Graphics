@@ -30,7 +30,7 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         int m_Version = 1;
 
-        #region Contexts
+        #region ContextData
 
         [SerializeField]
         JsonList<ContextData> m_Contexts = new JsonList<ContextData>();
@@ -180,19 +180,6 @@ namespace UnityEditor.ShaderGraph
             set => m_ConcretePrecision = value;
         }
 
-        [SerializeField]
-        JsonRef<AbstractMaterialNode> m_OutputNode;
-
-        public AbstractMaterialNode outputNode
-        {
-            get => m_OutputNode;
-            set
-            {
-                m_OutputNode = value;
-                UpdateTargets();
-            }
-        }
-
         #region Targets
         [NonSerialized]
         List<ITarget> m_ValidTargets = new List<ITarget>();
@@ -231,6 +218,91 @@ namespace UnityEditor.ShaderGraph
                 // Return a list of all valid TargetImplementations enabled in the bitmask
                 return m_ValidImplementations.Where(s => ((1 << m_ValidImplementations.IndexOf(s)) &
                     m_ActiveTargetImplementationBitmask) == (1 << m_ValidImplementations.IndexOf(s))).ToList();
+            }
+        }
+
+        public void SetTarget(Type type)
+        {
+            if(!typeof(ITarget).IsAssignableFrom(type))
+                return;
+
+            // Set active target index to a Type    
+            for(int i = 0; i < validTargets.Count; i++)
+            {
+                if(validTargets[i].GetType() == type)
+                    activeTargetIndex = i;
+            }
+        }
+        #endregion
+
+        #region Contexts & Blocks
+        // Temporary Context access
+        // Remove this when contexts are connected and can be properly evaluated
+        public ContextData vertexContext => contexts.Where(x => x.contextType.type == typeof(VertexContext)).FirstOrDefault();
+        public ContextData fragmentContext => contexts.Where(x => x.contextType.type == typeof(FragmentContext)).FirstOrDefault();
+        public ContextData outputContext => contexts.Where(x => x.contextType.type == typeof(OutputContext)).FirstOrDefault();
+        public BlockData targetBlock => outputContext?.blocks.Where(x => x.GetType() == typeof(TargetBlock)).FirstOrDefault();
+        public SubGraphOutputNode subGraphOutput => GetNodes<SubGraphOutputNode>().FirstOrDefault();
+
+        // Need a more efficient way to get all blocks...
+        public List<BlockData> allBlocks
+        {
+            get
+            {
+                List<BlockData> blocks = new List<BlockData>();
+                if(vertexContext != null)
+                {
+                    foreach(BlockData block in vertexContext.blocks)
+                        blocks.Add(block);
+                }
+                if(fragmentContext != null)
+                {
+                    foreach(BlockData block in fragmentContext.blocks)
+                        blocks.Add(block);
+                }
+                if(outputContext != null)
+                {
+                    foreach(BlockData block in outputContext.blocks)
+                        blocks.Add(block);
+                }
+                return blocks;
+            }
+        }
+
+        public void AddRequiredBlocks(Type[] requireBlocks)
+        {
+            if(requireBlocks != null)
+            {
+                foreach(Type requiredType in requireBlocks)
+                {
+                    if(requiredType.IsSubclassOf(typeof(BlockData)))
+                    {
+                        // Create block
+                        var blockData = (BlockData)Activator.CreateInstance(requiredType);
+                        blockData.owner = this;
+
+                        // Find context
+                        var context = contexts.Where(x => x.contextType.type == blockData.contextType).FirstOrDefault();
+                        if(context == null)
+                            return;
+
+                        // Add block to context
+                        if(context.blocks.Any(x => x.GetType() == blockData.GetType()))
+                            return;
+                        context.blocks.Add(blockData);
+
+                        // Recursively add required
+                        AddRequiredBlocks(blockData.requireBlocks);
+                    }
+                }
+            }
+        }
+
+        public void AddRequiredBlocksForImplementations()
+        {
+            foreach(ITargetImplementation implementation in activeTargetImplementations)
+            {
+                AddRequiredBlocks(implementation.requireBlocks);
             }
         }
         #endregion
@@ -1100,12 +1172,6 @@ namespace UnityEditor.ShaderGraph
                     node.group = groupData;
                 }
 
-                if (!string.IsNullOrEmpty(graphDataV0.activeOutputNodeGuid) &&
-                    nodeV0.guid == graphDataV0.activeOutputNodeGuid)
-                {
-                    outputNode = node;
-                }
-
                 var slots = node.InternalGetSlots();
                 slots.Clear();
                 SerializationHelper.Upgrade(nodeV0.slots, slots, slotJsonList);
@@ -1202,12 +1268,6 @@ namespace UnityEditor.ShaderGraph
                 }
             }
 
-            if (outputNode == null)
-            {
-                outputNode = GetNodes<AbstractMaterialNode>().FirstOrDefault(x => x is IMasterNode)
-                    ?? GetNodes<SubGraphOutputNode>().FirstOrDefault();
-            }
-
             foreach (var edge in m_Edges)
             {
                 AddEdgeToNodeEdges(edge);
@@ -1238,25 +1298,21 @@ namespace UnityEditor.ShaderGraph
         {
             // First get all valid TargetImplementations that are valid with the current graph
             List<ITargetImplementation> foundImplementations = new List<ITargetImplementation>();
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())//
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (var type in assembly.GetTypesOrNothing())
                 {
                     var isImplementation = !type.IsAbstract && !type.IsGenericType && type.IsClass && typeof(ITargetImplementation).IsAssignableFrom(type);
                     //for subgraph output nodes, preview target is the only valid target
-                    if (outputNode is SubGraphOutputNode && isImplementation && typeof(DefaultPreviewTarget).IsAssignableFrom(type))
+                    if (isSubGraph && isImplementation && typeof(DefaultPreviewTarget).IsAssignableFrom(type))
                     {
                         var implementation = (DefaultPreviewTarget)Activator.CreateInstance(type);
                         foundImplementations.Add(implementation);
                     }
-                    else if (isImplementation && !foundImplementations.Any(s => s.GetType() == type))
+                    else if (isImplementation && !foundImplementations.Any(s => s.GetType() == type) && !typeof(DefaultPreviewTarget).IsAssignableFrom(type))
                     {
-                        var masterNode = outputNode as IMasterNode;
                         var implementation = (ITargetImplementation)Activator.CreateInstance(type);
-                        if(implementation.IsValid(masterNode))
-                        {
-                            foundImplementations.Add(implementation);
-                        }
+                        foundImplementations.Add(implementation);
                     }
                 }
             }

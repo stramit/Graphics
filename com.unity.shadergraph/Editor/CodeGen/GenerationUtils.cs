@@ -15,6 +15,9 @@ namespace UnityEditor.ShaderGraph
         internal static List<FieldDescriptor> GetActiveFieldsFromConditionals(ConditionalField[] conditionalFields)
         {
             var fields = new List<FieldDescriptor>();
+            if(conditionalFields == null)
+                return fields;
+
             foreach(ConditionalField conditionalField in conditionalFields)
             {
                 if(conditionalField.condition == true)
@@ -26,7 +29,7 @@ namespace UnityEditor.ShaderGraph
             return fields;
         }
 
-        internal static void GenerateSubShaderTags(IMasterNode masterNode, SubShaderDescriptor descriptor, ShaderStringBuilder builder)
+        internal static void GenerateSubShaderTags(ActiveFields activeFields, SubShaderDescriptor descriptor, ShaderStringBuilder builder)
         {
             builder.AppendLine("Tags");
             using (builder.BlockScope())
@@ -39,7 +42,7 @@ namespace UnityEditor.ShaderGraph
 
                 // Render Type
                 string renderType = !string.IsNullOrEmpty(descriptor.renderTypeOverride) ?
-                    descriptor.renderTypeOverride : masterNode?.renderTypeTag;
+                    descriptor.renderTypeOverride : GetRenderTypeTagFromActiveFields(activeFields);
                 if(!string.IsNullOrEmpty(renderType))
                     builder.AppendLine($"\"RenderType\"=\"{renderType}\"");
                 else
@@ -47,11 +50,39 @@ namespace UnityEditor.ShaderGraph
 
                 // Render Queue
                 string renderQueue = !string.IsNullOrEmpty(descriptor.renderQueueOverride) ?
-                    descriptor.renderQueueOverride : masterNode?.renderQueueTag;
+                    descriptor.renderQueueOverride : GetRenderQueueTagFromActiveFields(activeFields);
                 if(!string.IsNullOrEmpty(renderQueue))
                     builder.AppendLine($"\"Queue\"=\"{renderQueue}\"");
                 else
                     builder.AppendLine("// Queue: <None>");
+            }
+        }
+
+        static string GetRenderQueueTagFromActiveFields(ActiveFields activeFields)
+        {
+            if(activeFields.baseInstance.Contains(Fields.SurfaceTransparent))
+            {
+                return $"{RenderQueue.Transparent}";
+            }
+            else if(activeFields.baseInstance.Contains(Fields.AlphaClip))
+            {
+                return $"{RenderQueue.AlphaTest}";
+            }
+            else
+            {
+                return $"{RenderQueue.Geometry}";
+            }
+        }
+
+        static string GetRenderTypeTagFromActiveFields(ActiveFields activeFields)
+        {
+            if(activeFields.baseInstance.Contains(Fields.SurfaceTransparent))
+            {
+                return $"{RenderType.Transparent}";
+            }
+            else
+            {
+                return $"{RenderType.Opaque}";
             }
         }
 
@@ -251,16 +282,6 @@ namespace UnityEditor.ShaderGraph
             interpolatorBuilder.Concat(unpackBuilder);
         }
 
-        internal static void GetUpstreamNodesForShaderPass(AbstractMaterialNode outputNode, PassDescriptor pass, out List<AbstractMaterialNode> vertexNodes, out List<AbstractMaterialNode> pixelNodes)
-        {
-            // Traverse Graph Data
-            vertexNodes = Graphing.ListPool<AbstractMaterialNode>.Get();
-            NodeUtils.DepthFirstCollectNodesFromNode(vertexNodes, outputNode, NodeUtils.IncludeSelf.Include, pass.vertexPorts);
-
-            pixelNodes = Graphing.ListPool<AbstractMaterialNode>.Get();
-            NodeUtils.DepthFirstCollectNodesFromNode(pixelNodes, outputNode, NodeUtils.IncludeSelf.Include, pass.pixelPorts);
-        }
-
         internal static void GetActiveFieldsAndPermutationsForNodes(AbstractMaterialNode outputNode, PassDescriptor pass,
             KeywordCollector keywordCollector,  List<AbstractMaterialNode> vertexNodes, List<AbstractMaterialNode> pixelNodes,
             List<int>[] vertexNodePermutations, List<int>[] pixelNodePermutations,
@@ -279,8 +300,8 @@ namespace UnityEditor.ShaderGraph
                     // Get active nodes for this permutation
                     var localVertexNodes = Graphing.ListPool<AbstractMaterialNode>.Get();
                     var localPixelNodes = Graphing.ListPool<AbstractMaterialNode>.Get();
-                    NodeUtils.DepthFirstCollectNodesFromNode(localVertexNodes, outputNode, NodeUtils.IncludeSelf.Include, pass.vertexPorts, keywordCollector.permutations[i]);
-                    NodeUtils.DepthFirstCollectNodesFromNode(localPixelNodes, outputNode, NodeUtils.IncludeSelf.Include, pass.pixelPorts, keywordCollector.permutations[i]);
+                    NodeUtils.DepthFirstCollectNodesFromNode(localVertexNodes, outputNode, NodeUtils.IncludeSelf.Include, keywordCollector.permutations[i]);
+                    NodeUtils.DepthFirstCollectNodesFromNode(localPixelNodes, outputNode, NodeUtils.IncludeSelf.Include, keywordCollector.permutations[i]);
 
                     // Track each vertex node in this permutation
                     foreach(AbstractMaterialNode vertexNode in localVertexNodes)
@@ -709,7 +730,7 @@ namespace UnityEditor.ShaderGraph
 
                         if (activeFields != null)
                         {
-                            var structField = new FieldDescriptor(structName, hlslName, "");
+                            var structField = new FieldDescriptor(structName, hlslName, $"OUTPUT_{structName.ToUpper()}_{slot.shaderOutputName.ToUpper()}");
                             activeFields.AddAll(structField);
                         }
                     }
@@ -804,7 +825,7 @@ namespace UnityEditor.ShaderGraph
             ShaderStringBuilder surfaceDescriptionFunction,
             GenerationMode mode)
         {
-            if (rootNode is IMasterNode || rootNode is SubGraphOutputNode)
+            if (rootNode is TargetBlock || rootNode is SubGraphOutputNode)
             {
                 var usedSlots = slots ?? rootNode.GetInputSlots<MaterialSlot>();
                 foreach (var input in usedSlots)
@@ -821,7 +842,7 @@ namespace UnityEditor.ShaderGraph
                         {
                             surfaceDescriptionFunction.AppendLine("surface.{0} = {1};",
                                 hlslName,
-                                rootNode.GetSlotValue(input.id, mode, rootNode.concretePrecision));
+                                input.owner.GetSlotValue(input.id, mode, rootNode.concretePrecision));
                         }
                         else
                         {
@@ -855,7 +876,7 @@ namespace UnityEditor.ShaderGraph
 
                     if (activeFields != null)
                     {
-                        var structField = new FieldDescriptor(structName, hlslName, "");
+                        var structField = new FieldDescriptor(structName, hlslName, $"OUTPUT_{structName.ToUpper()}_{slot.shaderOutputName.ToUpper()}");
                         activeFields.AddAll(structField);
                     }
                 }
