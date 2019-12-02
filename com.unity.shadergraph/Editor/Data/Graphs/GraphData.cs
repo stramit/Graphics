@@ -284,11 +284,11 @@ namespace UnityEditor.ShaderGraph
                         // Find context
                         var context = contexts.Where(x => x.contextType.type == blockData.contextType).FirstOrDefault();
                         if(context == null)
-                            return;
+                            continue;
 
                         // Add block to context
                         if(context.blocks.Any(x => x.GetType() == blockData.GetType()))
-                            return;
+                            continue;
                         context.blocks.Add(blockData);
 
                         // Recursively add required
