@@ -56,6 +56,8 @@ namespace UnityEditor.ShaderGraph.Drawing
 
             m_GraphView = graphView;
 
+            ShaderGraphPreferences.onMarkUnusedOutputPathsChanged += OnChange;
+
             m_ConnectorListener = connectorListener;
             node = inNode;
             viewDataKey = node.jsonId;
@@ -221,7 +223,7 @@ namespace UnityEditor.ShaderGraph.Drawing
         public void AttachMessage(string errString, ShaderCompilerMessageSeverity severity)
         {
             ClearMessage();
-            IconBadge badge;
+            IconBadge badge; 
             if (severity == ShaderCompilerMessageSeverity.Error)
             {
                 badge = IconBadge.CreateError(errString);
@@ -239,6 +241,14 @@ namespace UnityEditor.ShaderGraph.Drawing
         {
             var disabledString = "disabled";
             var inputViews = m_PortInputContainer.Children().OfType<PortInputView>();
+
+            if(!ShaderGraphPreferences.markUnusedOutputPaths)
+            {
+                RemoveFromClassList(disabledString);
+                foreach(var inputView in inputViews)
+                    inputView.RemoveFromClassList(disabledString);
+                return;
+            }
 
             if (!state)
             {
@@ -626,6 +636,8 @@ namespace UnityEditor.ShaderGraph.Drawing
                 if (listener != null)
                     listener.OnNodeModified(scope);
             }
+
+            MarkDirtyRepaint();
         }
 
         void AddSlots(IEnumerable<MaterialSlot> slots)
@@ -658,6 +670,12 @@ namespace UnityEditor.ShaderGraph.Drawing
                     portInputView = new PortInputView(port.slot) { style = { position = Position.Absolute } };
                     m_PortInputContainer.Add(portInputView);
                     SetPortInputPosition(port, portInputView);
+
+                    if(!ShaderGraphPreferences.markUnusedOutputPaths)
+                    {
+                        portInputView.RemoveFromClassList("disabled");
+                        continue;
+                    }
 
                     if(node.isActive)
                         portInputView.RemoveFromClassList("disabled");
@@ -815,6 +833,8 @@ namespace UnityEditor.ShaderGraph.Drawing
                 m_PreviewRenderData.onPreviewChanged -= UpdatePreviewTexture;
                 m_PreviewRenderData = null;
             }
+
+            ShaderGraphPreferences.onMarkUnusedOutputPathsChanged -= OnChange;
         }
     }
 }

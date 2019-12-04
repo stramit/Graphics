@@ -7,6 +7,7 @@ namespace UnityEditor.ShaderGraph
         static class Keys
         {
             internal const string variantLimit = "UnityEditor.ShaderGraph.VariantLimit";
+            internal const string markUnusedOutputPaths = "UnityEditor.ShaderGraph.MarkUnusedOutputPaths";
         }
 
         static bool m_Loaded = false;
@@ -22,6 +23,19 @@ namespace UnityEditor.ShaderGraph
                 if(onVariantLimitChanged != null)
                     onVariantLimitChanged();
                 TrySave(ref m_VariantLimit, value, Keys.variantLimit); 
+            }
+        }
+
+        internal static PreferenceChangedDelegate onMarkUnusedOutputPathsChanged;
+        static bool m_MarkUnusedOutputPaths = true;
+        internal static bool markUnusedOutputPaths
+        {
+            get { return m_MarkUnusedOutputPaths; }
+            set 
+            {
+                TrySave(ref m_MarkUnusedOutputPaths, value, Keys.markUnusedOutputPaths); 
+                if(onMarkUnusedOutputPathsChanged != null)
+                    onMarkUnusedOutputPathsChanged();
             }
         }
 
@@ -46,18 +60,30 @@ namespace UnityEditor.ShaderGraph
 
             EditorGUILayout.Space();
 
+            EditorGUILayout.LabelField("Generation", EditorStyles.boldLabel);
             EditorGUI.BeginChangeCheck ();
             var variantLimitValue = EditorGUILayout.DelayedIntField("Shader Variant Limit", variantLimit);
             if (EditorGUI.EndChangeCheck ()) 
             {
                 variantLimit = variantLimitValue;
             }
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.LabelField("View", EditorStyles.boldLabel);
+            EditorGUI.BeginChangeCheck ();
+            var markUnusedOutputPathsValue = EditorGUILayout.Toggle("Mark Unused Output Paths", markUnusedOutputPaths);
+            if (EditorGUI.EndChangeCheck ()) 
+            {
+                markUnusedOutputPaths = markUnusedOutputPathsValue;
+            }
         }
 
         static void Load()
         {
             m_VariantLimit = EditorPrefs.GetInt(Keys.variantLimit, 128);
-
+            m_MarkUnusedOutputPaths = EditorPrefs.GetBool(Keys.markUnusedOutputPaths, true);
+            
             m_Loaded = true;
         }
 
