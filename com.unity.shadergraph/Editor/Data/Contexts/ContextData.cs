@@ -29,7 +29,7 @@ namespace UnityEditor.ShaderGraph
         public static ContextData Create<T>(Vector2 position) where T : IContext
         {
             var contextType = new TypeRef<IContext>(typeof(T));
-            return new ContextData()
+            var contextData = new ContextData
             {
                 displayName = contextType.instance.name,
                 contextType = contextType,
@@ -37,6 +37,11 @@ namespace UnityEditor.ShaderGraph
                 outputPorts = contextType.instance.outputPorts,
                 position = position,
             };
+            foreach(var input in contextData.inputPorts)
+                input.owner = contextData;
+            foreach(var output in contextData.outputPorts)
+                output.owner = contextData;
+            return contextData;
         }
 
         public string displayName

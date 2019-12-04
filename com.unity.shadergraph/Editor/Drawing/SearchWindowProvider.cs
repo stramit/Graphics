@@ -86,6 +86,48 @@ namespace UnityEditor.ShaderGraph.Drawing
                 return entries;
             }
 
+            if(connectedPort?.userData is PortData portData)
+            {
+                if(portData.orientation == PortData.Orientation.Horizontal)
+                    throw new NotImplementedException("PortData is not valid for horizontal edges");
+
+                Type portType = portData.valueType.type;
+                TypeCache.TypeCollection contextCollection = TypeCache.GetTypesDerivedFrom<IContext>();
+                foreach(var type in contextCollection)
+                {
+                    // Never allow duplicate Output contexts
+                    if(type == typeof(OutputContext))
+                        continue;
+
+                    var typeRef = new TypeRef<IContext>(type);
+                    if(portData.direction == PortData.Direction.Input)
+                    {
+                        if(!typeRef.instance.outputPorts.Any(x => x.valueType.type == portType))
+                            continue;
+                    }
+                    else if(portData.direction == PortData.Direction.Output)
+                    {
+                        if(!typeRef.instance.inputPorts.Any(x => x.valueType.type == portType))
+                            continue;
+                    }
+
+                    var contextData = new ContextData
+                    {
+                        displayName = typeRef.instance.name,
+                        contextType = typeRef,
+                        inputPorts = typeRef.instance.inputPorts,
+                        outputPorts = typeRef.instance.outputPorts,
+                    };
+                    foreach(var input in contextData.inputPorts)
+                        input.owner = contextData;
+                    foreach(var output in contextData.outputPorts)
+                        output.owner = contextData;
+                    AddEntries(contextData, new string[] {typeRef.instance.name}, entries);
+                }
+
+                return entries;
+            }
+
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (var type in assembly.GetTypesOrNothing())
@@ -174,7 +216,7 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
         {
-            var nodeEntries = GetEntries();
+            var entries = GetEntries();
 
             //* Build up the data structure needed by SearchWindow.
 
@@ -187,15 +229,15 @@ namespace UnityEditor.ShaderGraph.Drawing
                 new SearchTreeGroupEntry(new GUIContent("Create Node"), 0),
             };
 
-            foreach (var nodeEntry in nodeEntries)
+            foreach (var entry in entries)
             {
                 // `createIndex` represents from where we should add new group entries from the current entry's group path.
                 var createIndex = int.MaxValue;
 
                 // Compare the group path of the current entry to the current group path.
-                for (var i = 0; i < nodeEntry.title.Length - 1; i++)
+                for (var i = 0; i < entry.title.Length - 1; i++)
                 {
-                    var group = nodeEntry.title[i];
+                    var group = entry.title[i];
                     if (i >= groups.Count)
                     {
                         // The current group path matches a prefix of the current entry's group path, so we add the
@@ -216,36 +258,45 @@ namespace UnityEditor.ShaderGraph.Drawing
 
                 // Create new group entries as needed.
                 // If we don't need to modify the group path, `createIndex` will be `int.MaxValue` and thus the loop won't run.
-                for (var i = createIndex; i < nodeEntry.title.Length - 1; i++)
+                for (var i = createIndex; i < entry.title.Length - 1; i++)
                 {
-                    var group = nodeEntry.title[i];
+                    var group = entry.title[i];
                     groups.Add(group);
                     tree.Add(new SearchTreeGroupEntry(new GUIContent(group)) { level = i + 1 });
                 }
 
                 // Finally, add the actual entry.
-                tree.Add(new SearchTreeEntry(new GUIContent(nodeEntry.title.Last(), m_Icon)) { level = nodeEntry.title.Length, userData = nodeEntry });
+                tree.Add(new SearchTreeEntry(new GUIContent(entry.title.Last(), m_Icon)) { level = entry.title.Length, userData = entry });
             }
 
             return tree;
         }
 
-        void AddEntries(AbstractMaterialNode node, string[] title, List<CreateEntry> nodeEntries)
-        {
-            if (m_Graph.isSubGraph && !node.allowedInSubGraph)
-                return;
-            if (!m_Graph.isSubGraph && !node.allowedInMainGraph)
-                return;
-            if (connectedPort == null)
+        void AddEntries(object obj, string[] title, List<CreateEntry> entries)
+        {  
+            AbstractMaterialNode node = obj as AbstractMaterialNode;
+            
+            if(node != null)
             {
-                nodeEntries.Add(new CreateEntry
+                if (m_Graph.isSubGraph && !node.allowedInSubGraph)
+                    return;
+                if (!m_Graph.isSubGraph && !node.allowedInMainGraph)
+                    return;
+            }
+            
+            if (connectedPort == null || obj is ContextData contextData)
+            {
+                entries.Add(new CreateEntry
                 {
-                    obj = node,
+                    obj = obj,
                     title = title,
                     compatibleSlotId = -1
                 });
                 return;
             }
+
+            if(node == null)
+                return;
 
             var connectedSlot = connectedPort.slot;
             m_Slots.Clear();
@@ -265,7 +316,7 @@ namespace UnityEditor.ShaderGraph.Drawing
 
             if (hasSingleSlot && m_Slots.Count == 1)
             {
-                nodeEntries.Add(new CreateEntry
+                entries.Add(new CreateEntry
                 {
                     obj = node,
                     title = title,
@@ -279,7 +330,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 var entryTitle = new string[title.Length];
                 title.CopyTo(entryTitle, 0);
                 entryTitle[entryTitle.Length - 1] += ": " + slot.displayName;
-                nodeEntries.Add(new CreateEntry
+                entries.Add(new CreateEntry
                 {
                     title = entryTitle,
                     obj = node,
@@ -291,6 +342,29 @@ namespace UnityEditor.ShaderGraph.Drawing
         public bool OnSelectEntry(SearchTreeEntry entry, SearchWindowContext context)
         {
             var createEntry = (CreateEntry)entry.userData;
+            
+            var windowRoot = m_EditorWindow.rootVisualElement;
+            var windowMousePosition = windowRoot.ChangeCoordinatesTo(windowRoot.parent, context.screenMousePosition - m_EditorWindow.position.position);
+            var graphMousePosition = m_GraphView.contentViewContainer.WorldToLocal(windowMousePosition);
+
+            if(createEntry.obj is ContextData contextData)
+            {
+                m_Graph.owner.RegisterCompleteObjectUndo("Add " + contextData.displayName + " Context");
+                contextData.position = graphMousePosition;
+                m_Graph.contexts.Add(contextData);
+
+                if (connectedPort != null)
+                {
+                    var connectedPortData = connectedPort.userData as PortData;
+                    var compatiblePortData = connectedPortData.direction == PortData.Direction.Input ? contextData.outputPorts[0] : contextData.inputPorts[0];
+
+                    var from = connectedPortData.direction == PortData.Direction.Output ? connectedPortData : compatiblePortData;
+                    var to = connectedPortData.direction == PortData.Direction.Output ? compatiblePortData : connectedPortData;
+                    m_Graph.Connect(from, to);
+                }
+
+                return true;
+            }
 
             if(createEntry.obj is BlockData blockData)
             {
@@ -313,9 +387,6 @@ namespace UnityEditor.ShaderGraph.Drawing
             if(createEntry.obj is AbstractMaterialNode node)
             {
                 var drawState = node.drawState;
-                var windowRoot = m_EditorWindow.rootVisualElement;
-                var windowMousePosition = windowRoot.ChangeCoordinatesTo(windowRoot.parent, context.screenMousePosition - m_EditorWindow.position.position);
-                var graphMousePosition = m_GraphView.contentViewContainer.WorldToLocal(windowMousePosition);
                 drawState.position = new Rect(graphMousePosition, Vector2.zero);
                 node.drawState = drawState;
 

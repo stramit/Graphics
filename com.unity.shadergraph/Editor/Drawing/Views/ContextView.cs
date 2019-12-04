@@ -65,14 +65,9 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         void AddPort(PortData portData)
         {
-            var orientation = portData.orientation == PortData.Orientation.Horizontal ? Orientation.Horizontal : Orientation.Vertical;
-            var direction = portData.direction == PortData.Direction.Input ? Direction.Input : Direction.Output;
-            var capacity = direction == Direction.Input ? Port.Capacity.Single : Port.Capacity.Multi;
-            var container = direction == Direction.Input ? inputContainer : outputContainer;
-
-            var port = Port.Create<UnityEditor.Experimental.GraphView.Edge>(orientation, direction, capacity, portData.valueType.type);
-            port.userData = portData;
-            port.portName = portData.displayName;
+            var graphEditorView = GetFirstAncestorOfType<GraphEditorView>();
+            var port = ShaderPort.Create(portData, graphEditorView.edgeConnectorListener);
+            var container = portData.direction == PortData.Direction.Input ? inputContainer : outputContainer;
             container.Add(port);
         }
 

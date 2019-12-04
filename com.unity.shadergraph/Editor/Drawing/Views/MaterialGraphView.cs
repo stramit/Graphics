@@ -423,14 +423,19 @@ namespace UnityEditor.ShaderGraph.Drawing
         {
             graph.owner.RegisterCompleteObjectUndo($"Add {contextType.instance.name} Context");
             var position = contentViewContainer.WorldToLocal(mousePosition);
-            graph.contexts.Add(new ContextData
+            var contextData = new ContextData
             {
                 displayName = contextType.instance.name,
                 contextType = contextType,
                 inputPorts = contextType.instance.inputPorts,
                 outputPorts = contextType.instance.outputPorts,
                 position = position,
-            });
+            };
+            foreach(var input in contextData.inputPorts)
+                input.owner = contextData;
+            foreach(var output in contextData.outputPorts)
+                output.owner = contextData;
+            graph.contexts.Add(contextData);
         }
 
         public void AddStickyNote(Vector2 position)
@@ -706,13 +711,22 @@ namespace UnityEditor.ShaderGraph.Drawing
 
             graph.owner.RegisterCompleteObjectUndo(operationName);
             graph.RemoveElements(nodesToDelete.ToArray(),
-                selection.OfType<UIEdge>().Select(x => x.userData).OfType<Edge>().ToArray(),
+                selection.OfType<UIEdge>().Where(x => x.userData is Edge edge).Select(x => x.userData).OfType<Edge>().ToArray(),
                 selection.OfType<ShaderGroup>().Select(x => x.userData).ToArray(),
-                selection.OfType<StickyNote>().Select(x => x.userData).ToArray());
+                selection.OfType<StickyNote>().Select(x => x.userData).ToArray(),
+                selection.OfType<UIEdge>().Where(x => x.userData is EdgeData edge).Select(x => x.userData).OfType<EdgeData>().ToArray());
 
             foreach (var contextView in selection.OfType<ContextView>().Where(x => x.data.contextType.type != typeof(OutputContext)))
             {
                 graph.contexts.Remove(contextView.data);
+
+                // Handle hanging EdgeDatas
+                for(int i = 0; i < graph.edgeDatas.Count(); i++)
+                {
+                    EdgeData edgeData = graph.edgeDatas.ElementAt(i);
+                    if(edgeData.input.owner == contextView.data || edgeData.output.owner == contextView.data)
+                        graph.RemoveEdge(edgeData);
+                }
             }
 
             foreach (var selectable in selection)

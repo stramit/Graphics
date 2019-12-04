@@ -579,7 +579,132 @@ namespace UnityEditor.ShaderGraph
             ValidateGraph();
         }
 
-        public void RemoveElements(AbstractMaterialNode[] nodes, Edge[] edges, GroupData[] groups, StickyNoteData[] notes)
+#region EdgeData
+        // This section is mostly a duplication of all the edge handling logic.
+        // ContextData uses a new PortData definition instead of MaterialSlot.
+        // This requires a new Edge implemenetation (EdgeData).
+        // To segregate these changes and minimise refactoring we have duplicated
+        // all the connection logic here.
+
+        [SerializeField]
+        List<EdgeData> m_EdgeDatas = new List<EdgeData>();
+
+        public IEnumerable<EdgeData> edgeDatas
+        {
+            get { return m_EdgeDatas; }
+        }
+
+        [NonSerialized]
+        Dictionary<ContextData, List<EdgeData>> m_ContextEdgeDatas = new Dictionary<ContextData, List<EdgeData>>();
+
+        static List<EdgeData> s_TempEdgeDatas = new List<EdgeData>();
+
+        public EdgeData Connect(PortData output, PortData input)
+        {
+            var newEdge = ConnectNoValidate(output, input);
+            ValidateGraph();
+            return newEdge;
+        }
+
+        EdgeData ConnectNoValidate(PortData from, PortData to)
+        {
+            if (from.direction == to.direction)
+                throw new InvalidOperationException($"Cannot connect two PortDatas of opposite directions");
+
+            if (from.orientation != to.orientation)
+                throw new InvalidOperationException($"Cannot connect two PortDatas of different orientations");
+
+            var outputPort = from.direction == PortData.Direction.Output ? from : to;
+            var inputPort = from.direction == PortData.Direction.Input ? from : to;
+
+            s_TempEdgeDatas.Clear();
+            GetEdgeDatas(inputPort, s_TempEdgeDatas);
+
+            // remove any inputs that exits before adding
+            foreach (var edge in s_TempEdgeDatas)
+            {
+                RemoveEdgeDataNoValidate((EdgeData)edge);
+            }
+
+            var newEdgeData = new EdgeData(inputPort, outputPort);
+            m_EdgeDatas.Add(newEdgeData);
+
+            if(from.orientation == PortData.Orientation.Vertical)
+            {
+                AddEdgeDataToContextEdgeDatas(newEdgeData);
+            }
+            else
+            {
+                // Implement AddEdgeDataToNodeEdgeDatas here
+                throw new NotImplementedException("EdgeData type not supported for horizontal edges");
+            }
+
+            return newEdgeData;
+        }
+
+        public void RemoveEdge(EdgeData edgeData)
+        {
+            RemoveEdgeDataNoValidate((EdgeData)edgeData);
+            ValidateGraph();
+        }
+
+        void RemoveEdgeDataNoValidate(EdgeData edgeData)
+        {
+            edgeData = m_EdgeDatas.FirstOrDefault(x => x.Equals(edgeData));
+            if (edgeData == null)
+                throw new ArgumentException("Trying to remove an edge that does not exist.", "e");
+            m_EdgeDatas.Remove(edgeData as EdgeData);
+
+            List<EdgeData> inputNodeEdgeDatas;
+            if (edgeData.input.owner != null && m_ContextEdgeDatas.TryGetValue(edgeData.input.owner, out inputNodeEdgeDatas))
+                inputNodeEdgeDatas.Remove(edgeData);
+
+            List<EdgeData> outputNodeEdgeDatas;
+            if (edgeData.output.owner != null && m_ContextEdgeDatas.TryGetValue(edgeData.output.owner, out outputNodeEdgeDatas))
+                outputNodeEdgeDatas.Remove(edgeData);
+        }
+
+        public IEnumerable<EdgeData> GetEdgeDatas(PortData portData)
+        {
+            var edgeDatas = new List<EdgeData>();
+            GetEdgeDatas(portData, edgeDatas);
+            return edgeDatas;
+        }
+
+        public void GetEdgeDatas(PortData portData, List<EdgeData> edgeDatas)
+        {
+            var contextData = portData.owner;
+            if (contextData == null)
+                return;
+
+            List<EdgeData> candidateEdges;
+            if (!m_ContextEdgeDatas.TryGetValue(portData.owner, out candidateEdges))
+                return;
+
+            foreach (var edgeData in candidateEdges)
+            {
+                if ((portData.direction == PortData.Direction.Input ? edgeData.input : edgeData.output) == portData)
+                {
+                    edgeDatas.Add(edgeData);
+                }
+            }
+        }
+
+        void AddEdgeDataToContextEdgeDatas(EdgeData edgeData)
+        {
+            List<EdgeData> inputEdgeDatas;
+            if (!m_ContextEdgeDatas.TryGetValue(edgeData.input.owner, out inputEdgeDatas))
+                m_ContextEdgeDatas[edgeData.input.owner] = inputEdgeDatas = new List<EdgeData>();
+            inputEdgeDatas.Add(edgeData);
+
+            List<EdgeData> outputEdgeDatas;
+            if (!m_ContextEdgeDatas.TryGetValue(edgeData.output.owner, out outputEdgeDatas))
+                m_ContextEdgeDatas[edgeData.output.owner] = outputEdgeDatas = new List<EdgeData>();
+            outputEdgeDatas.Add(edgeData);
+        }
+#endregion
+
+        public void RemoveElements(AbstractMaterialNode[] nodes, Edge[] edges, GroupData[] groups, StickyNoteData[] notes, EdgeData[] edgeDatas = null)
         {
             foreach (var node in nodes)
             {
@@ -592,6 +717,12 @@ namespace UnityEditor.ShaderGraph
             foreach (var edge in edges.ToArray())
             {
                 RemoveEdgeNoValidate((Edge)edge);
+            }   
+
+            if(edgeDatas != null)
+            {
+                foreach (var edgeData in edgeDatas)
+                    RemoveEdgeDataNoValidate(edgeData);
             }
 
             foreach (var serializableNode in nodes)
@@ -1268,10 +1399,11 @@ namespace UnityEditor.ShaderGraph
             {
                 m_GroupItems[stickyNote.group ?? m_NullGroup].Add(stickyNote);
             }
-
+//
             // Now set owner through all Blocks and their Slots
             foreach (var context in contexts)
             {
+                m_ContextEdgeDatas[context] = new List<EdgeData>();
                 foreach(var block in context.blocks)
                 {
                     block.owner = this;
@@ -1285,6 +1417,11 @@ namespace UnityEditor.ShaderGraph
             foreach (var edge in m_Edges)
             {
                 AddEdgeToNodeEdges(edge);
+            }
+
+            foreach (var edgeData in m_EdgeDatas)
+            {
+                AddEdgeDataToContextEdgeDatas(edgeData);
             }
 
             ValidateGraph();

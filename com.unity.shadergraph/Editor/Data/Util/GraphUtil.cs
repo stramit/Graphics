@@ -121,6 +121,8 @@ namespace UnityEditor.ShaderGraph
             graph.contexts.Add(outputContext);            
             graph.contexts.Add(FragmentContext);
 
+            graph.Connect(FragmentContext.outputPorts[0], outputContext.inputPorts[0]);
+
             // Add Blocks
             outputContext.blocks.Add(new TargetBlock());
 

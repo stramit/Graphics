@@ -102,6 +102,11 @@ namespace UnityEditor.ShaderGraph.Drawing
             get => m_ColorManager;
         }
 
+        public EdgeConnectorListener edgeConnectorListener
+        {
+            get => m_EdgeConnectorListener;
+        }
+
         public GraphEditorView(EditorWindow editorWindow, JsonStore jsonStore, MessageManager messageManager)
         {
             changeDispatcher = new ChangeDispatcher(jsonStore);
@@ -120,6 +125,8 @@ namespace UnityEditor.ShaderGraph.Drawing
             var serializedSettings = EditorUserSettings.GetConfigValue(k_UserViewSettings);
             m_UserViewSettings = JsonUtility.FromJson<UserViewSettings>(serializedSettings) ?? new UserViewSettings();
             m_ColorManager = new ColorManager(m_UserViewSettings.colorProvider);
+            m_SearchWindowProvider = ScriptableObject.CreateInstance<SearchWindowProvider>();
+            m_EdgeConnectorListener = new EdgeConnectorListener(m_Graph, m_SearchWindowProvider);
 
             string serializedWindowLayout = EditorUserSettings.GetConfigValue(k_FloatingWindowsLayoutKey);
             if (!string.IsNullOrEmpty(serializedWindowLayout))
@@ -265,7 +272,6 @@ namespace UnityEditor.ShaderGraph.Drawing
             // See ContextView.AddElement for more information.
             m_GraphView.OnChange();
 
-            m_SearchWindowProvider = ScriptableObject.CreateInstance<SearchWindowProvider>();
             m_SearchWindowProvider.Initialize(editorWindow, m_Graph, m_GraphView);
             m_GraphView.nodeCreationRequest = (c) =>
                 {
@@ -273,8 +279,6 @@ namespace UnityEditor.ShaderGraph.Drawing
                     m_SearchWindowProvider.target = c.target;
                     SearchWindow.Open(new SearchWindowContext(c.screenMousePosition), m_SearchWindowProvider);
                 };
-
-            m_EdgeConnectorListener = new EdgeConnectorListener(m_Graph, m_SearchWindowProvider);
 
             foreach (var graphGroup in m_Graph.groups)
             {
@@ -291,6 +295,9 @@ namespace UnityEditor.ShaderGraph.Drawing
 
             foreach (var edge in m_Graph.edges)
                 AddEdge(edge);
+
+            foreach (var edgeData in m_Graph.edgeDatas)
+                AddEdge(edgeData);
         }
 
         Action<Group, string> m_GraphViewGroupTitleChanged;
@@ -369,6 +376,14 @@ namespace UnityEditor.ShaderGraph.Drawing
                         m_Graph.owner.RegisterCompleteObjectUndo("Connect Edge");
                         m_Graph.Connect(leftSlot, rightSlot);
                     }
+
+                    var input = edge.input.userData as PortData;
+                    var output = edge.output.userData as PortData;
+                    if (input != null && output != null)
+                    {
+                        m_Graph.owner.RegisterCompleteObjectUndo("Connect Edge");
+                        m_Graph.Connect(output, input);
+                    }
                 }
                 graphViewChange.edgesToCreate.Clear();
             }
@@ -423,9 +438,10 @@ namespace UnityEditor.ShaderGraph.Drawing
             {
                 m_Graph.owner.RegisterCompleteObjectUndo("Remove Elements");
                 m_Graph.RemoveElements(graphViewChange.elementsToRemove.OfType<IShaderNodeView>().Select(v => v.node).ToArray(),
-                    graphViewChange.elementsToRemove.OfType<EdgeView>().Select(e => (Edge)e.userData).ToArray(),
+                    graphViewChange.elementsToRemove.OfType<EdgeView>().Where(x => x.userData is Edge edge).Select(x => x.userData).OfType<Edge>().ToArray(),
                     graphViewChange.elementsToRemove.OfType<ShaderGroup>().Select(g => g.userData).ToArray(),
-                    graphViewChange.elementsToRemove.OfType<StickyNote>().Select(n => n.userData).ToArray());
+                    graphViewChange.elementsToRemove.OfType<StickyNote>().Select(n => n.userData).ToArray(),
+                    graphViewChange.elementsToRemove.OfType<EdgeView>().Where(x => x.userData is EdgeData edge).Select(x => x.userData).OfType<EdgeData>().ToArray());
                 foreach (var edge in graphViewChange.elementsToRemove.OfType<EdgeView>())
                 {
                     if (edge.input != null)
@@ -680,16 +696,20 @@ namespace UnityEditor.ShaderGraph.Drawing
                     foreach (var graphElement in graphElements)
                     {
                         if (graphElement is EdgeView edgeView &&
-                            !m_Graph.edges.Any(x => x.Equals(edgeView.userData)))
+                            !m_Graph.edges.Any(x => x.Equals(edgeView.userData)) &&
+                            !m_Graph.edgeDatas.Any(x => x.Equals(edgeView.userData)))
                         {
-                            var inputNodeView = (IShaderNodeView)edgeView.input.node;
+                            var inputNodeView = edgeView.input.node as IShaderNodeView;
                             if (inputNodeView?.node != null)
                             {
                                 nodesToUpdate.Add(inputNodeView);
                             }
 
-                            var outputNodeView = (MaterialNodeView)edgeView.output.node;
-                            NodeUtils.UpdateNodeActiveOnEdgeChange(outputNodeView?.node);
+                            var outputNodeView = edgeView.output.node as MaterialNodeView;
+                            if(outputNodeView?.node != null)
+                            {
+                                NodeUtils.UpdateNodeActiveOnEdgeChange(outputNodeView?.node);
+                            }
 
                             edgeView.output.Disconnect(edgeView);
                             edgeView.input.Disconnect(edgeView);
@@ -712,6 +732,14 @@ namespace UnityEditor.ShaderGraph.Drawing
                             // Get downstream node of the output node
                             var outputNodeView = (MaterialNodeView)edgeView.output.node;
                             NodeUtils.UpdateNodeActiveOnEdgeChange(outputNodeView?.node);
+                        }
+                    }
+
+                    foreach (var edgeData in m_Graph.edgeDatas)
+                    {
+                        if (!graphElements.Any(x => x is EdgeView ev && edgeData.Equals(ev.userData)))
+                        {
+                            var edgeView = AddEdge(edgeData);
                         }
                     }
 
@@ -985,6 +1013,44 @@ namespace UnityEditor.ShaderGraph.Drawing
                 sourceNodeView.UpdatePortInputTypes();
                 targetNodeView.UpdatePortInputTypes();
 
+                return edgeView;
+            }
+
+            return null;
+        }
+
+        EdgeView AddEdge(EdgeData edgeData)
+        {
+            var sourceContext = edgeData.output?.owner;
+            if (sourceContext == null)
+            {
+                Debug.LogWarning("Source Context is null");
+                return null;
+            }
+            
+            var targetContext = edgeData.input?.owner;
+            if (targetContext == null)
+            {
+                Debug.LogWarning("Target Context is null");
+                return null;
+            }
+
+            var sourceContextView = m_GraphView.contexts.ToList().OfType<ContextView>().FirstOrDefault(x => x.data == sourceContext);
+            var targetContextView = m_GraphView.contexts.ToList().OfType<ContextView>().FirstOrDefault(x => x.data == targetContext);
+            if (sourceContextView != null)
+            {
+                var sourceAnchor = sourceContextView.outputContainer.Children().OfType<Port>().First(x => (PortData)x.userData == edgeData.output);
+                var targetAnchor = targetContextView.inputContainer.Children().OfType<Port>().First(x => (PortData)x.userData == edgeData.input);
+
+                var edgeView = new EdgeView
+                {
+                    userData = edgeData,
+                    output = sourceAnchor,
+                    input = targetAnchor
+                };
+                edgeView.output.Connect(edgeView);
+                edgeView.input.Connect(edgeView);
+                m_GraphView.AddElement(edgeView);
                 return edgeView;
             }
 

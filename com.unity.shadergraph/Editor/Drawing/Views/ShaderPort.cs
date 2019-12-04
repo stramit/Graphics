@@ -8,7 +8,7 @@ namespace UnityEditor.ShaderGraph.Drawing
 {
     sealed class ShaderPort : Port
     {
-        ShaderPort(Orientation portOrientation, Direction portDirection, Capacity portCapacity, Type type)
+        public ShaderPort(Orientation portOrientation, Direction portDirection, Capacity portCapacity, Type type)
             : base(portOrientation, portDirection, portCapacity, type)
         {
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/ShaderPort"));
@@ -27,6 +27,22 @@ namespace UnityEditor.ShaderGraph.Drawing
             port.slot = slot;
             port.portName = slot.displayName;
             port.visualClass = slot.concreteValueType.ToClassName();
+            return port;
+        }
+
+        public static Port Create(PortData portData, IEdgeConnectorListener connectorListener)
+        {
+            var orientation = portData.orientation == PortData.Orientation.Horizontal ? Orientation.Horizontal : Orientation.Vertical;
+            var direction = portData.direction == PortData.Direction.Input ? Direction.Input : Direction.Output;
+            var capacity = direction == Direction.Input ? Port.Capacity.Single : Port.Capacity.Multi;
+
+            var port = new ShaderPort(orientation, direction, capacity, null)
+            {
+                m_EdgeConnector = new EdgeConnector<UIEdge>(connectorListener),
+            };
+            port.AddManipulator(port.m_EdgeConnector);
+            port.userData = portData;
+            port.portName = portData.displayName;
             return port;
         }
 

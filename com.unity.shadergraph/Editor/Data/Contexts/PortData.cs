@@ -23,6 +23,9 @@ namespace UnityEditor.ShaderGraph
         string m_DisplayName;
 
         [SerializeField]
+        JsonRef<ContextData> m_Owner;
+
+        [SerializeField]
         TypeRef<IValueType> m_ValueType;
 
         [SerializeField]
@@ -44,6 +47,12 @@ namespace UnityEditor.ShaderGraph
         }
 
         public string displayName => m_DisplayName;
+
+        public ContextData owner
+        {
+            get => m_Owner;
+            set => m_Owner = value;
+        }
 
         public TypeRef<IValueType> valueType => m_ValueType;
 
