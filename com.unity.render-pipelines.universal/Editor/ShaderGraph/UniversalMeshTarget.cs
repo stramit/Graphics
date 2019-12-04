@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using UnityEditor.ShaderGraph;
 using UnityEditor.ShaderGraph.Internal;
+using UnityEditor.Graphing;
 
 namespace UnityEditor.Rendering.Universal.ShaderGraph
 {
@@ -13,6 +15,13 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
         public string sharedTemplateDirectory => GenerationUtils.GetDefaultSharedTemplateDirectory();
 
         public Type[] requireBlocks => new Type[] { typeof(UniversalMeshOptionsBlock )};
+        public Type[] supportedBlocks => new Type[]
+        {
+            typeof(MetallicBlock),
+            typeof(SmoothnessBlock),
+            typeof(NormalTSBlock),
+            typeof(EmissionBlock),
+        };
 
         public void SetupTarget(ref TargetSetupContext context)
         {
@@ -27,6 +36,52 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
             {
                 context.SetupSubShader(UniversalSubShaders.Unlit);
             }
+        }
+
+        public List<Type> GetSupportedBlocks(List<BlockData> currentBlocks)
+        {
+            var supportedBlocks = ListPool<Type>.Get();
+
+            // Add always supported features
+            supportedBlocks.Add(typeof(UniversalMeshOptionsBlock));
+            supportedBlocks.Add(typeof(TransparencyBlock));
+            supportedBlocks.Add(typeof(AlphaClipBlock));
+            supportedBlocks.Add(typeof(RenderBackfacesBlock));
+            
+            // Add always supported data
+            supportedBlocks.Add(typeof(VertexPositionBlock));
+            supportedBlocks.Add(typeof(VertexNormalBlock));
+            supportedBlocks.Add(typeof(VertexTangentBlock));
+            supportedBlocks.Add(typeof(BaseColorBlock));
+
+            // Evaluate remaining supported blocks
+            var optionsBlock = currentBlocks.Where(x => x is UniversalMeshOptionsBlock).FirstOrDefault() as UniversalMeshOptionsBlock;    
+            if(optionsBlock != null && optionsBlock.materialType == UniversalMeshOptionsBlock.MaterialType.Lit)
+            {
+                if(optionsBlock.workflowMode == UniversalMeshOptionsBlock.WorkflowMode.Specular)
+                {
+                    supportedBlocks.Add(typeof(SpecularColorBlock));
+                }
+                else
+                {
+                    supportedBlocks.Add(typeof(MetallicBlock));
+                }
+                
+                supportedBlocks.Add(typeof(SmoothnessBlock));
+                supportedBlocks.Add(typeof(NormalTSBlock));
+                supportedBlocks.Add(typeof(EmissionBlock));
+                supportedBlocks.Add(typeof(AmbientOcclusionBlock));
+            }
+            if(currentBlocks.Any(x => x is TransparencyBlock transparencyBlock) || currentBlocks.Any(x => x is AlphaClipBlock alphaClipBlock))
+            {
+                supportedBlocks.Add(typeof(AlphaBlock));
+            }
+            if(currentBlocks.Any(x => x is AlphaClipBlock alphaClipBlock))
+            {
+                supportedBlocks.Add(typeof(ClipThresholdBlock));
+            }
+
+            return supportedBlocks;
         }
     }
 }

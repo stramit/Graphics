@@ -34,6 +34,7 @@ namespace UnityEditor.ShaderGraph
             {
                 m_MaterialType = value;
                 owner.AddRequiredBlocks(requireBlocks);
+                owner.UpdateSupportedBlocks();
                 Dirty(Graphing.ModificationScope.Graph);
             }
         }

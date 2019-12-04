@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace UnityEditor.ShaderGraph.Internal
 {
@@ -12,5 +13,6 @@ namespace UnityEditor.ShaderGraph.Internal
         Type[] requireBlocks { get; }
 
         void SetupTarget(ref TargetSetupContext context);
+        List<Type> GetSupportedBlocks(List<BlockData> currentBlocks);
     }
 }

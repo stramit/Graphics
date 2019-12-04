@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using UnityEditor.ShaderGraph;
 using UnityEditor.ShaderGraph.Internal;
+using UnityEditor.Graphing;
 
 namespace UnityEditor.Rendering.Universal.ShaderGraph
 {
@@ -27,6 +29,29 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
             {
                 context.SetupSubShader(UniversalSubShaders.SpriteUnlit);
             }
+        }
+
+        public List<Type> GetSupportedBlocks(List<BlockData> currentBlocks)
+        {
+            var supportedBlocks = ListPool<Type>.Get();
+
+            // Add always supported features
+            supportedBlocks.Add(typeof(UniversalSpriteOptionsBlock));
+            
+            // Add always supported data
+            supportedBlocks.Add(typeof(VertexPositionBlock));
+            supportedBlocks.Add(typeof(VertexNormalBlock));
+            supportedBlocks.Add(typeof(VertexTangentBlock));
+            supportedBlocks.Add(typeof(BaseColorBlock));
+
+            // Evaluate remaining supported blocks
+            if(currentBlocks.Any(x => x is UniversalSpriteOptionsBlock optionsBlock && optionsBlock.materialType == UniversalSpriteOptionsBlock.MaterialType.Lit))
+            {
+                supportedBlocks.Add(typeof(SpriteMaskBlock));
+                supportedBlocks.Add(typeof(NormalTSBlock));
+            }
+
+            return supportedBlocks;
         }
     }
 }

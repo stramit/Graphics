@@ -43,6 +43,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             // TODO: This is bad
             // Use "owner" concept to access up to GraphData?
             var graphEditorView = GetFirstAncestorOfType<GraphEditorView>();
+            graphEditorView.graphView.graph.UpdateSupportedBlocks();
             graphEditorView.graphView.graph.targetBlock.Dirty(Graphing.ModificationScope.Graph);
         }
 

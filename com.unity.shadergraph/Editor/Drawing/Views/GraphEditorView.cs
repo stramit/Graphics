@@ -682,11 +682,14 @@ namespace UnityEditor.ShaderGraph.Drawing
                         if (graphElement is EdgeView edgeView &&
                             !m_Graph.edges.Any(x => x.Equals(edgeView.userData)))
                         {
-                            var nodeView = (IShaderNodeView)edgeView.input.node;
-                            if (nodeView?.node != null)
+                            var inputNodeView = (IShaderNodeView)edgeView.input.node;
+                            if (inputNodeView?.node != null)
                             {
-                                nodesToUpdate.Add(nodeView);
+                                nodesToUpdate.Add(inputNodeView);
                             }
+
+                            var outputNodeView = (MaterialNodeView)edgeView.output.node;
+                            NodeUtils.UpdateNodeActiveOnEdgeChange(outputNodeView?.node);
 
                             edgeView.output.Disconnect(edgeView);
                             edgeView.input.Disconnect(edgeView);
@@ -705,6 +708,10 @@ namespace UnityEditor.ShaderGraph.Drawing
                             var edgeView = AddEdge(edge);
                             if (edgeView != null)
                                 nodesToUpdate.Add((IShaderNodeView)edgeView.input.node);
+
+                            // Get downstream node of the output node
+                            var outputNodeView = (MaterialNodeView)edgeView.output.node;
+                            NodeUtils.UpdateNodeActiveOnEdgeChange(outputNodeView?.node);
                         }
                     }
 
@@ -765,7 +772,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             UpdateBadges();
 
             RegisterGraphViewCallbacks();
-        }
+        }        
 
         void UpdateBadges()
         {

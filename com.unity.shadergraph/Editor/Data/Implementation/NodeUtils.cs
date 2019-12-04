@@ -120,6 +120,57 @@ namespace UnityEditor.Graphing
                 nodeList.Add(node);
         }
 
+        public static void GetDownsteamNodesForNode(List<AbstractMaterialNode> nodeList, AbstractMaterialNode node)
+        {
+            // no where to start
+            if (node == null)
+                return;            
+
+            bool hasDownstream = false;
+            var ids = node.GetOutputSlots<MaterialSlot>().Select(x => x.id);
+            foreach (var slot in ids)
+            {
+                foreach (var edge in node.owner.GetEdges(node.FindSlot(slot)))
+                {
+                    var inputNode = ((Edge)edge).inputSlot.owner;
+                    if (inputNode != null)
+                    {
+                        hasDownstream = true;
+                        GetDownsteamNodesForNode(nodeList, inputNode);
+                    }
+                }
+            }
+
+            if(!hasDownstream)
+                nodeList.Add(node);
+        }
+
+        public static void UpdateNodeActiveOnEdgeChange(AbstractMaterialNode node)
+        {
+            if(node == null)
+                return;
+
+            // Get downstream node of the output node
+            var nodes = ListPool<AbstractMaterialNode>.Get();
+            NodeUtils.GetDownsteamNodesForNode(nodes, node);
+            
+            // If the only downstream node is this node
+            // This is the end of the chain and should always be active
+            if(nodes.Count == 1 && nodes[0] == node)
+            {
+                node.isActive = true;
+            }
+            else
+            {
+                // If any downstream nodes are active
+                // then this node is also active
+                if(nodes.Any(x => x.isActive))
+                    node.isActive = true;
+                else
+                    node.isActive = false;
+            }
+        }
+
         public static void CollectNodeSet(HashSet<AbstractMaterialNode> nodeSet, MaterialSlot slot)
         {
             var node = slot.owner;

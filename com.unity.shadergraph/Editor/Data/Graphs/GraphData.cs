@@ -305,6 +305,20 @@ namespace UnityEditor.ShaderGraph
                 AddRequiredBlocks(implementation.requireBlocks);
             }
         }
+
+        public void UpdateSupportedBlocks()
+        {
+            var supportedBlockTypes = ListPool<Type>.Get();
+            supportedBlockTypes.Add(typeof(TargetBlock));
+            foreach(var implementation in activeTargetImplementations)
+            {
+                supportedBlockTypes.AddRange(implementation.GetSupportedBlocks(allBlocks));
+            }
+            foreach(var block in allBlocks)
+            {
+                block.isActive = supportedBlockTypes.Contains(block.GetType());
+            }
+        }
         #endregion
 
         internal delegate void SaveGraphDelegate(Shader shader);

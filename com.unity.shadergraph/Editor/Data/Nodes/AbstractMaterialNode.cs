@@ -37,6 +37,9 @@ namespace UnityEditor.ShaderGraph
         [NonSerialized]
         bool m_HasError;
 
+        [NonSerialized]
+        bool m_IsActive = true;
+
         [SerializeField]
         JsonList<MaterialSlot> m_Slots = new JsonList<MaterialSlot>();
 
@@ -152,6 +155,26 @@ namespace UnityEditor.ShaderGraph
         {
             get { return m_HasError; }
             protected set { m_HasError = value; }
+        }
+
+        public virtual bool isActive
+        {
+            get { return m_IsActive; }
+            set 
+            {
+                if(isActive == value)
+                    return; 
+                m_IsActive = value;
+                Dirty(ModificationScope.Node);
+
+                // Get all downsteam nodes and update their active state
+                var nodes = ListPool<AbstractMaterialNode>.Get();
+                NodeUtils.DepthFirstCollectNodesFromNode(nodes, this, NodeUtils.IncludeSelf.Exclude);
+                foreach(var upstreamNode in nodes)
+                {
+                    NodeUtils.UpdateNodeActiveOnEdgeChange(upstreamNode);
+                }
+            }
         }
 
         string m_DefaultVariableName;

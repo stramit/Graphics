@@ -61,6 +61,8 @@ namespace UnityEditor.ShaderGraph.Drawing
             viewDataKey = node.jsonId;
             UpdateTitle();
 
+            Add(new VisualElement() { name = "disabledOverlay", pickingMode = PickingMode.Ignore });
+
             // Add controls container
             var controlsContainer = new VisualElement { name = "controls" };
             {
@@ -233,6 +235,24 @@ namespace UnityEditor.ShaderGraph.Drawing
             badge.AttachTo(m_TitleContainer, SpriteAlignment.RightCenter);
         }
 
+        public void SetActive(bool state)
+        {
+            var disabledString = "disabled";
+            var inputViews = m_PortInputContainer.Children().OfType<PortInputView>();
+
+            if (!state)
+            {
+                AddToClassList(disabledString);
+                foreach(var inputView in inputViews)
+                    inputView.AddToClassList(disabledString);
+            }
+            else
+            {
+                RemoveFromClassList(disabledString);
+                foreach(var inputView in inputViews)
+                    inputView.RemoveFromClassList(disabledString);
+            }
+        }
 
         public void ClearMessage()
         {
@@ -523,6 +543,8 @@ namespace UnityEditor.ShaderGraph.Drawing
         public void OnModified(ModificationScope scope)
         {
             UpdateTitle();
+            SetActive(node.isActive);
+
             if (node.hasPreview)
                 UpdatePreviewExpandedState(node.previewExpanded);
 
@@ -636,6 +658,11 @@ namespace UnityEditor.ShaderGraph.Drawing
                     portInputView = new PortInputView(port.slot) { style = { position = Position.Absolute } };
                     m_PortInputContainer.Add(portInputView);
                     SetPortInputPosition(port, portInputView);
+
+                    if(node.isActive)
+                        portInputView.RemoveFromClassList("disabled");
+                    else
+                        portInputView.AddToClassList("disabled");
                 }
 
                 port.RegisterCallback<GeometryChangedEvent>(UpdatePortInput);
