@@ -410,7 +410,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             foreach (var renderData in m_RenderList3D)
                 RenderPreview(renderData, m_SceneResources.sphere, Matrix4x4.identity);
 
-            var renderMasterPreview = masterRenderData != null && m_NodesToDraw.Select(x => x as BlockData).Any();
+            var renderMasterPreview = masterRenderData != null && m_NodesToDraw.Contains(masterRenderData.shaderData.node);
             if (renderMasterPreview)
             {
                 CollectShaderProperties(m_Graph.allBlocks, masterRenderData);
@@ -497,19 +497,15 @@ namespace UnityEditor.ShaderGraph.Drawing
             var wasAsyncAllowed = ShaderUtil.allowAsyncCompilation;
             ShaderUtil.allowAsyncCompilation = true;
 
-            if(m_NodesToUpdate.Select(x => x as BlockData).Any())
-            {
-                UpdateMasterNodeShader();
-            }
-
             foreach (var node in m_NodesToUpdate)
             {
-                if (node is TargetBlock && node == masterRenderData.shaderData.node)
+                if (node is TargetBlock && node == masterRenderData.shaderData.node && m_Graph.activeTarget.GetType() != typeof(VFXTarget))
                 {
+                    UpdateMasterNodeShader();
                     continue;
                 }
 
-                if (!node.hasPreview && !(node is SubGraphOutputNode))
+                if (!node.hasPreview && !(node is SubGraphOutputNode || m_Graph.activeTarget.GetType() == typeof(VFXTarget)))
                     continue;
 
                 if (!m_RenderDatas.TryGetValue(node, out var renderData))
