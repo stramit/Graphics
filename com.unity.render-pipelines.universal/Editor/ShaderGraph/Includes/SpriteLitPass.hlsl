@@ -35,8 +35,10 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
     UNITY_SETUP_INSTANCE_ID(unpacked);
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(unpacked);
 
+#if defined(FEATURES_GRAPH_PIXEL)
     SurfaceDescriptionInputs surfaceDescriptionInputs = BuildSurfaceDescriptionInputs(unpacked);
     SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
+#endif
 
     half3 color = half3(0.5, 0.5, 0.5);
     half alpha = 1;

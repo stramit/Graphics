@@ -16,8 +16,10 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
     Varyings unpacked = UnpackVaryings(packedInput);
     UNITY_SETUP_INSTANCE_ID(unpacked);
 
+#if defined(FEATURES_GRAPH_PIXEL)
     SurfaceDescriptionInputs surfaceDescriptionInputs = BuildSurfaceDescriptionInputs(unpacked);
     SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
+#endif
 
     half3 color = half3(0.5, 0.5, 0.5);
     half3 emission = half3(0, 0, 0);

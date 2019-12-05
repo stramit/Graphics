@@ -524,46 +524,49 @@ namespace UnityEditor.ShaderGraph
             // --------------------------------------------------
             // Graph Pixel
 
-            // Setup
-            string pixelGraphInputName = "SurfaceDescriptionInputs";
-            string pixelGraphOutputName = "SurfaceDescription";
-            string pixelGraphFunctionName = "SurfaceDescriptionFunction";
-            var pixelGraphOutputBuilder = new ShaderStringBuilder();
-            var pixelGraphFunctionBuilder = new ShaderStringBuilder();
+            var pixelBuilder = new ShaderStringBuilder();
 
-            // Build pixel graph outputs
-            // Add struct fields to active fields
-            GenerationUtils.GenerateSurfaceDescriptionStruct(pixelGraphOutputBuilder, pixelSlots, pixelGraphOutputName, activeFields.baseInstance);
-
-            // Build pixel graph functions from ShaderPass pixel port mask
-            GenerationUtils.GenerateSurfaceDescriptionFunction(
-                pixelNodes,
-                pixelNodePermutations,
-                m_OutputNode,
-                m_GraphData,
-                pixelGraphFunctionBuilder,
-                functionRegistry,
-                propertyCollector,
-                keywordCollector,
-                m_Mode,
-                pixelGraphFunctionName,
-                pixelGraphOutputName,
-                null,
-                pixelSlots,
-                pixelGraphInputName);
-
-            using (var pixelBuilder = new ShaderStringBuilder())
+            // If vertex modification enabled
+            if (activeFields.baseInstance.Contains(Fields.GraphPixel) && pixelSlots != null)
             {
+                // Setup
+                string pixelGraphInputName = "SurfaceDescriptionInputs";
+                string pixelGraphOutputName = "SurfaceDescription";
+                string pixelGraphFunctionName = "SurfaceDescriptionFunction";
+                var pixelGraphOutputBuilder = new ShaderStringBuilder();
+                var pixelGraphFunctionBuilder = new ShaderStringBuilder();
+
+                // Build pixel graph outputs
+                // Add struct fields to active fields
+                GenerationUtils.GenerateSurfaceDescriptionStruct(pixelGraphOutputBuilder, pixelSlots, pixelGraphOutputName, activeFields.baseInstance);
+
+                // Build pixel graph functions from ShaderPass pixel port mask
+                GenerationUtils.GenerateSurfaceDescriptionFunction(
+                    pixelNodes,
+                    pixelNodePermutations,
+                    m_OutputNode,
+                    m_GraphData,
+                    pixelGraphFunctionBuilder,
+                    functionRegistry,
+                    propertyCollector,
+                    keywordCollector,
+                    m_Mode,
+                    pixelGraphFunctionName,
+                    pixelGraphOutputName,
+                    null,
+                    pixelSlots,
+                    pixelGraphInputName);
+
                 // Generate final shader strings
                 pixelBuilder.AppendLines(pixelGraphOutputBuilder.ToString());
                 pixelBuilder.AppendNewLine();
                 pixelBuilder.AppendLines(pixelGraphFunctionBuilder.ToString());
-
-                // Add to splice commands
-                if(pixelBuilder.length == 0)
-                    pixelBuilder.AppendLine("// GraphPixel: <None>");
-                spliceCommands.Add("GraphPixel", pixelBuilder.ToCodeBlock());
             }
+
+            // Add to splice commands
+            if(pixelBuilder.length == 0)
+                pixelBuilder.AppendLine("// GraphPixel: <None>");
+            spliceCommands.Add("GraphPixel", pixelBuilder.ToCodeBlock());
 
             // --------------------------------------------------
             // Graph Functions

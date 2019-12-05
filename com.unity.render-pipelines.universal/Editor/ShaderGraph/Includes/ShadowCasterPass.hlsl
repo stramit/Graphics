@@ -16,8 +16,10 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
     Varyings unpacked = UnpackVaryings(packedInput);
     UNITY_SETUP_INSTANCE_ID(unpacked);
 
+#if defined(FEATURES_GRAPH_PIXEL)
     SurfaceDescriptionInputs surfaceDescriptionInputs = BuildSurfaceDescriptionInputs(unpacked);
     SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
+#endif
 
     half alpha = 1;
     half clipThreshold = 0.5;

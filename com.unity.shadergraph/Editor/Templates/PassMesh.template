@@ -25,6 +25,8 @@ Pass
     $splice(GraphKeywords)
     
     // Defines
+    $features.graphVertex:              #define FEATURES_GRAPH_VERTEX
+    $features.graphPixel:               #define FEATURES_GRAPH_PIXEL
     $SurfaceType.Transparent:           #define _SURFACE_TYPE_TRANSPARENT 1
     $AlphaClip:                         #define _AlphaClip 1
     $Normal:                            #define _NORMALMAP 1
@@ -51,7 +53,6 @@ Pass
     $Varyings.screenPosition:           #define VARYINGS_NEED_SCREENPOSITION
     $Varyings.fogFactorAndVertexLight:  #define VARYINGS_NEED_FOG_AND_VERTEX_LIGHT
     $Varyings.cullFace:                 #define VARYINGS_NEED_CULLFACE
-    $features.graphVertex:              #define FEATURES_GRAPH_VERTEX
     $VertexDescription.Position:        #define OUTPUT_VERTEXDESCRIPTION_POSITION
     $VertexDescription.Normal:          #define OUTPUT_VERTEXDESCRIPTION_NORMAL
     $VertexDescription.Tangent:         #define OUTPUT_VERTEXDESCRIPTION_TANGENT

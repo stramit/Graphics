@@ -282,7 +282,8 @@ namespace UnityEditor.ShaderGraph
                         blockData.owner = this;
 
                         // Find context
-                        var context = contexts.Where(x => x.contextType.type == blockData.contextType).FirstOrDefault();
+                        var foundContexts = NodeUtils.DepthFirstCollectContextsFromContext(outputContext, this);
+                        var context = foundContexts.Where(x => x.contextType.type == blockData.contextType).FirstOrDefault();
                         if(context == null)
                             continue;
 
@@ -1399,7 +1400,7 @@ namespace UnityEditor.ShaderGraph
             {
                 m_GroupItems[stickyNote.group ?? m_NullGroup].Add(stickyNote);
             }
-//
+            
             // Now set owner through all Blocks and their Slots
             foreach (var context in contexts)
             {
