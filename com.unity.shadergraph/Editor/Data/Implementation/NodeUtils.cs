@@ -184,6 +184,39 @@ namespace UnityEditor.Graphing
             }
         }
 
+        public static List<ContextData> DepthFirstCollectContextsFromContext(ContextData contextData, GraphData graphData,
+            IncludeSelf includeSelf = IncludeSelf.Include)
+        {
+            var contextList = new List<ContextData>();
+            DepthFirstCollectContextsFromContext(contextList, contextData, graphData, includeSelf);
+            return contextList;
+        }
+
+        static void DepthFirstCollectContextsFromContext(List<ContextData> contextList, ContextData contextData,
+            GraphData graphData, IncludeSelf includeSelf = IncludeSelf.Include)
+        {
+            // nowhere to start
+            if (contextData == null)
+                return;
+
+            // already added this node
+            if (contextList.Contains(contextData))
+                return;
+
+            foreach (var port in contextData.inputPorts)
+            {
+                foreach (var edgeData in graphData.GetEdgeDatas(port))
+                {
+                    var outputContext = edgeData.output.owner;
+                    if (outputContext != null)
+                        DepthFirstCollectContextsFromContext(contextList, outputContext, graphData);
+                }
+            }
+
+            if (includeSelf == IncludeSelf.Include)
+                contextList.Add(contextData);
+        }
+
         public static void CollectNodeSet(HashSet<AbstractMaterialNode> nodeSet, AbstractMaterialNode node)
         {
             if (!nodeSet.Add(node))

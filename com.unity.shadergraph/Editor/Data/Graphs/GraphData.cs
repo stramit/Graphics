@@ -238,9 +238,9 @@ namespace UnityEditor.ShaderGraph
         #region Contexts & Blocks
         // Temporary Context access
         // Remove this when contexts are connected and can be properly evaluated
-        public ContextData vertexContext => contexts.Where(x => x.contextType.type == typeof(VertexContext)).FirstOrDefault();
-        public ContextData fragmentContext => contexts.Where(x => x.contextType.type == typeof(FragmentContext)).FirstOrDefault();
-        public ContextData outputContext => contexts.Where(x => x.contextType.type == typeof(OutputContext)).FirstOrDefault();
+        public ContextData vertexContext => NodeUtils.DepthFirstCollectContextsFromContext(outputContext, this).FirstOrDefault(x => x.contextType.type == typeof(VertexContext));
+        public ContextData fragmentContext => NodeUtils.DepthFirstCollectContextsFromContext(outputContext, this).FirstOrDefault(x => x.contextType.type == typeof(FragmentContext));
+        public ContextData outputContext => contexts.FirstOrDefault(x => x.contextType.type == typeof(OutputContext));
         public BlockData targetBlock => outputContext?.blocks.Where(x => x.GetType() == typeof(TargetBlock)).FirstOrDefault();
         public SubGraphOutputNode subGraphOutput => GetNodes<SubGraphOutputNode>().FirstOrDefault();
 
