@@ -111,17 +111,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                             continue;
                     }
 
-                    var contextData = new ContextData
-                    {
-                        displayName = typeRef.instance.name,
-                        contextType = typeRef,
-                        inputPorts = typeRef.instance.inputPorts,
-                        outputPorts = typeRef.instance.outputPorts,
-                    };
-                    foreach(var input in contextData.inputPorts)
-                        input.owner = contextData;
-                    foreach(var output in contextData.outputPorts)
-                        output.owner = contextData;
+                    var contextData = ContextData.Create(typeRef, Vector2.zero);
                     AddEntries(contextData, new string[] {typeRef.instance.name}, entries);
                 }
 

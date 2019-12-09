@@ -32,6 +32,11 @@ namespace UnityEditor.ShaderGraph
         public static ContextData Create<T>(Vector2 position) where T : IContext
         {
             var contextType = new TypeRef<IContext>(typeof(T));
+            return ContextData.Create(contextType, position);
+        }
+
+        public static ContextData Create(TypeRef<IContext> contextType, Vector2 position)
+        {
             var contextData = new ContextData
             {
                 displayName = contextType.instance.name,

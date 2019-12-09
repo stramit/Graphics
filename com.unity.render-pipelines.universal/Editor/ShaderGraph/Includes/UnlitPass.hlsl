@@ -20,23 +20,23 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
     half alpha = 1;
     half clipThreshold = 0.5;
 
-#if defined(FEATURES_GRAPH_PIXEL)
-    SurfaceDescriptionInputs surfaceDescriptionInputs = BuildSurfaceDescriptionInputs(unpacked);
-    SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
+    #if defined(FEATURES_GRAPH_PIXEL)
+        SurfaceDescriptionInputs surfaceDescriptionInputs = BuildSurfaceDescriptionInputs(unpacked);
+        SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
 
-    // Data is overriden if the corresponding data block is present.
-    // Could use "$Tag.Field: value = surfaceDescription.Field" pattern
-    // to avoid preprocessors if this was a template file.
-    #ifdef OUTPUT_SURFACEDESCRIPTION_COLOR
-        color = surfaceDescription.Color;
+        // Data is overriden if the corresponding data block is present.
+        // Could use "$Tag.Field: value = surfaceDescription.Field" pattern
+        // to avoid preprocessors if this was a template file.
+        #ifdef OUTPUT_SURFACEDESCRIPTION_COLOR
+            color = surfaceDescription.Color;
+        #endif
+        #ifdef OUTPUT_SURFACEDESCRIPTION_ALPHA
+            alpha = surfaceDescription.Alpha;
+        #endif
+        #ifdef OUTPUT_SURFACEDESCRIPTION_ALPHACLIPTHRESHOLD
+            clipThreshold = surfaceDescription.AlphaClipThreshold;
+        #endif
     #endif
-    #ifdef OUTPUT_SURFACEDESCRIPTION_ALPHA
-        alpha = surfaceDescription.Alpha;
-    #endif
-    #ifdef OUTPUT_SURFACEDESCRIPTION_ALPHACLIPTHRESHOLD
-        clipThreshold = surfaceDescription.AlphaClipThreshold;
-    #endif
-#endif
 
 #if _AlphaClip
     clip(alpha - clipThreshold);

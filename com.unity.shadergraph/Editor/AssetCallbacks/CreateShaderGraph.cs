@@ -1,4 +1,3 @@
-using System;
 using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph
@@ -6,13 +5,13 @@ namespace UnityEditor.ShaderGraph
     static class CreateShaderGraph
     {
         [MenuItem("Assets/Create/Shader/Mesh Shader Graph", false, 208)]
-        public static void CreateLitGraph()
+        public static void CreateMeshGraph()
         {
             GraphUtil.CreateNewGraph(typeof(MeshTarget));
         }
 
         [MenuItem("Assets/Create/Shader/Sprite Shader Graph", false, 208)]
-        public static void CreateSpriteLitGraph()
+        public static void CreateSpriteGraph()
         {
             GraphUtil.CreateNewGraph(typeof(SpriteTarget));
         }

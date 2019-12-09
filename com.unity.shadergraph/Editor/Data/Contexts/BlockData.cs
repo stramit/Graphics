@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEditor.ShaderGraph.Internal;
-using UnityEditor.Graphing;
 
 namespace UnityEditor.ShaderGraph
 {
@@ -16,11 +15,5 @@ namespace UnityEditor.ShaderGraph
         public abstract Type[] requireBlocks { get; }
 
         public abstract ConditionalField[] GetConditionalFields(PassDescriptor pass);
-
-        protected override void OnSlotsChanged()
-        {
-            owner?.contextManager.DirtyOutput();
-            owner?.ClearErrorsForNode(this);
-        }
     }
 }

@@ -25,20 +25,20 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
     half3 color = half3(0.5, 0.5, 0.5);
     half alpha = 1;
 
-#if defined(FEATURES_GRAPH_PIXEL)
-    SurfaceDescriptionInputs surfaceDescriptionInputs = BuildSurfaceDescriptionInputs(unpacked);
-    SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
-    
-    // Data is overriden if the corresponding data block is present.
-    // Could use "$Tag.Field: value = surfaceDescription.Field" pattern
-    // to avoid preprocessors if this was a template file.
-    #ifdef OUTPUT_SURFACEDESCRIPTION_COLOR
-        color = surfaceDescription.Color;
+    #if defined(FEATURES_GRAPH_PIXEL)
+        SurfaceDescriptionInputs surfaceDescriptionInputs = BuildSurfaceDescriptionInputs(unpacked);
+        SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
+        
+        // Data is overriden if the corresponding data block is present.
+        // Could use "$Tag.Field: value = surfaceDescription.Field" pattern
+        // to avoid preprocessors if this was a template file.
+        #ifdef OUTPUT_SURFACEDESCRIPTION_COLOR
+            color = surfaceDescription.Color;
+        #endif
+        #ifdef OUTPUT_SURFACEDESCRIPTION_ALPHA
+            alpha = surfaceDescription.Alpha;
+        #endif
     #endif
-    #ifdef OUTPUT_SURFACEDESCRIPTION_ALPHA
-        alpha = surfaceDescription.Alpha;
-    #endif
-#endif
 
 #if ETC1_EXTERNAL_ALPHA
     float4 alphaTex = SAMPLE_TEXTURE2D(_AlphaTex, sampler_AlphaTex, unpacked.texCoord0.xy);

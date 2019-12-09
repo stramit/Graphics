@@ -260,6 +260,7 @@ namespace UnityEditor.ShaderGraph.Drawing
 
                 var nodes = new HashSet<AbstractMaterialNode>(m_Graph.GetNodes<AbstractMaterialNode>());
                 nodes.Add(m_Graph.contextManager.targetBlock);
+                
                 var removedNodes = new List<AbstractMaterialNode>();
                 foreach (var renderData in m_RenderDatas)
                 {

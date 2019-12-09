@@ -85,7 +85,7 @@ namespace UnityEditor.ShaderGraph.Drawing
         public PreviewManager previewManager
         {
             get { return m_PreviewManager; }
-            set { m_PreviewManager = value; }
+            private set { m_PreviewManager = value; }
         }
 
         public string assetName

@@ -115,21 +115,22 @@ namespace UnityEditor.ShaderGraph
             var graph = new GraphData();
             jsonStore.root = graph;
 
-            // Create Contexts
+            // Create Contexts then connect
             var outputContext = ContextData.Create<OutputContext>(Vector2.zero);
             var FragmentContext = ContextData.Create<FragmentContext>(new Vector2(0, -300));
             graph.contexts.Add(outputContext);            
             graph.contexts.Add(FragmentContext);
-
             graph.Connect(FragmentContext.outputPorts[0], outputContext.inputPorts[0]);
 
             // Add Blocks
             outputContext.blocks.Add(new TargetBlock());
 
             // Update Targets
+            // Need to call update targets before so it can determine what is valid
             graph.UpdateTargets();
             if(targetType != null && typeof(ITarget).IsAssignableFrom(targetType))
             {
+                // Set then update again to update implementations
                 graph.SetTarget(targetType);
                 graph.UpdateTargets();
                 graph.contextManager.AddRequiredBlocksForImplementations();
