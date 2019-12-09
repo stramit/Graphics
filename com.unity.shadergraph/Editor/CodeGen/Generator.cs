@@ -38,12 +38,13 @@ namespace UnityEditor.ShaderGraph
             m_ConfiguredTextures = new List<PropertyCollector.TextureInfo>();
             m_AssetDependencyPaths = new List<string>();
 
+            m_GraphData.contextManager.Init(outputNode is TargetBlock);
             BuildShader();
         }
 
         void GetTargetImplementations()
         {
-            if(m_OutputNode is TargetBlock targetBlock)
+            if(m_GraphData.contextManager.isActive)
             {
                 m_TargetImplementations = m_GraphData.activeTargetImplementations.ToArray();
             }
@@ -61,17 +62,12 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public static ActiveFields GatherActiveFieldsFromStack(AbstractMaterialNode outputNode, List<BlockData> blocks, PassDescriptor pass)
+        ActiveFields GatherActiveFieldsFromNode(ITargetImplementation implementation, PassDescriptor pass)
         {
             var activeFields = new ActiveFields();
-            if(outputNode is TargetBlock targetBlock)
+            if(m_GraphData.contextManager.isActive)
             {
-                foreach(var block in blocks)
-                {
-                    var fields = GenerationUtils.GetActiveFieldsFromConditionals(block.GetConditionalFields(pass));
-                    foreach(FieldDescriptor field in fields)
-                        activeFields.baseInstance.Add(field);
-                }
+                m_GraphData.contextManager.GetActiveFields(activeFields, implementation, pass);
             }
             // Preview shader
             else
@@ -84,8 +80,16 @@ namespace UnityEditor.ShaderGraph
         void BuildShader()
         {
             var activeNodeList = ListPool<AbstractMaterialNode>.Get();
-            foreach(BlockData block in m_GraphData.allBlocks)
-                NodeUtils.DepthFirstCollectNodesFromNode(activeNodeList, block);
+
+            if(m_GraphData.contextManager.isActive)
+            {
+                m_GraphData.contextManager.DepthFirstCollectNodesFromAllBlocks(activeNodeList);
+            }
+            // Preview shader
+            else
+            {
+                NodeUtils.DepthFirstCollectNodesFromNode(activeNodeList, m_OutputNode);
+            }
 
             var shaderProperties = new PropertyCollector();
             var shaderKeywords = new KeywordCollector();
@@ -102,8 +106,6 @@ namespace UnityEditor.ShaderGraph
 
             GetTargetImplementations();
 
-            foreach(BlockData block in m_GraphData.allBlocks)
-                block.CollectShaderProperties(shaderProperties, m_Mode);
             foreach (var activeNode in activeNodeList.OfType<AbstractMaterialNode>())
                 activeNode.CollectShaderProperties(shaderProperties, m_Mode);
 
@@ -114,11 +116,16 @@ namespace UnityEditor.ShaderGraph
 
                 for(int i = 0; i < m_TargetImplementations.Length; i++)
                 {
+                    if(m_GraphData.contextManager.isActive)
+                    {
+                        m_GraphData.contextManager.FilterBlocksForImplementation(m_TargetImplementations[i]);
+                    }
+
                     TargetSetupContext context = new TargetSetupContext();
-                    context.SetBlockDatas(m_GraphData.allBlocks.ToArray());
+                    context.SetBlockDatas(m_GraphData.contextManager.validBlocks.ToArray());
                     m_TargetImplementations[i].SetupTarget(ref context);
                     GetAssetDependencyPaths(context);
-                    GenerateSubShader(i, context.descriptor);
+                    GenerateSubShader(m_TargetImplementations[i], context.descriptor);
                 }
 
                 m_Builder.AppendLine(@"FallBack ""Hidden/Shader Graph/FallbackError""");
@@ -127,7 +134,7 @@ namespace UnityEditor.ShaderGraph
             m_ConfiguredTextures = shaderProperties.GetConfiguredTexutres();
         }
 
-        void GenerateSubShader(int targetIndex, SubShaderDescriptor descriptor)
+        void GenerateSubShader(ITargetImplementation implementation, SubShaderDescriptor descriptor)
         {
             if(descriptor.passes == null)
                 return;
@@ -137,12 +144,12 @@ namespace UnityEditor.ShaderGraph
             {
                 // Need to generate active fields up front to generate sub shader tags
                 // Consider splitting active fields into sub shader/pass based
-                var activeFields = GatherActiveFieldsFromStack(m_OutputNode, m_GraphData.allBlocks, new PassDescriptor());
+                var activeFields = GatherActiveFieldsFromNode(implementation, new PassDescriptor());
                 GenerationUtils.GenerateSubShaderTags(activeFields, descriptor, m_Builder);
 
                 foreach(PassCollection.Item pass in descriptor.passes)
                 {
-                    activeFields = GatherActiveFieldsFromStack(m_OutputNode, m_GraphData.allBlocks, pass.descriptor);
+                    activeFields = GatherActiveFieldsFromNode(implementation, pass.descriptor);
 
                     // TODO: cleanup this preview check, needed for HD decal preview pass
                     if(m_Mode == GenerationMode.Preview)
@@ -150,14 +157,14 @@ namespace UnityEditor.ShaderGraph
 
                     // Check masternode fields for valid passes
                     if(pass.TestActive(activeFields))
-                        GenerateShaderPass(targetIndex, pass.descriptor, activeFields);
+                        GenerateShaderPass(implementation, pass.descriptor, activeFields);
                 }
             }
             if (!string.IsNullOrEmpty(descriptor.customEditorOverride))
                 m_Builder.AppendLine(descriptor.customEditorOverride);
         }
 
-        void GenerateShaderPass(int targetIndex, PassDescriptor pass, ActiveFields activeFields)
+        void GenerateShaderPass(ITargetImplementation implementation, PassDescriptor pass, ActiveFields activeFields)
         {
             // Early exit if pass is not used in preview
             if(m_Mode == GenerationMode.Preview && !pass.useInPreview)
@@ -181,15 +188,10 @@ namespace UnityEditor.ShaderGraph
             m_GraphData.CollectShaderKeywords(keywordCollector, m_Mode);
 
             // Traverse Graph Data
-            TargetBlock targetBlock = m_OutputNode as TargetBlock;
             List<AbstractMaterialNode> vertexNodes = Graphing.ListPool<AbstractMaterialNode>.Get();
-            if(m_Mode == GenerationMode.ForReals || targetBlock != null)
+            if(m_GraphData.contextManager.isActive)
             {
-                if(m_GraphData.vertexContext != null)
-                {
-                    foreach(BlockData block in m_GraphData.vertexContext.blocks)
-                        NodeUtils.DepthFirstCollectNodesFromNode(vertexNodes, block);
-                }
+                m_GraphData.contextManager.GetFilteredVertexBlocks(vertexNodes, implementation);
             }
             else
             {
@@ -197,24 +199,24 @@ namespace UnityEditor.ShaderGraph
             }
 
             List<AbstractMaterialNode> pixelNodes = Graphing.ListPool<AbstractMaterialNode>.Get();
-            if(m_Mode == GenerationMode.ForReals || targetBlock != null)
+            if(m_GraphData.contextManager.isActive)
             {
-                if(m_GraphData.fragmentContext != null)
-                {
-                    foreach(BlockData block in m_GraphData.fragmentContext.blocks)
-                        NodeUtils.DepthFirstCollectNodesFromNode(pixelNodes, block);
-                }
+                m_GraphData.contextManager.GetFilteredFragmentBlocks(pixelNodes, implementation);
             }
             else
             {
                 NodeUtils.DepthFirstCollectNodesFromNode(pixelNodes, m_OutputNode);
             }
 
-            if(m_GraphData.vertexContext != null)
+            if(m_GraphData.contextManager.isVertexActive)
+            {
                 activeFields.baseInstance.Add(Fields.GraphVertex);
+            } 
 
-            if(m_GraphData.fragmentContext != null)
+            if(m_GraphData.contextManager.isFragmentActive || m_Mode == GenerationMode.Preview)
+            {
                 activeFields.baseInstance.Add(Fields.GraphPixel);
+            }
 
             // Track permutation indices for all nodes
             List<int>[] vertexNodePermutations = new List<int>[vertexNodes.Count];
@@ -231,28 +233,16 @@ namespace UnityEditor.ShaderGraph
             GenerationUtils.AddRequiredFields(pass.requiredFields, activeFields.baseInstance);
 
             // Get Port references from ShaderPass
-            List<MaterialSlot> pixelSlots = new List<MaterialSlot>();
-            List<MaterialSlot> vertexSlots = new List<MaterialSlot>();
-            if(m_OutputNode is TargetBlock || m_OutputNode is SubGraphOutputNode)
+            var pixelSlots = ListPool<MaterialSlot>.Get();
+            var vertexSlots = ListPool<MaterialSlot>.Get();
+            if(m_GraphData.contextManager.isActive)
             {
-                if(m_GraphData.fragmentContext != null)
-                {
-                    foreach(BlockData block in m_GraphData.fragmentContext.blocks)
-                    {
-                        List<MaterialSlot> blockSlots = new List<MaterialSlot>();
-                        block.GetSlots(blockSlots);
-                        pixelSlots.AddRange(blockSlots);
-                    }
-                }
-                if(m_GraphData.vertexContext != null)
-                {
-                    foreach(BlockData block in m_GraphData.vertexContext.blocks)
-                    {
-                        List<MaterialSlot> blockSlots = new List<MaterialSlot>();
-                        block.GetSlots(blockSlots);
-                        vertexSlots.AddRange(blockSlots);
-                    }
-                }
+                m_GraphData.contextManager.GetFilteredVertexSlots(vertexSlots, implementation);
+                m_GraphData.contextManager.GetFilteredFragmentSlots(pixelSlots, implementation);
+            }
+            else if(m_OutputNode is SubGraphOutputNode)
+            {
+                m_OutputNode.GetInputSlots(pixelSlots);
             }
             else
             {
@@ -719,14 +709,14 @@ namespace UnityEditor.ShaderGraph
             if(!string.IsNullOrEmpty(pass.passTemplatePath))
                 passTemplatePath = pass.passTemplatePath;
             else
-                passTemplatePath = m_TargetImplementations[targetIndex].passTemplatePath;
+                passTemplatePath = implementation.passTemplatePath;
 
             // Shared Templates
             string sharedTemplateDirectory;
             if(!string.IsNullOrEmpty(pass.sharedTemplateDirectory))
                 sharedTemplateDirectory = pass.sharedTemplateDirectory;
             else
-                sharedTemplateDirectory = m_TargetImplementations[targetIndex].sharedTemplateDirectory;
+                sharedTemplateDirectory = implementation.sharedTemplateDirectory;
 
             if (!File.Exists(passTemplatePath))
                 return;

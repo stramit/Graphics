@@ -465,7 +465,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 }
             }
 
-            m_Graph.targetBlock.Dirty(ModificationScope.Graph);
+            m_Graph.contextManager.DirtyOutput();
 
             UpdateEdgeColors(nodesToUpdate);
             return graphViewChange;
@@ -834,7 +834,6 @@ namespace UnityEditor.ShaderGraph.Drawing
         {
             var materialNodeView = new MaterialNodeView { userData = blockData };
             contextView.AddElement(materialNodeView);
-            blockData.RegisterCallback(OnNodeChanged);
             blockData.RegisterCallback(previewManager.OnNodeModified);
 
             // We should not need to add Nodes (Blocks or otherwise) via GraphEditorView

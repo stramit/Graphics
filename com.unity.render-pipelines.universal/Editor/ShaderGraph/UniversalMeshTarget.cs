@@ -14,13 +14,9 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
         public string passTemplatePath => GenerationUtils.GetDefaultTemplatePath("PassMesh.template");
         public string sharedTemplateDirectory => GenerationUtils.GetDefaultSharedTemplateDirectory();
 
-        public Type[] requireBlocks => new Type[] { typeof(UniversalMeshOptionsBlock )};
-        public Type[] supportedBlocks => new Type[]
-        {
-            typeof(MetallicBlock),
-            typeof(SmoothnessBlock),
-            typeof(NormalTSBlock),
-            typeof(EmissionBlock),
+        public Type[] requireBlocks => new Type[] 
+        { 
+            typeof(UniversalMeshOptionsBlock)
         };
 
         public void SetupTarget(ref TargetSetupContext context)
@@ -28,7 +24,8 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
             context.AddAssetDependencyPath(AssetDatabase.GUIDToAssetPath("7395c9320da217b42b9059744ceb1de6")); // MeshTarget
             context.AddAssetDependencyPath(AssetDatabase.GUIDToAssetPath("ac9e1a400a9ce404c8f26b9c1238417e")); // UniversalMeshTarget
 
-            if(context.blockDatas.Any(x => x is UniversalMeshOptionsBlock optionsBlock && optionsBlock.materialType == UniversalMeshOptionsBlock.MaterialType.Lit))
+            if(context.blockDatas.Any(x => x is UniversalMeshOptionsBlock optionsBlock && 
+                optionsBlock.materialType == UniversalMeshOptionsBlock.MaterialType.Lit))
             {
                 context.SetupSubShader(UniversalSubShaders.PBR);
             }
@@ -38,7 +35,7 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
             }
         }
 
-        public List<Type> GetSupportedBlocks(List<BlockData> currentBlocks)
+        public IEnumerable<Type> GetSupportedBlocks(IEnumerable<BlockData> currentBlocks)
         {
             var supportedBlocks = ListPool<Type>.Get();
 
@@ -55,8 +52,8 @@ namespace UnityEditor.Rendering.Universal.ShaderGraph
             supportedBlocks.Add(typeof(BaseColorBlock));
 
             // Evaluate remaining supported blocks
-            var optionsBlock = currentBlocks.Where(x => x is UniversalMeshOptionsBlock).FirstOrDefault() as UniversalMeshOptionsBlock;    
-            if(optionsBlock != null && optionsBlock.materialType == UniversalMeshOptionsBlock.MaterialType.Lit)
+            if(currentBlocks.FirstOrDefault(x => x is UniversalMeshOptionsBlock) is UniversalMeshOptionsBlock optionsBlock && 
+                optionsBlock.materialType == UniversalMeshOptionsBlock.MaterialType.Lit)
             {
                 if(optionsBlock.workflowMode == UniversalMeshOptionsBlock.WorkflowMode.Specular)
                 {

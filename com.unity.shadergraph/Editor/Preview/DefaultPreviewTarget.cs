@@ -21,7 +21,7 @@ namespace UnityEditor.ShaderGraph
             context.SetupSubShader(PreviewTargetResources.PreviewSubShader);
         }
 
-        public List<Type> GetSupportedBlocks(List<BlockData> currentBlocks)
+        public IEnumerable<Type> GetSupportedBlocks(IEnumerable<BlockData> currentBlocks)
         {
             return null;
         }

@@ -26,6 +26,9 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         Vector2 m_Position;
 
+        [NonSerialized]
+        GraphData m_Owner;
+
         public static ContextData Create<T>(Vector2 position) where T : IContext
         {
             var contextType = new TypeRef<IContext>(typeof(T));
@@ -74,6 +77,12 @@ namespace UnityEditor.ShaderGraph
         {
             get => m_Position;
             set => m_Position = value;
+        }
+
+        public GraphData owner
+        {
+            get => m_Owner;
+            set => m_Owner = value;
         }
     }
 }

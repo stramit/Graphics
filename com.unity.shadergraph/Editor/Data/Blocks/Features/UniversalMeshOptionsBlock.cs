@@ -42,9 +42,7 @@ namespace UnityEditor.ShaderGraph
             set 
             {
                 m_MaterialType = value;
-                owner.AddRequiredBlocks(requireBlocks);
-                owner.UpdateSupportedBlocks();
-                Dirty(Graphing.ModificationScope.Graph);
+                owner.contextManager.DirtyBlock(this);
             }
         }
 
@@ -55,9 +53,7 @@ namespace UnityEditor.ShaderGraph
             set 
             {
                 m_WorkflowMode = value;
-                owner.AddRequiredBlocks(requireBlocks);
-                owner.UpdateSupportedBlocks();
-                Dirty(Graphing.ModificationScope.Graph);
+                owner.contextManager.DirtyBlock(this);
             }
         }
 

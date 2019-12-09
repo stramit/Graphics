@@ -18,7 +18,7 @@ namespace UnityEditor.ShaderGraph.Internal
         {
         }
 
-        public List<Type> GetSupportedBlocks(List<BlockData> currentBlocks)
+        public IEnumerable<Type> GetSupportedBlocks(IEnumerable<BlockData> currentBlocks)
         {
             var supportedBlocks = ListPool<Type>.Get();
 

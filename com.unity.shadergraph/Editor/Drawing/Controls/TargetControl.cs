@@ -76,8 +76,7 @@ namespace UnityEditor.ShaderGraph.Drawing.Controls
         void UpdateTargets()
         {
             m_Node.owner.UpdateTargets();
-            m_Node.owner.UpdateSupportedBlocks();
-            m_Node.owner.targetBlock.Dirty(ModificationScope.Graph);
+            m_Node.owner.contextManager.DirtyBlock(m_Node as BlockData);
         }
 
         public void OnNodeModified(ModificationScope scope)

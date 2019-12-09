@@ -50,7 +50,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             foreach (var node in m_Graph.GetNodes<AbstractMaterialNode>())
                 AddPreview(node);
 
-            AddPreview(m_Graph.targetBlock);
+            AddPreview(m_Graph.contextManager.targetBlock);
         }
 
         static Texture2D GenerateFourSquare(Color c1, Color c2)
@@ -156,6 +156,12 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         public void OnNodeModified(AbstractMaterialNode node, ModificationScope scope)
         {
+            if(node is BlockData)
+            {
+                // Changes to any BlockData shoudl update the TargetBlock
+                node = m_Graph.contextManager.targetBlock;
+            }
+
             if (scope == ModificationScope.Topological ||
                 scope == ModificationScope.Graph)
             {
@@ -237,7 +243,7 @@ namespace UnityEditor.ShaderGraph.Drawing
         {
             if (m_Version != m_Graph.changeVersion)
             {
-                var blocks = m_Graph.allBlocks;
+                var blocks = m_Graph.contextManager.allBlocks;
                 var stackHashNew = new int[blocks.Count];
                 for(int i = 0; i < blocks.Count; i++)
                 {
@@ -253,7 +259,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 }
 
                 var nodes = new HashSet<AbstractMaterialNode>(m_Graph.GetNodes<AbstractMaterialNode>());
-                nodes.Add(m_Graph.targetBlock);
+                nodes.Add(m_Graph.contextManager.targetBlock);
                 var removedNodes = new List<AbstractMaterialNode>();
                 foreach (var renderData in m_RenderDatas)
                 {
@@ -413,7 +419,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             var renderMasterPreview = masterRenderData != null && m_NodesToDraw.Contains(masterRenderData.shaderData.node);
             if (renderMasterPreview)
             {
-                CollectShaderProperties(m_Graph.allBlocks, masterRenderData);
+                CollectShaderProperties(m_Graph.contextManager.validBlocks, masterRenderData);
 
                 if (m_NewMasterPreviewSize.HasValue)
                 {

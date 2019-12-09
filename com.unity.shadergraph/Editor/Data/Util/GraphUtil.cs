@@ -132,7 +132,7 @@ namespace UnityEditor.ShaderGraph
             {
                 graph.SetTarget(targetType);
                 graph.UpdateTargets();
-                graph.AddRequiredBlocksForImplementations();
+                graph.contextManager.AddRequiredBlocksForImplementations();
             }
 
             graph.path = "Shader Graphs";

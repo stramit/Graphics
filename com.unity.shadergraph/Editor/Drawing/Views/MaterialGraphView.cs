@@ -62,6 +62,7 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         void AddContext(ContextData contextData)
         {
+            contextData.owner = graph;
             var contextView = new ContextView(contextData);
             AddElement(contextView);
 

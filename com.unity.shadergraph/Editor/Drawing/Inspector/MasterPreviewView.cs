@@ -139,11 +139,6 @@ namespace UnityEditor.ShaderGraph.Drawing.Inspector
             evt.menu.AppendAction("Custom Mesh", e => ChangeMeshCustom(), DropdownMenuAction.AlwaysEnabled);
         }
 
-        void DirtyMasterNode(ModificationScope scope)
-        {
-            m_Graph?.targetBlock?.Dirty(scope);
-        }
-
         void OnPreviewChanged()
         {
             m_PreviewTextureView.image = m_PreviewRenderHandle?.texture ?? Texture2D.blackTexture;
@@ -165,7 +160,7 @@ namespace UnityEditor.ShaderGraph.Drawing.Inspector
         {
             Mesh changedMesh = mesh;
 
-            DirtyMasterNode(ModificationScope.Node);
+            m_Graph.contextManager.DirtyOutput(ModificationScope.Node);
 
             if (m_Graph.previewData.serializedMesh.mesh != changedMesh)
             {
@@ -228,7 +223,7 @@ namespace UnityEditor.ShaderGraph.Drawing.Inspector
             float rescaleAmount = -scrollValue * .03f;
             m_Graph.previewData.scale = Mathf.Clamp(m_Graph.previewData.scale + rescaleAmount, 0.2f, 5f);
 
-            DirtyMasterNode(ModificationScope.Node);
+            m_Graph.contextManager.DirtyOutput(ModificationScope.Node);
         }
 
         void OnMouseDragPreviewMesh(Vector2 deltaMouse)
@@ -240,7 +235,7 @@ namespace UnityEditor.ShaderGraph.Drawing.Inspector
             Quaternion previewRotation = Quaternion.Euler(m_PreviewScrollPosition.y, 0, 0) * Quaternion.Euler(0, m_PreviewScrollPosition.x, 0);
             m_Graph.previewData.rotation = previewRotation;
 
-            DirtyMasterNode(ModificationScope.Node);
+            m_Graph.contextManager.DirtyOutput(ModificationScope.Node);
         }
     }
 }

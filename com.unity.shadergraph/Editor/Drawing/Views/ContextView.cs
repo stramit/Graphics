@@ -36,15 +36,6 @@ namespace UnityEditor.ShaderGraph.Drawing
             this.Synchronize(data.blocks, AddElement, RemoveElement);
             inputContainer.Synchronize(data.inputPorts, e => AddPort(e), e => RemovePort((Port)e));
             outputContainer.Synchronize(data.outputPorts, e => AddPort(e), e => RemovePort((Port)e));
-
-            // Rebuild Blocks query
-            blocks = contentContainer.Query<Node>().Build();
-
-            // TODO: This is bad
-            // Use "owner" concept to access up to GraphData?
-            var graphEditorView = GetFirstAncestorOfType<GraphEditorView>();
-            graphEditorView.graphView.graph.UpdateSupportedBlocks();
-            graphEditorView.graphView.graph.targetBlock.Dirty(Graphing.ModificationScope.Graph);
         }
 
         void AddElement(BlockData blockData)
@@ -53,6 +44,9 @@ namespace UnityEditor.ShaderGraph.Drawing
             // Preview and Color Managers etc. This needs to be rewritten.
             var graphEditorView = GetFirstAncestorOfType<GraphEditorView>();
             var nodeView = graphEditorView.AddBlockNode(this, blockData);
+
+            blocks = contentContainer.Query<Node>().Build();
+            data.owner.contextManager.UpdateBlocks();
         }
 
         void RemoveElement(VisualElement element)
@@ -60,11 +54,15 @@ namespace UnityEditor.ShaderGraph.Drawing
             if(element is MaterialNodeView nodeView)
             {
                 Remove(nodeView);
+                blocks = contentContainer.Query<Node>().Build();
+                data.owner.contextManager.UpdateBlocks();
             }
         }
 
         void AddPort(PortData portData)
         {
+            // GraphEditorView is required for the EdgeConnectorListener
+            // Should we create any listener somewhere easier to get to?
             var graphEditorView = GetFirstAncestorOfType<GraphEditorView>();
             var port = ShaderPort.Create(portData, graphEditorView.edgeConnectorListener);
             var container = portData.direction == PortData.Direction.Input ? inputContainer : outputContainer;

@@ -162,7 +162,7 @@ Shader ""Hidden/GraphErrorShader2""
             {
                 if (!string.IsNullOrEmpty(graph.path))
                     shaderName = graph.path + "/" + shaderName;
-                var generator = new Generator(graph, graph.targetBlock, GenerationMode.ForReals, shaderName);
+                var generator = new Generator(graph, graph.contextManager.targetBlock, GenerationMode.ForReals, shaderName);
                 shaderString = generator.generatedShader;
                 configuredTextures = generator.configuredTextures;
                 sourceAssetDependencyPaths = generator.assetDependencyPaths;
@@ -206,7 +206,6 @@ Shader ""Hidden/GraphErrorShader2""
             return GetShaderText(path, out configuredTextures, null,graph );
         }
 
-        // TODO: Re-enable this
         static ShaderGraphVfxAsset GenerateVfxShaderGraphAsset(GraphData graphData)
         {
             var nl = Environment.NewLine;
@@ -215,7 +214,10 @@ Shader ""Hidden/GraphErrorShader2""
             var result = asset.compilationResult = new GraphCompilationResult();
             var mode = GenerationMode.ForReals;
 
-            asset.lit = graphData.allBlocks.Any(x => x is VisualEffectOptions vfxOptions && 
+            graphData.contextManager.Init(true);
+            graphData.contextManager.FilterBlocksForImplementation(new DefaultVFXTarget());
+
+            asset.lit = graphData.contextManager.validBlocks.Any(x => x is VisualEffectOptions vfxOptions && 
                 vfxOptions.materialType == VisualEffectOptions.MaterialType.Lit);
 
             var assetGuid = graphData.assetGuid;
@@ -225,7 +227,7 @@ Shader ""Hidden/GraphErrorShader2""
             var nodes = new List<AbstractMaterialNode>();
             var ports = new List<KeyValuePair<BlockData, MaterialSlot>>();
 
-            foreach(BlockData block in graphData.allBlocks)
+            foreach(BlockData block in graphData.contextManager.validBlocks)
             {
                 NodeUtils.DepthFirstCollectNodesFromNode(nodes, block);
 
@@ -236,7 +238,6 @@ Shader ""Hidden/GraphErrorShader2""
                         ports.Add(new KeyValuePair<BlockData, MaterialSlot>(block, slot));
                 }
             }
-                
 
             var bodySb = new ShaderStringBuilder(1);
             var registry = new FunctionRegistry(new ShaderStringBuilder(), true);

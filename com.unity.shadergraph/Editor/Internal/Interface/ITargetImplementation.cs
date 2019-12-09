@@ -13,6 +13,6 @@ namespace UnityEditor.ShaderGraph.Internal
         Type[] requireBlocks { get; }
 
         void SetupTarget(ref TargetSetupContext context);
-        List<Type> GetSupportedBlocks(List<BlockData> currentBlocks);
+        IEnumerable<Type> GetSupportedBlocks(IEnumerable<BlockData> currentBlocks);
     }
 }

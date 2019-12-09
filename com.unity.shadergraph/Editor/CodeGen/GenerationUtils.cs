@@ -14,7 +14,8 @@ namespace UnityEditor.ShaderGraph
 
         internal static List<FieldDescriptor> GetActiveFieldsFromConditionals(ConditionalField[] conditionalFields)
         {
-            var fields = new List<FieldDescriptor>();
+            var fields = ListPool<FieldDescriptor>.Get();
+
             if(conditionalFields == null)
                 return fields;
 
@@ -842,7 +843,7 @@ namespace UnityEditor.ShaderGraph
                         {
                             surfaceDescriptionFunction.AppendLine("surface.{0} = {1};",
                                 hlslName,
-                                input.owner.GetSlotValue(input.id, mode, rootNode.concretePrecision));
+                                rootNode.GetSlotValue(input.id, mode, rootNode.concretePrecision));
                         }
                         else
                         {

@@ -12,24 +12,31 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
     UNITY_SETUP_INSTANCE_ID(unpacked);
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(unpacked);
 
-#if defined(FEATURES_GRAPH_PIXEL)
-    SurfaceDescriptionInputs surfaceDescriptionInputs = BuildSurfaceDescriptionInputs(unpacked);
-    SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
-#endif
-
+    // Fields required by feature blocks are not currently generated
+    // unless the corresponding data block is present
+    // Therefore we need to predefine all potential data values.
+    // Required fields should be tracked properly and generated.
     half3 color = half3(0.5, 0.5, 0.5);
     half alpha = 1;
     half3 normal = half3(0.5, 0.5, 1);
 
-#ifdef OUTPUT_SURFACEDESCRIPTION_COLOR
-    color = surfaceDescription.Color;
-#endif
-#ifdef OUTPUT_SURFACEDESCRIPTION_ALPHA
-    alpha = surfaceDescription.Alpha;
-#endif
-#ifdef OUTPUT_SURFACEDESCRIPTION_NORMAL
-    normal = surfaceDescription.Normal;
-#endif
+    #if defined(FEATURES_GRAPH_PIXEL)
+        SurfaceDescriptionInputs surfaceDescriptionInputs = BuildSurfaceDescriptionInputs(unpacked);
+        SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
+
+        // Data is overriden if the corresponding data block is present.
+        // Could use "$Tag.Field: value = surfaceDescription.Field" pattern
+        // to avoid preprocessors if this was a template file.
+        #ifdef OUTPUT_SURFACEDESCRIPTION_COLOR
+            color = surfaceDescription.Color;
+        #endif
+        #ifdef OUTPUT_SURFACEDESCRIPTION_ALPHA
+            alpha = surfaceDescription.Alpha;
+        #endif
+        #ifdef OUTPUT_SURFACEDESCRIPTION_NORMAL
+            normal = surfaceDescription.Normal;
+        #endif
+    #endif
 
     return NormalsRenderingShared(half4(color, alpha), normal, unpacked.tangentWS.xyz, unpacked.bitangentWS, unpacked.normalWS);
 }

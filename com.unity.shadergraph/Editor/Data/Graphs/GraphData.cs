@@ -37,6 +37,10 @@ namespace UnityEditor.ShaderGraph
 
         public List<ContextData> contexts => m_Contexts;
 
+        ContextManager m_ContextManager;
+
+        public ContextManager contextManager => m_ContextManager;
+
         #endregion
 
         #region Input data
@@ -235,92 +239,7 @@ namespace UnityEditor.ShaderGraph
         }
         #endregion
 
-        #region Contexts & Blocks
-        // Temporary Context access
-        // Remove this when contexts are connected and can be properly evaluated
-        public ContextData vertexContext => NodeUtils.DepthFirstCollectContextsFromContext(outputContext, this).FirstOrDefault(x => x.contextType.type == typeof(VertexContext));
-        public ContextData fragmentContext => NodeUtils.DepthFirstCollectContextsFromContext(outputContext, this).FirstOrDefault(x => x.contextType.type == typeof(FragmentContext));
-        public ContextData outputContext => contexts.FirstOrDefault(x => x.contextType.type == typeof(OutputContext));
-        public BlockData targetBlock => outputContext?.blocks.Where(x => x.GetType() == typeof(TargetBlock)).FirstOrDefault();
         public SubGraphOutputNode subGraphOutput => GetNodes<SubGraphOutputNode>().FirstOrDefault();
-
-        // Need a more efficient way to get all blocks...
-        public List<BlockData> allBlocks
-        {
-            get
-            {
-                List<BlockData> blocks = new List<BlockData>();
-                if(vertexContext != null)
-                {
-                    foreach(BlockData block in vertexContext.blocks)
-                        blocks.Add(block);
-                }
-                if(fragmentContext != null)
-                {
-                    foreach(BlockData block in fragmentContext.blocks)
-                        blocks.Add(block);
-                }
-                if(outputContext != null)
-                {
-                    foreach(BlockData block in outputContext.blocks)
-                        blocks.Add(block);
-                }
-                return blocks;
-            }
-        }
-
-        public void AddRequiredBlocks(Type[] requireBlocks)
-        {
-            if(requireBlocks != null)
-            {
-                foreach(Type requiredType in requireBlocks)
-                {
-                    if(requiredType.IsSubclassOf(typeof(BlockData)))
-                    {
-                        // Create block
-                        var blockData = (BlockData)Activator.CreateInstance(requiredType);
-                        blockData.owner = this;
-
-                        // Find context
-                        var foundContexts = NodeUtils.DepthFirstCollectContextsFromContext(outputContext, this);
-                        var context = foundContexts.Where(x => x.contextType.type == blockData.contextType).FirstOrDefault();
-                        if(context == null)
-                            continue;
-
-                        // Add block to context
-                        if(context.blocks.Any(x => x.GetType() == blockData.GetType()))
-                            continue;
-                        context.blocks.Add(blockData);
-
-                        // Recursively add required
-                        AddRequiredBlocks(blockData.requireBlocks);
-                    }
-                }
-            }
-        }
-
-        public void AddRequiredBlocksForImplementations()
-        {
-            foreach(ITargetImplementation implementation in activeTargetImplementations)
-            {
-                AddRequiredBlocks(implementation.requireBlocks);
-            }
-        }
-
-        public void UpdateSupportedBlocks()
-        {
-            var supportedBlockTypes = ListPool<Type>.Get();
-            supportedBlockTypes.Add(typeof(TargetBlock));
-            foreach(var implementation in activeTargetImplementations)
-            {
-                supportedBlockTypes.AddRange(implementation.GetSupportedBlocks(allBlocks));
-            }
-            foreach(var block in allBlocks)
-            {
-                block.isActive = supportedBlockTypes.Contains(block.GetType());
-            }
-        }
-        #endregion
 
         internal delegate void SaveGraphDelegate(Shader shader);
 
@@ -329,6 +248,7 @@ namespace UnityEditor.ShaderGraph
         public GraphData()
         {
             m_GroupItems[m_NullGroup] = new List<IGroupItem>();
+            m_ContextManager = new ContextManager(this);
         }
 
         public void ClearChanges()
