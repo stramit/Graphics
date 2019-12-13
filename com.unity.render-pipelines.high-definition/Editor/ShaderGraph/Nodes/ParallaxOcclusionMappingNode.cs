@@ -96,7 +96,7 @@ namespace UnityEditor.Rendering.HighDefinition
 
             // Texture sample inputs
             var samplerSlot = FindInputSlot<MaterialSlot>(kHeightmapSamplerSlotId);
-            var edgesSampler = owner.GetEdges(samplerSlot.slotReference);
+            var edgesSampler = owner.GetEdges(samplerSlot);
             var heightmap = GetSlotValue(kHeightmapSlotId, generationMode);
 
             registry.ProvideFunction(GetFunctionName(), s =>

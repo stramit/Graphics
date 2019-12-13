@@ -82,9 +82,9 @@ namespace UnityEditor.VFX
             switch (property.propertyType)
             {
                 case PropertyType.Texture2D:
-                    return ((Texture2DShaderProperty)property).value.texture;
+                    return ((Texture2DShaderProperty)property).value;
                 case PropertyType.Texture3D:
-                    return ((Texture3DShaderProperty)property).value.texture;
+                    return ((Texture3DShaderProperty)property).value;
                 case PropertyType.Cubemap:
                     return ((CubemapShaderProperty)property).value.cubemap;
                 case PropertyType.Texture2DArray:

@@ -54,21 +54,10 @@ namespace UnityEngine.Rendering.HighDefinition
         {
         }
 
-        [Serializable, ReloadGroup]
-        public sealed class ShaderGraphResources
-        {
-            [Reload("Runtime/RenderPipelineResources/ShaderGraph/AutodeskInteractive.ShaderGraph")]
-            public Shader autodeskInteractive;
-            [Reload("Runtime/RenderPipelineResources/ShaderGraph/AutodeskInteractiveMasked.ShaderGraph")]
-            public Shader autodeskInteractiveMasked;
-            [Reload("Runtime/RenderPipelineResources/ShaderGraph/AutodeskInteractiveTransparent.ShaderGraph")]
-            public Shader autodeskInteractiveTransparent;
-        }
-
         public ShaderResources shaders;
         public MaterialResources materials;
         public TextureResources textures;
-        public ShaderGraphResources shaderGraphs;
+        // public ShaderGraphResources shaderGraphs;
     }
 
 
@@ -92,7 +81,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 resources.materials = null;
                 resources.textures = null;
                 resources.shaders = null;
-                resources.shaderGraphs = null;
+                // resources.shaderGraphs = null;
                 ResourceReloader.ReloadAllNullIn(target, HDUtils.GetHDRenderPipelinePath());
             }
         }

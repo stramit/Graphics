@@ -17,6 +17,7 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
         public static DefineCollection Forward = new DefineCollection
         {
             { HDKeywords.Descriptors.HasLightloop, 1 },
+            { HDKeywords.Descriptors.LightList, 0, new FieldCondition(Fields.SurfaceTransparent, false) },
             { HDKeywords.Descriptors.LightList, 1, new FieldCondition(Fields.SurfaceTransparent, true) },
             { RayTracingNode.GetRayTracingKeyword(), 0, new FieldCondition(Fields.SurfaceTransparent, true) },
         };

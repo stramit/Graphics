@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph
@@ -14,7 +15,7 @@ namespace UnityEditor.ShaderGraph
         public override Type contextType => typeof(OutputContext);
         public override Type[] requireBlocks => null;
 
-        public override ConditionalField[] GetConditionalFields(PassDescriptor pass)
+        public override ConditionalField[] GetConditionalFields(PassDescriptor pass, List<BlockData> validBlocks)
         {
             return new ConditionalField[]
             {

@@ -9,12 +9,13 @@ using UnityEditor.ShaderGraph.Drawing.Controls;
 using UnityEditor.Rendering.HighDefinition;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.Rendering;
+using UnityEditor.Rendering.HighDefinition.ShaderGraph;
 
 namespace UnityEditor.Rendering.HighDefinition.Drawing
 {
     class HDUnlitSettingsView : VisualElement
     {
-        HDUnlitMasterNode m_Node;
+        HDRPMeshOptionsBlock m_Node;
 
         IntegerField m_SortPiorityField;
 
@@ -28,7 +29,7 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
             return new Label(label + text);
         }
 
-        public HDUnlitSettingsView(HDUnlitMasterNode node)
+        public HDUnlitSettingsView(HDRPMeshOptionsBlock node)
         {
             m_Node = node;
             PropertySheet ps = new PropertySheet();
@@ -92,9 +93,9 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
                 ++indentLevel;
                 ps.Add(new PropertyRow(CreateLabel("Blending Mode", indentLevel)), (row) =>
                 {
-                    row.Add(new EnumField(HDUnlitMasterNode.AlphaModeLit.Additive), (field) =>
+                    row.Add(new EnumField(BlendMode.Additive), (field) =>
                     {
-                        field.value = GetAlphaModeLit(m_Node.alphaMode);
+                        field.value = m_Node.blendMode;
                         field.RegisterValueChangedCallback(ChangeBlendMode);
                     });
                 });
@@ -241,15 +242,12 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
 
         void ChangeBlendMode(ChangeEvent<Enum> evt)
         {
-            // Make sure the mapping is correct by handling each case.
-
-            AlphaMode alphaMode = GetAlphaMode((HDUnlitMasterNode.AlphaModeLit)evt.newValue);
-
-            if (Equals(m_Node.alphaMode, alphaMode))
+            BlendMode alphaMode = (BlendMode)evt.newValue;
+            if (Equals(m_Node.blendMode, alphaMode))
                 return;
 
             m_Node.owner.owner.RegisterCompleteObjectUndo("Alpha Mode Change");
-            m_Node.alphaMode = alphaMode;
+            m_Node.blendMode = alphaMode;
         }
 
         void ChangeTransparencyFog(ChangeEvent<bool> evt)
@@ -380,43 +378,6 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
 
             m_Node.owner.owner.RegisterCompleteObjectUndo("ZTest Change");
             m_Node.zTest = (CompareFunction)evt.newValue;
-        }
-
-        public AlphaMode GetAlphaMode(HDUnlitMasterNode.AlphaModeLit alphaModeLit)
-        {
-            switch (alphaModeLit)
-            {
-                case HDUnlitMasterNode.AlphaModeLit.Alpha:
-                    return AlphaMode.Alpha;
-                case HDUnlitMasterNode.AlphaModeLit.Premultiply:
-                    return AlphaMode.Premultiply;
-                case HDUnlitMasterNode.AlphaModeLit.Additive:
-                    return AlphaMode.Additive;
-                default:
-                    {
-                        Debug.LogWarning("Not supported: " + alphaModeLit);
-                        return AlphaMode.Alpha;
-                    }
-
-            }
-        }
-
-        public HDUnlitMasterNode.AlphaModeLit GetAlphaModeLit(AlphaMode alphaMode)
-        {
-            switch (alphaMode)
-            {
-                case AlphaMode.Alpha:
-                    return HDUnlitMasterNode.AlphaModeLit.Alpha;
-                case AlphaMode.Premultiply:
-                    return HDUnlitMasterNode.AlphaModeLit.Premultiply;
-                case AlphaMode.Additive:
-                    return HDUnlitMasterNode.AlphaModeLit.Additive;
-                default:
-                    {
-                        Debug.LogWarning("Not supported: " + alphaMode);
-                        return HDUnlitMasterNode.AlphaModeLit.Alpha;
-                    }
-            }
         }
     }
 }

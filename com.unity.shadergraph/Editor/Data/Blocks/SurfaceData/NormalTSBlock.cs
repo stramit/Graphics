@@ -1,7 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.ShaderGraph.Internal;
-using System.Collections.Generic;
 
 namespace UnityEditor.ShaderGraph
 {
@@ -23,7 +23,7 @@ namespace UnityEditor.ShaderGraph
             RemoveSlotsNameNotMatching(new[] { 0 });
         }
 
-        public override ConditionalField[] GetConditionalFields(PassDescriptor pass)
+        public override ConditionalField[] GetConditionalFields(PassDescriptor pass, List<BlockData> validBlocks)
         {
             return new ConditionalField[]
             {

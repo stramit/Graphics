@@ -33,12 +33,12 @@ namespace UnityEngine.Rendering.HighDefinition
             // pipeline is created so in that case, we just return a null pipeline. Some error may appear
             // when we upgrade the pipeline but it's better than breaking HDRP resources an causing more
             // errors.
-            try
-            {
+            // try
+            // {
                 pipeline = new HDRenderPipeline(this, HDRenderPipeline.defaultAsset);
-            } catch (Exception e) {
-                UnityEngine.Debug.LogError(e);
-            }
+            // } catch (Exception e) {
+            //     UnityEngine.Debug.LogError(e);
+            // }
 
             return pipeline;
         }
@@ -262,14 +262,14 @@ namespace UnityEngine.Rendering.HighDefinition
             => renderPipelineEditorResources?.materials.defaultDiffuseMat;
 
         // call to GetAutodeskInteractiveShaderXXX are only from within editor
-        public override Shader autodeskInteractiveShader
-            => renderPipelineEditorResources?.shaderGraphs.autodeskInteractive;
+        // public override Shader autodeskInteractiveShader
+        //     => renderPipelineEditorResources?.shaderGraphs.autodeskInteractive;
 
-        public override Shader autodeskInteractiveTransparentShader
-            => renderPipelineEditorResources?.shaderGraphs.autodeskInteractiveTransparent;
+        // public override Shader autodeskInteractiveTransparentShader
+        //     => renderPipelineEditorResources?.shaderGraphs.autodeskInteractiveTransparent;
 
-        public override Shader autodeskInteractiveMaskedShader
-            => renderPipelineEditorResources?.shaderGraphs.autodeskInteractiveMasked;
+        // public override Shader autodeskInteractiveMaskedShader
+        //     => renderPipelineEditorResources?.shaderGraphs.autodeskInteractiveMasked;
 
         public override Shader terrainDetailLitShader
             => renderPipelineEditorResources?.shaders.terrainDetailLitShader;

@@ -108,15 +108,25 @@ Pass
         SurfaceDescriptionInputs surfaceDescriptionInputs = FragInputsToSurfaceDescriptionInputs(fragInputs, V);
         SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
 
+        float alpha = 1.0;
+        float clipThreshold = 0.5;
+
+        #ifdef OUTPUT_SURFACEDESCRIPTION_ALPHA
+            alpha = surfaceDescription.Alpha;
+        #endif
+        #ifdef OUTPUT_SURFACEDESCRIPTION_ALPHACLIPTHRESHOLD
+            clipThreshold = surfaceDescription.AlphaClipThreshold;
+        #endif
+
         // Perform alpha test very early to save performance (a killed pixel will not sample textures)
         // TODO: split graph evaluation to grab just alpha dependencies first? tricky..
-        $AlphaTest: DoAlphaTest(surfaceDescription.Alpha, surfaceDescription.AlphaClipThreshold);
+        $AlphaTest: DoAlphaTest(alpha, clipThreshold);
 
         BuildSurfaceData(fragInputs, surfaceDescription, V, posInput, surfaceData);
 
         // Builtin Data
         ZERO_INITIALIZE(BuiltinData, builtinData); // No call to InitBuiltinData as we don't have any lighting
-        builtinData.opacity = surfaceDescription.Alpha;
+        builtinData.opacity = alpha;
 
         $SurfaceDescription.Emission: builtinData.emissiveColor = surfaceDescription.Emission;
 

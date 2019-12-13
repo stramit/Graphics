@@ -23,7 +23,7 @@ namespace UnityEditor.ShaderGraph
             RemoveSlotsNameNotMatching(new[] { 0 });
         }
 
-        public override ConditionalField[] GetConditionalFields(PassDescriptor pass)
+        public override ConditionalField[] GetConditionalFields(PassDescriptor pass, List<BlockData> validBlocks)
         {
             return null;
         }

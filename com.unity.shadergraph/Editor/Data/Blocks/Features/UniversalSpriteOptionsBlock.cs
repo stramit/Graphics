@@ -48,7 +48,7 @@ namespace UnityEditor.ShaderGraph
             return types.ToArray();
         }
 
-        public override ConditionalField[] GetConditionalFields(PassDescriptor pass)
+        public override ConditionalField[] GetConditionalFields(PassDescriptor pass, List<BlockData> validBlocks)
         {
             return null;
         }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEditor.Graphing;
 using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
@@ -27,14 +28,14 @@ namespace UnityEditor.ShaderGraph
                     return;
 
                 m_Mode = value;
-                Dirty(ModificationScope.Graph);
+                owner.contextManager.DirtyBlock(this);
             }
         }
 
         public override Type contextType => typeof(OutputContext);
         public override Type[] requireBlocks => new Type[] { typeof(AlphaBlock) };
 
-        public override ConditionalField[] GetConditionalFields(PassDescriptor pass)
+        public override ConditionalField[] GetConditionalFields(PassDescriptor pass, List<BlockData> validBlocks)
         {
             return new ConditionalField[]
             {

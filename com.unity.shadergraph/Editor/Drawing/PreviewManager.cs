@@ -481,18 +481,21 @@ namespace UnityEditor.ShaderGraph.Drawing
                     }
 
                     if (!isCompiled)
-                {
+                    {
                         continue;
                     }
 
                     renderData.shaderData.isCompiling = false;
                     CheckForErrors(renderData.shaderData);
                     m_NodesToDraw.Add(renderData.shaderData.node);
-
-                    var masterNode = renderData.shaderData.node as TargetBlock;
-                    // TODO: Move this to the Target
-                    // masterNode?.ProcessPreviewMaterial(renderData.shaderData.mat);
                 }
+            }
+
+            // Call into each BlockData to try to process the master preview
+            // This only needs to called for the main options block for each target implementation
+            foreach(BlockData blockData in m_Graph.contextManager.allBlocks)
+            {
+                blockData.ProcessPreviewMaterial(masterRenderData.shaderData.mat);
             }
 
             if (m_NodesToUpdate.Count == 0)

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -8,12 +9,13 @@ using UnityEditor.ShaderGraph.Drawing;
 using UnityEditor.ShaderGraph.Drawing.Controls;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.Rendering;
+using UnityEditor.Rendering.HighDefinition.ShaderGraph;
 
 namespace UnityEditor.Rendering.HighDefinition.Drawing
 {
     class HDLitSettingsView : VisualElement
     {
-        HDLitMasterNode m_Node;
+        HDRPMeshOptionsBlock m_Node;
 
         IntegerField m_SortPriorityField;
 
@@ -27,9 +29,10 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
             return new Label(label + text);
         }
 
-        public HDLitSettingsView(HDLitMasterNode node)
+        public HDLitSettingsView(HDRPMeshOptionsBlock node)
         {
             m_Node = node;
+
             PropertySheet ps = new PropertySheet();
 
             int indentLevel = 0;
@@ -92,14 +95,14 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
 
                 if (!m_Node.HasRefraction())
                 {
-                    ps.Add(new PropertyRow(CreateLabel("Blending Mode", indentLevel)), (row) =>
-                    {
-                        row.Add(new EnumField(HDLitMasterNode.AlphaModeLit.Additive), (field) =>
-                        {
-                            field.value = GetAlphaModeLit(m_Node.alphaMode);
-                            field.RegisterValueChangedCallback(ChangeBlendMode);
-                        });
-                    });
+                    // ps.Add(new PropertyRow(CreateLabel("Blending Mode", indentLevel)), (row) =>
+                    // {
+                    //     row.Add(new EnumField(TransparencyMode.Additive), (field) =>
+                    //     {
+                    //         field.value = GetAlphaModeLit(m_Node.alphaMode);
+                    //         field.RegisterValueChangedCallback(ChangeBlendMode);
+                    //     });
+                    // });
 
                     ++indentLevel;
                     ps.Add(new PropertyRow(CreateLabel("Preserve Specular Lighting", indentLevel)), (row) =>
@@ -278,7 +281,7 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
 
             ps.Add(new PropertyRow(CreateLabel("Material Type", indentLevel)), (row) =>
             {
-                row.Add(new EnumField(HDLitMasterNode.MaterialType.Standard), (field) =>
+                row.Add(new EnumField(HDRPMeshOptionsBlock.MaterialType.Standard), (field) =>
                 {
                     field.value = m_Node.materialType;
                     field.RegisterValueChangedCallback(ChangeMaterialType);
@@ -286,7 +289,7 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
             });
 
             ++indentLevel;
-            if (m_Node.materialType == HDLitMasterNode.MaterialType.SubsurfaceScattering)
+            if (m_Node.materialType == HDRPMeshOptionsBlock.MaterialType.SubsurfaceScattering)
             {
                 ps.Add(new PropertyRow(CreateLabel("Transmission", indentLevel)), (row) =>
                 {
@@ -298,7 +301,7 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
                 });
             }
 
-            if (m_Node.materialType == HDLitMasterNode.MaterialType.SpecularColor)
+            if (m_Node.materialType == HDRPMeshOptionsBlock.MaterialType.SpecularColor)
             {
                 ps.Add(new PropertyRow(CreateLabel("Energy Conserving Specular", indentLevel)), (row) =>
                 {
@@ -422,7 +425,7 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
                 return;
 
             m_Node.owner.owner.RegisterCompleteObjectUndo("Material Type Change");
-            m_Node.materialType = (HDLitMasterNode.MaterialType)evt.newValue;
+            m_Node.materialType = (HDRPMeshOptionsBlock.MaterialType)evt.newValue;
         }
 
         void ChangeSSSTransmission(ChangeEvent<bool> evt)
@@ -435,15 +438,12 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
 
         void ChangeBlendMode(ChangeEvent<Enum> evt)
         {
-            // Make sure the mapping is correct by handling each case.
-
-            AlphaMode alphaMode = GetAlphaMode((HDLitMasterNode.AlphaModeLit)evt.newValue);
-
-            if (Equals(m_Node.alphaMode, alphaMode))
+            BlendMode alphaMode = (BlendMode)evt.newValue;
+            if (Equals(m_Node.blendMode, alphaMode))
                 return;
 
             m_Node.owner.owner.RegisterCompleteObjectUndo("Alpha Mode Change");
-            m_Node.alphaMode = alphaMode;
+            m_Node.blendMode = alphaMode;
         }
 
         void ChangeRenderingPass(ChangeEvent<HDRenderQueue.RenderQueueType> evt)
@@ -694,42 +694,6 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
 
             m_Node.owner.owner.RegisterCompleteObjectUndo("ZTest Change");
             m_Node.zTest = (CompareFunction)evt.newValue;
-        }
-
-        public AlphaMode GetAlphaMode(HDLitMasterNode.AlphaModeLit alphaModeLit)
-        {
-            switch (alphaModeLit)
-            {
-                case HDLitMasterNode.AlphaModeLit.Alpha:
-                    return AlphaMode.Alpha;
-                case HDLitMasterNode.AlphaModeLit.Premultiply:
-                    return AlphaMode.Premultiply;
-                case HDLitMasterNode.AlphaModeLit.Additive:
-                    return AlphaMode.Additive;
-                default:
-                    {
-                        Debug.LogWarning("Not supported: " + alphaModeLit);
-                        return AlphaMode.Alpha;
-                    }
-            }
-        }
-
-        public HDLitMasterNode.AlphaModeLit GetAlphaModeLit(AlphaMode alphaMode)
-        {
-            switch (alphaMode)
-            {
-                case AlphaMode.Alpha:
-                    return HDLitMasterNode.AlphaModeLit.Alpha;
-                case AlphaMode.Premultiply:
-                    return HDLitMasterNode.AlphaModeLit.Premultiply;
-                case AlphaMode.Additive:
-                    return HDLitMasterNode.AlphaModeLit.Additive;
-                default:
-                    {
-                        Debug.LogWarning("Not supported: " + alphaMode);
-                        return HDLitMasterNode.AlphaModeLit.Alpha;
-                    }
-            }
         }
     }
 }

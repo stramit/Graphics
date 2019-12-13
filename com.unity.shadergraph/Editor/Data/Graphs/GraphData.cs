@@ -1441,17 +1441,17 @@ namespace UnityEditor.ShaderGraph
 
             // Current ITargetImplementation bitmask is set to Mixed...
             // We need to build a new bitmask from the indicies in the new Implementation list
-            int newBitmask = 0;
-            foreach(ITargetImplementation implementation in activeTargetImplementations)
-            {
-                var implementationInFound = foundImplementations.Where(s => s.GetType() == implementation.GetType()).FirstOrDefault();
-                if(implementationInFound != null)
-                {
-                    // If the new Implementation list contains this Implementation
-                    // add its new index to the bitmask
-                    newBitmask = newBitmask | (1 << foundImplementations.IndexOf(implementationInFound));
-                }
-            }
+            int newBitmask = m_ActiveTargetImplementationBitmask;//0;
+            // foreach(ITargetImplementation implementation in activeTargetImplementations)
+            // {
+            //     var implementationInFound = foundImplementations.Where(s => s.GetType() == implementation.GetType()).FirstOrDefault();
+            //     if(implementationInFound != null)
+            //     {
+            //         // If the new Implementation list contains this Implementation
+            //         // add its new index to the bitmask
+            //         newBitmask = newBitmask | (1 << foundImplementations.IndexOf(implementationInFound));
+            //     }
+            // }
             m_ActiveTargetImplementationBitmask = newBitmask;
         }
     }

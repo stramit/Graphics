@@ -30,13 +30,15 @@ namespace UnityEditor.Rendering.HighDefinition
             {
                 if (shader.IsShaderGraph())
                 {
-                    string shaderPath = AssetDatabase.GetAssetPath(shader);
-                    shaderGraphMasterNodeType = GraphUtil.GetOutputNodeType(shaderPath);
+                    // TODO
+                    // How does this work?
+                    // string shaderPath = AssetDatabase.GetAssetPath(shader);
+                    // shaderGraphMasterNodeType = GraphUtil.GetOutputNodeType(shaderPath);
                 }
 
                 m_ShaderGraphMasterNodeType[shader] = shaderGraphMasterNodeType;
             }
-            isBuiltInLit |= shaderGraphMasterNodeType == typeof(HDLitMasterNode);
+            // isBuiltInLit |= shaderGraphMasterNodeType == typeof(HDLitMasterNode);
 
             // Caution: Currently only HDRP/TerrainLit is using keyword _ALPHATEST_ON with multi compile, we shouldn't test any other built in shader
             if (isBuiltInTerrainLit)

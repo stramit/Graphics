@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEditor.ShaderGraph.Internal;
 using UnityEditor.ShaderGraph.Drawing.Controls;
 
@@ -27,7 +28,7 @@ namespace UnityEditor.ShaderGraph
 
         public override bool canDeleteNode => false;
 
-        public override ConditionalField[] GetConditionalFields(PassDescriptor pass)
+        public override ConditionalField[] GetConditionalFields(PassDescriptor pass, List<BlockData> validBlocks)
         {
             return null;
         }

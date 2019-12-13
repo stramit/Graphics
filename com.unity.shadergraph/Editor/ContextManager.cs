@@ -20,6 +20,8 @@ namespace UnityEditor.ShaderGraph
             m_GraphData = graphData;
             m_AllBlocks = ListPool<BlockData>.Get();
             m_ValidBlocks = ListPool<BlockData>.Get();
+
+            UpdateBlocks(false);
         }
 
         ContextData vertexContext => NodeUtils.DepthFirstCollectContextsFromContext(outputContext, m_GraphData)
@@ -45,7 +47,7 @@ namespace UnityEditor.ShaderGraph
         }
 
         // Get all unfiltered data from Contexts
-        public void UpdateBlocks()
+        public void UpdateBlocks(bool filter = true)
         {
             m_AllBlocks.Clear();
             var contexts = NodeUtils.DepthFirstCollectContextsFromContext(outputContext, m_GraphData);
@@ -57,7 +59,12 @@ namespace UnityEditor.ShaderGraph
                 }
             };
 
-            // Always update filter for active blocks
+            if(filter == false)
+            {
+                return;
+            }
+
+            // Update filter for active blocks
             SetBlocksActiveToFilter();
             DirtyOutput();
         }
@@ -149,14 +156,23 @@ namespace UnityEditor.ShaderGraph
         // Filter BlockDatas not supported by the current Implementation
         public void FilterBlocksForImplementation(ITargetImplementation implementation)
         {
-            m_ValidBlocks = allBlocks.Where(x => implementation.GetSupportedBlocks(allBlocks).Contains(x.GetType())).ToList();
+            var supportedBlocks = implementation.GetSupportedBlocks(allBlocks);
+
+            if(supportedBlocks != null)
+            {
+                m_ValidBlocks = allBlocks.Where(x => supportedBlocks.Contains(x.GetType())).ToList();
+            }
+            else
+            {
+                m_ValidBlocks.Clear();   
+            }
         }
 
         public void GetActiveFields(ActiveFields activeFields, ITargetImplementation implementation, PassDescriptor passDescriptor)
         { 
             foreach(var block in validBlocks)
             {
-                var fields = GenerationUtils.GetActiveFieldsFromConditionals(block.GetConditionalFields(passDescriptor));
+                var fields = GenerationUtils.GetActiveFieldsFromConditionals(block.GetConditionalFields(passDescriptor, validBlocks));
                 foreach(FieldDescriptor field in fields)
                     activeFields.baseInstance.Add(field);
             }
@@ -220,7 +236,11 @@ namespace UnityEditor.ShaderGraph
             supportedBlockTypes.Add(typeof(TargetBlock));
             foreach(var implementation in m_GraphData.activeTargetImplementations)
             {
-                supportedBlockTypes.AddRange(implementation.GetSupportedBlocks(allBlocks));
+                var supportedBlocks = implementation.GetSupportedBlocks(allBlocks);
+                if(supportedBlocks != null)
+                {
+                    supportedBlockTypes.AddRange(supportedBlocks);
+                } 
             }
 
             // Set active state

@@ -9,7 +9,7 @@ namespace UnityEditor.ShaderGraph.Internal
     [FormerName("UnityEditor.ShaderGraph.ColorShaderProperty")]
     public sealed class ColorShaderProperty : AbstractShaderProperty<Color>
     {
-        internal ColorShaderProperty()
+        public ColorShaderProperty()
         {
             displayName = "Color";
         }

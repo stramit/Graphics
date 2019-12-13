@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph
@@ -14,6 +16,12 @@ namespace UnityEditor.ShaderGraph
         public abstract Type contextType { get; } 
         public abstract Type[] requireBlocks { get; }
 
-        public abstract ConditionalField[] GetConditionalFields(PassDescriptor pass);
+        public abstract ConditionalField[] GetConditionalFields(PassDescriptor pass, List<BlockData> validBlocks);
+
+        // This used to be on IMasterNode
+        // Is required for render pipelines to set preview property values
+        public virtual void ProcessPreviewMaterial(Material material)
+        {
+        }
     }
 }

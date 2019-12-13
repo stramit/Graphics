@@ -37,9 +37,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "META",
                 useInPreview = false,
 
-                // Port Mask
-                pixelPorts = HDPortMasks.Pixel.UnlitDefault,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.Meta,
@@ -60,10 +57,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "ShadowCaster",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.UnlitDefault,
-                pixelPorts = HDPortMasks.Pixel.UnlitOnlyAlpha,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -82,10 +75,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "SceneSelectionPass",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.UnlitDefault,
-                pixelPorts = HDPortMasks.Pixel.UnlitOnlyAlpha,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -107,10 +96,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "DepthForwardOnly",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.UnlitDefault,
-                pixelPorts = HDPortMasks.Pixel.UnlitOnlyAlpha,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -130,10 +115,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_MOTION_VECTORS",
                 lightMode = "MotionVectors",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.UnlitDefault,
-                pixelPorts = HDPortMasks.Pixel.UnlitOnlyAlpha,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -155,10 +136,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_FORWARD_UNLIT",
                 lightMode = "ForwardOnly",
                 useInPreview = true,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.UnlitDefault,
-                pixelPorts = HDPortMasks.Pixel.UnlitDefault,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -185,10 +162,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "GBuffer",
                 useInPreview = true,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.PBRDefault,
-                pixelPorts = HDPortMasks.Pixel.PBRDefault,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.LitMinimal,
@@ -209,9 +182,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_LIGHT_TRANSPORT",
                 lightMode = "META",
                 useInPreview = false,
-
-                // Port Mask
-                pixelPorts = HDPortMasks.Pixel.PBRDefault,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -234,10 +204,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "ShadowCaster",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.PBRDefault,
-                pixelPorts = HDPortMasks.Pixel.PBROnlyAlpha,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -257,10 +223,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "SceneSelectionPass",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.PBRDefault,
-                pixelPorts = HDPortMasks.Pixel.PBROnlyAlpha,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -283,10 +245,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "DepthOnly",
                 useInPreview = true,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.PBRDefault,
-                pixelPorts = HDPortMasks.Pixel.PBRDepthMotionVectors,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.LitFull,
@@ -308,10 +266,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_MOTION_VECTORS",
                 lightMode = "MotionVectors",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.PBRDefault,
-                pixelPorts = HDPortMasks.Pixel.PBRDepthMotionVectors,
 
                 // Fields
                 structs = HDStructCollections.Default,
@@ -336,10 +290,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_FORWARD",
                 lightMode = "Forward",
                 useInPreview = true,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.PBRDefault,
-                pixelPorts = HDPortMasks.Pixel.PBRDefault,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -368,9 +318,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "META",
                 useInPreview = false,
 
-                // Port Mask
-                pixelPorts = HDPortMasks.Pixel.HDUnlitDefault,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.Meta,
@@ -392,10 +339,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "ShadowCaster",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDUnlitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDUnlitOnlyAlpha,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -415,10 +358,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "SceneSelectionPass",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDUnlitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDUnlitOnlyAlpha,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -441,10 +380,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "DepthForwardOnly",
                 useInPreview = true,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDUnlitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDUnlitOnlyAlpha,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -464,10 +399,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_MOTION_VECTORS",
                 lightMode = "MotionVectors",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDUnlitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDUnlitOnlyAlpha,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -490,10 +421,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "DistortionVectors",
                 useInPreview = true,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDUnlitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDUnlitDistortion,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -513,10 +440,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_FORWARD_UNLIT",
                 lightMode = "ForwardOnly",
                 useInPreview = true,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDUnlitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDUnlitForward,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -543,10 +466,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "GBuffer",
                 useInPreview = true,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDLitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDLitDefault,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.LitMinimal,
@@ -568,9 +487,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_LIGHT_TRANSPORT",
                 lightMode = "META",
                 useInPreview = false,
-
-                // Port Mask
-                pixelPorts = HDPortMasks.Pixel.HDLitMeta,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -594,10 +510,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "ShadowCaster",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDLitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDLitShadowCaster,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -619,10 +531,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "SceneSelectionPass",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDLitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDLitSceneSelection,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -643,10 +551,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "DepthOnly",
                 useInPreview = true,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDLitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDLitDepthMotionVectors,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -670,10 +574,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "MotionVectors",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDLitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDLitDepthMotionVectors,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.LitFull,
@@ -696,10 +596,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "DistortionVectors",
                 useInPreview = true,
 
-                // Port mask
-                vertexPorts = HDPortMasks.Vertex.HDLitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDLitDistortion,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -720,10 +616,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "TransparentDepthPrepass",
                 useInPreview = true,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDLitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDLitTransparentDepthPrepass,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -746,10 +638,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "TransparentBackface",
                 useInPreview = true,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDLitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDLitTransparentBackface,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -770,10 +658,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_FORWARD",
                 lightMode = "Forward",
                 useInPreview = true,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDLitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDLitDefault,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -796,10 +680,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "TransparentDepthPostpass",
                 useInPreview = true,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDLitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDLitTransparentDepthPostpass,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -827,9 +707,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "META",
                 useInPreview = false,
 
-                // Port Mask
-                pixelPorts = HDPortMasks.Pixel.EyeMETA,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.Meta,  
@@ -851,10 +728,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "ShadowCaster",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.EyeDefault,
-                pixelPorts = HDPortMasks.Pixel.EyeAlphaDepth,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -874,10 +747,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "SceneSelectionPass",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.EyeDefault,
-                pixelPorts = HDPortMasks.Pixel.EyeAlphaDepth,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -899,10 +768,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "DepthForwardOnly",
                 useInPreview = true,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.EyeDefault,
-                pixelPorts = HDPortMasks.Pixel.EyeDepthMotionVectors,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -926,10 +791,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "MotionVectors",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.EyeDefault,
-                pixelPorts = HDPortMasks.Pixel.EyeDepthMotionVectors,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.LitFull,
@@ -951,10 +812,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_FORWARD",
                 lightMode = "ForwardOnly",
                 useInPreview = true,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.EyeDefault,
-                pixelPorts = HDPortMasks.Pixel.EyeForward,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -983,9 +840,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "META",
                 useInPreview = false,
 
-                // Port Mask
-                pixelPorts = HDPortMasks.Pixel.FabricMETA,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.Meta,
@@ -1007,10 +861,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "ShadowCaster",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.FabricDefault,
-                pixelPorts = HDPortMasks.Pixel.FabricAlphaDepth,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -1030,10 +880,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "SceneSelectionPass",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.FabricDefault,
-                pixelPorts = HDPortMasks.Pixel.FabricAlphaDepth,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -1055,10 +901,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "DepthForwardOnly",
                 useInPreview = true,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.FabricDefault,
-                pixelPorts = HDPortMasks.Pixel.FabricDepthMotionVectors,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -1082,10 +924,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "MotionVectors",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.FabricDefault,
-                pixelPorts = HDPortMasks.Pixel.FabricDepthMotionVectors,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.LitFull,
@@ -1107,10 +945,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_FORWARD",
                 lightMode = "ForwardOnly",
                 useInPreview = true,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.FabricDefault,
-                pixelPorts = HDPortMasks.Pixel.FabricForward,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -1139,9 +973,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "META",
                 useInPreview = false,
 
-                // Port Mask
-                pixelPorts = HDPortMasks.Pixel.HairMETA,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.Meta,
@@ -1163,10 +994,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "ShadowCaster",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HairDefault,
-                pixelPorts = HDPortMasks.Pixel.HairShadowCaster,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -1186,10 +1013,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "SceneSelectionPass",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HairDefault,
-                pixelPorts = HDPortMasks.Pixel.HairAlphaDepth,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -1211,10 +1034,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "DepthForwardOnly",
                 useInPreview = true,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HairDefault,
-                pixelPorts = HDPortMasks.Pixel.HairDepthMotionVectors,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -1238,10 +1057,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "MotionVectors",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HairDefault,
-                pixelPorts = HDPortMasks.Pixel.HairDepthMotionVectors,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.LitFull,
@@ -1264,10 +1079,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "TransparentDepthPrepass",
                 useInPreview = true,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HairDefault,
-                pixelPorts = HDPortMasks.Pixel.HairTransparentDepthPrepass,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -1288,10 +1099,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_FORWARD",
                 lightMode = "TransparentBackface",
                 useInPreview = true,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HairDefault,
-                pixelPorts = HDPortMasks.Pixel.HairTransparentBackface,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -1315,10 +1122,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "ForwardOnly",
                 useInPreview = true,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HairDefault,
-                pixelPorts = HDPortMasks.Pixel.HairForward,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.LitFull,
@@ -1340,10 +1143,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "TransparentDepthPostpass",
                 useInPreview = true,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HairDefault,
-                pixelPorts = HDPortMasks.Pixel.HairTransparentDepthPostpass,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -1371,9 +1170,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "META",
                 useInPreview = false,
 
-                // Port Mask
-                pixelPorts = HDPortMasks.Pixel.StackLitMETA,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.Meta,
@@ -1395,10 +1191,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "ShadowCaster",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.StackLitPosition,
-                pixelPorts = HDPortMasks.Pixel.StackLitAlphaDepth,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -1418,10 +1210,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_DEPTH_ONLY",
                 lightMode = "SceneSelectionPass",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.StackLitDefault,
-                pixelPorts = HDPortMasks.Pixel.StackLitAlphaDepth,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -1451,10 +1239,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "DepthForwardOnly",
                 useInPreview = true,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.StackLitDefault,
-                pixelPorts = HDPortMasks.Pixel.StackLitDepthMotionVectors,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.LitFull,
@@ -1476,10 +1260,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_MOTION_VECTORS",
                 lightMode = "MotionVectors",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.StackLitDefault,
-                pixelPorts = HDPortMasks.Pixel.StackLitDepthMotionVectors,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -1503,10 +1283,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "DistortionVectors",
                 useInPreview = true,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.StackLitDefault,
-                pixelPorts = HDPortMasks.Pixel.StackLitDistortion,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -1526,10 +1302,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_FORWARD",
                 lightMode = "ForwardOnly",
                 useInPreview = true,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.StackLitDefault,
-                pixelPorts = HDPortMasks.Pixel.StackLitForward,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -1560,10 +1332,7 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_DBufferProjector3RT],
                 useInPreview = false,
 
-                // Port mask
-                pixelPorts = HDPortMasks.Pixel.DecalDefault,
-
-                //Fields
+                // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
                 renderStates = HDRenderStates.DecalProjector3RT,
@@ -1580,14 +1349,9 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_DBufferProjector4RT],
                 useInPreview = false,
 
-                // Port mask
-                pixelPorts = HDPortMasks.Pixel.DecalDefault,
-
-                //Fields
+                // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
-
-                // Conditional State
                 renderStates = HDRenderStates.DecalProjector4RT,
                 pragmas = HDPragmas.Instanced,
                 defines = HDDefines.Decals4RT,
@@ -1602,14 +1366,9 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_ProjectorEmissive],
                 useInPreview = false,
 
-                // Port mask
-                pixelPorts = HDPortMasks.Pixel.DecalEmissive,
-
-                //Fields
+                // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
-
-                // Conditional State
                 renderStates = HDRenderStates.DecalProjectorEmissive,
                 pragmas = HDPragmas.Instanced,
                 includes = HDIncludes.Decal,
@@ -1623,15 +1382,10 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_DBufferMesh3RT],
                 useInPreview = false,
 
-                // Port mask
-                pixelPorts = HDPortMasks.Pixel.DecalDefault,
-
-                //Fields
+                // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.DecalMesh,
                 fieldDependencies = HDFieldDependencies.Default,
-
-                // Conditional State
                 renderStates = HDRenderStates.DecalMesh3RT,
                 pragmas = HDPragmas.Instanced,
                 defines = HDDefines.Decals3RT,
@@ -1646,15 +1400,10 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_DBufferMesh4RT],
                 useInPreview = false,
 
-                // Port mask
-                pixelPorts = HDPortMasks.Pixel.DecalDefault,
-
-                //Fields
+                // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.DecalMesh,
                 fieldDependencies = HDFieldDependencies.Default,
-
-                // Conditional State
                 renderStates = HDRenderStates.DecalMesh4RT,
                 pragmas = HDPragmas.Instanced,
                 defines = HDDefines.Decals4RT,
@@ -1669,15 +1418,10 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = DecalSystem.s_MaterialSGDecalPassNames[(int)DecalSystem.MaterialSGDecalPass.ShaderGraph_MeshEmissive],
                 useInPreview = false,
 
-                // Port mask
-                pixelPorts = HDPortMasks.Pixel.DecalMeshEmissive,
-
-                //Fields
+                // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.DecalMesh,
                 fieldDependencies = HDFieldDependencies.Default,
-
-                // Conditional State
                 renderStates = HDRenderStates.DecalMeshEmissive, 
                 pragmas = HDPragmas.Instanced,
                 includes = HDIncludes.Decal,
@@ -1691,15 +1435,10 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "ForwardOnly",
                 useInPreview = true,
 
-                // Port mask
-                pixelPorts = HDPortMasks.Pixel.DecalMeshEmissive,
-
-                //Fields
+                // Collections
                 structs = HDStructCollections.Default,
                 requiredFields = HDRequiredFields.DecalMesh,
                 fieldDependencies = HDFieldDependencies.Default,
-
-                // Render state overrides
                 renderStates = HDRenderStates.DecalPreview,
                 pragmas = HDPragmas.Instanced,
                 includes = HDIncludes.Decal,
@@ -1717,10 +1456,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_RAYTRACING_INDIRECT",
                 lightMode = "IndirectDXR",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDLitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDLitDefault,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -1742,10 +1477,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "VisibilityDXR",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDLitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDLitDefault,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -1764,10 +1495,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_RAYTRACING_FORWARD",
                 lightMode = "ForwardDXR",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDLitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDLitDefault,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -1788,10 +1515,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_RAYTRACING_GBUFFER",
                 lightMode = "GBufferDXR",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDLitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDLitDefault,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -1818,10 +1541,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "IndirectDXR",  
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDUnlitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDUnlitDefault,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -1840,10 +1559,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_RAYTRACING_VISIBILITY",
                 lightMode = "VisibilityDXR",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDUnlitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDUnlitDefault,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -1864,10 +1579,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "ForwardDXR",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDUnlitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDUnlitDefault,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -1886,10 +1597,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_RAYTRACING_GBUFFER",
                 lightMode = "GBufferDXR",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.HDUnlitDefault,
-                pixelPorts = HDPortMasks.Pixel.HDUnlitDefault,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -1915,10 +1622,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "IndirectDXR",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.FabricDefault,
-                pixelPorts = HDPortMasks.Pixel.FabricForward,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -1939,10 +1642,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 lightMode = "VisibilityDXR",
                 useInPreview = false,
 
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.FabricDefault,
-                pixelPorts = HDPortMasks.Pixel.FabricForward,
-
                 // Collections
                 structs = HDStructCollections.Default,
                 fieldDependencies = HDFieldDependencies.Default,
@@ -1961,10 +1660,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_RAYTRACING_FORWARD",
                 lightMode = "ForwardDXR",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.FabricDefault,
-                pixelPorts = HDPortMasks.Pixel.FabricForward,
 
                 // Collections
                 structs = HDStructCollections.Default,
@@ -1985,10 +1680,6 @@ namespace UnityEditor.Rendering.HighDefinition.ShaderGraph
                 referenceName = "SHADERPASS_RAYTRACING_GBUFFER",
                 lightMode = "GBufferDXR",
                 useInPreview = false,
-
-                // Port Mask
-                vertexPorts = HDPortMasks.Vertex.FabricDefault,
-                pixelPorts = HDPortMasks.Pixel.FabricForward,
 
                 // Collections
                 structs = HDStructCollections.Default,

@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.ShaderGraph;
+using UnityEditor.ShaderGraph.Serialization;
 using UnityEngine;
+using UnityEditor.Rendering.HighDefinition.ShaderGraph;
 
 namespace UnityEditor.Rendering.HighDefinition
 {
@@ -46,16 +48,16 @@ namespace UnityEditor.Rendering.HighDefinition
         };
 
         // exposed shadergraph, for reference while searching the ShaderID
-        static readonly Type[] s_MasterNodes =
-        {
-            typeof(HDUnlitMasterNode),
-            typeof(HDLitMasterNode),
-            typeof(HairMasterNode),
-            typeof(FabricMasterNode),
-            typeof(StackLitMasterNode),
-            typeof(DecalMasterNode),
-            typeof(EyeMasterNode),
-        };
+        // static readonly Type[] s_MasterNodes =
+        // {
+        //     typeof(HDUnlitMasterNode),
+        //     typeof(HDLitMasterNode),
+        //     typeof(HairMasterNode),
+        //     typeof(FabricMasterNode),
+        //     typeof(StackLitMasterNode),
+        //     typeof(DecalMasterNode),
+        //     typeof(EyeMasterNode),
+        // };
         
         // list of methods for resetting keywords
         delegate void MaterialResetter(Material material);
@@ -130,8 +132,7 @@ namespace UnityEditor.Rendering.HighDefinition
 
             if (shader.IsShaderGraph())
             {
-                var outputNodeType = GraphUtil.GetOutputNodeType(AssetDatabase.GetAssetPath(shader));
-                return s_MasterNodes.Contains(outputNodeType);
+                return true;
             }
             else if (upgradable)
                 return s_ShaderPaths.Contains(shader.name);
@@ -146,15 +147,24 @@ namespace UnityEditor.Rendering.HighDefinition
 
             if (shader.IsShaderGraph())
             {
-                string shaderPath = AssetDatabase.GetAssetPath(shader);
-                switch (GraphUtil.GetOutputNodeType(shaderPath).Name)
+                // TODO
+                // We currently need to deserialize the entire graph
+                // to determine what blocks are active.
+                // We should store the stack state as objects in metadata
+                // So we dont need to deserialize the graph and external
+                // packages can read the metadata without access to internals.
+                var path = AssetDatabase.GetAssetPath(shader);
+                var textGraph = System.IO.File.ReadAllText(path);
+                var set = JsonStore.Deserialize(textGraph);
+                var graphData = set.First<GraphData>();
+
+                if(graphData.contextManager.allBlocks.Any(x => x is HDRPMeshOptionsBlock optionsBlock &&
+                    optionsBlock.lightingType == HDRPMeshOptionsBlock.LightingType.Lit))
                 {
-                    case nameof(HDUnlitMasterNode):
-                    case nameof(UnlitMasterNode):
-                        return true;
-                    default:
-                        return false;
+                    return false;
                 }
+
+                return true;
             }
             else
                 return shader.name == "HDRP/Unlit";
@@ -172,24 +182,25 @@ namespace UnityEditor.Rendering.HighDefinition
             return s_ShaderPaths[index];
         }
 
-        internal static Type GetShaderMasterNodeType(ShaderID id)
-        {
-            int index = (int)id - (int)ShaderID.Count_Standard;
-            if (index < 0 && index >= (int)ShaderID.Count_ShaderGraph)
-            {
-                Debug.LogError("Trying to access HDRP shader path out of bounds");
-                return null;
-            }
-
-            return s_MasterNodes[index];
-        }
-
         internal static ShaderID GetShaderEnumFromShader(Shader shader)
         {
             if (shader.IsShaderGraph())
             {
-                var type = GraphUtil.GetOutputNodeType(AssetDatabase.GetAssetPath(shader));
-                var index = Array.FindIndex(s_MasterNodes, m => m == type);
+                // How do we resolve the GUI now?
+                // There should only be one...
+
+                // TODO
+                // We currently need to deserialize the entire graph
+                // to determine what lighting type this is...
+                var path = AssetDatabase.GetAssetPath(shader);
+                var textGraph = System.IO.File.ReadAllText(path);
+                var set = JsonStore.Deserialize(textGraph);
+                var graphData = set.First<GraphData>();
+                graphData.contextManager.UpdateBlocks(false);
+
+                var optionsBlock = graphData.contextManager.allBlocks.FirstOrDefault(x => x is HDRPMeshOptionsBlock)
+                    as HDRPMeshOptionsBlock;
+                var index = (int)optionsBlock.lightingType;
                 if (index == -1)
                     throw new ArgumentException("Unknown shader");
                 return (ShaderID)(index + ShaderID.Count_Standard);
