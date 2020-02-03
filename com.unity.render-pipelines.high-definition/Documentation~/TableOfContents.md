@@ -8,8 +8,8 @@
   * [Render Pipeline Wizard](Render-Pipeline-Wizard)
   * [Forward and Deferred Rendering](Forward-And-Deferred-Rendering)
   * [Exposing More Options](More-Options)
-  * [VR in HDRP](VR-in-HDRP)
 * Upgrading HDRP between Unity Versions
+  * [Material Upgrade](Material-Upgrade)
   * [2019.1 to 2019.2](Upgrading-from-2019.1-to-2019.2)
   * [2019.2 to 2019.3](Upgrading-from-2019.2-to-2019.3)
 * Volume Framework
@@ -55,13 +55,15 @@
     * [Subsurface Scattering Materials](Subsurface-Scattering)
     * [Diffusion Profile](Diffusion-Profile)
   * Shader List
+    * [AxF Shader](AxF-Shader)
     * [Decal Shader](Decal-Shader)
     * [Layered Lit Shader](Layered-Lit-Shader)
     * [Lit Shader](Lit-Shader)
     * [Unlit Shader](Unlit-Shader)
   * Shader Graph Master Nodes
-    * [Customizing Materials Using Master Nodes](Creating-and-Editing-HDRP-Shader-Graphs)
+    * [Customizing Materials Using Master Nodes](Customizing-HDRP-materials-with-Shader-Graph)
     * [Decal](Master-Node-Decal)
+    * [Fabric](Master-Node-Fabric)
     * [Hair](Master-Node-Hair)
     * [Unlit](Master-Node-Unlit)
   * Shader Graph Nodes
@@ -93,6 +95,7 @@
   * [Dynamic Resolution](Dynamic-Resolution)
   * [Motion Vectors](Motion-Vectors)
   * [Anti-Aliasing](Anti-Aliasing)
+  * [Alpha Output](Alpha-Output)
 * Post-processing
   * [Post-processing in HDRP](Post-Processing-Main)
   * [Effect Execution Order](Post-Processing-Execution-Order)
@@ -139,6 +142,8 @@
 * Debugging
   * [MatCap](MatCap)
   * [Render Pipeline Debug Window](Render-Pipeline-Debug-Window)
+* Virtual Reality
+  * [VR Overview](VR-Overview)
 * Consoles
   * [Building For Consoles](Building-For-Consoles)
 * Customizing HDRP
