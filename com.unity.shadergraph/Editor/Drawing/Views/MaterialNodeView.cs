@@ -171,10 +171,22 @@ namespace UnityEditor.ShaderGraph.Drawing
             if (masterNode != null)
             {
                 AddToClassList("master");
-
-                if (!masterNode.IsPipelineCompatible(GraphicsSettings.renderPipelineAsset))
+                if(!node.owner.activeTargetImplementations.Any())
                 {
-                    AttachMessage("The current render pipeline is not compatible with this master node.", ShaderCompilerMessageSeverity.Error);
+                    //either no target implmentation is selected or no assemblies containing valid target implementations have been found
+                    AttachMessage("There are no active Target Implementations. Either enable Implementations from the toolbar or install a Render Pipeline that is compatible with this Master Node.", ShaderCompilerMessageSeverity.Error);
+                }
+                else
+                {
+                    //TODO: move this check somewhere outside of initialize so we can clear the message without reloading the graph
+                    foreach(ITargetImplementation activeTarget in node.owner.activeTargetImplementations)
+                    {
+                        //if we have a valid active target implementation and render pipeline, don't display the error
+                        if (activeTarget.IsPipelineCompatible(GraphicsSettings.currentRenderPipeline))
+                            break;
+                        //if no active target implemenetations are valid with the current pipeline, display the error
+                        AttachMessage("The active target implementation is not compatible with the current Render Pipeline. Assign a Render Pipeline in the graphics settings that is compatible with this Master Node.", ShaderCompilerMessageSeverity.Error);
+                    }
                 }
             }
 
@@ -366,11 +378,8 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         string ConvertToShader(GenerationMode mode)
         {
-            List<PropertyCollector.TextureInfo> textureInfo;
-            if (node is IMasterNode masterNode)
-                return masterNode.GetShader(mode, node.name, out textureInfo);
-
-            return node.owner.GetShader(node, mode, node.name).shader;
+            var generator = new Generator(node.owner, node, mode, node.name);
+            return generator.generatedShader;
         }
 
         void AddDefaultSettings()
