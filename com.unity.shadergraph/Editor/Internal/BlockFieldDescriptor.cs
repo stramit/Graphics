@@ -41,6 +41,16 @@ namespace UnityEditor.ShaderGraph.Internal
         }
     }
 
+    public class ColorRGBAControl : IControl
+    {
+        public Color value { get; private set; }
+
+        public ColorRGBAControl(Color value)
+        {
+            this.value = value;
+        }
+    }
+
     public class FloatControl : IControl
     {
         public float value { get; private set; }

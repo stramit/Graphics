@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine.Rendering;
 
 namespace UnityEditor.ShaderGraph.Internal
@@ -13,5 +14,8 @@ namespace UnityEditor.ShaderGraph.Internal
         bool IsValid(IMasterNode masterNode);
         bool IsPipelineCompatible(RenderPipelineAsset currentPipeline);
         void SetupTarget(ref TargetSetupContext context);
+
+        // TODO: Argument should be Target specific Settings object
+        List<BlockFieldDescriptor> GetSupportedBlocks(IMasterNode masterNode);
     }
 }

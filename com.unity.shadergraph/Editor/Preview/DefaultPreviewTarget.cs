@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEditor.ShaderGraph.Internal;
 using UnityEngine.Rendering;
 
@@ -26,6 +27,11 @@ namespace UnityEditor.ShaderGraph
             context.AddAssetDependencyPath("17beeb3de0d148c4091315e2775a46e3"); // DefaultPreviewTarget
 
             context.SetupSubShader(PreviewTargetResources.PreviewSubShader);
+        }
+
+        public List<BlockFieldDescriptor> GetSupportedBlocks(IMasterNode masterNode)
+        {
+            return null;
         }
     }
 }

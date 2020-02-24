@@ -38,6 +38,8 @@ namespace UnityEditor.ShaderGraph.Internal
                 new FloatControl(1.0f), ContextStage.Fragment);
             public static BlockFieldDescriptor ClipThreshold = new BlockFieldDescriptor(SurfaceDescription.name, "ClipThreshold", 
                 new FloatControl(0.5f), ContextStage.Fragment);
+            public static BlockFieldDescriptor SpriteMask = new BlockFieldDescriptor(SurfaceDescription.name, "SpriteMask", 
+                new ColorRGBAControl(new Color(1, 1, 1, 1)), ContextStage.Fragment);
         }
     }
 }

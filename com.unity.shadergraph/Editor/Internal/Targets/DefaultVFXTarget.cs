@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine.Rendering;
 using UnityEditor.ShaderGraph;
 
@@ -22,6 +23,12 @@ namespace UnityEditor.ShaderGraph.Internal
 
         public void SetupTarget(ref TargetSetupContext context)
         {
+        }
+
+        // TODO: Calculate supported blocks
+        public List<BlockFieldDescriptor> GetSupportedBlocks(IMasterNode masterNode)
+        {
+            return null;
         }
     }
 }
