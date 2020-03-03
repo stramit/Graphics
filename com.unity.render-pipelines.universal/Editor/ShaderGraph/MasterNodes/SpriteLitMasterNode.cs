@@ -72,14 +72,14 @@ namespace UnityEditor.Experimental.Rendering.Universal
         public string renderQueueTag => $"{RenderQueue.Transparent}";
         public string renderTypeTag => $"{RenderType.Transparent}";
 
-        public ConditionalField[] GetConditionalFields(PassDescriptor pass)
+        public ConditionalField[] GetConditionalFields(PassDescriptor pass, List<BlockFieldDescriptor> blocks)
         {
             return new ConditionalField[]
             {
                 // Features
-                new ConditionalField(Fields.GraphVertex,         IsSlotConnected(PBRMasterNode.PositionSlotId) || 
-                                                                        IsSlotConnected(PBRMasterNode.VertNormalSlotId) || 
-                                                                        IsSlotConnected(PBRMasterNode.VertTangentSlotId)),
+                new ConditionalField(Fields.GraphVertex,         blocks.Contains(BlockFields.VertexDescription.Position) ||
+                                                                    blocks.Contains(BlockFields.VertexDescription.Normal) ||
+                                                                    blocks.Contains(BlockFields.VertexDescription.Tangent)),
                 new ConditionalField(Fields.GraphPixel,          true),
                 
                 // Surface Type

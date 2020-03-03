@@ -258,14 +258,14 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public ConditionalField[] GetConditionalFields(PassDescriptor pass)
+        public ConditionalField[] GetConditionalFields(PassDescriptor pass, List<BlockFieldDescriptor> blocks)
         {
             return new ConditionalField[]
             {
                 // Features
-                new ConditionalField(Fields.GraphVertex,         IsSlotConnected(PBRMasterNode.PositionSlotId) || 
-                                                                        IsSlotConnected(PBRMasterNode.VertNormalSlotId) || 
-                                                                        IsSlotConnected(PBRMasterNode.VertTangentSlotId)),
+                new ConditionalField(Fields.GraphVertex,         blocks.Contains(BlockFields.VertexDescription.Position) ||
+                                                                    blocks.Contains(BlockFields.VertexDescription.Normal) ||
+                                                                    blocks.Contains(BlockFields.VertexDescription.Tangent)),
                 new ConditionalField(Fields.GraphPixel,          true),
                 
                 // Surface Type
@@ -287,7 +287,7 @@ namespace UnityEditor.ShaderGraph
                 new ConditionalField(Fields.AlphaClip,           alphaClip.isOn),
                 new ConditionalField(Fields.AlphaTest,           alphaClip.isOn),
                 new ConditionalField(Fields.SpecularSetup,       model == PBRMasterNode.Model.Specular),
-                new ConditionalField(Fields.Normal,              IsSlotConnected(PBRMasterNode.NormalSlotId)),
+                new ConditionalField(Fields.Normal,              blocks.Contains(BlockFields.SurfaceDescription.Normal)),
                 new ConditionalField(Fields.DoubleSided,         twoSided.isOn),
             };
         }

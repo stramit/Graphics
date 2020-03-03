@@ -9,11 +9,11 @@ namespace UnityEditor.ShaderGraph.Internal
         {
             public static string name = "VertexDescription";
             public static BlockFieldDescriptor Position      = new BlockFieldDescriptor(VertexDescription.name, "Position", "VERTEXDESCRIPTION_POSITION",
-                new ObjectSpacePositionControl(), ContextStage.Vertex);
+                new ObjectSpacePositionControl(), ContextStage.Vertex, new ShaderGraphRequirements() { requiresPosition = NeededCoordinateSpace.Object });
             public static BlockFieldDescriptor Normal        = new BlockFieldDescriptor(VertexDescription.name, "Normal", "VERTEXDESCRIPTION_NORMAL",
-                new ObjectSpaceNormalControl(), ContextStage.Vertex);
+                new ObjectSpaceNormalControl(), ContextStage.Vertex, new ShaderGraphRequirements() { requiresNormal = NeededCoordinateSpace.Object });
             public static BlockFieldDescriptor Tangent       = new BlockFieldDescriptor(VertexDescription.name, "Tangent", "VERTEXDESCRIPTION_TANGENT",
-                new ObjectSpaceTangentControl(), ContextStage.Vertex);
+                new ObjectSpaceTangentControl(), ContextStage.Vertex, new ShaderGraphRequirements() { requiresTangent = NeededCoordinateSpace.Object });
         }
 
         [GenerateBlocks]

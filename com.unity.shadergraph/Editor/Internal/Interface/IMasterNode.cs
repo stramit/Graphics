@@ -9,7 +9,7 @@ namespace UnityEditor.ShaderGraph.Internal
     {
         string renderQueueTag { get; }
         string renderTypeTag { get; }
-        ConditionalField[] GetConditionalFields(PassDescriptor pass);
+        ConditionalField[] GetConditionalFields(PassDescriptor pass, List<BlockFieldDescriptor> blocks);
         void ProcessPreviewMaterial(Material material);
     }
 }
