@@ -138,5 +138,19 @@ namespace UnityEditor.Experimental.Rendering.Universal
             }
             return validSlots.OfType<IMayRequireTangent>().Aggregate(NeededCoordinateSpace.None, (mask, node) => mask | node.RequiresTangent(stageCapability));
         }
+
+        // TODO: Temporary
+        // TODO: Required to prevent duplicate properties now they are also taken from Blocks
+        public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
+        {
+            return;
+        }
+
+        // TODO: Temporary
+        // TODO: Required to prevent duplicate properties now they are also taken from Blocks
+        public override void CollectPreviewMaterialProperties(List<PreviewProperty> properties)
+        {
+            return;
+        }
     }
 }

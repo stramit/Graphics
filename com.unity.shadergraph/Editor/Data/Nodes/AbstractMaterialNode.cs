@@ -170,13 +170,13 @@ namespace UnityEditor.ShaderGraph
             protected set { m_HasError = value; }
         }
 
-        public virtual bool isActive
+        public bool isActive
         {
             get { return m_IsActive; }
             set 
             {
-                if(isActive == value)
-                    return; 
+                if(m_IsActive == value)
+                    return;
                 
                 // Update this node
                 m_IsActive = value;

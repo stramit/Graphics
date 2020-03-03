@@ -61,19 +61,19 @@ namespace UnityEditor.ShaderGraph.Internal
         }
     }
 
-    public class BlockFieldDescriptor
+    public class BlockFieldDescriptor : FieldDescriptor
     {
-        public string tag { get; }
-        public string name { get; }
         public IControl control { get; }
         public ContextStage contextStage { get; }
+        public ShaderGraphRequirements requirements { get; }
 
-        public BlockFieldDescriptor(string tag, string name, IControl control, ContextStage contextStage)
+        public BlockFieldDescriptor(string tag, string name, string define,
+            IControl control, ContextStage contextStage, ShaderGraphRequirements requirements = default(ShaderGraphRequirements))
+            : base (tag, name, define)
         {
-            this.tag = tag;
-            this.name = name;
             this.control = control;
             this.contextStage = contextStage;
+            this.requirements = requirements;
         }
     }
 }
