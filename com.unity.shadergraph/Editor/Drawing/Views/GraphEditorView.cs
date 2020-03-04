@@ -798,8 +798,14 @@ namespace UnityEditor.ShaderGraph.Drawing
                     nodesToUpdate.Add((IShaderNodeView)edgeView.input.node);
 
                 // Update active state for connected Nodes
-                var outputNodeView = (MaterialNodeView)edgeView.output.node;
-                NodeUtils.UpdateNodeActiveOnEdgeChange(outputNodeView?.node);
+                if(edgeView.output.node is MaterialNodeView nodeView)
+                {
+                    NodeUtils.UpdateNodeActiveOnEdgeChange(nodeView.node);
+                }
+                else if(edgeView.output.node is PropertyNodeView propertyNodeView)
+                {
+                    NodeUtils.UpdateNodeActiveOnEdgeChange(propertyNodeView.node);
+                }
             }
 
             foreach (var node in nodesToUpdate)
