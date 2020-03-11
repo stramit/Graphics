@@ -1943,6 +1943,15 @@ void PostEvaluateBSDF(  LightLoopContext lightLoopContext,
 #else
     GetScreenSpaceAmbientOcclusionMultibounce(posInput.positionSS, preLightData.NdotV, bsdfData.perceptualRoughness, bsdfData.ambientOcclusion, bsdfData.specularOcclusion, bsdfData.diffuseColor, bsdfData.fresnel0, aoFactor);
 #endif
+
+#if (SHADERPASS == SHADERPASS_DEFERRED_LIGHTING || SHADERPASS == SHADERPASS_FORWARD) && !defined(_SURFACE_TYPE_TRANSPARENT)
+    #if RAYTRACING_ENABLED
+    // Add the contribution of SSGI, when SSGI id disabled this is black.
+    if (_RaytracedIndirectDiffuse == 0)
+    #endif
+        builtinData.bakeDiffuseLighting += LOAD_TEXTURE2D_X(_IndirectDiffuseTexture, posInput.positionSS).xyz;
+#endif
+
     ApplyAmbientOcclusionFactor(aoFactor, builtinData, lighting);
 
     // Subsurface scattering mode
