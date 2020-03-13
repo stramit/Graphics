@@ -106,7 +106,7 @@ namespace UnityEngine.Rendering.HighDefinition
         }
         [Tooltip("Filter Radius")]
         [SerializeField]
-        public ClampedIntParameter m_FilterRadius = new ClampedIntParameter(2, 2, 4);
+        public ClampedIntParameter m_FilterRadius = new ClampedIntParameter(2, 2, 8);
 
         /// <summary>
         /// Toggles ray traced global illumination.

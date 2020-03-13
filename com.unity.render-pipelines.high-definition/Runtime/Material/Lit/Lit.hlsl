@@ -1949,7 +1949,7 @@ void PostEvaluateBSDF(  LightLoopContext lightLoopContext,
     // Add the contribution of SSGI, when SSGI id disabled this is black.
     if (_RaytracedIndirectDiffuse == 0)
     #endif
-        builtinData.bakeDiffuseLighting += LOAD_TEXTURE2D_X(_IndirectDiffuseTexture, posInput.positionSS).xyz;
+        builtinData.bakeDiffuseLighting += LOAD_TEXTURE2D_X(_IndirectDiffuseTexture, posInput.positionSS).xyz * GetInverseCurrentExposureMultiplier();
 #endif
 
     ApplyAmbientOcclusionFactor(aoFactor, builtinData, lighting);

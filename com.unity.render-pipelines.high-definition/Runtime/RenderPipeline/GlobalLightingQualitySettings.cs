@@ -52,7 +52,7 @@ namespace UnityEngine.Rendering.HighDefinition
             SSGIResolution[(int)ScalableSettingLevelParameter.Level.Medium] = true;
             SSGIResolution[(int)ScalableSettingLevelParameter.Level.High] = true;
 
-            SSGIRadius[(int)ScalableSettingLevelParameter.Level.Low] = 2.0f;
+            SSGIRadius[(int)ScalableSettingLevelParameter.Level.Low] = 0.5f;
             SSGIRadius[(int)ScalableSettingLevelParameter.Level.Medium] = 3.0f;
             SSGIRadius[(int)ScalableSettingLevelParameter.Level.High] = 10.0f;
 
@@ -60,13 +60,13 @@ namespace UnityEngine.Rendering.HighDefinition
             SSGIFullResolution[(int)ScalableSettingLevelParameter.Level.Medium] = true;
             SSGIFullResolution[(int)ScalableSettingLevelParameter.Level.High] = true;
 
-            SSGIClampValue[(int)ScalableSettingLevelParameter.Level.Low] = 2.0f;
+            SSGIClampValue[(int)ScalableSettingLevelParameter.Level.Low] = 0.8f;
             SSGIClampValue[(int)ScalableSettingLevelParameter.Level.Medium] = 2.0f;
             SSGIClampValue[(int)ScalableSettingLevelParameter.Level.High] = 3.0f;
 
             SSGIFilterRadius[(int)ScalableSettingLevelParameter.Level.Low] = 2;
             SSGIFilterRadius[(int)ScalableSettingLevelParameter.Level.Medium] = 3;
-            SSGIFilterRadius[(int)ScalableSettingLevelParameter.Level.High] = 4;
+            SSGIFilterRadius[(int)ScalableSettingLevelParameter.Level.High] = 7;
         }
 
         internal static GlobalLightingQualitySettings NewDefault() => new GlobalLightingQualitySettings();
@@ -92,11 +92,17 @@ namespace UnityEngine.Rendering.HighDefinition
         public int[] SSRMaxRaySteps = new int[s_QualitySettingCount];
 
         // Screen Space Global Illumination
+        [System.NonSerialized]
         public int[] SSGIRaySteps = new int[s_QualitySettingCount];
+        [System.NonSerialized]
         public bool[] SSGIResolution = new bool[s_QualitySettingCount];
+        [System.NonSerialized]
         public float[] SSGIRadius = new float[s_QualitySettingCount];
+        [System.NonSerialized]
         public bool[] SSGIFullResolution = new bool[s_QualitySettingCount];
+        [System.NonSerialized]
         public float[] SSGIClampValue = new float[s_QualitySettingCount];
+        [System.NonSerialized]
         public int[] SSGIFilterRadius = new int[s_QualitySettingCount];
 
         // TODO: Volumetric fog quality
