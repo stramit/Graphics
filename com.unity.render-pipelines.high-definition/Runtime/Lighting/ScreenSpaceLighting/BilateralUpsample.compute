@@ -93,10 +93,10 @@ void BILATERAL_UPSAMPLE(uint3 dispatchThreadId : SV_DispatchThreadID, uint2 grou
     int2 halfResTap3 = clamp(0, halfResolution + UpscaleBilateralPixels[offsetInCoordTable + 3], _HalfScreenSize.xy - 1);
 
     // Grab the depth of all the half resolution pixels
-    float4 lowDepths = float4(LOAD_TEXTURE2D_X(_DepthTexture, _DepthPyramidFirstMipLevelOffset + halfResTap0).x
-                            , LOAD_TEXTURE2D_X(_DepthTexture, _DepthPyramidFirstMipLevelOffset + halfResTap1).x
-                            , LOAD_TEXTURE2D_X(_DepthTexture, _DepthPyramidFirstMipLevelOffset + halfResTap2).x
-                            , LOAD_TEXTURE2D_X(_DepthTexture, _DepthPyramidFirstMipLevelOffset + halfResTap3).x);
+    float4 lowDepths = float4(LOAD_TEXTURE2D_X(_DepthTexture, asuint(_DepthPyramidFirstMipLevelOffset) + halfResTap0).x
+                            , LOAD_TEXTURE2D_X(_DepthTexture, asuint(_DepthPyramidFirstMipLevelOffset) + halfResTap1).x
+                            , LOAD_TEXTURE2D_X(_DepthTexture, asuint(_DepthPyramidFirstMipLevelOffset) + halfResTap2).x
+                            , LOAD_TEXTURE2D_X(_DepthTexture, asuint(_DepthPyramidFirstMipLevelOffset) + halfResTap3).x);
 
 #if SINGLE_CHANNEL
     // Grab all the scalar values required for upscale

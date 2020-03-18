@@ -12,7 +12,7 @@ namespace UnityEngine.Rendering.HighDefinition
         /// Enable screen space global illumination.
         /// </summary>
         [Tooltip("Enable screen space global illumination.")]
-        public BoolParameter enable = new BoolParameter(true);
+        public BoolParameter enable = new BoolParameter(false);
 
         /// <summary>
         /// The thickness of the depth buffer value used for the ray marching step

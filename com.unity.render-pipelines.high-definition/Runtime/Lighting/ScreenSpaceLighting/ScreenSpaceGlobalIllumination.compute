@@ -223,9 +223,6 @@ void TRACE_GLOBAL_ILLUMINATION(uint3 dispatchThreadId : SV_DispatchThreadID, uin
     newSample.x = GetBNDSequenceSample(currentCoord.xy, _RaytracingFrameIndex, 0);
     newSample.y = GetBNDSequenceSample(currentCoord.xy, _RaytracingFrameIndex, 1);
 
-    // Here to reduce the variance of the integration, we put the first parameter to the square which tighten the lobe but adds bias.
-    newSample.x *= newSample.x;
-
     // Importance sample with a cosine lobe (direction that will be used for ray casting)
     float3 sampleDir = SampleHemisphereCosine(newSample.x, newSample.y, normalData.normalWS);
 
