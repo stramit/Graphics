@@ -37,6 +37,7 @@ CBUFFER_END
 RW_TEXTURE2D_X(float4, _OutputFilteredBuffer);
 
 #define SPATIAL_FILTER_SIGMA_RATIO 1.0
+#define DEPTH_WEIGHT_MULTIPLIER 1000.0f
 
 [numthreads(SSGI_FILTER_TILE_SIZE, SSGI_FILTER_TILE_SIZE, 1)]
 void SPATIAL_FILTER(uint3 dispatchThreadId : SV_DispatchThreadID , uint2 groupThreadId : SV_GroupThreadID , uint2 groupId : SV_GroupID)
@@ -104,7 +105,7 @@ void SPATIAL_FILTER(uint3 dispatchThreadId : SV_DispatchThreadID , uint2 groupTh
             float tapz01 = Linear01Depth(tapDepth, _ZBufferParams);
 
             // Compute the depth for this pixel
-            float depthWeight = max(0.0, 1.0 - abs(tapz01 - centerz01));
+            float depthWeight = max(0.0, 1.0 - abs(tapz01 - centerz01) * DEPTH_WEIGHT_MULTIPLIER);
 
             // Compute the weight (skip computation for the center)
             const float w = r ? gaussian(r, sigma) * depthWeight : 1.0;

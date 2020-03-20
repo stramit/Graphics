@@ -331,8 +331,15 @@ void REPROJECT_GLOBAL_ILLUMINATION(uint3 dispatchThreadId : SV_DispatchThreadID,
     if (AnyIsNaN(color))
         color = 0.0f;
 
+    // Convert the color to HSV
+    float3 hsvColor = RgbToHsv(color);
+
     // We need to clamp before leaving, this need to be exposed properly before clamping
-    color = clamp(color * GetInversePreviousExposureMultiplier() * GetCurrentExposureMultiplier(), 0.0, _RaytracingIntensityClamp);
+    // We only apply the clamp to the luminance
+    hsvColor.z = clamp(hsvColor.z * GetInversePreviousExposureMultiplier() * GetCurrentExposureMultiplier(), 0.0, _RaytracingIntensityClamp);
+
+    // Convert back to the RGB space
+    color = HsvToRgb(hsvColor);
 
     // We are simply interested to know if the intersected pixel was moving, so we multiply it by a big number
     // TODO: make this process not binary
