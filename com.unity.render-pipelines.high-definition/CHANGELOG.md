@@ -102,6 +102,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added an info box to warn about depth test artifacts when rendering object twice in custom passes with MSAA.
 - Added a frame setting for alpha to mask.
 - Added support for custom passes in the AOV API
+- Implemented ray traced reflections for transparent objects.
+- Add a new parameter to control reflections in recursive rendering.
 
 ### Fixed
 - Fix when rescale probe all direction below zero (1219246)
@@ -631,6 +633,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Optimized PrepareLightsForGPU (cost reduced by over 25%) and PrepareGPULightData (around twice as fast now).
 - Moved scene view camera settings for HDRP from the preferences window to the scene view camera settings window.
 - Updated shaders to be compatible with Microsoft's DXC.
+- Ignoring the disable SSR flags for recursive rendering.
 
 ## [7.1.1] - 2019-09-05
 

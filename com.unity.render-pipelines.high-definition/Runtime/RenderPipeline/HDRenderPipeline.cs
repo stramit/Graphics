@@ -4011,31 +4011,42 @@ namespace UnityEngine.Rendering.HighDefinition
             if (!hdCamera.IsTransparentSSREnabled())
                 return;
 
-            BuildCoarseStencilAndResolveIfNeeded(hdCamera, cmd);
-
-            // Before doing anything, we need to clear the target buffers and rebuild the depth pyramid for tracing
-            // NOTE: This is probably something we can avoid if we read from the depth buffer and traced on the pyramid without the transparent objects
-            using (new ProfilingScope(cmd, ProfilingSampler.Get(HDProfileId.PrepareForTransparentSsr)))
+            var settings = hdCamera.volumeStack.GetComponent<ScreenSpaceReflection>();
+            bool usesRaytracedReflections = hdCamera.frameSettings.IsEnabled(FrameSettingsField.RayTracing) && settings.rayTracing.value;
+            if (usesRaytracedReflections)
             {
-                // Clear the SSR lighting buffer (not sure it is required)
-                CoreUtils.SetRenderTarget(cmd, m_SsrLightingTexture, ClearFlag.Color, Color.clear);
-                CoreUtils.SetRenderTarget(cmd, m_SsrHitPointTexture, ClearFlag.Color, Color.clear);
-
-                // Invalid the depth pyramid and regenerate the depth pyramid
-                m_IsDepthBufferCopyValid = false;
-                GenerateDepthPyramid(hdCamera, cmd, FullScreenDebugMode.DepthPyramid);
+                hdCamera.xr.StartSinglePass(cmd, hdCamera.camera, renderContext);
+                RenderRayTracedReflections(hdCamera, cmd, m_SsrLightingTexture, renderContext, m_FrameCount, true);
+                hdCamera.xr.StopSinglePass(cmd, hdCamera.camera, renderContext);
             }
-
-            // Evaluate the screen space reflection for the transparent pixels
-            var previousColorPyramid = hdCamera.GetPreviousFrameRT((int)HDCameraFrameHistoryType.ColorBufferMipChain);
-            var parameters = PrepareSSRParameters(hdCamera);
-            RenderSSR(parameters, m_SharedRTManager.GetDepthTexture(), m_SsrHitPointTexture, m_SharedRTManager.GetStencilBuffer(), TextureXR.GetBlackTexture(), previousColorPyramid, m_SsrLightingTexture, cmd, renderContext);
-
-            // If color pyramid was not valid, we bind a black texture
-            if (!hdCamera.colorPyramidHistoryIsValid)
+            else
             {
-                cmd.SetGlobalTexture(HDShaderIDs._SsrLightingTexture, TextureXR.GetClearTexture());
-                hdCamera.colorPyramidHistoryIsValid = true; // For the next frame...
+                BuildCoarseStencilAndResolveIfNeeded(hdCamera, cmd);
+
+                // Before doing anything, we need to clear the target buffers and rebuild the depth pyramid for tracing
+                // NOTE: This is probably something we can avoid if we read from the depth buffer and traced on the pyramid without the transparent objects
+                using (new ProfilingScope(cmd, ProfilingSampler.Get(HDProfileId.PrepareForTransparentSsr)))
+                {
+                    // Clear the SSR lighting buffer (not sure it is required)
+                    CoreUtils.SetRenderTarget(cmd, m_SsrLightingTexture, ClearFlag.Color, Color.clear);
+                    CoreUtils.SetRenderTarget(cmd, m_SsrHitPointTexture, ClearFlag.Color, Color.clear);
+
+                    // Invalid the depth pyramid and regenerate the depth pyramid
+                    m_IsDepthBufferCopyValid = false;
+                    GenerateDepthPyramid(hdCamera, cmd, FullScreenDebugMode.DepthPyramid);
+                }
+
+                // Evaluate the screen space reflection for the transparent pixels
+                var previousColorPyramid = hdCamera.GetPreviousFrameRT((int)HDCameraFrameHistoryType.ColorBufferMipChain);
+                var parameters = PrepareSSRParameters(hdCamera);
+                RenderSSR(parameters, m_SharedRTManager.GetDepthTexture(), m_SsrHitPointTexture, m_SharedRTManager.GetStencilBuffer(), TextureXR.GetBlackTexture(), previousColorPyramid, m_SsrLightingTexture, cmd, renderContext);
+
+                // If color pyramid was not valid, we bind a black texture
+                if (!hdCamera.colorPyramidHistoryIsValid)
+                {
+                    cmd.SetGlobalTexture(HDShaderIDs._SsrLightingTexture, TextureXR.GetClearTexture());
+                    hdCamera.colorPyramidHistoryIsValid = true; // For the next frame...
+                }
             }
 
             // Push our texture to the debug menu
