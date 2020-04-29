@@ -21,7 +21,7 @@ namespace UnityEditor.ShaderGraph
     // This ifdef can be removed once V2 is the only option.
     [ScriptedImporter(100, Extension, 3)]
 #else
-    [ScriptedImporter(32, Extension, 3)]
+    [ScriptedImporter(32, Extension, -905)]
 #endif
 
     class ShaderGraphImporter : ScriptedImporter
